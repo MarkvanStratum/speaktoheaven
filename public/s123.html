@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Checkout</title>
+  <meta name="referrer" content="no-referrer">
+
+  <style>
+    :root{
+      --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff; --green:#16a34a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:#ffffff; color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{max-width:980px; margin:0 auto; padding:18px 14px 64px}
+
+    /* Top order summary bar */
+    .summary-bar{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff;
+      font-size:14px;
+    }
+    .sum-left{ display:flex; align-items:center; gap:8px; }
+    .sum-left .cart{ font-size:16px }
+    .sum-left .caret{ font-size:12px; opacity:.7 }
+    .sum-right{ font-weight:800 }
+
+    /* Verified-by logos image below summary bar (shifted right) */
+    .cc-secure{
+      margin:10px 0 12px 20px; /* 20px to the right */
+      max-width:140px; height:auto; display:block;
+    }
+
+    /* Optional hero (affiliate-set title + image) */
+    .hero{
+      display:none; align-items:center; gap:10px; margin:6px 0 14px 0;
+      padding:10px; border:1px solid var(--line); border-radius:10px; background:#fff;
+    }
+    .hero img{ width:44px; height:44px; border-radius:8px; object-fit:cover; border:1px solid #e6eaf1; }
+    .hero .title{ font-weight:900 }
+
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px }
+    .two-col{ display:grid; grid-template-columns:1fr; gap:18px }
+    @media (min-width:1000px){ .two-col{ grid-template-columns: minmax(0,1fr) 420px } }
+
+    .section-title{ font-weight:900; font-size:18px; margin:6px 0 12px }
+    .row{ display:grid; grid-template-columns:1fr; gap:10px }
+    .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    .row-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px }
+    @media (max-width:640px){ .row-2,.row-3{ grid-template-columns:1fr } }
+
+    .label{font-weight:700; font-size:13px; margin:2px 0 4px; color:#334}
+    .input, .select, .el{
+      width:100%; background:#fff; border:1px solid #cfd6e4; border-radius:10px; padding:12px; font-size:15px; outline:none;
+    }
+
+    .shipping-method{
+      display:flex; align-items:center; gap:10px; padding:12px; border-radius:10px;
+      border:1px dashed #d9e2ef; background:#f7fbff; justify-content:space-between
+    }
+    .free{ color:#16a34a; font-weight:800 }
+
+    .order-summary{ margin-top:14px; border-top:1px dashed #e6eaf1; padding-top:12px }
+    .order-row{ display:flex; justify-content:space-between; font-size:14px; font-weight:700 }
+
+    .pay-box{ position:sticky; top:14px }
+    .btn{
+      width:100%; border:none; border-radius:12px; padding:13px 16px; font-weight:900; font-size:16px; cursor:pointer;
+      background:#16a34a; color:#fff; margin-top:10px
+    }
+    .tiny{ font-size:12px; color:#5b6b82; text-align:center; margin-top:8px }
+
+    /* bottom individual logos */
+    .logos{ display:flex; gap:10px; align-items:center; margin-top:12px; justify-content:center; }
+    .logos img{ height:28px; width:auto; display:block }
+
+    .err{ display:none; background:#fff1f1; border:1px solid #f5b6b6; color:#9a1a1a; padding:10px; border-radius:10px; font-size:14px; margin-top:10px }
+    .err[aria-hidden="false"]{ display:block }
+
+    /* Loading overlay (matches your original behavior) */
+    .loading-overlay{
+      position:fixed; inset:0; background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center; z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{ display:flex }
+    .loading-box{
+      width:min(92vw,460px); background:#fff; border:1px solid #e6edf5;
+      border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:20px;
+      text-align:center; color:#2a3b55
+    }
+    .loading-title{ font-weight:800; margin:2px 0 10px; font-size:18px }
+    .progress-wrap{ width:100%; height:10px; background:#ecf1f8; border-radius:999px; overflow:hidden; }
+    .progress-bar{ width:0%; height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
+    @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Order summary bar -->
+    <div class="summary-bar">
+      <div class="sum-left"><span class="cart">🛒</span> <span>Show summary</span> <span class="caret">▾</span></div>
+      <div class="sum-right" id="summaryPrice">$9.95</div>
+    </div>
+
+    <!-- Verified by Visa / MasterCard SecureCode image -->
+    <img src="./cclogos.png" alt="Verified by Visa and MasterCard SecureCode" class="cc-secure">
+
+    <!-- Affiliate hero (title + image) -->
+    <div id="hero" class="hero">
+      <img id="heroImg" alt="">
+      <div id="heroTitle" class="title"></div>
+    </div>
+
+    <div class="two-col">
+      <!-- LEFT COLUMN -->
+      <div class="card">
+        <div class="section-title">1. Contact Information</div>
+        <div class="row-2">
+          <div>
+            <div class="label">First Name</div>
+            <input id="firstName" class="input" placeholder="Jane" autocomplete="given-name">
+          </div>
+          <div>
+            <div class="label">Last Name</div>
+            <input id="lastName" class="input" placeholder="Doe" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <div class="label">E-mail Address</div>
+            <input id="emailInput" class="input" placeholder="you@example.com" type="email" autocomplete="email">
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:18px">2. Shipping Information</div>
+        <div class="row">
+          <div>
+            <div class="label">Address</div>
+            <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Address">
+          </div>
+        </div>
+        <div class="row-3">
+          <div>
+            <div class="label">City</div>
+            <input id="billingCity" class="input" autocomplete="address-level2" placeholder="City">
+          </div>
+          <div>
+            <div class="label">State</div>
+            <select id="billingState" class="select">
+              <option value="">Select…</option>
+              <option>AL</option><option>CA</option><option>FL</option><option>NY</option><option>TX</option>
+            </select>
+          </div>
+          <div>
+            <div class="label">Zip Code</div>
+            <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Zip">
+          </div>
+        </div>
+        <div class="row-2">
+          <div>
+            <div class="label">Country</div>
+            <input id="billingCountry" class="input" placeholder="Country">
+          </div>
+          <div>
+            <div class="label">Phone Number</div>
+            <input id="phoneNumber" class="input" inputmode="tel" placeholder="Your number" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:18px">3. Shipping Method</div>
+        <div class="shipping-method">
+          <div>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3b82f6;margin-right:8px"></span>
+            Tracked delivery (shipped within 48h)
+          </div>
+          <div class="free">Free</div>
+        </div>
+
+        <div class="order-summary">
+          <div class="order-row">
+            <span>Total</span>
+            <span id="orderTotal">$9.95</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="card pay-box">
+        <div class="section-title">4. Payment</div>
+        <div class="row">
+          <div>
+            <div class="label">Credit Card</div>
+            <div id="card-number" class="el"></div>
+          </div>
+        </div>
+        <div class="row-2">
+          <div>
+            <div class="label">MM / YYYY</div>
+            <div id="card-expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="label">CVV</div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div id="err" class="err" role="alert" aria-hidden="true"></div>
+        <button id="payNow" class="btn" type="button">Order Now</button>
+        <div class="tiny">🔒 SSL-secured transaction</div>
+
+        <!-- bottom individual logos (unchanged) -->
+        <div class="logos">
+          <img src="./visa.png" alt="Visa">
+          <img src="./mc2.png" alt="MasterCard">
+          <img src="./amex.png" alt="American Express">
+          <img src="./discover.jpg" alt="Discover">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay (shown during payment / 3DS) -->
+  <div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+    <div class="loading-box">
+      <div class="loading-title">Processing your payment…</div>
+      <div class="progress-wrap"><div class="progress-bar"></div></div>
+      <p class="tiny" style="margin-top:10px">Please wait, this may take a few seconds.</p>
+    </div>
+  </div>
+
+  <!-- Stripe Elements -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    // ====== CONFIG (same endpoint/keys) ======
+    const SUBSCRIBE_URL   = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
+    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+
+    // ====== Helper: loading overlay ======
+    const overlay = document.getElementById('loading-overlay');
+    function showLoading(){ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); }
+    function hideLoading(){ overlay.setAttribute('aria-hidden','true'); overlay.style.display='none'; }
+
+    // ====== URL prefill + hero (sub1..sub10) ======
+    (function(){
+      const qs = new URLSearchParams(location.search);
+      const title = qs.get('sub1') || '';
+      const imgUrl = qs.get('sub2') || '';
+      const hero = document.getElementById('hero');
+      const heroTitle = document.getElementById('heroTitle');
+      const heroImg = document.getElementById('heroImg');
+      let showHero = false;
+
+      if (title) { heroTitle.textContent = decodeURIComponent(title); showHero = true; }
+      if (imgUrl) {
+        try {
+          const src = decodeURIComponent(imgUrl);
+          if (/^https?:\/\//i.test(src)) { heroImg.src = src; showHero = true; }
+        } catch(_) {}
+      }
+      if (showHero) hero.style.display = 'flex';
+
+      const map = {
+        firstName:  'sub3',
+        lastName:   'sub4',
+        billingStreet:   'sub5',
+        billingPostcode: 'sub6',
+        billingCity:     'sub7',
+        billingCountry:  'sub8',
+        emailInput:      'sub9',
+        phoneNumber:     'sub10'
+      };
+      for (const [id,key] of Object.entries(map)){
+        const el = document.getElementById(id);
+        const v = qs.get(key);
+        if (el && v) el.value = decodeURIComponent(v);
+      }
+    })();
+
+    // ====== Stripe Elements mount ======
+    let stripe, elements, cardNumber, cardExpiry, cardCvc;
+    if (window.Stripe) {
+      stripe = Stripe(PUBLISHABLE_KEY);
+      elements = stripe.elements();
+      cardNumber = elements.create('cardNumber');
+      cardExpiry = elements.create('cardExpiry');
+      cardCvc    = elements.create('cardCvc');
+      cardNumber.mount('#card-number');
+      cardExpiry.mount('#card-expiry');
+      cardCvc.mount('#card-cvc');
+    }
+
+    // Country normalizer (simple)
+    function normalizeCountry(text){
+      if(!text) return undefined;
+      const t = text.trim().toUpperCase();
+      const map = { UK:'GB', ENGLAND:'GB', USA:'US', UNITEDSTATES:'US' };
+      if (t.length === 2) return t;
+      return map[t] || undefined;
+    }
+
+    // ====== CLICK HANDLER with overlay around Stripe steps ======
+    document.getElementById('payNow').addEventListener('click', async () => {
+      const errBox = document.getElementById('err');
+      errBox.setAttribute('aria-hidden','true'); errBox.textContent='';
+
+      if(!stripe){ alert('Payment temporarily unavailable. Please try again.'); return; }
+
+      // Show loading immediately, keep up until 3DS completes or an error occurs
+      showLoading();
+
+      const first = document.getElementById('firstName').value.trim();
+      const last  = document.getElementById('lastName').value.trim();
+      const name  = [first,last].filter(Boolean).join(' ') || undefined;
+      const email = (document.getElementById('emailInput').value || '').trim() || undefined;
+      const phone = (document.getElementById('phoneNumber').value || '').replace(/[^\d+]/g,'') || undefined;
+
+      const address = {
+        line1: (document.getElementById('billingStreet').value || '').trim() || undefined,
+        city: (document.getElementById('billingCity').value || '').trim() || undefined,
+        state: (document.getElementById('billingState').value || '').trim() || undefined,
+        postal_code: (document.getElementById('billingPostcode').value || '').trim() || undefined,
+        country: normalizeCountry(document.getElementById('billingCountry').value)
+      };
+
+      try{
+        // 1) Create PaymentMethod from Elements
+        const pmRes = await stripe.createPaymentMethod({
+          type:'card',
+          card: cardNumber,
+          billing_details: { name, email, phone, address }
+        });
+        if (pmRes.error) throw new Error(pmRes.error.message);
+
+        // 2) Call your server to create PaymentIntent
+        const resp = await fetch(SUBSCRIBE_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            paymentMethodId: pmRes.paymentMethod.id,
+            name, email, phone, address
+          })
+        });
+        const data = await resp.json();
+        if(!data.clientSecret) throw new Error(data.error || 'Payment failed to start');
+
+        // 3) Confirm (handles 3DS/SCA) — overlay stays visible during modal
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error) throw new Error(conf.error.message);
+        if(!(conf.paymentIntent && conf.paymentIntent.status === 'succeeded')){
+          throw new Error('Payment not completed');
+        }
+
+        // 4) Success redirect (same as before)
+        (function(){
+          const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+          const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+          const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+          window.location.href = TRACKER_URL + (TRACKER_URL.includes('?') ? '&' : '?') + qp.toString();
+        })();
+
+      }catch(err){
+        // Hide overlay on error and show inline error
+        hideLoading();
+        errBox.textContent = err.message || 'Something went wrong.';
+        errBox.setAttribute('aria-hidden','false');
+        // Failure redirect (same as original)
+        window.location.href = 'https://www.united-defence-shield.com/7GQSPJ/27CC71Q';
+      }
+    });
+  </script>
+</body>
+</html>

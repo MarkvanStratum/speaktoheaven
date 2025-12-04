@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Página en blanco (con Aceleads)</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    :root{
+      --bg:#f6f9fc; --card:#ffffff; --text:#0a2540; --muted:#5b6b82; --line:#e3e8ee; --accent:#635bff; --accent2:#2dd4bf; --radius:14px;
+      --ok:#1a7f37; --warn:#d30000;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+
+    .shell{ max-width:880px; margin:24px auto 40px; padding:0 16px; }
+    .header{
+      display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:16px;
+    }
+    .brand{ font-weight:900; letter-spacing:.2px; }
+    .badge{ font-size:12px; color:var(--muted); border:1px solid var(--line); padding:4px 8px; border-radius:999px }
+
+    .checkout{ display:grid; grid-template-columns:1fr; gap:18px }
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px;
+      box-shadow:0 10px 30px rgba(50,50,93,.05), 0 4px 6px rgba(0,0,0,.07);
+      padding:22px;
+    }
+    .title{ font-size:18px; font-weight:800; margin:2px 0 12px }
+    .sub{ font-size:13px; color:var(--muted); margin:-6px 0 14px }
+
+    .step{ display:none }
+    .step[aria-hidden="false"]{ display:block }
+
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+    @media (max-width:560px){ .grid{ grid-template-columns:1fr } }
+    .phone-wrap{ display:grid; grid-template-columns:160px 1fr; gap:8px; grid-column:1 / -1 }
+    @media (max-width:560px){ .phone-wrap{ grid-template-columns:1fr } }
+
+    .label{font-size:13px; font-weight:700; color:#334; margin:6px 0 6px}
+    .input, .select, .el{
+      width:100%; background:#fff; color:#0a2540; border:1px solid #c7d0dd; border-radius:10px; padding:12px; font-size:15px;
+      outline:none;
+    }
+    .input::placeholder{ color:#8aa0b6 }
+    .btn{
+      width:100%; border:none; border-radius:12px; padding:12px 16px; font-weight:900; font-size:16px; cursor:pointer;
+      background:linear-gradient(180deg, #7aa3ff, #635bff); color:#fff; margin-top:12px;
+    }
+    .btn.muted{ background:#f1f4f8; color:#20324d; border:1px solid var(--line); }
+
+    .summary{
+      background:#f7f9fd; border:1px dashed #d7deea; border-radius:12px; padding:12px; margin:8px 0 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:14px;
+    }
+    .summary .left{ display:flex; align-items:center; gap:10px; }
+    .pill{ font-size:12px; background:#eef2ff; color:#3949ab; padding:2px 8px; border-radius:999px; border:1px solid #dfe3ff }
+    .amount{ font-weight:900 }
+
+    .err{ display:none; background:#fff1f1; border:1px solid #f5bcbc; color:#9a1a1a; padding:10px; border-radius:10px; font-size:14px; margin-top:10px }
+    .err[aria-hidden="false"]{ display:block }
+
+    .footnote{font-size:12px; color:var(--muted); text-align:center; margin-top:6px}
+
+    /* Loading overlay */
+    .loading-overlay{ position:fixed; inset:0; background:rgba(246,249,252,.9);
+      display:none; align-items:center; justify-content:center; z-index:9999; }
+    .loading-overlay[aria-hidden="false"]{ display:flex }
+    .loading-box{ width:min(92vw,460px); background:#fff; border:1px solid #e6edf5;
+      border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:20px; text-align:center; color:#2a3b55 }
+    .loading-title{ font-weight:800; margin:2px 0 10px; font-size:18px }
+    .progress-wrap{ width:100%; height:10px; background:#ecf1f8; border-radius:999px; overflow:hidden; }
+    .progress-bar{ width:0%; height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
+    @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+    <header class="header">
+      <span class="brand">Pago</span>
+      <span class="badge">Con tecnología de Stripe</span>
+    </header>
+
+    <div class="checkout">
+      <!-- PASO 1: Cuenta -->
+      <section id="step1" class="card step" aria-hidden="false">
+        <h2 class="title">Crea tu cuenta</h2>
+        <p class="sub">Introduce tus datos para continuar al pago.</p>
+
+        <div class="grid">
+          <div>
+            <div class="label">Nombre completo</div>
+            <input id="nameInput" class="input" placeholder="Juana Pérez" autocomplete="name" required>
+          </div>
+          <div>
+            <div class="label">Correo electrónico</div>
+            <input id="emailInput" class="input" placeholder="tú@ejemplo.com" type="email" autocomplete="email" required>
+          </div>
+
+          <div class="phone-wrap">
+            <div>
+              <div class="label">Prefijo telefónico</div>
+              <select id="phonePrefix" class="select" aria-label="Prefijo telefónico"></select>
+            </div>
+            <div>
+              <div class="label">Número de teléfono</div>
+              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Tu número" autocomplete="tel-national">
+            </div>
+          </div>
+
+          <div>
+            <div class="label">Contraseña</div>
+            <input id="passwordInput" class="input" type="password" placeholder="Crea una contraseña" autocomplete="new-password" required>
+          </div>
+          <div></div>
+        </div>
+
+        <button id="nextBtn" class="btn" type="button">Continuar →</button>
+        <p class="footnote">Nunca compartiremos tu correo. Privacidad 100%.</p>
+      </section>
+
+      <!-- PASO 2: Pago -->
+      <section id="step2" class="card step" aria-hidden="true">
+        <h2 class="title">Pago</h2>
+        <p class="sub">Los datos de tu tarjeta se cifran y son procesados por Stripe.</p>
+
+        <div class="summary" aria-live="polite">
+          <div class="left">
+            <span class="pill">Suscripción</span>
+            <span>Pago seguro</span>
+          </div>
+          <span class="amount" id="summaryAmount">£12.50</span>
+        </div>
+
+        <div class="grid">
+          <div>
+            <div class="label">Calle y número</div>
+            <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Dirección">
+          </div>
+          <div>
+            <div class="label">Ciudad</div>
+            <input id="billingCity" class="input" autocomplete="address-level2" placeholder="Ciudad">
+          </div>
+
+          <div>
+            <div class="label">País (código ISO de 2 letras)</div>
+            <select id="billingCountry" class="select" aria-label="País (código ISO de 2 letras)"></select>
+          </div>
+          <div>
+            <div class="label">Código postal</div>
+            <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Código postal">
+          </div>
+        </div>
+
+        <div class="label" style="margin-top:10px">Número de tarjeta</div>
+        <div id="card-number" class="el"></div>
+
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <div class="label">Vencimiento</div>
+            <div id="card-expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="label">CVC</div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div id="err" class="err" role="alert" aria-hidden="true"></div>
+
+        <button id="backBtn" class="btn muted" type="button">← Atrás</button>
+        <button id="payNow" class="btn" type="button">Pagar de forma segura</button>
+        <p class="footnote">🔒 SSL de 256 bits · Con tecnología de Stripe</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Capa de carga -->
+  <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+    <div class="loading-box">
+      <div class="loading-title">Procesando tu pago…</div>
+      <div class="progress-wrap"><div class="progress-bar"></div></div>
+      <p class="sub" style="margin-top:10px">Espera, puede tardar unos segundos.</p>
+    </div>
+  </div>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // ----- DOM -----
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const errBox = document.getElementById('err');
+      const nextBtn = document.getElementById('nextBtn');
+      const backBtn = document.getElementById('backBtn');
+
+      const phonePrefix = document.getElementById('phonePrefix');
+      const phoneNumber = document.getElementById('phoneNumber');
+
+      const billingStreet = document.getElementById('billingStreet');
+      const billingCity = document.getElementById('billingCity');
+      const billingCountry = document.getElementById('billingCountry');
+      const billingPostcode = document.getElementById('billingPostcode');
+
+      // Endpoints/clave (SIN CAMBIOS excepto la ruta de £12.50)
+      const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-1250";
+      const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+      const API_BASE = (location.protocol.startsWith('http') ? location.origin : 'http://localhost:10000');
+
+      // ===== País (ISO) + prefijos =====
+      const COUNTRY_CHOICES = { GE:'Georgia', US:'United States', GB:'United Kingdom', IE:'Ireland', CA:'Canada', AU:'Australia', NZ:'New Zealand', DE:'Germany', FR:'France', ES:'Spain', IT:'Italy', NL:'Netherlands', BE:'Belgium', CH:'Switzerland', AT:'Austria', DK:'Denmark', NO:'Norway', SE:'Sweden', FI:'Finland', PT:'Portugal', PL:'Poland', CZ:'Czechia', HU:'Hungary', RO:'Romania', BR:'Brazil', MX:'Mexico', AR:'Argentina', CL:'Chile', CO:'Colombia', ZA:'South Africa', IN:'India', SG:'Singapore', MY:'Malaysia', TH:'Thailand', VN:'Vietnam', PH:'Philippines', HK:'Hong Kong', JP:'Japan', KR:'South Korea', AE:'United Arab Emirates', SA:'Saudi Arabia', TR:'Turkey', IL:'Israel' };
+      const CALLING_CODES = { US:'+1', CA:'+1', GB:'+44', IE:'+353', AU:'+61', NZ:'+64', DE:'+49', FR:'+33', ES:'+34', IT:'+39', NL:'+31', BE:'+32', CH:'+41', AT:'+43', DK:'+45', NO:'+47', SE:'+46', FI:'+358', PT:'+351', PL:'+48', CZ:'+420', HU:'+36', RO:'+40', BR:'+55', MX:'+52', AR:'+54', CL:'+56', CO:'+57', ZA:'+27', IN:'+91', SG:'+65', MY:'+60', TH:'+66', VN:'+84', PH:'+63', HK:'+852', JP:'+81', KR:'+82', AE:'+971', SA:'+966', TR:'+90', IL:'+972', GE:'+995' };
+
+      function populateCountrySelect(){
+        billingCountry.innerHTML = '';
+        billingCountry.append(new Option('Selecciona un país', '', true, true));
+        const priority = ['MX','US','ES','AR','CL','CO'];
+        const seen = new Set();
+        const add = (code) => { if (seen.has(code) || !COUNTRY_CHOICES[code]) return; seen.add(code); billingCountry.append(new Option(COUNTRY_CHOICES[code], code)); };
+        priority.forEach(add);
+        Object.keys(COUNTRY_CHOICES).filter(c => !priority.includes(c)).sort((a,b)=>COUNTRY_CHOICES[a].localeCompare(COUNTRY_CHOICES[b])).forEach(add);
+      }
+
+      function populatePrefixOptions(){
+        phonePrefix.innerHTML = '';
+        const priority = ['MX','US','ES','AR','CL','CO'];
+        const seen = new Set();
+        const add = (cc) => { if (seen.has(cc) || !CALLING_CODES[cc]) return; seen.add(cc); const code = CALLING_CODES[cc]; const label = `${code} — ${COUNTRY_CHOICES[cc] || cc}`; phonePrefix.append(new Option(label, code)); };
+        priority.forEach(add);
+        Object.keys(CALLING_CODES).filter(cc => !priority.includes(cc)).sort().forEach(add);
+        if (!phonePrefix.value) phonePrefix.value = CALLING_CODES.MX; // +52 por defecto
+      }
+
+      function setPrefixFromISO(cc){
+        const code = CALLING_CODES[cc]; if (!code) return;
+        const exists = Array.from(phonePrefix.options).some(o=>o.value===code);
+        if(!exists) phonePrefix.add(new Option(`${code} — ${COUNTRY_CHOICES[cc]||cc}`, code));
+        phonePrefix.value = code;
+      }
+
+      function setPrefixValue(code){
+        if(!phonePrefix || !code) return;
+        let c = String(code).trim(); if(!c.startsWith('+')) c = '+' + c.replace(/[^\d]/g,'');
+        const exists = Array.from(phonePrefix.options).some(o=>o.value===c);
+        if(!exists) phonePrefix.add(new Option(c, c));
+        phonePrefix.value = c;
+      }
+
+      populateCountrySelect();
+      populatePrefixOptions();
+
+      // Forzar México por defecto
+      billingCountry.value = 'MX';
+      setPrefixFromISO('MX');
+
+      // ===== IP Prefill (ISO + prefijo + ciudad) =====
+      const withTimeout = (ms,p)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+      function guessISO(){ const cc=(navigator.language||'').split('-')[1]; return cc?cc.toUpperCase():null; }
+
+      async function hydrateFromIP(){
+        try{
+          const try1=()=>withTimeout(2000, fetch('https://ipapi.co/json/').then(r=>r.json()));
+          const try2=()=>withTimeout(2000, fetch('https://ipwho.is/?fields=city,country,country_code,phone').then(r=>r.json()));
+          const try3=()=>withTimeout(2000, fetch('https://ipinfo.io/json').then(r=>r.json()));
+          let d=null; try{ d=await try1(); }catch{} if(!d||d.error){ try{ d=await try2(); }catch{} } if(!d||d.error){ try{ d=await try3(); }catch{} }
+          let iso = (d && (d.country_code || d.countryCode)) ? String(d.country_code || d.countryCode).toUpperCase() : null;
+          const city = d?.city || null;
+          if(!iso) iso = guessISO();
+
+          if (iso && billingCountry.value === '') billingCountry.value = iso;
+          if (iso) setPrefixFromISO(iso);
+          if (city && !billingCity.value) billingCity.value = city;
+        }catch{
+          const iso = guessISO();
+          if(iso){ billingCountry.value = billingCountry.value || iso; setPrefixFromISO(iso); }
+        }
+      }
+      hydrateFromIP();
+      phoneNumber.addEventListener('focus', hydrateFromIP);
+      billingCountry.addEventListener('change', e => setPrefixFromISO(e.target.value));
+
+      // ===== Prefill por URL (correo/teléfono) =====
+      (function prefillFromURL(){
+        try{
+          const qs = new URLSearchParams(window.location.search);
+          const getFirst = (...keys) => { for (const k of keys){ const v = qs.get(k); if (v) return v; } return ''; };
+
+          const emailParam = getFirst('email','e','em','mail');
+          if (emailParam) { const el = document.getElementById('emailInput'); if (el) el.value = decodeURIComponent(emailParam); }
+
+          const splitPref = getFirst('prefix','cc','dial');
+          const splitNum  = getFirst('number','n');
+          const single    = getFirst('phone','tel','p','msisdn');
+
+          let pref = '', num = '';
+
+          if (splitPref || splitNum) {
+            const rawPref = (splitPref || '').trim();
+            pref = rawPref ? (rawPref.startsWith('+') ? rawPref : ('+' + rawPref.replace(/[^\d]/g,''))) : '';
+            num  = (splitNum || '').replace(/[^\d]/g,'');
+          } else if (single) {
+            const s = single.trim();
+            if (s.startsWith('+')) {
+              const digits = s.replace(/[^\d]/g,'');
+              const m = digits.match(/^(\d{1,4})(\d{4,15})$/);
+              if (m) { pref = '+' + m[1]; num = m[2]; }
+              else { pref = '+' + digits.slice(0,1); num = digits.slice(1); }
+            } else {
+              num = s.replace(/[^\d]/g,'');
+            }
+          }
+
+          if (pref) setPrefixValue(pref);
+          if (num) { const pn = document.getElementById('phoneNumber'); if (pn) pn.value = num; }
+        } catch {}
+      })();
+
+      // ===== Aceleads (sin cambios de lógica) =====
+      const ACELEADS_URL = 'https://mdleads.org/api/v1/ep/src-lead';
+      const ACELEADS_TOKEN = 'AL-X19VW4B6HDbazgq-m3gdFY1qD0s4igrYpE1SHO4_-Xg=';
+
+      function normalizePhone(pref, raw){
+        if(!raw) return '';
+        const digits = String(raw).replace(/[^0-9]/g,'');
+        let prefix = String(pref||'').replace(/[^0-9]/g,'');
+        if(!prefix && digits.length>=10){ return digits; }
+        return (prefix ? prefix + digits : digits);
+      }
+
+      async function sendAceleadsLead({ fname, lname, email, mobile, country }){
+        const payload = {
+          fname: fname || undefined,
+          lname: lname || undefined,
+          email: email || undefined,
+          mobile: mobile || undefined,
+          country: country || undefined,
+          token: ACELEADS_TOKEN,
+          timestamp: new Date().toISOString(),
+          is_legacy: false
+        };
+
+        try{
+          const res = await fetch(ACELEADS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const text = await res.text();
+          console.log('Aceleads response:', res.status, text);
+          if(!res.ok){
+            console.warn('Aceleads error', text);
+            return { ok:false, status:res.status, body:text };
+          }
+          return { ok:true, status:res.status, body:text };
+        }catch(err){
+          console.error('Aceleads send failed', err);
+          return { ok:false, error:err.message };
+        }
+      }
+
+      // ===== Navegación de pasos / creación de cuenta =====
+      function show(o){ o?.setAttribute('aria-hidden','false'); }
+      function hide(o){ o?.setAttribute('aria-hidden','true'); }
+
+      async function ensureAccount(){
+        const email = document.getElementById('emailInput')?.value.trim();
+        const password = document.getElementById('passwordInput')?.value;
+        const prefix = phonePrefix?.value || '';
+        const raw = (phoneNumber?.value || '').replace(/[^0-9]/g,'');
+        const phone = raw ? (prefix + raw) : '';
+        if(!email || !password) throw new Error('Se requieren correo y contraseña');
+
+        try{
+          const mobile = normalizePhone(prefix, raw);
+          const countryIso = billingCountry?.value || 'MX';
+          sendAceleadsLead({ fname: document.getElementById('nameInput')?.value?.split(' ')[0], lname: '', email, mobile, country: countryIso })
+            .then(r => console.log('Aceleads result (background):', r))
+            .catch(e => console.warn('Aceleads background error', e));
+        }catch(e){ console.warn('Aceleads trigger failed', e); }
+
+        const r = await fetch(API_BASE + '/api/register',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password, phone }) });
+        if(r.status===201) return true;
+        let data={}; try{ data=await r.json(); }catch{}
+        if(r.status===400 && (data.error||'').toLowerCase().includes('exists')) return true;
+        throw new Error(data.error || 'No se pudo crear la cuenta');
+      }
+
+      nextBtn?.addEventListener('click', async ()=>{
+        hide(step1); show(step2);
+        try{
+          await ensureAccount();
+        }catch(e){
+          if(errBox){ errBox.textContent = 'Problema al crear la cuenta: ' + (e.message||'revisa tus datos'); errBox.setAttribute('aria-hidden','false'); }
+        }
+      });
+
+      backBtn?.addEventListener('click', ()=>{ hide(step2); show(step1); });
+
+      // ===== Stripe =====
+      let stripe, elements, cardNumber, cardExpiry, cardCvc;
+      try{
+        if(window.Stripe){
+          stripe = Stripe(PUBLISHABLE_KEY);
+          elements = stripe.elements();
+          cardNumber = elements.create('cardNumber');
+          cardExpiry = elements.create('cardExpiry');
+          cardCvc    = elements.create('cardCvc');
+          cardNumber.mount('#card-number');
+          cardExpiry.mount('#card-expiry');
+          cardCvc.mount('#card-cvc');
+        }
+      }catch(e){ console.warn('Stripe init skipped:', e); }
+
+      const overlay = document.getElementById('loading-overlay');
+      function showLoading(){ overlay?.setAttribute('aria-hidden','false'); }
+      function hideLoading(){ overlay?.setAttribute('aria-hidden','true'); }
+
+      document.getElementById('payNow')?.addEventListener('click', async ()=>{
+        if(!stripe){ alert('Pago no disponible temporalmente. Revisa tu conexión e inténtalo de nuevo.'); return; }
+        errBox?.setAttribute('aria-hidden','true'); if(errBox) errBox.textContent='';
+        showLoading();
+
+        const name = document.getElementById('nameInput')?.value.trim();
+        const email = document.getElementById('emailInput')?.value.trim();
+        const raw = (phoneNumber?.value || '').replace(/[^0-9]/g,'');
+        const fullPhone = raw ? ((phonePrefix?.value||'') + raw) : undefined;
+
+        const isoCountry = billingCountry.value || 'MX';
+        const address = {
+          line1: (billingStreet?.value||'').trim() || undefined,
+          city: (billingCity?.value||'').trim() || undefined,
+          country: isoCountry,
+          postal_code: (billingPostcode?.value||'').trim() || undefined
+        };
+
+        try{
+          // 1) PaymentMethod
+          const pmRes = await stripe.createPaymentMethod({
+            type:'card',
+            card:cardNumber,
+            billing_details:{ name:name||undefined, email:email||undefined, phone:fullPhone, address }
+          });
+          if(pmRes.error) throw new Error(pmRes.error.message);
+
+          // 2) Intro charge (£12.50)
+          const resp = await fetch(SUBSCRIBE_URL,{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ paymentMethodId: pmRes.paymentMethod.id, name, email, phone: fullPhone, address })
+          });
+          const data = await resp.json();
+          if(!data.clientSecret) throw new Error(data.error || 'No se pudo iniciar el pago');
+
+          // 3) Confirmación (3DS/SCA)
+          const conf = await stripe.confirmCardPayment(data.clientSecret);
+          if(conf.error) throw new Error(conf.error.message);
+          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('El pago no se completó');
+
+          // Envío final a Aceleads
+          try{
+            const mobile = (phonePrefix?.value||'').replace(/[^0-9]/g,'') + raw;
+            const countryIso = billingCountry?.value || 'MX';
+            const [f, ...rest] = (name||'').split(' ');
+            const l = rest.join(' ');
+            const aceRes = await sendAceleadsLead({ fname: f || undefined, lname: l || undefined, email, mobile, country: countryIso });
+            console.log('Aceleads after-payment:', aceRes);
+          }catch(e){ console.warn('Aceleads after-payment error', e); }
+
+          // Redirección de éxito
+          (function(){
+            const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+            const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+            const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+            try{
+              const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+              const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
+              if (sub) {
+                qp.set('sub_id',  sub);
+                qp.set('subid',   sub);
+                qp.set('aff_sub', sub);
+                qp.set('click_id',sub);
+                qp.set('cid',     sub);
+                qp.set('tid',     sub);
+              }
+            }catch(e){}
+            const sep = TRACKER_URL.includes('?') ? '&' : '?';
+            window.location.href = TRACKER_URL + sep + qp.toString();
+          })();
+
+        }catch(err){
+          if(errBox){ errBox.textContent = err.message || 'Algo salió mal.'; errBox.setAttribute('aria-hidden','false'); }
+          hideLoading();
+          window.location.href = 'https://track.crugate.info/214a2787-4e13-47d7-8eaa-3e8c7caeb599';
+        }
+      });
+    });
+  </script>
+
+  <!-- GoAffPro loader (sin cambios) -->
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+  <!-- Etiqueta de retargeting -->
+  <script type="application/javascript">
+  (function (d, b, t) {
+    "use strict";
+    var s = document.createElement(t), c = (d.getElementsByTagName(t)[0]);
+    s.setAttribute("src", "https://vrtxdata.com/resources/content/charmr.js");
+    s.setAttribute("async", true);
+    if (c) {
+      var n = c.parentNode; n.insertBefore(s, c);
+    } else {
+      b.appendChild(s);
+    }
+  })(document, document.body, "SCRIPT");
+</script>
+</body>
+</html>

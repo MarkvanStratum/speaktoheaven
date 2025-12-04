@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Survey Page</title>
+<style>
+  :root{
+    --brand:#0f6bd6;
+    --ink:#000;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    color:var(--ink);
+    background:url("background.png") center/cover no-repeat fixed;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;  /* centers the white box */
+    min-height:100vh;
+  }
+
+  /* ---------- Header image ---------- */
+  .topbar{
+    position:absolute;
+    top:0; left:0; width:100%;
+  }
+  .topbar img{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+
+  /* ---------- Content ---------- */
+  .wrap{
+    width:100%;
+    max-width:860px;
+    padding:0 16px;
+    margin-top:100px; /* ensures it stays below topbar on small screens */
+  }
+  .card{
+    background:rgba(255,255,255,0.88);
+    border-radius:var(--radius);
+    box-shadow:0 10px 28px rgba(17,24,39,.15);
+    padding:28px;
+    text-align:center;
+  }
+  .title{
+    margin:0 0 18px;
+    font-size:22px;
+    color:#000;
+    font-weight:700;
+  }
+  .q{
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    justify-content:center;
+  }
+  .q h2{margin:0;font-size:20px;color:#000;}
+  .answers{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:8px;
+    justify-content:center;
+  }
+
+  /* ---------- Buttons with stronger contrast ---------- */
+  .btn{
+    appearance:none;
+    border:2px solid #000;
+    background:#fff;
+    color:#000;
+    padding:12px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    transition:all .2s ease;
+  }
+  .btn:hover{
+    background:#000;
+    color:#fff;
+  }
+  .btn.primary{
+    background:var(--brand);
+    color:#fff;
+    border-color:var(--brand);
+  }
+  .btn.primary:hover{
+    background:#094da2;
+  }
+
+  .muted{color:#222;font-size:14px}
+
+  /* ---------- Progress ---------- */
+  .progress{
+    width:100%;
+    height:14px;
+    border-radius:999px;
+    background:rgba(0,0,0,0.1);
+    overflow:hidden;
+  }
+  .bar{
+    height:100%;
+    width:0;
+    background:linear-gradient(90deg,var(--brand),#67b3ff);
+    border-radius:inherit;
+  }
+
+  /* ---------- Popup ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:100;
+  }
+  .modal{
+    background:rgba(255,255,255,0.95);
+    border-radius:16px;
+    max-width:560px;
+    width:100%;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 10px 28px rgba(0,0,0,.3);
+  }
+  .modal h3{margin:0 0 8px;font-size:22px;color:#000}
+  .modal p{margin:8px 0 16px;color:#000}
+</style>
+</head>
+<body>
+  <!-- Full-width header bar -->
+  <div class="topbar">
+    <img src="bar1.png" alt="Top bar graphic">
+  </div>
+
+  <div class="wrap">
+    <div class="card" id="card">
+      <p class="title">See if you qualify!</p>
+      <div class="q" id="q"></div>
+    </div>
+  </div>
+
+  <!-- Popup -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3>Welcome!</h3>
+      <p>You may qualify to try the new iPhone 17 Pro for FREE!</p>
+      <p>We regularly select people at random to try our products and write a review. This feedback is used to improve our products and to promote our products to our customers. If you believe you can help us by reviewing the iPhone 17 Pro, please continue below.</p>
+      <button class="btn primary" id="startBtn" type="button">START SURVEY</button>
+    </div>
+  </div>
+
+<script>
+  const STEPS = [
+    { prompt: "Do you live in South Africa?", options: ["Yes", "No"] },
+    { prompt: "Do you currently have an iPhone?", options: ["Yes", "No"] },
+    { prompt: "After participating, when could you share your feedback?", options: ["After one week", "After a month"] }
+  ];
+
+  // Final button now goes to https://cudsr.bemobtrcks.com/click
+  const FINAL_DESTINATION = "https://cudsr.bemobtrcks.com/click";
+
+  const overlay = document.getElementById("overlay");
+  const startBtn = document.getElementById("startBtn");
+  const qEl = document.getElementById("q");
+
+  startBtn.addEventListener("click", ()=> overlay.style.display = "none");
+
+  let step = 0;
+  const answers = [];
+
+  function renderQuestion(){
+    const s = STEPS[step];
+    qEl.innerHTML = `
+      <h2>${s.prompt}</h2>
+      <div class="answers">
+        ${s.options.map(o=>`<button class="btn" data-answer="${o}">${o}</button>`).join("")}
+      </div>
+      <div class="muted">Step ${step+1} of ${STEPS.length}</div>
+    `;
+    qEl.querySelectorAll("[data-answer]").forEach(b=>{
+      b.addEventListener("click",()=>{
+        answers.push({q:s.prompt,a:b.dataset.answer});
+        step++;
+        if(step<STEPS.length) renderQuestion();
+        else renderProcessing();
+      });
+    });
+  }
+
+  function renderProcessing(){
+    qEl.innerHTML = `
+      <h2>PROCESSING YOUR ANSWERS</h2>
+      <div class="progress"><div class="bar" id="procBar"></div></div>
+      <p class="muted">This takes about 4 seconds…</p>
+    `;
+    const bar=document.getElementById("procBar");
+    bar.style.transition="width 4s linear";
+    requestAnimationFrame(()=>bar.style.width="100%");
+    setTimeout(renderSuccess,4050);
+  }
+
+  function renderSuccess(){
+    qEl.innerHTML = `
+      <h2 style="margin-bottom:6px;">CONGRATULATIONS!</h2>
+      <p style="margin:0 0 10px">Our systems have detected that you qualify to be part of our reviewers group. You may test the iPhone 17 Pro for FREE. Please enter your shipping details on the next page and pay the Post Office delivery fee of R58.</p>
+      <div class="answers">
+        <a class="btn primary" href="${FINAL_DESTINATION}" target="_blank" rel="noopener noreferrer">CONTINUE</a>
+      </div>
+    `;
+    console.log("Survey answers:",answers);
+  }
+
+  renderQuestion();
+</script>
+</body>
+</html>

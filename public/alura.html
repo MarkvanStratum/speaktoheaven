@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ALURA – Alura Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b1323;--muted:#5a6475;--sand:#efe6dc;--cream:#f6efe8;
+  --shadow:0 10px 30px rgba(0,0,0,.08);--max:1220px;--radius:28px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,sans-serif;color:var(--ink);background:#fff;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+.topbar{background:#f4efe8;text-align:center;padding:.6rem 1rem;font-weight:700}
+
+/* header */
+header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;z-index:10}
+.header-wrap{max-width:var(--max);margin:0 auto;position:relative;padding:12px 16px}
+.header-container{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center}
+.header-menu{justify-self:start;display:flex;gap:18px;font-weight:600}
+.header-logo{justify-self:center;font-family:'Playfair Display',serif;font-size:48px;font-weight:900;letter-spacing:.08em}
+.header-icons{justify-self:end;display:flex;gap:12px;font-size:20px}
+.logo-text{display:inline-block;line-height:1}
+
+/* hero product */
+.product{max-width:var(--max);margin:2rem auto;display:flex;gap:2rem;align-items:stretch;padding:0 1rem}
+.panel{flex:1;background:var(--sand);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.gallery-main{
+  position:relative;
+  border-radius:20px;
+  overflow:hidden;
+  background:#efe6dc; /* match image background */
+  flex:0 0 auto;
+}
+.gallery-main img{width:100%;height:100%;object-fit:contain}
+@media(min-width:1025px){.gallery-main{height:420px}}
+@media(min-width:1280px){.gallery-main{height:440px}}
+.navbtn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:0;border-radius:999px;width:40px;height:40px;cursor:pointer}
+.navbtn.prev{left:10px}.navbtn.next{right:10px}
+.thumbs{display:flex;gap:.65rem;margin:.75rem 0 0;overflow:auto;padding:.25rem;border-radius:16px}
+.thumbs img{height:78px;border-radius:18px;border:2px solid rgba(0,0,0,.15);flex:0 0 auto;background:#fff;cursor:pointer;transition:transform .15s ease,border-color .15s ease}
+.thumbs img.selected{border-color:#111;transform:scale(1.02)}
+
+.info{flex:1;min-width:300px;display:flex;flex-direction:column}
+.title{font-family:'Playfair Display',serif;font-weight:900;font-size:58px;line-height:1.05;margin:.25rem 0 1rem}
+.rating{display:flex;gap:.5rem;align-items:center;margin:.25rem 0 1rem}
+.stars{color:#f59e0b;letter-spacing:.12rem}
+.price{font-size:2rem;font-weight:900;margin:.25rem 0 1rem}
+.bullets{display:grid;gap:.85rem;margin:.75rem 0 1rem}
+.chips{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.25rem}
+.chip{border:1px solid #e3e3e3;border-radius:999px;padding:.5rem 1rem;font-weight:700;background:#fff}
+.btn{background:#0f172a;color:#fff;border:0;border-radius:12px;padding:.9rem 1.25rem;font-weight:800;cursor:pointer;display:inline-block;margin-top:1rem}
+
+/* sections */
+.section{max-width:var(--max);margin:3rem auto;padding:0 1rem}
+.frame{border-radius:24px;overflow:hidden;box-shadow:var(--shadow);background:#fff}
+.h1{font-family:'Playfair Display',serif;font-size:52px;line-height:1.1;margin:0 0 1rem}
+.dark{max-width:100%;background:#0f0f10;color:#efe7dd;padding:3.5rem 1rem;margin:3rem 0}
+.dark-inner{max-width:var(--max);margin:0 auto;text-align:center}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+
+/* organized section w/ inline hearth card on mobile */
+.organized{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+.organized .frame.alura2{grid-column:1}
+.organized .text-inline{grid-column:2}
+.hearth-inline{display:none}
+
+/* weekends free w/ overlay review */
+.weeks{display:grid;grid-template-columns:1fr 1.2fr;gap:2rem;align-items:center}
+.review-card{position:relative}
+.review-card .overlay{
+  position:absolute;right:6%;bottom:6%;
+  background:#fff;border-radius:18px;box-shadow:var(--shadow);
+  padding:1rem 1.25rem;max-width:520px
+}
+.overlay .stars{color:#f59e0b;font-size:20px;letter-spacing:.2rem;margin-bottom:.25rem}
+
+/* hearth vs paper */
+.versus-wrap{background:var(--cream);border-radius:24px;padding:1.25rem}
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.col{background:#f6efe8;border-radius:24px;padding:1rem}
+.col h3{margin:.25rem 0 0}
+.list-line{border-bottom:2px solid #183c4b20;padding:.5rem 0;margin:.2rem 0}
+
+/* testimonials */
+.testimonials{max-width:var(--max);margin:0 auto;padding:0 1rem 3rem}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.tcard{background:#efe6dc;border-radius:22px;padding:1.25rem 1.25rem 1rem;box-shadow:var(--shadow)}
+.tmeta{border-top:1px solid #cfc6bb;margin-top:1rem;padding-top:.65rem;font-weight:800}
+
+/* money-back band */
+.cta{max-width:100%;background:#000;color:#eee;padding:2.75rem 1rem;margin:3rem 0}
+.cta-inner{max-width:var(--max);margin:0 auto;text-align:center}
+.cta .h1{color:#efe7dd;margin-bottom:.5rem}
+
+/* footer */
+footer{text-align:center;color:#6b7280;border-top:1px solid #eee;padding:2rem 1rem}
+
+/* mobile */
+.mobile-only{display:none}
+@media(max-width: 768px){
+  .header-container{grid-template-columns:1fr;row-gap:6px;text-align:center}
+  .header-logo{order:1;justify-self:center}
+  .header-menu{order:2;justify-self:center;display:flex;justify-content:center;gap:18px;width:100%}
+  .header-icons{position:absolute;right:16px;top:12px}
+
+  .product{flex-direction:column}
+  /* Put the gallery above the title/content on mobile */
+.panel{order:1; margin-bottom:1rem;}
+.info{order:2}
+
+  .title{font-size:40px;margin-top:.25rem}
+  .price{font-size:1.8rem}
+
+  .dark .h1,.h1{font-size:38px}
+
+  .organized{display:flex;gap:1rem;align-items:flex-start}
+  .organized .frame.alura2{display:none}
+  .hearth-inline{display:block;flex:0 0 40%}
+  .organized .text-inline{flex:1}
+
+  .weeks{grid-template-columns:1fr;gap:1rem}
+  .overlay{position:static !important;margin-top:1rem}
+
+  .versus{grid-template-columns:1fr}
+  .versus .col.col-paper{display:none}
+
+  .tgrid{grid-template-columns:1fr}
+  .thumbs img{height:66px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">🚚 Worldwide Free Shipping</div>
+
+<header>
+  <div class="header-wrap">
+    <div class="header-container">
+      <nav class="header-menu"><a href="#">Home</a><a href="#">Catalog</a><a href="#">Contact</a></nav>
+      <div class="header-logo"><span class="logo-text">ALURA</span></div>
+      <div class="header-icons">🔍 🛍️ 👤</div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="product">
+  <!-- text -->
+  <div class="info">
+    <h1 class="title">Alura Planner</h1>
+    <div class="rating"><div class="stars">★★★★★</div> <div style="color:#5a6475">(6,724 Reviews)</div></div>
+    <div class="price">$49.95 USD</div>
+    <p style="color:#5a6475">Easily keep your family's routines on track, share responsibilities, and help everyone become more independent with our simple digital tool.</p>
+    <div class="bullets">
+      <div>🗓️ &nbsp; Syncs with your favorite calendars</div>
+      <div>👨‍👩‍👧‍👦 &nbsp; Profiles for everyone in the family</div>
+      <div>📝 &nbsp; Easy-to-use to-do lists</div>
+      <div>📱 &nbsp; Access everything on the go with our app</div>
+      <div>🌤️ &nbsp; Check the weather at a glance</div>
+    </div>
+    <a class="btn" href="https://www.charmr.xyz/shopify-49.html?ref=HAZ&sub1=Alura%20Planner&sub2=https://cdn.shopify.com/s/files/1/0789/3142/7572/files/featureImage.jpg?v=1761937782">Buy Now</a>
+  </div>
+
+  <!-- gallery -->
+  <div class="panel">
+    <div class="gallery-main" id="galleryMain">
+      <img id="mainImage" src="alura1-1.png" alt="Alura gallery image">
+      <button class="navbtn prev" id="prevBtn" aria-label="Previous">‹</button>
+      <button class="navbtn next" id="nextBtn" aria-label="Next">›</button>
+    </div>
+    <div class="thumbs" id="thumbs">
+      <img src="alura1-1.png" data-idx="0" alt="thumb 1">
+      <img src="alura1-2.png" data-idx="1" alt="thumb 2">
+      <img src="alura1-3.png" data-idx="2" alt="thumb 3">
+      <img src="alura1-4.png" data-idx="3" alt="thumb 4">
+      <img src="alura1-5.png" data-idx="4" alt="thumb 5">
+      <img src="alura1-6.png" data-idx="5" alt="thumb 6">
+    </div>
+  </div>
+</section>
+
+<!-- DARK BAND -->
+<section class="dark">
+  <div class="dark-inner">
+    <h2 class="h1">Struggling to Keep Everyone’s Schedule Straight?</h2>
+    <p style="max-width:900px;margin:10px auto 0;color:#d7d7d7">
+      Imagine having one place where all your family’s schedules and to-dos come together—easy, right?
+      That’s exactly what Alura Planner does. It’s super simple to use and makes organizing a breeze.
+      Dive into a smoother way to <strong>keep everyone in sync</strong>!
+    </p>
+  </div>
+</section>
+
+<!-- KEEP WEEKENDS FREE (image with overlay review) -->
+<section class="section weeks">
+  <div>
+    <h2 class="h1">Keep Your Weekends Free</h2>
+    <p style="color:#5a6475">Use Alura Planner to organize your weekend adventures. Input your plans, and let it handle the reminders and schedule coordination. You handle the adventure essentials like snacks and tunes.</p>
+    <p style="color:#5a6475">Alura Planner pulls all your schedules into one spot. Now, everyone knows the plan without the fuss.</p>
+  </div>
+  <div class="review-card frame" style="background:var(--cream);">
+    <img src="alura3.png" alt="Hear From Hearth Home">
+    <div class="overlay">
+      <div class="stars">★★★★★</div>
+      <p style="margin:.25rem 0 .5rem">“I love my new Hearth!! Setting the kids routines has been a game changer for the morning and evenings. I am really excited for the alerts and list features that are coming out!”</p>
+      <div style="font-weight:800;color:#333">Claudia Alves</div>
+    </div>
+  </div>
+</section>
+
+<!-- EVERYTHING YOUR FAMILY NEED / ORGANIZED TEXT -->
+<section class="section organized">
+  <!-- desktop/tablet image -->
+  <div class="frame alura2"><img src="alura2.png" alt="Everything Your Family Need"></div>
+
+  <!-- mobile hearth card left -->
+  <div class="hearth-inline mobile-only">
+    <div class="col" style="background:#f6efe8;border-radius:24px;padding:1rem">
+      <h3>Hearth Display</h3>
+      <div class="frame" style="margin:.5rem 0 1rem"><img src="alura5.png" alt="Hearth display"></div>
+      <ul style="color:#5a6475">
+        <li>Everything in one place</li>
+        <li>Transform habits into routine</li>
+        <li>Streamline household tasks</li>
+        <li>Super charge your calendar</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="text-inline">
+    <h2 class="h1">Keep Your Family Organized, the Easy Way</h2>
+    <p style="color:#5a6475">Imagine all your schedules, to-dos, and daily routines in one spot, ready to go. That’s Alura Planner for you—making every day smoother, no sweat.</p>
+    <p style="color:#5a6475">Everyone's calendars, tasks, and routines all neatly lined up in one place. With Alura Planner, it's that simple to keep the whole family on track and stress-free.</p>
+  </div>
+</section>
+
+<!-- REDUCE STRESS + HEARTH VS PAPER -->
+<section class="section">
+  <div class="grid-2" style="align-items:start">
+    <div>
+      <h2 class="h1">Reduce Stress and Improve Efficiency</h2>
+      <p style="color:#5a6475">Spend less time worrying about what needs to be done and more time enjoying life, knowing everything is neatly organized and easily accessible.</p>
+    </div>
+    <div class="versus-wrap">
+      <div class="versus">
+        <div class="col col-hearth">
+          <h3>Hearth Display</h3>
+          <div class="frame" style="margin:.5rem 0 1rem"><img src="alura5.png" alt="Hearth display"></div>
+          <div class="list-line">Everything in one place</div>
+          <div class="list-line">Transform habits into routine</div>
+          <div class="list-line">Streamline household tasks</div>
+          <div class="list-line">Super charge your calendar</div>
+        </div>
+        <div class="col col-paper">
+          <h3>Paper Calendar</h3>
+          <div class="frame" style="margin:.5rem 0 1rem"><img src="alura6.png" alt="Paper calendar"></div>
+          <div class="list-line">Static Information</div>
+          <div class="list-line">Limited Access</div>
+          <div class="list-line">No Alerts or Reminders</div>
+          <div class="list-line">No Integration</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MONEY BACK -->
+<section class="cta">
+  <div class="cta-inner">
+    <h2 class="h1">Love It or Your Money Back</h2>
+    <p>We stand by the quality of our products. If you're not completely satisfied with your Alura Planner return it within 30 days for a full refund. Your comfort and happiness are our top priority.</p>
+    <a class="btn" href="https://www.charmr.xyz/shopify-49.html?ref=HAZ&sub1=Alura%20Planner&sub2=https://cdn.shopify.com/s/files/1/0789/3142/7572/files/featureImage.jpg?v=1761937782">Buy Now</a>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials">
+  <h2 class="h1" style="text-align:center;margin-bottom:1.25rem">Hear from Alura Planner</h2>
+  <div class="tgrid">
+    <article class="tcard">
+      <p>Our experience with Alura Planner so far has been amazing. The idea of reducing the mental load on caregivers is already noticeable in our home. We love that when we come home from school the kids immediately go to our Alura to start on their tasks. It's awesome that our whole family can be so much more self-sufficient!</p>
+      <div class="tmeta">RYAN E. <span style="font-weight:400">Dad of three</span></div>
+    </article>
+    <article class="tcard">
+      <p>The mental load they have managed to relieve, even in the early days has been so refreshing. It is so exciting to not be asked, ‘What’s for dinner?’ or ‘Is today trash day?’. Having the kids be able to receive, track, and check off their tasks without me remembering, writing, reminding, and following up has literally added hours back into my week.</p>
+      <div class="tmeta">STACY B. <span style="font-weight:400">Mom of two</span></div>
+    </article>
+    <article class="tcard">
+      <p>Alura Planner can easily help keep my family on track for activities, chores, and everything in between. My favorite moments are watching my youngest son, who is 4 and can’t read yet, be able to easily check off items on his to do list. I can see in his expressions that being able to complete tasks on his own is definitely building confidence and better preparing him for kindergarten next year.</p>
+      <div class="tmeta">KATTE B. <span style="font-weight:400">Super Mom</span></div>
+    </article>
+  </div>
+</section>
+
+<footer>© 2025 Alura. All rights reserved.</footer>
+
+<script>
+const IMAGES=['alura1-1.png','alura1-2.png','alura1-3.png','alura1-4.png','alura1-5.png','alura1-6.png'];
+const mainImage=document.getElementById('mainImage');
+const thumbs=Array.from(document.querySelectorAll('#thumbs img'));
+let idx=0;
+function setActive(i){
+  idx=(i+IMAGES.length)%IMAGES.length;
+  mainImage.src=IMAGES[idx];
+  thumbs.forEach(t=>t.classList.remove('selected'));
+  if(thumbs[idx]) thumbs[idx].classList.add('selected');
+}
+document.getElementById('prevBtn').addEventListener('click',()=>setActive(idx-1));
+document.getElementById('nextBtn').addEventListener('click',()=>setActive(idx+1));
+thumbs.forEach((t,i)=>t.addEventListener('click',()=>setActive(i)));
+// swipe
+let startX=0;const main=document.getElementById('galleryMain');
+main.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX},{passive:true});
+main.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>40){dx<0?setActive(idx+1):setActive(idx-1)}},{passive:true});
+// init
+setActive(0);
+</script>
+
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript"></script>
+
+</body>
+</html>

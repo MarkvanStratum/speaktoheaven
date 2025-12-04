@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ασφαλές Ταμείο</title>
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Google tag (χωρίς αλλαγές) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    :root{
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
+      --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
+
+    /* Top safe strip */
+    .safe{
+      background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px; text-align:left;
+    }
+
+    /* Two-column layout like the screenshot */
+    .grid{
+      display:grid; grid-template-columns: minmax(0,1fr) 360px; gap:18px; align-items:start;
+    }
+    @media (max-width:980px){ .grid{ grid-template-columns:1fr } }
+
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; }
+
+    .page-title{
+      font-size:28px; font-weight:900; display:flex; align-items:center; gap:8px; margin:6px 0 14px;
+    }
+    .stars{ color:#f6b80c; font-size:15px }
+    .reviews{ color:var(--muted); font-size:13px; margin-left:6px }
+
+    .h2{ font-size:18px; font-weight:800; margin:10px 0 14px }
+    .sub{ font-size:13px; color:#5b6b82; margin-top:-6px }
+
+    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    .form-grid-1{ display:grid; grid-template-columns:1fr; gap:10px }
+    @media (max-width:620px){ .form-grid{ grid-template-columns:1fr } }
+
+    .label{font-weight:700; font-size:13px; margin:4px 0 4px; color:#334}
+    .input, .select, .el{
+      width:100%; background:#fff; border:1px solid #cfd6e4; border-radius:10px; padding:12px; font-size:15px; outline:none;
+    }
+    .input::placeholder{ color:#8aa0b6 }
+
+    .btn{
+      width:100%; border:none; border-radius:12px; padding:12px 16px; font-weight:900; font-size:16px; cursor:pointer;
+      background:#16a34a; color:#fff;
+    }
+    .btn:disabled{opacity:.65; cursor:not-allowed}
+    .btn.muted{ background:#f1f4f8; color:#20324d; border:1px solid var(--line); }
+
+    .logos{ display:flex; gap:10px; align-items:center; margin-top:12px }
+    .logos img{ height:20px; width:auto; display:block }
+
+    .err{ display:none; background:#fff1f1; border:1px solid #f5bcbc; color:#9a1a1a; padding:10px; border-radius:10px; font-size:14px; margin-top:10px }
+    .err[aria-hidden="false"]{ display:block }
+
+    /* Right column widgets */
+    .widget{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px }
+    .widget + .widget{ margin-top:12px }
+    .w-title{ font-weight:800; font-size:16px; margin:2px 0 10px }
+    .order-row{ display:flex; justify-content:space-between; font-size:14px; padding:6px 0; border-top:1px dashed #e6eaf1 }
+    .order-row:first-of-type{ border-top:none }
+    .green{ color:var(--green) }
+
+    .delivery{
+      display:flex; align-items:center; gap:12px; border:1px dashed #d9e2ef; background:#f7fbff; padding:12px; border-radius:10px;
+    }
+    .delivery img{ width:52px; height:52px; border-radius:8px; object-fit:cover; border:1px solid #e6eaf1; background:#fff }
+    .tiny{ font-size:12px; color:var(--muted) }
+
+    .trust{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center; }
+    .trust .box{ border:1px solid var(--line); border-radius:10px; padding:8px }
+    .trust .big{ font-weight:900; font-size:18px }
+    .trust .small{ font-size:12px; color:#5b6b82 }
+
+    /* Steps (Information / Payment) */
+    .step{ display:none }
+    .step[aria-hidden="false"]{ display:block }
+
+    /* Stripe element shell to look native */
+    .el{ padding:10px 12px; border-radius:10px; border:1px solid #cfd6e4 }
+
+    /* Loading overlay */
+    .loading-overlay{ position:fixed; inset:0; background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center; z-index:9999; }
+    .loading-overlay[aria-hidden="false"]{ display:flex }
+    .loading-box{ width:min(92vw,460px); background:#fff; border:1px solid #e6edf5;
+      border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:20px; text-align:center; color:#2a3b55 }
+    .loading-title{ font-weight:800; margin:2px 0 10px; font-size:18px }
+    .progress-wrap{ width:100%; height:10px; background:#ecf1f8; border-radius:999px; overflow:hidden; }
+    .progress-bar{ width:0%; height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
+    @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+  </style>
+</head>
+<body>
+  <div class="safe">Πληρωμή με ασφάλεια SSL</div>
+
+  <div class="wrap">
+    <div class="page-title">
+      Ασφαλές Ταμείο <span style="font-size:18px">🔒</span>
+      <span class="stars">★★★★★</span>
+      <span class="reviews">(2777 κριτικές)</span>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: FORM -->
+      <div class="card">
+        <!-- STEP 1: Information -->
+        <section id="step1" class="step" aria-hidden="false">
+          <!-- Affiliate dynamic hero (optional) -->
+          <div id="hero" style="display:none; margin-bottom:8px; display:flex; align-items:center; gap:10px">
+            <img id="heroImg" alt="" style="width:44px;height:44px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover">
+            <div id="heroTitle" style="font-weight:900"></div>
+          </div>
+
+          <div class="h2">1. Πληροφορίες</div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Όνομα</div>
+              <input id="firstName" class="input" placeholder="Άννα" autocomplete="given-name">
+            </div>
+            <div>
+              <div class="label">Επώνυμο</div>
+              <input id="lastName" class="input" placeholder="Παπαδοπούλου" autocomplete="family-name">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div style="grid-column:1 / -1">
+              <div class="label">Διεύθυνση</div>
+              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Διεύθυνση">
+            </div>
+            <div>
+              <div class="label">Τ.Κ.</div>
+              <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Τ.Κ.">
+            </div>
+            <div>
+              <div class="label">Πόλη</div>
+              <input id="billingCity" class="input" autocomplete="address-level2" placeholder="Πόλη">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Ηλεκτρονικό ταχυδρομείο</div>
+              <input id="emailInput" class="input" placeholder="εσύ@example.com" type="email" autocomplete="email" required>
+            </div>
+            <div>
+              <div class="label">Χώρα</div>
+              <!-- free text to keep your country→ISO conversion -->
+              <input id="billingCountry" class="input" placeholder="Ελλάδα">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Κωδικός χώρας</div>
+              <select id="phonePrefix" class="select" aria-label="Κωδικός χώρας">
+                <option value="+30">+30 — Ελλάδα</option>
+              </select>
+            </div>
+            <div>
+              <div class="label">Τηλέφωνο</div>
+              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Ο αριθμός σας" autocomplete="tel-national">
+            </div>
+          </div>
+
+          <!-- Hidden full name field (keeps your existing payment code exactly the same) -->
+          <input id="nameInput" class="input" style="display:none">
+
+          <button id="nextBtn" class="btn" type="button">Συνέχεια</button>
+
+          <div class="logos">
+            <img src="/visa.png" alt="Visa">
+            <img src="mastercard.png" alt="Mastercard">
+            <img src="amex.png" alt="American Express">
+            <img src="discover.jpg" alt="Discover">
+          </div>
+        </section>
+
+        <!-- STEP 2: Payment -->
+        <section id="step2" class="step" aria-hidden="true">
+          <div class="h2">2. Πληρωμή</div>
+          <p class="sub">Τα στοιχεία της κάρτας κρυπτογραφούνται και διεκπεραιώνονται από τη Stripe.</p>
+
+          <div class="form-grid-1">
+            <div>
+              <div class="label">Αριθμός κάρτας</div>
+              <div id="card-number" class="el"></div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <div class="label">Ημ/νία λήξης</div>
+                <div id="card-expiry" class="el"></div>
+              </div>
+              <div>
+                <div class="label">CVC</div>
+                <div id="card-cvc" class="el"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="err" class="err" role="alert" aria-hidden="true"></div>
+
+          <div style="display:flex; gap:10px; margin-top:12px">
+            <button id="backBtn" class="btn muted" style="width:40%" type="button">← Πίσω</button>
+            <button id="payNow" class="btn" style="width:60%" type="button">Ασφαλής πληρωμή</button>
+          </div>
+
+          <p class="sub" style="text-align:center; margin-top:10px">🔒 Κρυπτογράφηση SSL 256-bit · Με την υποστήριξη της Stripe</p>
+        </section>
+      </div>
+
+      <!-- RIGHT: SIDEBAR -->
+      <aside>
+        <div class="widget">
+          <div class="w-title" style="text-align:center">Τι λένε οι πελάτες μας</div>
+          <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
+          <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
+          <p class="tiny" style="text-align:center; margin-top:8px">
+            Παρέλαβα το προϊόν χθες. Γρήγορη και εξαιρετική εξυπηρέτηση! Ευχαριστώ πολύ.
+          </p>
+        </div>
+
+        <div class="widget">
+          <div class="delivery">
+            <img id="sidebarImg" alt="">
+            <div>
+              <div style="font-weight:800">Γρήγορη παράδοση στη διεύθυνσή σας</div>
+              <div class="tiny">3–5 εργάσιμες ημέρες</div>
+            </div>
+            <div style="margin-left:auto; font-weight:800">Δωρεάν</div>
+          </div>
+
+          <div class="w-title" style="margin-top:14px">Σύνοψη παραγγελίας</div>
+          <div class="order-row"><span>Σύνολο</span><span id="orderTotal">≈ 2,00 €</span></div>
+
+          <div class="tiny" style="margin-top:10px; line-height:1.5">
+            🗃️ Λίγα τεμάχια διαθέσιμα<br>
+            👀 Μερικοί το βλέπουν τώρα<br>
+            ✅ Κάποιος το αγόρασε πρόσφατα<br>
+            💳 Πολλοί πελάτες το αγόρασαν τις τελευταίες ημέρες
+          </div>
+        </div>
+
+        <div class="widget">
+          <div class="w-title">ΑΞΙΟΠΙΣΤΟ ΚΑΤΑΣΤΗΜΑ</div>
+          <div class="trust">
+            <div class="box">
+              <div class="big">99 %</div>
+              <div class="small">Ευχαριστημένοι πελάτες</div>
+            </div>
+            <div class="box">
+              <div class="big">Ασφαλές</div>
+              <div class="small">Κρυπτογράφηση SSL</div>
+            </div>
+            <div class="box">
+              <div class="big">10.000 €</div>
+              <div class="small">Προστασία αγοραστή</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+    <div class="loading-box">
+      <div class="loading-title">Επεξεργασία της πληρωμής σας…</div>
+      <div class="progress-wrap"><div class="progress-bar"></div></div>
+      <p class="sub" style="margin-top:10px">Παρακαλώ περιμένετε, μπορεί να διαρκέσει μερικά δευτερόλεπτα.</p>
+    </div>
+  </div>
+
+  <!-- Stripe.js (χωρίς αλλαγές) -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    /* JavaScript χωρίς αλλαγές από το αρχικό */
+  </script>
+
+  <!-- GoAffPro loader (χωρίς αλλαγές) -->
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+</body>
+</html>

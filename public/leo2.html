@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pure Wave Ear Pods — Secure Checkout</title>
+<style>
+  :root{
+    --green:#24b15a; --text:#17324d; --muted:#5b6b82; --line:#e6eaf1; --bg:#ffffff;
+    --light:#f8fafc; --accent:#2dd4bf; --warn:#cc0000;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f5f7fb;color:var(--text)}
+  a{color:inherit}
+  .bar{background:#20b559;color:#fff;text-align:center;font-weight:800;padding:10px 12px}
+  .wrap{max-width:1150px;margin:0 auto;padding:22px 14px 60px}
+  .head{display:flex;align-items:center;gap:16px;justify-content:center;margin:16px 0 8px}
+  .logo{font-weight:900;font-size:28px;display:flex;align-items:center;gap:10px}
+  .logo img{height:30px}
+  .subhead{text-align:center;color:#33475b;margin-bottom:12px}
+  .secure{background:#eef3f8;border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:12px;justify-content:center}
+  .secure img{height:20px}
+
+  .grid{display:grid;grid-template-columns: 520px 1fr;gap:18px;align-items:start;margin-top:18px}
+  @media (max-width:1100px){.grid{grid-template-columns:1fr}}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  h2{margin:0 0 12px;font-size:18px}
+  .order{display:flex;gap:14px}
+  .order img{width:86px;height:86px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+  .rows{margin-top:8px}
+  .row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px dashed #e6eaf1}
+  .row:first-of-type{border-top:none}
+  .total{font-weight:900;font-size:22px}
+  .ups{display:flex;align-items:center;gap:10px;border:1px dashed #d7e3ef;background:#f7fbff;padding:12px;border-radius:10px;margin-top:12px}
+  .ups strong{color:#e21a1a}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .form .full{grid-column:1 / -1}
+  label{font-size:13px;font-weight:700;margin:2px 0;display:block;color:#2b3d55}
+  input,select{width:100%;border:1px solid #cfd7e6;border-radius:10px;padding:12px;font-size:15px;background:#fff}
+  .btn{display:inline-block;width:100%;background:#1aa34a;color:#fff;border:none;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:900;cursor:pointer}
+  .btn:disabled{opacity:.65;cursor:not-allowed}
+  .badge-line{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .badge-line img{height:22px}
+  .step{margin-top:14px}
+  .flags{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .secure-bar{background:#f0f4f9;color:#334; border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;gap:10px;align-items:center;margin-top:8px}
+
+  /* step state */
+  .hidden{display:none}
+
+  /* card elements */
+  .el{border:1px solid #cfd6e4;border-radius:10px;padding:12px; background:#fff}
+  .err{display:none;background:#fff1f1;border:1px solid #ffcaca;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
+  .err[aria-hidden="false"]{display:block}
+
+  /* footer feature cards */
+  .features{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .fitem{text-align:center}
+  .ficon{font-size:40px;line-height:1}
+  .ftitle{font-weight:800;margin-top:6px}
+  .ftext{font-size:13px;color:#5b6b82}
+
+  /* testimonials */
+  .test{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  .tc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+  .stars{color:#ffb21a;letter-spacing:1px}
+  .tname{font-weight:800;margin-top:6px}
+
+  /* lower image bar (girl + pods) */
+  .hero-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;margin-top:14px}
+  .hero-pair img{width:100%;border-radius:12px;border:1px solid var(--line);object-fit:cover}
+  .mini-pod{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+
+  /* loading overlay */
+  .overlay{position:fixed;inset:0;background:rgba(247,250,255,.92);display:none;align-items:center;justify-content:center;z-index:9999}
+  .overlay[aria-hidden="false"]{display:flex}
+  .box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);padding:20px;text-align:center}
+  .barx{height:10px;background:#ecf1f8;border-radius:999px;overflow:hidden;margin-top:8px}
+  .barx>span{display:block;height:100%;width:0%;background:linear-gradient(90deg,#68a0ff,#2dd4bf);animation:load 2s ease-in-out infinite}
+  @keyframes load{0%{width:0%}60%{width:80%}100%{width:100%}}
+</style>
+</head>
+<body>
+  <!-- Top green bar -->
+  <div class="bar">YOUR PURE WAVE EAR PODS HAS BEEN RESERVED!</div>
+
+  <div class="wrap">
+    <div class="head">
+      <div class="logo">
+        <img src="https://dummyimage.com/120x30/000/fff&text=Pure+Wave" alt="Pure Wave">
+        Pure <strong>Wave</strong> <span style="font-weight:400">EAR PODS</span>
+      </div>
+    </div>
+    <div class="subhead">High-quality Bluetooth earpods with excellent sound output and battery life.</div>
+    <div class="secure">
+      <strong>Secure Checkout</strong>
+      <img src="https://dummyimage.com/70x20/ccc/000&text=McAfee" alt="">
+      <img src="https://dummyimage.com/70x20/ccc/000&text=Norton" alt="">
+      <img src="https://dummyimage.com/70x20/ccc/000&text=Comodo" alt="">
+      <img src="https://dummyimage.com/70x20/ccc/000&text=VeriSign" alt="">
+      <img src="https://dummyimage.com/70x20/ccc/000&text=TRUSTe" alt="">
+      <img src="https://dummyimage.com/70x20/ccc/000&text=PayPal" alt="">
+    </div>
+
+    <div class="grid">
+      <!-- LEFT column: Order confirmation + payment -->
+      <div class="panel">
+        <h2>Step 1: Confirm Your Order</h2>
+        <div class="order">
+          <img src="https://dummyimage.com/86x86/ffffff/000&text=Pods" alt="Pure Wave Ear Pods">
+          <div>
+            <div><strong>1 Pure Wave Ear Pods</strong></div>
+            <div class="rows">
+              <div class="row"><span>Price:</span><span>$0.00</span></div>
+              <div class="row"><span>Shipping &amp; Handling</span><span>$9.95</span></div>
+              <div class="row total"><span>Total</span><span>$9.95</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ups" style="margin-top:14px">
+          <img src="https://dummyimage.com/52x52/fff/000&text=UPS" alt="UPS" style="border:1px solid var(--line);border-radius:8px">
+          <div>Your order is estimated to arrive by <strong id="eta">19 October 2025</strong></div>
+        </div>
+
+        <!-- Lower image row (girl + pods) -->
+        <div class="hero-pair">
+          <img src="girl_w_pods.jpg" alt="Girl with earpods">
+          <div class="mini-pod">
+            <img src="https://dummyimage.com/500x340/f7f9fc/000&text=i12+TWS" alt="i12 TWS">
+            <div style="margin-top:6px;font-weight:800">i12 TWS bluetooth earphone</div>
+            <div style="font-size:12px;color:#5b6b82">touch control • HIFI sound • fit all smartphone</div>
+          </div>
+        </div>
+
+        <!-- Payment stepper -->
+        <div class="step" id="step1">
+          <h2 style="margin-top:18px">Step 2: Where Do We Ship</h2>
+          <div class="form">
+            <div>
+              <label>First Name</label>
+              <input id="firstName" placeholder="First name" autocomplete="given-name">
+            </div>
+            <div>
+              <label>Last Name</label>
+              <input id="lastName" placeholder="Last name" autocomplete="family-name">
+            </div>
+            <div class="full">
+              <label>Your Address</label>
+              <input id="billingStreet" placeholder="Street address" autocomplete="address-line1">
+            </div>
+            <div>
+              <label>Zip Code</label>
+              <input id="billingPostcode" placeholder="Zip" autocomplete="postal-code">
+            </div>
+            <div>
+              <label>Your City</label>
+              <input id="billingCity" placeholder="City" autocomplete="address-level2">
+            </div>
+            <div>
+              <label>Select State</label>
+              <input id="stateInput" placeholder="State/Region" autocomplete="address-level1">
+            </div>
+            <div>
+              <label>Email Address</label>
+              <input id="emailInput" type="email" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div>
+              <label>Phone</label>
+              <input id="phoneNumber" inputmode="tel" placeholder="Your number" autocomplete="tel">
+            </div>
+            <!-- Hidden name field to mirror atlas2.html -->
+            <input id="nameInput" style="display:none">
+          </div>
+          <div class="secure-bar">
+            <span>Billing same as Shipping</span>
+            <label style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <input type="radio" name="billingSame" checked> YES
+            </label>
+            <label style="display:flex;gap:8px;align-items:center">
+              <input type="radio" name="billingSame"> NO
+            </label>
+          </div>
+          <div class="badge-line">
+            <img src="https://dummyimage.com/60x22/eee/000&text=VISA" alt="VISA">
+            <img src="https://dummyimage.com/70x22/eee/000&text=Mastercard" alt="Mastercard">
+            <img src="https://dummyimage.com/60x22/eee/000&text=Amex" alt="American Express">
+            <img src="https://dummyimage.com/70x22/eee/000&text=Discover" alt="Discover">
+          </div>
+          <div style="margin-top:10px"><button id="toPayment" class="btn">Continue</button></div>
+        </div>
+
+        <div class="step hidden" id="step2">
+          <h2>Step 3: Credit Card Information</h2>
+          <div class="form">
+            <div class="full">
+              <label>Credit Card Number</label>
+              <div id="card-number" class="el"></div>
+            </div>
+            <div>
+              <label>CVV</label>
+              <div id="card-cvc" class="el"></div>
+            </div>
+            <div>
+              <label>Expiration</label>
+              <div id="card-expiry" class="el"></div>
+            </div>
+          </div>
+          <div id="err" class="err" role="alert" aria-hidden="true"></div>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button id="back" class="btn" style="background:#eef2f7;color:#223; border:1px solid var(--line);width:40%">← Back</button>
+            <button id="pay" class="btn" style="width:60%">COMPLETE PURCHASE</button>
+          </div>
+          <div class="badge-line" style="justify-content:center;margin-top:12px">
+            <strong>GUARANTEED SAFE CHECKOUT</strong>
+            <img src="https://dummyimage.com/70x20/ccc/000&text=McAfee" alt="">
+            <img src="https://dummyimage.com/70x20/ccc/000&text=Norton" alt="">
+            <img src="https://dummyimage.com/70x20/ccc/000&text=Comodo" alt="">
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT column: social proof -->
+      <div class="panel">
+        <div class="features">
+          <div class="fgrid">
+            <div class="fitem">
+              <div class="ficon">🟦</div>
+              <div class="ftitle">Advanced Bluetooth</div>
+              <div class="ftext">Quick & hassle-free pairing.</div>
+            </div>
+            <div class="fitem">
+              <div class="ficon">🔋</div>
+              <div class="ftitle">Long Battery</div>
+              <div class="ftext">Uninterrupted listening & calling.</div>
+            </div>
+            <div class="fitem">
+              <div class="ficon">💧</div>
+              <div class="ftitle">IP6/7 Waterproof</div>
+              <div class="ftext">Rain or shower, never take it off.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="test">
+          <div class="tc">
+            <div class="stars">★★★★★</div>
+            <div class="tname">Verified Purchase</div>
+            <p class="ftext">My niece loves her new Pure Wave Ear Pods. She finally stopped asking me for those other over-priced ones!</p>
+            <div class="ftext"><strong>Robert P.</strong><br/>Newark, New Jersey</div>
+          </div>
+          <div class="tc">
+            <div class="stars">★★★★★</div>
+            <div class="tname">Verified Purchase</div>
+            <p class="ftext">Battery life is great and the fit is awesome. I recommend this for novices and hardcore exercise people alike.</p>
+            <div class="ftext"><strong>Jean B.</strong><br/>Raleigh, NC</div>
+          </div>
+          <div class="tc">
+            <div class="stars">★★★★★</div>
+            <div class="tname">Verified Purchase</div>
+            <p class="ftext">Audio feels immersive and balanced. Exceeded my expectations!</p>
+            <div class="ftext"><strong>Gary V.</strong><br/>Chicago, Illinois</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <div style="font-weight:900">Processing your payment…</div>
+      <div class="barx"><span></span></div>
+      <div style="color:#5b6b82;font-size:13px;margin-top:8px">Please wait, this may take a few seconds.</div>
+    </div>
+  </div>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    // ---- Elements from form
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const toPayment = document.getElementById('toPayment');
+    const backBtn = document.getElementById('back');
+    const payBtn = document.getElementById('pay');
+    const errBox = document.getElementById('err');
+    const overlay = document.getElementById('overlay');
+
+    const firstName = document.getElementById('firstName');
+    const lastName  = document.getElementById('lastName');
+    const nameInput = document.getElementById('nameInput');
+    const billingStreet = document.getElementById('billingStreet');
+    const billingCity   = document.getElementById('billingCity');
+    const billingPost   = document.getElementById('billingPostcode');
+    const stateInput    = document.getElementById('stateInput');
+    const emailInput    = document.getElementById('emailInput');
+    const phoneNumber   = document.getElementById('phoneNumber');
+
+    function show(o){ o.classList.remove('hidden'); }
+    function hide(o){ o.classList.add('hidden'); }
+    function showErr(msg){ if(!errBox) return; errBox.textContent = msg || 'Something went wrong.'; errBox.setAttribute('aria-hidden','false'); }
+    function clrErr(){ if(!errBox) return; errBox.setAttribute('aria-hidden','true'); errBox.textContent=''; }
+    function loading(v){ overlay.setAttribute('aria-hidden', v ? 'false' : 'true'); }
+
+    // Step nav
+    toPayment.addEventListener('click', () => {
+      nameInput.value = [firstName.value||'', lastName.value||''].join(' ').trim();
+      hide(step1); show(step2);
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+    backBtn.addEventListener('click', () => { hide(step2); show(step1); });
+
+    // ---- Stripe (kept identical to atlas2 flow) ----
+    // These constants mirror the ones from atlas2.html so the backend flow is the same.  :contentReference[oaicite:1]{index=1}
+    const SUBSCRIBE_URL   = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
+    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+
+    let stripe, elements, cardNumber, cardExpiry, cardCvc;
+    try{
+      stripe = Stripe(PUBLISHABLE_KEY);
+      elements = stripe.elements();
+      cardNumber = elements.create('cardNumber');
+      cardExpiry = elements.create('cardExpiry');
+      cardCvc    = elements.create('cardCvc');
+      cardNumber.mount('#card-number');
+      cardExpiry.mount('#card-expiry');
+      cardCvc.mount('#card-cvc');
+    }catch(e){ console.warn('Stripe init failed', e); }
+
+    payBtn.addEventListener('click', async () => {
+      if(!stripe){ alert('Payment temporarily unavailable. Please try again.'); return; }
+      clrErr(); loading(true);
+
+      const address = {
+        line1: (billingStreet.value||'').trim() || undefined,
+        city:  (billingCity.value||'').trim() || undefined,
+        postal_code: (billingPost.value||'').trim() || undefined,
+        state: (stateInput.value||'').trim() || undefined
+      };
+      const name = nameInput.value.trim();
+      const email = (emailInput.value||'').trim() || undefined;
+      const phone = (phoneNumber.value||'').trim() || undefined;
+
+      try{
+        // 1) Create PaymentMethod
+        const pmRes = await stripe.createPaymentMethod({
+          type:'card',
+          card: cardNumber,
+          billing_details: { name, email, phone, address }
+        });
+        if(pmRes.error) throw new Error(pmRes.error.message);
+
+        // 2) Start intro charge with your server (same endpoint as atlas2)
+        const resp = await fetch(SUBSCRIBE_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            paymentMethodId: pmRes.paymentMethod.id,
+            name, email, phone, address
+          })
+        });
+        const data = await resp.json();
+        if(!data.clientSecret) throw new Error(data.error || 'Payment failed to start');
+
+        // 3) Confirm (handles 3DS/SCA)
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error) throw new Error(conf.error.message);
+        if(!(conf.paymentIntent && conf.paymentIntent.status === 'succeeded')) throw new Error('Payment not completed');
+
+        // Success: simple thank-you (replace with your thank-you URL if you have one)
+        window.location.href = 'thank_you.html';
+
+      }catch(err){
+        showErr(err.message || 'Payment failed.');
+        loading(false);
+        // Optional: failure redirect (mirrors atlas2 behavior)
+        // window.location.href = 'https://track.crugate.info/214a2787-4e13-47d7-8eaa-3e8c7caeb599';
+      }
+    });
+  </script>
+</body>
+</html>

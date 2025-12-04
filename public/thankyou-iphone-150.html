@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thank you</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    /* GA init (required for page_view). Without this, the loader above won't send hits. */
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fff; color: #111;
+    }
+    main { text-align: center; max-width: 60ch; padding: 2rem; }
+    h1 { margin: 0 0 .5rem; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    p  { margin: 0; font-size: 1.1rem; opacity: .9; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Thank you for your order.</h1>
+    <p>We will contact you shortly with delivery details.</p>
+  </main>
+
+  <!-- Ensure sub_id is present in URL before GoAffPro loads -->
+  <script>
+    (function ensureSubIdInURL(){
+      var url = new URL(location.href);
+      if (!url.searchParams.get("sub_id")) {
+        function getStored(){
+          try{
+            var m = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+            if (m) return decodeURIComponent(m[1]);
+            var ls = localStorage.getItem("aff_sub_id");
+            if (ls) return ls;
+          }catch(e){}
+          return null;
+        }
+        var sub = getStored();
+        if (!sub && document.referrer) {
+          try{
+            var ref = new URL(document.referrer);
+            sub = ref.searchParams.get("sub_id") || ref.searchParams.get("subid") ||
+                  ref.searchParams.get("aff_sub") || ref.searchParams.get("click_id") ||
+                  ref.searchParams.get("cid")    || ref.searchParams.get("tid");
+          }catch(e){}
+        }
+        if (sub) {
+          url.searchParams.set("sub_id", sub);
+          history.replaceState(null, "", url.toString());
+        }
+      }
+    })();
+  </script>
+
+  <!-- GoAffPro loader -->
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+  <!-- Idempotent GoAffPro conversion fire (prevents double tracking) -->
+  <script>
+    // 1) Build a stable order id from the redirect (v=...), with safe fallbacks.
+    const qs = new URLSearchParams(location.search);
+    const orderId =
+      qs.get('v') || qs.get('order_id') || qs.get('oid') || qs.get('t') || ('TEST-' + Date.now());
+
+    // 2) Prevent duplicate fires for the same order id (persists across refreshes).
+    function alreadyFired(id){
+      try { return JSON.parse(localStorage.getItem('goaffpro_fired')||'{}')[id]; } catch { return false; }
+    }
+    function markFired(id){
+      try {
+        const m = JSON.parse(localStorage.getItem('goaffpro_fired')||'{}');
+        m[id] = Date.now();
+        localStorage.setItem('goaffpro_fired', JSON.stringify(m));
+      } catch {}
+    }
+
+    // 3) Payload (keep your values; fill with real total/currency if available).
+    var goaffproOrder = {
+      id: orderId,            // string
+      number: orderId,        // string (can match id)
+      total: 150,             // number
+      currency: "USD",        // ISO code
+      forceSDK: true
+    };
+
+    // 4) Call the tracker once the SDK is ready, but only once per orderId.
+    (function wait(i){
+      if (alreadyFired(orderId)) {
+        console.log('[GoAffPro] Skipping duplicate for', orderId);
+        return;
+      }
+      if (typeof window.goaffproTrackConversion === "function") {
+        window.goaffproTrackConversion(goaffproOrder);
+        markFired(orderId);
+        console.log("[GoAffPro] Sent once for", orderId);
+      } else if (i < 50) {          // ~10s max
+        setTimeout(() => wait(i+1), 200);
+      } else {
+        console.error("[GoAffPro] goaffproTrackConversion not found. Check CSP/ad-blockers/shop key.");
+      }
+    })(0);
+  </script>
+</body>
+</html>

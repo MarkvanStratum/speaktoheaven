@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Bezpečná pokladňa</title>
+  <meta name="referrer" content="no-referrer">
+  <!-- Google tag (nezmenené) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+  <style>
+    :root{
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
+      --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
+
+    /* Horný bezpečnostný pruh */
+    .safe{
+      background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px; text-align:left;
+    }
+
+    /* Dvojstĺpcové rozloženie */
+    .grid{
+      display:grid; grid-template-columns: minmax(0,1fr) 360px; gap:18px; align-items:start;
+    }
+    @media (max-width:980px){ .grid{ grid-template-columns:1fr } }
+
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; }
+
+    .page-title{
+      font-size:28px; font-weight:900; display:flex; align-items:center; gap:8px; margin:6px 0 14px;
+    }
+    .stars{ color:#f6b80c; font-size:15px }
+    .reviews{ color:var(--muted); font-size:13px; margin-left:6px }
+
+    .h2{ font-size:18px; font-weight:800; margin:10px 0 14px }
+    .sub{ font-size:13px; color:#5b6b82; margin-top:-6px }
+
+    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    .form-grid-1{ display:grid; grid-template-columns:1fr; gap:10px }
+    @media (max-width:620px){ .form-grid{ grid-template-columns:1fr } }
+
+    .label{font-weight:700; font-size:13px; margin:4px 0 4px; color:#334}
+    .input, .select, .el{
+      width:100%; background:#fff; border:1px solid #cfd6e4; border-radius:10px; padding:12px; font-size:15px; outline:none;
+    }
+    .input::placeholder{ color:#8aa0b6 }
+
+    .btn{
+      width:100%; border:none; border-radius:12px; padding:12px 16px; font-weight:900; font-size:16px; cursor:pointer;
+      background:#16a34a; color:#fff;
+    }
+    .btn:disabled{opacity:.65; cursor:not-allowed}
+    .btn.muted{ background:#f1f4f8; color:#20324d; border:1px solid var(--line); }
+
+    .logos{ display:flex; gap:10px; align-items:center; margin-top:12px }
+    .logos img{ height:20px; width:auto; display:block }
+
+    .err{ display:none; background:#fff1f1; border:1px solid #f5bcbc; color:#9a1a1a; padding:10px; border-radius:10px; font-size:14px; margin-top:10px }
+    .err[aria-hidden="false"]{ display:block }
+
+    /* Pravý panel (widgety) */
+    .widget{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px }
+    .widget + .widget{ margin-top:12px }
+    .w-title{ font-weight:800; font-size:16px; margin:2px 0 10px }
+    .order-row{ display:flex; justify-content:space-between; font-size:14px; padding:6px 0; border-top:1px dashed #e6eaf1 }
+    .order-row:first-of-type{ border-top:none }
+    .green{ color:var(--green) }
+
+    .delivery{
+      display:flex; align-items:center; gap:12px; border:1px dashed #d9e2ef; background:#f7fbff; padding:12px; border-radius:10px;
+    }
+    .delivery img{ width:52px; height:52px; border-radius:8px; object-fit:cover; border:1px solid #e6eaf1; background:#fff }
+    .tiny{ font-size:12px; color:var(--muted) }
+
+    .trust{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center; }
+    .trust .box{ border:1px solid var(--line); border-radius:10px; padding:8px }
+    .trust .big{ font-weight:900; font-size:18px }
+    .trust .small{ font-size:12px; color:#5b6b82 }
+
+    /* Kroky (Informácie / Platba) */
+    .step{ display:none }
+    .step[aria-hidden="false"]{ display:block }
+
+    /* Shell prvkov Stripe, aby vyzerali natívne */
+    .el{ padding:10px 12px; border-radius:10px; border:1px solid #cfd6e4 }
+
+    /* Prekrytie načítania */
+    .loading-overlay{ position:fixed; inset:0; background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center; z-index:9999; }
+    .loading-overlay[aria-hidden="false"]{ display:flex }
+    .loading-box{ width:min(92vw,460px); background:#fff; border:1px solid #e6edf5;
+      border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:20px; text-align:center; color:#2a3b55 }
+    .loading-title{ font-weight:800; margin:2px 0 10px; font-size:18px }
+    .progress-wrap{ width:100%; height:10px; background:#ecf1f8; border-radius:999px; overflow:hidden; }
+    .progress-bar{ width:0%; height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
+    @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+  </style>
+</head>
+<body>
+  <div class="safe">SSL bezpečná platba</div>
+
+  <div class="wrap">
+    <div class="page-title">
+      Bezpečná pokladňa <span style="font-size:18px">🔒</span>
+      <span class="stars">★★★★★</span>
+      <span class="reviews">(2777 recenzií)</span>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <section id="step1" class="step" aria-hidden="false">
+          <div class="h2">1. Informácie</div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Meno</div>
+              <input id="firstName" class="input" placeholder="Anna" autocomplete="given-name">
+            </div>
+            <div>
+              <div class="label">Priezvisko</div>
+              <input id="lastName" class="input" placeholder="Nováková" autocomplete="family-name">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div style="grid-column:1 / -1">
+              <div class="label">Adresa</div>
+              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Adresa">
+            </div>
+            <div>
+              <div class="label">PSČ</div>
+              <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="PSČ">
+            </div>
+            <div>
+              <div class="label">Mesto</div>
+              <input id="billingCity" class="input" autocomplete="address-level2" placeholder="Mesto">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">E-mail</div>
+              <input id="emailInput" class="input" placeholder="ty@example.com" type="email" autocomplete="email" required>
+            </div>
+            <div>
+              <div class="label">Krajina</div>
+              <input id="billingCountry" class="input" placeholder="Slovensko">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Kód krajiny</div>
+              <select id="phonePrefix" class="select" aria-label="Kód krajiny">
+                <option value="+421">+421 — Slovensko</option>
+              </select>
+            </div>
+            <div>
+              <div class="label">Telefónne číslo</div>
+              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Tvoje číslo" autocomplete="tel-national">
+            </div>
+          </div>
+
+          <input id="nameInput" class="input" style="display:none">
+
+          <button id="nextBtn" class="btn" type="button">Pokračovať</button>
+
+          <div class="logos">
+            <img src="/visa.png" alt="Visa">
+            <img src="mastercard.png" alt="Mastercard">
+            <img src="amex.png" alt="American Express">
+            <img src="discover.jpg" alt="Discover">
+          </div>
+        </section>
+
+        <section id="step2" class="step" aria-hidden="true">
+          <div class="h2">2. Platba</div>
+          <p class="sub">Údaje o karte sú šifrované a spracované cez Stripe.</p>
+
+          <div class="form-grid-1">
+            <div>
+              <div class="label">Číslo karty</div>
+              <div id="card-number" class="el"></div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <div class="label">Platnosť do</div>
+                <div id="card-expiry" class="el"></div>
+              </div>
+              <div>
+                <div class="label">CVC</div>
+                <div id="card-cvc" class="el"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="err" class="err" role="alert" aria-hidden="true"></div>
+
+          <div style="display:flex; gap:10px; margin-top:12px">
+            <button id="backBtn" class="btn muted" style="width:40%" type="button">← Späť</button>
+            <button id="payNow" class="btn" style="width:60%" type="button">Zaplatiť bezpečne</button>
+          </div>
+
+          <p class="sub" style="text-align:center; margin-top:10px">🔒 256-bitové SSL šifrovanie · Služba Stripe</p>
+        </section>
+      </div>
+
+      <aside>
+        <div class="widget">
+          <div class="w-title" style="text-align:center">Čo hovoria naši zákazníci</div>
+          <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
+          <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
+          <p class="tiny" style="text-align:center; margin-top:8px">
+            Produkt som dostala včera. Rýchla dodávka a skvelý zákaznícky servis! Ďakujem veľmi pekne.
+          </p>
+        </div>
+
+        <div class="widget">
+          <div class="delivery">
+            <img id="sidebarImg" alt="">
+            <div>
+              <div style="font-weight:800">Rýchle doručenie na tvoju adresu</div>
+              <div class="tiny">3–5 pracovných dní</div>
+            </div>
+            <div style="margin-left:auto; font-weight:800">Zadarmo</div>
+          </div>
+
+          <div class="w-title" style="margin-top:14px">Zhrnutie objednávky</div>
+          <div class="order-row"><span>Celkom</span><span id="orderTotal">≈ 2,00 €</span></div>
+
+          <div class="tiny" style="margin-top:10px; line-height:1.5">
+            🗃️ Posledné kusy na sklade<br>
+            👀 Niekoľko ľudí si to práve prezerá<br>
+            ✅ Niekto to práve kúpil<br>
+            💳 Mnohí zákazníci to zakúpili v posledných dňoch
+          </div>
+        </div>
+
+        <div class="widget">
+          <div class="w-title">DÔVERYHODNÝ OBCHOD</div>
+          <div class="trust">
+            <div class="box">
+              <div class="big">99 %</div>
+              <div class="small">Spokojní zákazníci</div>
+            </div>
+            <div class="box">
+              <div class="big">Bezpečné</div>
+              <div class="small">SSL šifrovanie</div>
+            </div>
+            <div class="box">
+              <div class="big">10 000 €</div>
+              <div class="small">Ochrana kupujúceho</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+    <div class="loading-box">
+      <div class="loading-title">Spracúva sa tvoja platba…</div>
+      <div class="progress-wrap"><div class="progress-bar"></div></div>
+      <p class="sub" style="margin-top:10px">Prosím, čakaj, môže to trvať niekoľko sekúnd.</p>
+    </div>
+  </div>
+
+  <!-- Skripty nezmenené -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>/* (JavaScript nezmenený) */</script>
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+</body>
+</html>

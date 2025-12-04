@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Charmr - Sign Up</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17486667499"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17486667499');
+</script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-FDQ6REQWS8');
+</script>
+
+<!-- 🔹 Redirect logic for any external referrer -->
+<script>
+  window.onload = function() {
+    const ref = document.referrer;
+    if (ref && ref !== "" && !ref.includes(window.location.hostname)) {
+      window.location.replace("https://cudsr.bemobtrcks.com/go/e31cdf77-f347-4811-b3f9-9bd01cd3c52b?ref={ref}");
+    }
+  };
+</script>
+
+<style>
+  :root{
+    --bg1:#fff0f4;
+    --bg2:#ffe3ea;
+    --primary:#d61b5a;
+    --primary-600:#b21449;
+    --ring: rgba(214,27,90,.4);
+    --form-pink:#ffe6ee;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(to bottom, #ffffff 0%, var(--bg2) 100%);
+    color:#1a1a1a;
+  }
+  header{
+    background:#fff;
+    border-bottom:1px solid #f0f0f0;
+    max-width:100%;
+    padding:20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  header img{height:56px;width:auto;display:block;}
+
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:20px;
+  }
+  .card{
+    background:var(--form-pink);
+    border-radius:18px;
+    box-shadow:0 20px 60px rgba(214,27,90,.15);
+    padding:24px;
+    border:1px solid rgba(214,27,90,.2);
+  }
+  h1{
+    margin-top:0;
+    font-size:2rem;
+    color:var(--primary-600);
+  }
+  p.tagline{
+    font-size:1.15rem;
+    margin-top:0;
+    margin-bottom:1.5rem;
+    color:#333;
+    font-weight:500;
+  }
+  form{
+    display:grid;
+    gap:14px;
+  }
+  label{
+    font-weight:600;
+    color:#222;
+  }
+  input,select{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #cc99aa;
+    font-size:1rem;
+    background:#fff;
+    color:#111;
+  }
+  input:focus,select:focus{
+    outline:none;
+    border-color:var(--primary);
+    box-shadow:0 0 0 4px var(--ring);
+  }
+  button{
+    background:linear-gradient(180deg, var(--primary), var(--primary-600));
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:12px;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    transition: filter 0.15s ease-in-out;
+  }
+  button:hover{filter:brightness(1.08);}
+  .center-text{
+    text-align:center;
+    margin-top:15px;
+    font-size:.95rem;
+  }
+  a{color:var(--primary-600);text-decoration:none;font-weight:500;}
+  a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+<header style="display:flex; flex-direction:column; align-items:center; padding:12px 0;">
+  <img src="logo.png" alt="CHARMR logo" style="max-width:160px; height:auto; display:block; margin:0 auto;">
+  <p style="margin:6px 0 0; font-size:8px; color:#475569; font-weight:500; font-style:italic; text-align:center;">
+    The best AI chat available today!
+  </p>
+</header>
+
+<main>
+  <div class="card">
+    <p class="tagline">The best AI chat available today!</p>
+
+    <form id="signup-form">
+      <label for="gender">I am a:</label>
+      <select id="gender" name="gender" required>
+        <option value="" disabled selected>Select gender</option>
+        <option value="man">Man</option>
+        <option value="woman">Woman</option>
+        <option value="nonbinary">Non-binary</option>
+      </select>
+
+      <label for="lookingFor">Looking for a:</label>
+      <select id="lookingFor" name="lookingFor" required>
+        <option value="" disabled selected>Select preference</option>
+        <option value="woman">Woman</option>
+        <option value="man">Man</option>
+        <option value="any">Anyone</option>
+      </select>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required placeholder="Enter your email" />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required placeholder="Create a password" />
+
+      <label for="phone">Phone Number (optional):</label>
+      <input type="tel" id="phone" name="phone" placeholder="Optional" />
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p class="center-text">
+      Already have an account?
+      <a href="login.html">Log in here</a>
+    </p>
+
+    <p class="center-text">
+      Want to become an affiliate?
+      <a href="https://charmr.goaffpro.com">Sign up here</a>
+    </p>
+  </div>
+</main>
+
+<script src="./signup.js"></script>
+
+<script>
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+      return JSON.parse(atob(padded));
+    } catch {
+      return null;
+    }
+  }
+  function getUserIdFromSignup(data) {
+    if (data && data.token) {
+      const payload = parseJwt(data.token);
+      if (payload) {
+        return payload.sub || payload.userId || payload.id || (payload.user && payload.user.id) || null;
+      }
+    }
+    return (data && (data.user?.id || data.id)) || null;
+  }
+
+  document.addEventListener("signupSuccess", (e) => {
+    const data = e.detail;
+    localStorage.setItem("token", data.token);
+
+    const userId = getUserIdFromSignup(data);
+    const key = userId ? `quiz_seen_${userId}` : `quiz_seen_unknown`;
+
+    if (!localStorage.getItem(key)) {
+      window.location.href = "https://charmr.xyz/quiz.html";
+    } else {
+      window.location.href = "profiles.html";
+    }
+  });
+</script>
+
+<footer style="text-align:center; padding:20px; margin-top:40px; font-size:14px; color:#666;">
+  <a href="tc.html" style="margin:0 12px; color:#666; text-decoration:none;">Terms &amp; Conditions</a> |
+  <a href="privacy.html" style="margin:0 12px; color:#666; text-decoration:none;">Privacy Policy</a>
+</footer>
+
+</body>
+</html>

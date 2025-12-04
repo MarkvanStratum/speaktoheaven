@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Charmr.xyz — Select Your Plan</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#ffffff; --card:#151518; --text:#fff; --ring:0 0 0 1.5px rgba(255,255,255,.08) inset, 0 8px 24px rgba(0,0,0,.45);
+      --accent:#ffcc58; --accent-2:#ffd159; --accent-3:#ffb429; --payHeroW:260px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#fff}
+    .app{max-width:980px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:12px 16px 24px}
+    .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:14px 12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:#000}
+    .logo{width:22px;height:22px;display:grid;place-items:center;color:#6ee7b7;background:#2a2a2e;border-radius:8px}
+    .offer-grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media (min-width:900px){.offer-grid{grid-template-columns:1fr 1.2fr; align-items:stretch;}}
+    .offer-media{background:#0b0b0d;border-radius:18px;box-shadow:var(--ring);overflow:hidden;width:100%;max-width:var(--payHeroW);margin:0 auto;aspect-ratio:9/13}
+    .offer-media video{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+    .offer-right{display:flex;flex-direction:column;gap:10px}
+    .headline{font-size:40px;font-weight:800;margin:0;color:#ff69b4}
+    .subline{font-size:17px;color:#000;font-weight:600;margin:2px 0 8px}
+    .subhead{color:#000;font-weight:700;margin:4px 0 8px}
+    .subhead .pink{color:#ff69b4;font-weight:800}
+    .card{background:#151518;border-radius:18px;box-shadow:var(--ring);overflow:hidden;border:1px solid #26262b}
+    .plan{position:relative;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+    .plan + .plan{border-top:1px solid #222229}
+    .plan.selected{outline:2px solid var(--accent-2);background:linear-gradient(180deg,#1a1a1f,#141418)}
+    .plan .sel{position:absolute;right:12px;top:12px;width:26px;height:26px;border-radius:999px;background:linear-gradient(180deg,#ffd76b,#ffb429);color:#111;font-weight:900;line-height:26px;text-align:center}
+    .left{display:flex;flex-direction:column;gap:6px}
+    .pname{font-weight:800}
+    .micro{color:#9ea1aa;font-size:11px}
+    .pprice{display:flex;align-items:baseline;gap:8px;font-weight:800;font-size:32px}
+    .perday-label{font-size:12px;color:#d0d2d9}
+    .big-zero{font-size:46px;line-height:1}
+    .small-cents{font-size:13px;vertical-align:super}
+    .cta-wrap{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+    @media (min-width:900px){ .cta-wrap{margin-top:auto;} }
+    .row-btns{display:flex;flex-direction:column;gap:10px}
+    @media (min-width:640px){.row-btns{flex-direction:row}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:12px 20px;border:none;border-radius:14px;font-weight:800;cursor:pointer;color:#111;background:linear-gradient(180deg,#ffd76b,#ffb429)}
+    .btn.secondary{background:#1a1a1f;color:#fff}
+    .btn-xl{font-size:15px;padding:14px 20px}
+    .center{text-align:center}
+    .trust{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;color:#cfcfd6;font-weight:600}
+    .trust .dot{width:6px;height:6px;background:#2a2a31;border-radius:999px;display:inline-block}
+  </style>
+</head>
+<body>
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+  <div class="app">
+    <div class="topbar">
+      <div class="brand"><span class="logo">💎</span><span>Charmr.xyz</span></div>
+    </div>
+
+    <section id="premium" class="section active">
+      <div class="offer-grid">
+        <div class="offer-media">
+          <video src="https://charmr.xyz/video4.mp4" autoplay muted loop playsinline></video>
+        </div>
+
+        <div class="offer-right">
+          <h2 class="headline">Unlock the cleanest <span class="em">AI chat</span> Now!</h2>
+          <div class="subline">Chat with the coolest AI girls</div>
+          <div class="subhead">Get <span class="pink">LIFETIME ACCESS</span> today!</div>
+
+          <div class="card" id="plans"></div>
+
+          <div class="cta-wrap">
+            <div class="row-btns">
+              <button id="continueBtn" class="btn btn-xl full">START CHATTING NOW — <span id="perDayBadge">£20 one-time</span></button>
+              <button id="maybeLater" class="btn secondary btn-xl full">Maybe later</button>
+            </div>
+
+            <div class="center">
+              <div class="trust">
+                <span>🔒 Secure Payment</span>
+                <span class="dot"></span><span>100% Discreet Billing</span>
+                <span class="dot"></span><span>One-time purchase</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const CURRENCY = '£';
+
+    // Added the 1-month plan at £15 that links to blank-1500.html
+    const planData = [
+      {
+        key: 'one_time',
+        label: 'Lifetime Access',
+        upfront: 25.00,
+        upfrontLabel: 'one-time payment',
+        recurLabel: 'No subscription — pay once',
+        href: 'blank.html'
+      },
+      {
+        key: 'monthly_1m',
+        label: '1 Month Access',
+        upfront: 15.00,
+        upfrontLabel: '1 month access',
+        recurLabel: 'Full access for 30 days',
+        href: 'blank-1500.html'
+      }
+    ];
+
+    const plansWrap = document.getElementById('plans');
+    const continueBtn = document.getElementById('continueBtn');
+    const perDayBadge = document.getElementById('perDayBadge');
+
+    let selectedKey = 'one_time'; // default selection
+
+    function formatMoney(v){
+      return CURRENCY + (Math.round(v*100)/100).toFixed(2);
+    }
+
+    function renderPlans(){
+      plansWrap.innerHTML = '';
+      planData.forEach(p => {
+        const [pounds, cents] = formatMoney(p.upfront).replace(CURRENCY,'').split('.');
+        const row = document.createElement('div');
+        row.className = 'plan' + (p.key === selectedKey ? ' selected' : '');
+        row.setAttribute('data-key', p.key);
+        row.innerHTML = `
+          ${p.key === selectedKey ? '<div class="sel">✓</div>' : ''}
+          <div class="left">
+            <div class="pname">${p.label}</div>
+            <div class="micro">${p.recurLabel}</div>
+          </div>
+          <div class="right" style="text-align:right">
+            <div class="pprice">
+              <span>${CURRENCY}<span class="big-zero">${pounds}</span><span class="small-cents">.${cents}</span></span>
+              <span class="perday-label">${p.upfrontLabel}</span>
+            </div>
+          </div>
+        `;
+        row.addEventListener('click', () => selectPlan(p.key));
+        plansWrap.appendChild(row);
+      });
+      updateCTA();
+    }
+
+    function selectPlan(key){
+      selectedKey = key;
+      // toggle selected class + checkmark
+      Array.from(plansWrap.children).forEach(el => {
+        const k = el.getAttribute('data-key');
+        if (k === key){
+          el.classList.add('selected');
+          if (!el.querySelector('.sel')){
+            const dot = document.createElement('div');
+            dot.className = 'sel';
+            dot.textContent = '✓';
+            el.appendChild(dot);
+          }
+        } else {
+          el.classList.remove('selected');
+          const dot = el.querySelector('.sel');
+          if (dot) dot.remove();
+        }
+      });
+      updateCTA();
+    }
+
+    function updateCTA(){
+      const plan = planData.find(p => p.key === selectedKey) || planData[0];
+      perDayBadge.textContent = `${formatMoney(plan.upfront)} ${plan.upfrontLabel}`;
+      continueBtn.onclick = () => { window.location.href = plan.href; };
+    }
+
+    document.getElementById('maybeLater').addEventListener('click', ()=>{
+      window.location.href = 'profiles.html';
+    });
+
+    (function init(){
+      renderPlans();
+      // keep original badge text if needed; otherwise updateCTA covers it
+    })();
+  </script>
+</body>
+</html>

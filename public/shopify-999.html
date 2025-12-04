@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Secure Checkout</title>
+<meta name="referrer" content="no-referrer" />
+
+<!-- GTM (unchanged) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+</script>
+
+<style>
+  :root{
+    --bg:#ffffff; --muted:#5b6b82; --text:#111; --line:#e5e7eb; --card:#fff;
+    --black:#000; --pill:#fff7ea; --pill-border:#f7d9a8;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:#fafafa}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 14px 60px}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
+
+  .logo-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative}
+  .logo-center{flex:1;display:flex;justify-content:center}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
+
+  .banner{display:flex;align-items:center;gap:10px;background:var(--pill);border:1px solid var(--pill-border);
+    color:#7a4f19;border-radius:10px;padding:12px;margin-bottom:14px;font-size:14px}
+  .clock{font-weight:900;margin-left:4px}
+
+  .section{margin-top:16px}
+  .h{font-size:18px;font-weight:800;margin:0 0 10px}
+  .sub{font-size:13px;color:#6b7280}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .row-1{display:grid;grid-template-columns:1fr;gap:10px}
+  @media (max-width:640px){.row,.row-3{grid-template-columns:1fr}}
+
+  .label{font-size:13px;font-weight:700;margin:2px 0 6px;color:#334}
+  .input,.select,.el{width:100%;background:#fff;border:1px solid #cfd6e4;border-radius:10px;padding:12px;font-size:15px;outline:none}
+  .input::placeholder{color:#8aa0b6}
+
+  .select{appearance:none;background-image:linear-gradient(45deg, transparent 50%, #999 50%),linear-gradient(135deg, #999 50%, transparent 50%);
+    background-position:calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
+    background-size:6px 6px, 6px 6px;background-repeat:no-repeat;padding-right:34px}
+
+  .ship{display:flex;align-items:center;gap:10px;border:2px solid #111;border-radius:12px;padding:12px}
+  .ship .dot{display:inline-flex;width:18px;height:18px;border:2px solid #111;border-radius:50%}
+  .ship .meta{font-size:13px;color:#6b7280}
+  .ship .price{margin-left:auto;font-weight:900}
+
+  .card-box{border:1px solid #cfd6e4;border-radius:12px;padding:12px}
+  .card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .card-head .dot{display:inline-flex;width:18px;height:18px;border:2px solid #111;border-radius:50%}
+  .card-brands img{height:16px;margin-left:6px;vertical-align:middle}
+
+  .btn{width:100%;border:none;border-radius:10px;padding:14px 16px;font-weight:900;font-size:16px;background:#000;color:#fff;cursor:pointer}
+  .btn:disabled{opacity:.65;cursor:not-allowed}
+  .btn.muted{background:#f3f4f6;color:#111;border:1px solid #e5e7eb}
+
+  .badges{margin-top:16px;display:flex;gap:18px;align-items:center;justify-content:center;opacity:.95}
+  .badges img{height:22px}
+
+  .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;font-size:14px;margin-top:10px}
+  .err[aria-hidden="false"]{display:block}
+
+  .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .widget + .widget{margin-top:12px}
+  .order-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-top:1px dashed #e6eaf1}
+  .order-row:first-of-type{border-top:none}
+  .delivery{display:flex;align-items:center;gap:12px;border:1px dashed #d9e2ef;background:#f7fbff;padding:12px;border-radius:10px}
+  .delivery img{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid #e6eaf1;background:#fff}
+
+  .minihead{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+  .minihead img{width:48px;height:48px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover}
+  .title-clip{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .step{display:none}
+  .step[aria-hidden="false"]{display:block}
+
+  .el{padding:10px 12px;border-radius:10px;border:1px solid #cfd6e4}
+
+  /* Processing overlay (from working page) */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100}
+  .overlay[aria-hidden="false"]{display:flex}
+  .box{background:#fff;border-radius:16px;max-width:520px;width:92vw;padding:22px;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3)}
+  .bar{height:10px;width:100%;background:#eef2f5;border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#7aa3ff,#2dd4bf);animation:load 2.2s ease-in-out infinite;border-radius:inherit}
+  @keyframes load{0%{width:0%}60%{width:85%}100%{width:100%}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo-bar">
+      <div class="logo-center">
+        <img id="logoImg" alt="Logo" style="height:56px;display:none" loading="lazy">
+      </div>
+      <div style="margin-left:auto;opacity:.85">🛒</div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="card">
+        <div class="banner"><span>⚠️</span> Some items in your cart are almost out of stock, hurry up! Your cart is reserved for <span class="clock" id="reserveClock">09:57</span></div>
+
+        <!-- STEP 1 -->
+        <section id="step1" class="step" aria-hidden="false">
+          <div class="section">
+            <div class="h">Contact</div>
+            <div class="row-1">
+              <div>
+                <div class="label">Email</div>
+                <input id="emailInput" class="input" type="email" placeholder="you@example.com" autocomplete="email" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="h">Delivery</div>
+            <div class="row">
+              <div>
+                <div class="label">Country</div>
+                <!-- keep your select, logic will map directly -->
+                <select id="billingCountry" class="select">
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="AU">Australia</option>
+                  <option value="NZ">New Zealand</option>
+                </select>
+              </div>
+              <div>
+                <div class="label">Phone number</div>
+                <div class="row">
+                  <select id="phonePrefix" class="select" aria-label="Country calling code"></select>
+                  <input id="phoneNumber" class="input" inputmode="tel" placeholder="Phone number" autocomplete="tel-national">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <div class="label">First name</div>
+                <input id="firstName" class="input" placeholder="First name" autocomplete="given-name">
+              </div>
+              <div>
+                <div class="label">Last name</div>
+                <input id="lastName" class="input" placeholder="Last name" autocomplete="family-name">
+              </div>
+            </div>
+
+            <div class="row-1">
+              <div>
+                <div class="label">Address</div>
+                <input id="billingStreet" class="input" placeholder="Address" autocomplete="address-line1">
+              </div>
+              <div>
+                <div class="label">Apartment, suite, etc. (Optional)</div>
+                <input id="billingStreet2" class="input" placeholder="">
+              </div>
+            </div>
+
+            <div class="row-3">
+              <div>
+                <div class="label">Town</div>
+                <input id="billingCity" class="input" placeholder="Town / City" autocomplete="address-level2">
+              </div>
+              <div>
+                <div class="label">State *</div>
+                <input id="billingState" class="input" placeholder="State">
+              </div>
+              <div>
+                <div class="label">ZIP Code</div>
+                <input id="billingPostcode" class="input" placeholder="ZIP Code" autocomplete="postal-code">
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="h">Shipping method</div>
+            <label class="ship">
+              <span class="dot"></span>
+              <div>
+                <div><strong>Free</strong></div>
+                <div class="meta">3 to 5 business days</div>
+              </div>
+              <div class="price">0$</div>
+            </label>
+          </div>
+
+          <!-- Hidden full name -->
+          <input id="nameInput" class="input" style="display:none">
+
+          <div class="section" style="margin-top:16px">
+            <button id="nextBtn" class="btn" type="button">Continue to payment</button>
+          </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section id="step2" class="step" aria-hidden="true">
+          <div class="section">
+            <div class="h">Payment</div>
+            <div class="sub">All transactions are secure and encrypted</div>
+          </div>
+
+          <!-- Apple / Google Pay -->
+          <div id="prb-wrap" style="margin:10px 0 14px; display:none">
+            <div id="payment-request-button"></div>
+            <div class="sub" style="margin-top:6px">Or pay with card</div>
+          </div>
+
+          <div class="card-box">
+            <div class="card-head">
+              <span class="dot"></span>
+              <strong>Card</strong>
+              <div class="card-brands" style="margin-left:auto;opacity:.9">
+                <img src="mastercard.png" alt="MC">
+                <img src="visa.png" alt="Visa">
+                <img src="amex.png" alt="Amex">
+                <img src="discover.jpg" alt="Discover">
+              </div>
+            </div>
+
+            <div class="row-1">
+              <div class="label">Card number</div>
+              <div id="card-number" class="el"></div>
+            </div>
+            <div class="row">
+              <div>
+                <div class="label">Expiration date</div>
+                <div id="card-expiry" class="el"></div>
+              </div>
+              <div>
+                <div class="label">Security Code</div>
+                <div id="card-cvc" class="el"></div>
+              </div>
+            </div>
+            <div class="row-1">
+              <div class="label">Name on card</div>
+              <input id="cardNameMirror" class="input" placeholder="Name on card" readonly>
+            </div>
+          </div>
+
+          <div id="err" class="err" role="alert" aria-hidden="true"></div>
+
+          <div class="section" style="margin-top:16px;display:flex;gap:10px">
+            <button id="backBtn" class="btn muted" type="button" style="width:40%">← Back</button>
+            <button id="payNow" class="btn" type="button" style="width:60%">Pay now</button>
+          </div>
+
+          <div class="badges">
+            <img src="mcafee.png" alt="McAfee">
+            <img src="norton.png" alt="Norton">
+            <img src="truste.png" alt="TRUSTe">
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT: SIDEBAR -->
+      <aside>
+        <div class="widget">
+          <!-- Dynamic product header (title + image + price) -->
+          <div class="minihead">
+            <img id="productImg" alt="">
+            <div class="title-clip" id="productTitle">Your Item</div>
+            <div style="font-weight:900" id="priceTop">$9.95</div>
+          </div>
+
+          <div class="order-row"><span>Subtotal</span><span id="subtotal">$9.95</span></div>
+          <div class="order-row"><span>Delivery</span><span>$0.00</span></div>
+          <div class="order-row"><span>Discount</span><span id="discount">$0.00</span></div>
+          <div class="order-row" style="font-weight:900"><span>Total</span><span id="orderTotal">$9.95</span></div>
+
+          <div class="delivery" style="margin-top:12px">
+            <img id="sidebarImg2" alt="">
+            <div>
+              <div style="font-weight:800">Fast delivery to your address</div>
+              <div class="sub">3–5 business days</div>
+            </div>
+            <div style="margin-left:auto;font-weight:800">Free</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Processing overlay -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <h3>Processing your payment…</h3>
+      <div class="bar"><span></span></div>
+      <p class="sub" style="margin-top:8px">Please wait, this may take a few seconds.</p>
+    </div>
+  </div>
+
+  <!-- Stripe -->
+  <script src="https://js.stripe.com/v3"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // ====== CONSTANTS / CONFIG ======
+      const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+      // Updated to use Render backend:
+      const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
+
+      // Capture affiliate params for Stripe metadata
+      const urlParams  = new URLSearchParams(window.location.search);
+      const AFF_REF    = urlParams.get('ref') || '';
+      const AFF_SOURCE = urlParams.get('source') || '';
+
+      // ====== DOM ======
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const nextBtn = document.getElementById('nextBtn');
+      const backBtn = document.getElementById('backBtn');
+      const payNow = document.getElementById('payNow');
+      const errBox = document.getElementById('err');
+
+      const emailInput = document.getElementById('emailInput');
+      const firstName = document.getElementById('firstName');
+      const lastName  = document.getElementById('lastName');
+      const nameInput = document.getElementById('nameInput');
+      const cardNameMirror = document.getElementById('cardNameMirror');
+
+      const phonePrefix = document.getElementById('phonePrefix');
+      const phoneNumber = document.getElementById('phoneNumber');
+
+      const billingStreet = document.getElementById('billingStreet');
+      const billingStreet2= document.getElementById('billingStreet2');
+      const billingCity   = document.getElementById('billingCity');
+      const billingState  = document.getElementById('billingState');
+      const billingCountrySel = document.getElementById('billingCountry');
+      const billingPost   = document.getElementById('billingPostcode');
+
+      const productTitle = document.getElementById('productTitle');
+      const productImg   = document.getElementById('productImg');
+      const sidebarImg2  = document.getElementById('sidebarImg2');
+
+      const subtotal = document.getElementById('subtotal');
+      const orderTotal = document.getElementById('orderTotal');
+      const priceTop = document.getElementById('priceTop');
+
+      const overlay = document.getElementById('overlay');
+      const showLoading = () => overlay.setAttribute('aria-hidden','false');
+      const hideLoading = () => overlay.setAttribute('aria-hidden','true');
+
+      // ====== Price labels ======
+      const PRICE_TEXT = '$9.95';
+      try { subtotal.textContent = PRICE_TEXT; orderTotal.textContent = PRICE_TEXT; priceTop.textContent = PRICE_TEXT; } catch(e){}
+
+      // ====== Countdown ======
+      (function(){
+        const el = document.getElementById('reserveClock'); if(!el) return;
+        let s = 9*60+57;
+        setInterval(()=>{ if(s<=0) return; s--; const m=String(Math.floor(s/60)).padStart(2,'0'); const ss=String(s%60).padStart(2,'0'); el.textContent=`${m}:${ss}`; },1000);
+      })();
+
+      // ====== Helpers ======
+      function show(o){ o?.setAttribute('aria-hidden','false'); }
+      function hide(o){ o?.setAttribute('aria-hidden','true'); }
+
+      // ====== Dynamic title / image / logo via URL ======
+      (function hydrateTitleAndImage(){
+        const qs = new URLSearchParams(window.location.search);
+        const title = qs.get('sub1') || qs.get('title') || qs.get('t') || '';
+        const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
+        if (title) productTitle.textContent = decodeURIComponent(title);
+        if (imgUrlRaw){
+          try{
+            const decoded = decodeURIComponent(imgUrlRaw);
+            if(/^https?:\/\//i.test(decoded)){
+              productImg.src = decoded;
+              sidebarImg2.src = decoded;
+            }
+          }catch(e){}
+        }
+      })();
+
+      (function hydrateLogoFromURL(){
+        try{
+          const qs = new URLSearchParams(window.location.search);
+          const logoUrlRaw = qs.get('sub11') || '';
+          if(!logoUrlRaw) return;
+          const decoded = decodeURIComponent(logoUrlRaw);
+          if(/^https?:\/\//i.test(decoded)){
+            const logoImg = document.getElementById('logoImg');
+            logoImg.src = decoded;
+            logoImg.style.display = 'block';
+          }
+        }catch(e){}
+      })();
+
+      // ====== Country + Calling Code ======
+      const COUNTRY_CHOICES = { US:'United States', CA:'Canada', AU:'Australia', NZ:'New Zealand' };
+      const CALLING_CODES   = { US:'+1',           CA:'+1',      AU:'+61',       NZ:'+64' };
+
+      function populatePrefixOptions(defaultISO){
+        phonePrefix.innerHTML = '';
+        ['US','CA','AU','NZ'].forEach(cc=>{
+          phonePrefix.append(new Option(`${CALLING_CODES[cc]} — ${COUNTRY_CHOICES[cc]}`, CALLING_CODES[cc]));
+        });
+        if (defaultISO && CALLING_CODES[defaultISO]) phonePrefix.value = CALLING_CODES[defaultISO];
+      }
+
+      // IP-based default
+      (async function selectCountryFromIP(){
+        const withTimeout=(ms,p)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+        const guessISO=()=>{ const cc=(navigator.language||'').split('-')[1]; return (['US','CA','AU','NZ'].includes((cc||'').toUpperCase())) ? cc.toUpperCase() : 'US'; };
+        let iso='US';
+        try{
+          const try1=()=>withTimeout(2000, fetch('https://ipapi.co/json/').then(r=>r.json()));
+          const try2=()=>withTimeout(2000, fetch('https://ipwho.is/?fields=country_code').then(r=>r.json()));
+          const try3=()=>withTimeout(2000, fetch('https://ipinfo.io/json').then(r=>r.json()));
+          let d=null; try{ d=await try1(); }catch{} if(!d||d.error){ try{ d=await try2(); }catch{} } if(!d||d.error){ try{ d=await try3(); }catch{} }
+          const code = (d && (d.country_code || d.countryCode)) ? String(d.country_code || d.countryCode).toUpperCase() : null;
+          iso = (code && COUNTRY_CHOICES[code]) ? code : guessISO();
+        }catch{ iso = guessISO(); }
+
+        if (COUNTRY_CHOICES[iso]) billingCountrySel.value = iso;
+        populatePrefixOptions(iso);
+      })();
+
+      billingCountrySel.addEventListener('change', ()=>{
+        const iso = billingCountrySel.value;
+        if (CALLING_CODES[iso]) phonePrefix.value = CALLING_CODES[iso];
+      });
+
+      // ====== URL Prefills ======
+      (function applyPrefills(){
+        const qs = new URLSearchParams(window.location.search);
+        const map = {
+          first:qs.get('sub3'), last:qs.get('sub4'), street:qs.get('sub5'),
+          post:qs.get('sub6'), city:qs.get('sub7'), countryTxt:qs.get('sub8'),
+          email:qs.get('sub9'), phone:qs.get('sub10')
+        };
+        if(map.first) firstName.value = decodeURIComponent(map.first);
+        if(map.last)  lastName.value  = decodeURIComponent(map.last);
+        if(map.email) emailInput.value= decodeURIComponent(map.email);
+        if(map.street)billingStreet.value = decodeURIComponent(map.street);
+        if(map.city)  billingCity.value = decodeURIComponent(map.city);
+        if(map.post)  billingPost.value = decodeURIComponent(map.post);
+
+        if(map.countryTxt){
+          const val = decodeURIComponent(map.countryTxt).toUpperCase().slice(0,2);
+          if (COUNTRY_CHOICES[val]) { billingCountrySel.value = val; phonePrefix.value = CALLING_CODES[val]; }
+        }
+
+        const rawPhone = (map.phone||'').trim();
+        if(rawPhone){
+          if(rawPhone.startsWith('+')){
+            const digits = rawPhone.replace(/[^\d]/g,'');
+            const m = digits.match(/^(\d{1,4})(\d{4,15})$/);
+            if(m){
+              const lead = '+'+m[1];
+              const isoFromCode = Object.keys(CALLING_CODES).find(k=>CALLING_CODES[k]===lead);
+              if(isoFromCode){ billingCountrySel.value = isoFromCode; phonePrefix.value = lead; }
+              phoneNumber.value = m[2];
+            }else{
+              phoneNumber.value = digits;
+            }
+          }else{
+            phoneNumber.value = rawPhone.replace(/[^\d]/g,'');
+          }
+        }
+      })();
+
+      // ====== ADSCURB mount/unmount ======
+      const ADSCURB_SRC = "https://adscurb.co/tag/analytics.js";
+      function mountAdscurb(){
+        if (document.getElementById('adscurb-sdk')) return;
+        const s = document.createElement('script');
+        s.src = ADSCURB_SRC;
+        s.async = true;
+        s.id = 'adscurb-sdk';
+        document.head.appendChild(s);
+      }
+      function unmountAdscurb(){
+        const s = document.getElementById('adscurb-sdk');
+        if (s) s.remove();
+      }
+      if (step1 && step1.getAttribute('aria-hidden') === 'false'){ mountAdscurb(); }
+
+      // ====== Step nav ======
+      nextBtn?.addEventListener('click', ()=>{
+        unmountAdscurb();
+        nameInput.value = [firstName.value||'', lastName.value||''].join(' ').trim();
+        cardNameMirror.value = nameInput.value || '';
+        hide(step1); show(step2);
+      });
+      backBtn?.addEventListener('click', ()=>{ mountAdscurb(); hide(step2); show(step1); });
+
+      // ====== Stripe (Payment Request + Card) ======
+      let stripe, elements, cardNumber, cardExpiry, cardCvc;
+      try{
+        if(window.Stripe){
+          stripe = Stripe(PUBLISHABLE_KEY);
+          elements = stripe.elements();
+
+          // Payment Request Button
+          try{
+            const prbWrap = document.getElementById('prb-wrap');
+            const paymentRequest = stripe.paymentRequest({
+              country: billingCountrySel?.value || 'US',
+              currency: 'usd',
+              total: { label: 'Total', amount: 995 },
+              requestPayerName: true,
+              requestPayerEmail: true,
+              requestPayerPhone: true
+            });
+            paymentRequest.canMakePayment().then(function(result){
+              if (result) {
+                const prButton = elements.create('paymentRequestButton', { paymentRequest });
+                prButton.mount('#payment-request-button');
+                prbWrap.style.display = 'block';
+              }
+            });
+
+            paymentRequest.on('paymentmethod', async function(ev){
+              showLoading();
+              try{
+                const name = (nameInput?.value || '').trim() || ([firstName?.value||'', lastName?.value||''].join(' ').trim() || undefined);
+                const email = emailInput?.value.trim() || ev.payerEmail || undefined;
+                const fullPhone = (phoneNumber?.value ? (phonePrefix?.value + phoneNumber.value.replace(/[^0-9]/g,'')) : ev.payerPhone);
+
+                const address = {
+                  line1: (billingStreet?.value||'').trim() || undefined,
+                  line2: (billingStreet2?.value||'').trim() || undefined,
+                  city: (billingCity?.value||'').trim() || undefined,
+                  state: (billingState?.value||'').trim() || undefined,
+                  country: billingCountrySel?.value || undefined,
+                  postal_code: (billingPost?.value||'').trim() || undefined
+                };
+
+                const resp = await fetch(SUBSCRIBE_URL,{
+                  method:'POST',
+                  headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({
+                    paymentMethodId: ev.paymentMethod.id,
+                    name,
+                    email,
+                    phone: fullPhone,
+                    address,
+                    metadata: {
+                      aff_ref: AFF_REF || undefined,
+                      aff_source: AFF_SOURCE || undefined
+                    }
+                  })
+                });
+                const data = await resp.json();
+                if(!data.clientSecret){ ev.complete('fail'); throw new Error(data.error || 'Payment failed to start'); }
+
+                const conf = await stripe.confirmCardPayment(data.clientSecret, { payment_method: ev.paymentMethod.id });
+                if(conf.error){ ev.complete('fail'); throw conf.error; }
+                if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')){ ev.complete('fail'); throw new Error('Payment not completed'); }
+
+                ev.complete('success');
+
+                (function(){
+                  const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+                  const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+                  const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+                  try{
+                    const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+                    const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
+                    if (sub) {
+                      qp.set('sub_id',sub); qp.set('subid',sub); qp.set('aff_sub',sub);
+                      qp.set('click_id',sub); qp.set('cid',sub); qp.set('tid',sub);
+                    }
+                  }catch(e){}
+                  const sep = TRACKER_URL.includes('?') ? '&' : '?';
+                  window.location.href = TRACKER_URL + sep + qp.toString();
+                })();
+
+              }catch(err){
+                if(errBox){ errBox.textContent = err.message || 'Something went wrong.'; errBox.setAttribute('aria-hidden','false'); }
+                ev.complete('fail');
+                hideLoading();
+              }
+            });
+          }catch(e){ console.warn('Payment Request init skipped:', e); }
+
+          // Card elements
+          cardNumber = elements.create('cardNumber');
+          cardExpiry = elements.create('cardExpiry');
+          cardCvc    = elements.create('cardCvc');
+          cardNumber.mount('#card-number');
+          cardExpiry.mount('#card-expiry');
+          cardCvc.mount('#card-cvc');
+        }
+      }catch(e){ console.warn('Stripe init skipped:', e); }
+
+      // ====== Pay button flow ======
+      payNow?.addEventListener('click', async ()=>{
+        if(!stripe){ alert('Payment temporarily unavailable. Please try again.'); return; }
+        if(errBox){ errBox.textContent=''; errBox.setAttribute('aria-hidden','true'); }
+        showLoading();
+
+        const name = (nameInput.value || [firstName.value||'', lastName.value||''].join(' ').trim()).trim();
+        const email = emailInput.value.trim();
+        const fullPhone = phoneNumber.value ? (phonePrefix.value + phoneNumber.value.replace(/[^0-9]/g,'')) : undefined;
+
+        const address = {
+          line1: (billingStreet.value||'').trim() || undefined,
+          line2: (billingStreet2.value||'').trim() || undefined,
+          city: (billingCity.value||'').trim() || undefined,
+          state: (billingState.value||'').trim() || undefined,
+          country: (billingCountrySel.value) || undefined,
+          postal_code: (billingPost.value||'').trim() || undefined
+        };
+
+        try{
+          const pmRes = await stripe.createPaymentMethod({
+            type:'card',
+            card:cardNumber,
+            billing_details:{ name:name||undefined, email:email||undefined, phone:fullPhone, address }
+          });
+          if(pmRes.error) throw new Error(pmRes.error.message);
+
+          const resp = await fetch(SUBSCRIBE_URL,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              paymentMethodId: pmRes.paymentMethod.id,
+              name,
+              email,
+              phone: fullPhone,
+              address,
+              metadata: {
+                aff_ref: AFF_REF || undefined,
+                aff_source: AFF_SOURCE || undefined
+              }
+            })
+          });
+          const data = await resp.json();
+          if(!data.clientSecret) throw new Error(data.error || 'Payment failed to start');
+
+          const conf = await stripe.confirmCardPayment(data.clientSecret);
+          if(conf.error) throw new Error(conf.error.message);
+          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Payment not completed');
+
+          (function(){
+            const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+            const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+            const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+            try{
+              const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+              const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
+              if (sub) { qp.set('sub_id',sub); qp.set('subid',sub); qp.set('aff_sub',sub); qp.set('click_id',sub); qp.set('cid',sub); qp.set('tid',sub); }
+            }catch(e){}
+            const sep = TRACKER_URL.includes('?') ? '&' : '?';
+            window.location.href = TRACKER_URL + sep + qp.toString();
+          })();
+
+        }catch(err){
+          if(errBox){ errBox.textContent = err.message || 'Something went wrong.'; errBox.setAttribute('aria-hidden','false'); }
+          hideLoading();
+          window.location.href = 'https://www.united-defence-shield.com/7GQSPJ/27CC71Q';
+        }
+      });
+    });
+  </script>
+
+  <!-- GoAffPro loader (tracks pageviews the same way as the working page) -->
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript"></script>
+</body>
+</html>
