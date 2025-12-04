@@ -1,17 +1,19 @@
 {
-  "name": "thenewholybible-server",
+  "name": "speaktoheaven",
   "version": "1.0.0",
+  "description": "SpeakToHeaven religious AI chat server",
+  "type": "module",
   "main": "server.js",
-  "license": "MIT",
   "scripts": {
     "start": "node server.js"
   },
-  "engines": {
-    "node": ">=18"
-  },
   "dependencies": {
     "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
     "stripe": "^14.0.0",
-    "cors": "^2.8.5"
+    "openai": "^4.0.0"
   }
 }
