@@ -1,340 +1,347 @@
 // ================================
-// SpeakToHeaven – Lean Server.js
+//              IMPORTS
 // ================================
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const supabase = require("./utils/supabase");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const { OpenAI } = require("openai"); // OpenRouter uses the OpenAI client
+const { addAiMessageDrip } = require("./utils/aiDrip");
+const { appendAiOutput, buildLogs } = require("./utils/logs");
 
-import express from "express";
-import cors from "cors";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import pkg from "pg";
-import crypto from "crypto";
-import path from "path";
-import { fileURLToPath } from "url";
-import Stripe from "stripe";
-import OpenAI from "openai";
-
-// ------------------------------
-// BASIC INITIAL SETUP
-// ------------------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+// ================================
+//          SERVER INIT
+// ================================
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 10000;
-const SECRET_KEY = process.env.SECRET_KEY || "your-secret";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-const { Pool } = pkg;
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+const openai = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
 });
 
-// ------------------------------
-// DATABASE INIT
-// ------------------------------
-(async () => {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      gender TEXT,
-      lookingfor TEXT,
-      phone TEXT,
-      credits INT DEFAULT 10,
-      lifetime BOOLEAN DEFAULT false,
-      access_expires TIMESTAMP,
-      reset_token TEXT,
-      reset_token_expires TIMESTAMP
-    );
-  `);
+// ================================
+//       BIBLICAL SYSTEM PROMPT
+// ================================
+function buildBiblicalSystemPrompt(characterName) {
+  return `
+You are an AI representation inspired by the biblical figure: ${characterName}.
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS messages (
-      id SERIAL PRIMARY KEY,
-      user_id INT REFERENCES users(id) ON DELETE CASCADE,
-      profile_id INT NOT NULL,
-      from_user BOOLEAN NOT NULL,
-      text TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-  `);
+GUIDELINES:
+- You are NOT the real ${characterName}, nor a deity. You are an AI roleplay assistant.
+- You must ALWAYS acknowledge you are an AI representation if asked.
+- Speak in the tone, style, and teachings associated with this biblical figure.
+- Reference relevant scripture when appropriate.
+- Do NOT claim divine authority.
+- Do NOT give prophecy or supernatural commands.
+- Use the entire Bible (Old & New Testament) as your stylistic reference.
+- Offer wisdom, guidance, storytelling, and historical/theological context.
 
-  console.log("✅ Database ready");
-})();
+Your goal is to provide an immersive but safe biblical roleplay experience.
+  `;
+}
 
-// ------------------------------
-// 20 BIBLICAL PROFILES
-// ------------------------------
-const profiles = [
-  { id: 1, name: "God", image: "/pics/1.png", description: "The Almighty. Speaks with ultimate authority, wisdom, and perfect love." },
-  { id: 2, name: "Jesus", image: "/pics/2.png", description: "Compassionate teacher. Speaks with parables, kindness, truth, and mercy." },
-  { id: 3, name: "Moses", image: "/pics/3.png", description: "Firm leader and prophet. Guides with strength, obedience, and perseverance." },
-  { id: 4, name: "Mary", image: "/pics/4.png", description: "Gentle, nurturing, full of grace. Offers comfort and calm insight." },
-  { id: 5, name: "David", image: "/pics/5.png", description: "Poetic king. Encourages with psalm-like emotional depth and courage." },
-  { id: 6, name: "Solomon", image: "/pics/6.png", description: "Master of wisdom. Speaks with clarity, proverbs, and philosophical insight." },
-  { id: 7, name: "Noah", image: "/pics/7.png", description: "Steadfast and faithful. Encourages trust during trials and storms." },
-  { id: 8, name: "Abraham", image: "/pics/8.png", description: "Fatherly and devoted. Speaks of faith, promise, and covenant." },
-  { id: 9, name: "Joseph", image: "/pics/9.png", description: "Forgiving and visionary. Helps interpret purpose behind suffering." },
-  { id: 10, name: "Samuel", image: "/pics/10.png", description: "Prophetic and direct. Offers righteous clarity and discernment." },
-  { id: 11, name: "Elijah", image: "/pics/11.png", description: "Bold prophet. Speaks with intensity, conviction, and spiritual fire." },
-  { id: 12, name: "Isaiah", image: "/pics/12.png", description: "Poetic prophet. Uses imagery of hope, redemption, and restoration." },
-  { id: 13, name: "Jeremiah", image: "/pics/13.png", description: "Honest and emotional. Offers raw truth and compassionate lament." },
-  { id: 14, name: "Ruth", image: "/pics/14.png", description: "Loyal, humble, kind. Speaks with gentleness and steadfast love." },
-  { id: 15, name: "Esther", image: "/pics/15.png", description: "Courageous queen. Encourages bravery, purpose, and divine timing." },
-  { id: 16, name: "Daniel", image: "/pics/16.png", description: "Disciplined and calm. Provides wisdom under pressure and adversity." },
-  { id: 17, name: "Paul", image: "/pics/17.png", description: "Apostolic teacher. Speaks with doctrine, exhortation, and clarity." },
-  { id: 18, name: "Peter", image: "/pics/18.png", description: "Bold and passionate. Encourages repentance, growth, and strength." },
-  { id: 19, name: "John", image: "/pics/19.png", description: "Apostle of love. Reflective, gentle, emphasizing light and truth." },
-  { id: 20, name: "Job", image: "/pics/20.png", description: "Honest about suffering. Offers deep reflection and perseverance." }
-];
+// ================================
+//          AUTH HELPERS
+// ================================
+function generateToken(user) {
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.JWT_SECRET || "TEMP_SECRET",
+    { expiresIn: "30d" }
+  );
+}
 
-// ------------------------------
-// AUTH HELPERS
-// ------------------------------
 function authenticateToken(req, res, next) {
-  const auth = req.headers["authorization"];
-  const token = auth && auth.split(" ")[1];
-  if (!token) return res.sendStatus(401);
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.sendStatus(403);
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.JWT_SECRET || "TEMP_SECRET", (err, user) => {
+    if (err) return res.status(403).json({ error: "Invalid token" });
     req.user = user;
     next();
   });
 }
 
-// ------------------------------
-// REGISTRATION
-// ------------------------------
-app.post("/api/register", async (req, res) => {
-  let { email, password, gender, lookingFor, phone } = req.body;
+// ================================
+//     AUTH: SIGNUP / LOGIN
+// ================================
+app.post("/api/signup", async (req, res) => {
+  const { email, password } = req.body;
   if (!email || !password)
-    return res.status(400).json({ error: "Email and password required" });
+    return res.status(400).json({ error: "Missing email or password" });
 
-  email = email.toLowerCase();
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("email", email)
+    .single();
 
-  try {
-    const exists = await pool.query("SELECT 1 FROM users WHERE email=$1", [email]);
-    if (exists.rows.length)
-      return res.status(400).json({ error: "User already exists" });
-
-    const hashed = await bcrypt.hash(password, 10);
-
-    await pool.query(
-      `INSERT INTO users (email, password, gender, lookingfor, phone)
-       VALUES ($1,$2,$3,$4,$5)`,
-      [email, hashed, gender, lookingFor, phone]
-    );
-
-    res.json({ ok: true, redirect: "/login.html" });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Server error" });
+  if (existingUser) {
+    return res.status(409).json({ error: "Email already registered" });
   }
+
+  const password_hash = await bcrypt.hash(password, 10);
+  const { data: newUser, error } = await supabase
+    .from("users")
+    .insert([{ email, password_hash, credits: 10 }])
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: "Signup failed" });
+
+  res.json({ token: generateToken(newUser) });
 });
 
-// ------------------------------
-// LOGIN
-// ------------------------------
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password)
+    return res.status(400).json({ error: "Missing email or password" });
 
-  try {
-    const r = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
-    if (!r.rows.length) return res.status(400).json({ error: "Invalid credentials" });
+  const { data: user } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .single();
 
-    const user = r.rows[0];
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ error: "Invalid credentials" });
+  if (!user) return res.status(404).json({ error: "User not found" });
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      SECRET_KEY,
-      { expiresIn: "7d" }
-    );
+  const valid = await bcrypt.compare(password, user.password_hash);
+  if (!valid) return res.status(401).json({ error: "Incorrect password" });
 
-    res.json({ token });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Server error" });
-  }
+  res.json({ token: generateToken(user) });
 });
 
-// ------------------------------
-// GET PROFILES
-// ------------------------------
-app.get("/api/profiles", (req, res) => {
-  res.json(profiles);
+// ================================
+//     USER INFO
+// ================================
+app.get("/api/me", authenticateToken, async (req, res) => {
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, email, credits, is_operator, stripe_customer_id")
+    .eq("id", req.user.id)
+    .single();
+
+  res.json(user);
 });
 
-// ------------------------------
-// CHAT – AI RESPONSE
-// ------------------------------
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// ================================
+//      STRIPE SUBSCRIPTIONS
+// ================================
+app.post("/api/create-checkout-session", authenticateToken, async (req, res) => {
+  const { priceId } = req.body;
+  if (!priceId) return res.status(400).json({ error: "Missing priceId" });
 
-const SYSTEM_PROMPT = `
-You are a Biblical figure. Speak in the tone, wisdom, knowledge, history, and character of that specific figure.
-Use scripture-based principles. Never claim modern doctrines. Do not act flirtatious or inappropriate.
-Your purpose is to guide, comfort, teach, correct, uplift, and lead people closer to God.
-`;
+  let { data: user } = await supabase
+    .from("users")
+    .select("stripe_customer_id")
+    .eq("id", req.user.id)
+    .single();
 
-// Premium access logic
-async function userHasAccess(userId) {
-  const r = await pool.query(
-    "SELECT lifetime, access_expires FROM users WHERE id=$1",
-    [userId]
-  );
+  let customerId = user.stripe_customer_id;
 
-  if (!r.rows.length) return false;
-
-  const u = r.rows[0];
-  if (u.lifetime) return true;
-
-  if (u.access_expires && new Date(u.access_expires) > new Date())
-    return true;
-
-  return false;
-}
-
-app.post("/api/chat", authenticateToken, async (req, res) => {
-  const userId = req.user.id;
-  const { profileId, message } = req.body;
-
-  const profile = profiles.find(p => p.id === Number(profileId));
-  if (!profile) return res.status(404).json({ error: "Profile not found" });
-
-  // Access check
-  const hasAccess = await userHasAccess(userId);
-  if (!hasAccess)
-    return res.status(403).json({ error: "PAYMENT_REQUIRED" });
-
-  try {
-    await pool.query(
-      `INSERT INTO messages (user_id, profile_id, from_user, text)
-       VALUES ($1,$2,true,$3)`,
-      [userId, profileId, message]
-    );
-
-    const history = await pool.query(
-      `SELECT from_user, text FROM messages
-       WHERE user_id=$1 AND profile_id=$2 ORDER BY created_at ASC`,
-      [userId, profileId]
-    );
-
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "system", content: `You are ${profile.name}. ${profile.description}` }
-    ];
-
-    history.rows.forEach(m =>
-      messages.push({
-        role: m.from_user ? "user" : "assistant",
-        content: m.text
-      })
-    );
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: req.user.email,
+      metadata: { userId: req.user.id },
     });
 
-    const reply = completion.choices[0].message.content;
+    customerId = customer.id;
 
-    await pool.query(
-      `INSERT INTO messages (user_id, profile_id, from_user, text)
-       VALUES ($1,$2,false,$3)`,
-      [userId, profileId, reply]
-    );
-
-    res.json({ reply });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "AI error" });
+    await supabase
+      .from("users")
+      .update({ stripe_customer_id: customerId })
+      .eq("id", req.user.id);
   }
-});
 
-// ------------------------------
-// STRIPE ONE-TIME PAYMENTS
-// ------------------------------
-async function chargeUser({ userId, amount, description }) {
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount,
-    currency: "usd",
-    metadata: { userId, description }
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: "https://aiangelica.com/bible?success=1",
+    cancel_url: "https://aiangelica.com/bible?canceled=1",
   });
 
-  return paymentIntent.client_secret;
-}
-
-// $20 — 1 month
-app.post("/api/pay/month", authenticateToken, async (req, res) => {
-  const userId = req.user.id;
-
-  const pi = await chargeUser({
-    userId,
-    amount: 2000,
-    description: "1 month access"
-  });
-
-  await pool.query(
-    `UPDATE users
-     SET access_expires = NOW() + INTERVAL '30 days'
-     WHERE id=$1`,
-    [userId]
-  );
-
-  res.json({ clientSecret: pi });
+  res.json({ url: session.url });
 });
 
-// $35 — 3 months
-app.post("/api/pay/quarter", authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+// ================================
+//         STRIPE WEBHOOK
+// ================================
+app.post(
+  "/api/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        req.headers["stripe-signature"],
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (e) {
+      return res.status(400).send(`Webhook Error: ${e.message}`);
+    }
 
-  const pi = await chargeUser({
-    userId,
-    amount: 3500,
-    description: "3 month access"
-  });
+    if (event.type === "invoice.payment_succeeded") {
+      const customerId = event.data.object.customer;
 
-  await pool.query(
-    `UPDATE users
-     SET access_expires = NOW() + INTERVAL '90 days'
-     WHERE id=$1`,
-    [userId]
-  );
+      await supabase
+        .from("users")
+        .update({ credits: 9999 })
+        .eq("stripe_customer_id", customerId);
+    }
 
-  res.json({ clientSecret: pi });
+    res.json({ received: true });
+  }
+);
+
+// ================================
+//   CHAT COMPLETION (MAIN AI)
+// ================================
+app.post("/api/chat", authenticateToken, async (req, res) => {
+  const { message, girlId, chatId } = req.body;
+  if (!message || !girlId)
+    return res.status(400).json({ error: "Missing parameters" });
+
+  // Get user
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, credits")
+    .eq("id", req.user.id)
+    .single();
+
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (user.credits <= 0)
+    return res.status(402).json({ error: "Out of credits" });
+
+  // Deduct credits
+  await supabase
+    .from("users")
+    .update({ credits: user.credits - 1 })
+    .eq("id", user.id);
+
+  // Fetch selected biblical figure
+  const { data: profile } = await supabase
+    .from("girls")
+    .select("*")
+    .eq("id", girlId)
+    .single();
+
+  if (!profile) return res.status(404).json({ error: "Figure not found" });
+
+  // Fetch chat history
+  const { data: pastMessages } = await supabase
+    .from("ai_messages")
+    .select("text, ai")
+    .eq("chat_id", chatId)
+    .order("id", { ascending: true });
+
+  const history = pastMessages
+    ? pastMessages.map((m) => ({
+        role: m.ai ? "assistant" : "user",
+        content: m.text,
+      }))
+    : [];
+
+  const aiMessages = [
+    { role: "system", content: buildBiblicalSystemPrompt(profile.name) },
+    ...history,
+    { role: "user", content: message },
+  ];
+
+  // Request completion from OpenRouter
+  let completion;
+  try {
+    completion = await openai.chat.completions.create({
+      model: "openai/gpt-4.1-mini",
+      messages: aiMessages,
+      temperature: 0.85,
+      max_tokens: 250,
+    });
+  } catch (err) {
+    console.error("OpenRouter Error:", err);
+    return res.status(500).json({ error: "AI request failed" });
+  }
+
+  const aiText = completion.choices?.[0]?.message?.content || "(no response)";
+
+  // Store user + AI messages
+  await supabase.from("ai_messages").insert([
+    { chat_id: chatId, text: message, ai: false },
+    { chat_id: chatId, text: aiText, ai: true },
+  ]);
+
+  addAiMessageDrip(chatId, aiText);
+
+  res.json({ response: aiText, logs: buildLogs(aiMessages, aiText) });
 });
 
-// $50 — lifetime
-app.post("/api/pay/lifetime", authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+// ================================
+//   CHAT MANAGEMENT
+// ================================
+app.post("/api/create-chat", authenticateToken, async (req, res) => {
+  const { girlId } = req.body;
 
-  const pi = await chargeUser({
-    userId,
-    amount: 5000,
-    description: "Lifetime access"
-  });
+  const { data: chat } = await supabase
+    .from("chats")
+    .insert([{ girl_id: girlId, user_id: req.user.id }])
+    .select()
+    .single();
 
-  await pool.query(
-    `UPDATE users SET lifetime=true WHERE id=$1`,
-    [userId]
-  );
-
-  res.json({ clientSecret: pi });
+  res.json(chat);
 });
 
-// ------------------------------
-// START SERVER
-// ------------------------------
-app.listen(PORT, () => {
-  console.log(`SpeakToHeaven server running on port ${PORT}`);
+app.get("/api/chats", authenticateToken, async (req, res) => {
+  const { data: chats } = await supabase
+    .from("chats")
+    .select("id, girl_id")
+    .eq("user_id", req.user.id);
+
+  res.json(chats);
 });
+
+app.get("/api/messages/:chatId", authenticateToken, async (req, res) => {
+  const { chatId } = req.params;
+
+  const { data: messages } = await supabase
+    .from("ai_messages")
+    .select("*")
+    .eq("chat_id", chatId)
+    .order("id", { ascending: true });
+
+  res.json(messages);
+});
+
+// ================================
+//   OPERATOR MODE ENDPOINTS
+// ================================
+app.get("/api/operator/customers", authenticateToken, async (req, res) => {
+  const { data: user } = await supabase
+    .from("users")
+    .select("is_operator")
+    .eq("id", req.user.id)
+    .single();
+
+  if (!user?.is_operator)
+    return res.status(403).json({ error: "Forbidden" });
+
+  const { data: customers } = await supabase
+    .from("users")
+    .select("id, email, credits");
+
+  res.json(customers);
+});
+
+// ================================
+//         START SERVER
+// ================================
+app.listen(PORT, () =>
+  console.log(`Bible AI server running on http://localhost:${PORT}`)
+);
