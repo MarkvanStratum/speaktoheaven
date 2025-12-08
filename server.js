@@ -1,24 +1,30 @@
 // ================================
-//              IMPORTS
+//              IMPORTS (ESM)
 // ================================
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const supabase = require("./utils/supabase");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const { OpenAI } = require("openai"); // OpenRouter uses the OpenAI client
-const { addAiMessageDrip } = require("./utils/aiDrip");
-const { appendAiOutput, buildLogs } = require("./utils/logs");
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import cors from "cors";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import stripeLib from "stripe";
+import { OpenAI } from "openai";
+
+import supabase from "./utils/supabase.js";
+import { addAiMessageDrip } from "./utils/aiDrip.js";
+import { appendAiOutput, buildLogs } from "./utils/logs.js";
 
 // ================================
-//          SERVER INIT
+//            INIT
 // ================================
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 const PORT = process.env.PORT || 3000;
+
+const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -26,28 +32,23 @@ const openai = new OpenAI({
 });
 
 // ================================
-//       BIBLICAL SYSTEM PROMPT
+//   BIBLICAL SYSTEM PROMPT BUILDER
 // ================================
-function buildBiblicalSystemPrompt(characterName) {
+function buildBiblicalSystemPrompt(name) {
   return `
-You are an AI representation inspired by the biblical figure: ${characterName}.
+You are an AI representation inspired by the biblical figure: ${name}.
+You are NOT the real ${name}, nor a deity. You are an AI roleplay assistant.
+If asked, you must clearly acknowledge that you are an AI representation.
 
-GUIDELINES:
-- You are NOT the real ${characterName}, nor a deity. You are an AI roleplay assistant.
-- You must ALWAYS acknowledge you are an AI representation if asked.
-- Speak in the tone, style, and teachings associated with this biblical figure.
-- Reference relevant scripture when appropriate.
-- Do NOT claim divine authority.
-- Do NOT give prophecy or supernatural commands.
-- Use the entire Bible (Old & New Testament) as your stylistic reference.
-- Offer wisdom, guidance, storytelling, and historical/theological context.
-
-Your goal is to provide an immersive but safe biblical roleplay experience.
+Speak in the tone and style associated with this biblical figure.
+Use the entire Bible as stylistic reference, and cite scripture when appropriate.
+Do NOT claim divine authority or prophetic power.
+Do NOT issue supernatural commands.
   `;
 }
 
 // ================================
-//          AUTH HELPERS
+//      AUTH HELPERS
 // ================================
 function generateToken(user) {
   return jwt.sign(
@@ -58,7 +59,7 @@ function generateToken(user) {
 }
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
+  const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
 
   const token = authHeader.split(" ")[1];
@@ -70,39 +71,34 @@ function authenticateToken(req, res, next) {
 }
 
 // ================================
-//     AUTH: SIGNUP / LOGIN
+//        SIGNUP / LOGIN
 // ================================
 app.post("/api/signup", async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Missing email or password" });
 
-  const { data: existingUser } = await supabase
+  const { data: exists } = await supabase
     .from("users")
     .select("id")
     .eq("email", email)
     .single();
 
-  if (existingUser) {
-    return res.status(409).json({ error: "Email already registered" });
-  }
+  if (exists) return res.status(409).json({ error: "Email already registered" });
 
-  const password_hash = await bcrypt.hash(password, 10);
-  const { data: newUser, error } = await supabase
+  const hash = await bcrypt.hash(password, 10);
+
+  const { data: user, error } = await supabase
     .from("users")
-    .insert([{ email, password_hash, credits: 10 }])
+    .insert([{ email, password_hash: hash, credits: 10 }])
     .select()
     .single();
 
   if (error) return res.status(500).json({ error: "Signup failed" });
 
-  res.json({ token: generateToken(newUser) });
+  res.json({ token: generateToken(user) });
 });
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Missing email or password" });
 
   const { data: user } = await supabase
     .from("users")
@@ -119,7 +115,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // ================================
-//     USER INFO
+//           USER INFO
 // ================================
 app.get("/api/me", authenticateToken, async (req, res) => {
   const { data: user } = await supabase
@@ -132,13 +128,13 @@ app.get("/api/me", authenticateToken, async (req, res) => {
 });
 
 // ================================
-//      STRIPE SUBSCRIPTIONS
+//         STRIPE CHECKOUT
 // ================================
 app.post("/api/create-checkout-session", authenticateToken, async (req, res) => {
   const { priceId } = req.body;
-  if (!priceId) return res.status(400).json({ error: "Missing priceId" });
 
-  let { data: user } = await supabase
+  // get user stripe id
+  const { data: user } = await supabase
     .from("users")
     .select("stripe_customer_id")
     .eq("id", req.user.id)
@@ -151,7 +147,6 @@ app.post("/api/create-checkout-session", authenticateToken, async (req, res) => 
       email: req.user.email,
       metadata: { userId: req.user.id },
     });
-
     customerId = customer.id;
 
     await supabase
@@ -172,7 +167,7 @@ app.post("/api/create-checkout-session", authenticateToken, async (req, res) => 
 });
 
 // ================================
-//         STRIPE WEBHOOK
+//        STRIPE WEBHOOK
 // ================================
 app.post(
   "/api/stripe-webhook",
@@ -186,7 +181,7 @@ app.post(
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (e) {
-      return res.status(400).send(`Webhook Error: ${e.message}`);
+      return res.status(400).send(`Webhook error: ${e.message}`);
     }
 
     if (event.type === "invoice.payment_succeeded") {
@@ -203,40 +198,34 @@ app.post(
 );
 
 // ================================
-//   CHAT COMPLETION (MAIN AI)
+//       MAIN AI CHAT ROUTE
 // ================================
 app.post("/api/chat", authenticateToken, async (req, res) => {
   const { message, girlId, chatId } = req.body;
-  if (!message || !girlId)
-    return res.status(400).json({ error: "Missing parameters" });
 
-  // Get user
+  // user
   const { data: user } = await supabase
     .from("users")
     .select("id, credits")
     .eq("id", req.user.id)
     .single();
 
-  if (!user) return res.status(404).json({ error: "User not found" });
   if (user.credits <= 0)
     return res.status(402).json({ error: "Out of credits" });
 
-  // Deduct credits
   await supabase
     .from("users")
     .update({ credits: user.credits - 1 })
     .eq("id", user.id);
 
-  // Fetch selected biblical figure
+  // profile
   const { data: profile } = await supabase
     .from("girls")
     .select("*")
     .eq("id", girlId)
     .single();
 
-  if (!profile) return res.status(404).json({ error: "Figure not found" });
-
-  // Fetch chat history
+  // history
   const { data: pastMessages } = await supabase
     .from("ai_messages")
     .select("text, ai")
@@ -250,29 +239,28 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
       }))
     : [];
 
-  const aiMessages = [
+  const messages = [
     { role: "system", content: buildBiblicalSystemPrompt(profile.name) },
     ...history,
     { role: "user", content: message },
   ];
 
-  // Request completion from OpenRouter
   let completion;
   try {
     completion = await openai.chat.completions.create({
       model: "openai/gpt-4.1-mini",
-      messages: aiMessages,
-      temperature: 0.85,
+      messages,
+      temperature: 0.9,
       max_tokens: 250,
     });
   } catch (err) {
-    console.error("OpenRouter Error:", err);
+    console.error("OpenRouter error:", err);
     return res.status(500).json({ error: "AI request failed" });
   }
 
   const aiText = completion.choices?.[0]?.message?.content || "(no response)";
 
-  // Store user + AI messages
+  // store
   await supabase.from("ai_messages").insert([
     { chat_id: chatId, text: message, ai: false },
     { chat_id: chatId, text: aiText, ai: true },
@@ -280,11 +268,11 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
   addAiMessageDrip(chatId, aiText);
 
-  res.json({ response: aiText, logs: buildLogs(aiMessages, aiText) });
+  res.json({ response: aiText, logs: buildLogs(messages, aiText) });
 });
 
 // ================================
-//   CHAT MANAGEMENT
+//        CHATS + MESSAGES
 // ================================
 app.post("/api/create-chat", authenticateToken, async (req, res) => {
   const { girlId } = req.body;
@@ -320,16 +308,16 @@ app.get("/api/messages/:chatId", authenticateToken, async (req, res) => {
 });
 
 // ================================
-//   OPERATOR MODE ENDPOINTS
+//        OPERATOR MODE
 // ================================
 app.get("/api/operator/customers", authenticateToken, async (req, res) => {
-  const { data: user } = await supabase
+  const { data: me } = await supabase
     .from("users")
     .select("is_operator")
     .eq("id", req.user.id)
     .single();
 
-  if (!user?.is_operator)
+  if (!me?.is_operator)
     return res.status(403).json({ error: "Forbidden" });
 
   const { data: customers } = await supabase
@@ -340,8 +328,8 @@ app.get("/api/operator/customers", authenticateToken, async (req, res) => {
 });
 
 // ================================
-//         START SERVER
+//           START SERVER
 // ================================
 app.listen(PORT, () =>
-  console.log(`Bible AI server running on http://localhost:${PORT}`)
+  console.log(`Bible AI server running (ESM) on port ${PORT}`)
 );
