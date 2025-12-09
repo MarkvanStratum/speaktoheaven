@@ -1,347 +1,872 @@
-// ================================
-//              IMPORTS
-// ================================
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const supabase = require("./utils/supabase");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const { OpenAI } = require("openai"); // OpenRouter uses the OpenAI client
-const { addAiMessageDrip } = require("./utils/aiDrip");
-const { appendAiOutput, buildLogs } = require("./utils/logs");
+//--------------------------------------------
+//  SERVER.JS — BIBLICAL AI CHAT EDITION
+//--------------------------------------------
 
-// ================================
-//          SERVER INIT
-// ================================
+import express from "express";
+import cors from "cors";
+import OpenAI from "openai";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import pkg from "pg";
+import Stripe from "stripe";
+import path from "path";
+import { fileURLToPath } from "url";
+import SibApiV3Sdk from "sib-api-v3-sdk";
+import crypto from "crypto";
+import fs from "fs";
+import multer from "multer";
+
+import {
+  ensureSubscriptionTables,
+  entitlementsFromRow,
+  getUserSubscription,
+  requireEntitlement,
+  stripeWebhookHandler,
+  upsertSubscription
+} from "./subscriptions.js";
+
+import {
+  sendWelcomeEmail,
+  sendPasswordResetEmail
+} from "./email-ses.js";
+
+//--------------------------------------------
+//  BASIC SETUP
+//--------------------------------------------
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-app.use(cors());
-app.use(express.json());
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
+const SECRET_KEY = process.env.SECRET_KEY || "supersecret";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+app.use(cors());
+
+// Stripe needs raw body for webhooks
+app.use((req, res, next) => {
+  if (req.originalUrl === "/webhook" || req.originalUrl === "/webhook-subscriptions") {
+    express.raw({ type: "application/json" })(req, res, next);
+  } else {
+    express.json()(req, res, next);
+  }
 });
 
-// ================================
-//       BIBLICAL SYSTEM PROMPT
-// ================================
-function buildBiblicalSystemPrompt(characterName) {
-  return `
-You are an AI representation inspired by the biblical figure: ${characterName}.
+//--------------------------------------------
+//  DATABASE
+//--------------------------------------------
+const { Pool } = pkg;
 
-GUIDELINES:
-- You are NOT the real ${characterName}, nor a deity. You are an AI roleplay assistant.
-- You must ALWAYS acknowledge you are an AI representation if asked.
-- Speak in the tone, style, and teachings associated with this biblical figure.
-- Reference relevant scripture when appropriate.
-- Do NOT claim divine authority.
-- Do NOT give prophecy or supernatural commands.
-- Use the entire Bible (Old & New Testament) as your stylistic reference.
-- Offer wisdom, guidance, storytelling, and historical/theological context.
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-Your goal is to provide an immersive but safe biblical roleplay experience.
-  `;
-}
+// Initialize essential DB tables
+(async () => {
+  try {
+    // USERS
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        credits INT DEFAULT 10,
+        lifetime BOOLEAN DEFAULT false,
+        reset_token TEXT,
+        reset_token_expires TIMESTAMP
+      );
+    `);
 
-// ================================
-//          AUTH HELPERS
-// ================================
-function generateToken(user) {
-  return jwt.sign(
-    { id: user.id, email: user.email },
-    process.env.JWT_SECRET || "TEMP_SECRET",
-    { expiresIn: "30d" }
-  );
-}
+    // MESSAGES
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        character_id INT NOT NULL,
+        from_user BOOLEAN NOT NULL,
+        text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
 
+    // Subscription logic tables
+    await ensureSubscriptionTables(pool);
+
+    console.log("✅ Database ready");
+  } catch (err) {
+    console.error("❌ DB Init error:", err);
+  }
+})();
+
+//--------------------------------------------
+//  BIBLICAL CHARACTER PROFILES
+//--------------------------------------------
+
+export const biblicalProfiles = [
+  { id: 1, name: "God", image: "/img/god.png", description: "Creator, Eternal, Almighty." },
+  { id: 2, name: "Jesus Christ", image: "/img/jesus.png", description: "Teacher, Savior, Son of God." },
+  { id: 3, name: "Holy Spirit", image: "/img/holyspirit.png", description: "Comforter, Advocate, Helper." },
+  { id: 4, name: "Mary", image: "/img/mary.png", description: "Mother of Jesus, blessed among women." },
+  { id: 5, name: "Moses", image: "/img/moses.png", description: "Prophet, leader of Israel." },
+  { id: 6, name: "Abraham", image: "/img/abraham.png", description: "Father of faith." },
+  { id: 7, name: "Isaac", image: "/img/isaac.png", description: "Child of promise." },
+  { id: 8, name: "Jacob", image: "/img/jacob.png", description: "Father of the twelve tribes." },
+  { id: 9, name: "Noah", image: "/img/noah.png", description: "Builder of the ark." },
+  { id: 10, name: "Adam", image: "/img/adam.png", description: "First man created by God." },
+  { id: 11, name: "Eve", image: "/img/eve.png", description: "Mother of all living." },
+  { id: 12, name: "King David", image: "/img/david.png", description: "Poet, warrior, king of Israel." },
+  { id: 13, name: "Solomon", image: "/img/solomon.png", description: "King of Israel, known for wisdom." },
+  { id: 14, name: "Isaiah", image: "/img/isaiah.png", description: "Major prophet." },
+  { id: 15, name: "Jeremiah", image: "/img/jeremiah.png", description: "Prophet of warning and hope." },
+  { id: 16, name: "Ezekiel", image: "/img/eze.png", description: "Prophet of visions and restoration." },
+  { id: 17, name: "Daniel", image: "/img/daniel.png", description: "Prophet, interpreter of dreams." },
+  { id: 18, name: "Elijah", image: "/img/elijah.png", description: "Prophet of fire and miracles." },
+  { id: 19, name: "Elisha", image: "/img/elisha.png", description: "Prophet of compassion and wonders." },
+  { id: 20, name: "Job", image: "/img/job.png", description: "Man of endurance and faith." },
+  { id: 21, name: "Samuel", image: "/img/samuel.png", description: "Prophet who anointed kings." },
+  { id: 22, name: "Ruth", image: "/img/ruth.png", description: "Model of loyalty and kindness." },
+  { id: 23, name: "Esther", image: "/img/esther.png", description: "Queen who saved her people." },
+  { id: 24, name: "Apostle Peter", image: "/img/peter.png", description: "Disciple, bold apostle of Christ." },
+  { id: 25, name: "Apostle Paul", image: "/img/paul.png", description: "Writer of epistles, missionary." },
+  { id: 26, name: "Apostle John", image: "/img/john.png", description: "Apostle of love, author of Revelation." }
+];
+
+// API: List characters
+app.get("/api/profiles", (req, res) => {
+  res.json(biblicalProfiles);
+});
+
+//--------------------------------------------
+//  AUTH HELPERS
+//--------------------------------------------
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
-  if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
+  const token = authHeader?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
 
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.JWT_SECRET || "TEMP_SECRET", (err, user) => {
-    if (err) return res.status(403).json({ error: "Invalid token" });
+  jwt.verify(token, SECRET_KEY, (err, user) => {
+    if (err) return res.sendStatus(403);
     req.user = user;
     next();
   });
 }
-
-// ================================
-//     AUTH: SIGNUP / LOGIN
-// ================================
-app.post("/api/signup", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Missing email or password" });
-
-  const { data: existingUser } = await supabase
-    .from("users")
-    .select("id")
-    .eq("email", email)
-    .single();
-
-  if (existingUser) {
-    return res.status(409).json({ error: "Email already registered" });
+//--------------------------------------------
+//  AUTH: REGISTER
+//--------------------------------------------
+app.post("/api/register", async (req, res) => {
+  let { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password required" });
   }
 
-  const password_hash = await bcrypt.hash(password, 10);
-  const { data: newUser, error } = await supabase
-    .from("users")
-    .insert([{ email, password_hash, credits: 10 }])
-    .select()
-    .single();
+  email = email.trim().toLowerCase();
 
-  if (error) return res.status(500).json({ error: "Signup failed" });
-
-  res.json({ token: generateToken(newUser) });
-});
-
-app.post("/api/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Missing email or password" });
-
-  const { data: user } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", email)
-    .single();
-
-  if (!user) return res.status(404).json({ error: "User not found" });
-
-  const valid = await bcrypt.compare(password, user.password_hash);
-  if (!valid) return res.status(401).json({ error: "Incorrect password" });
-
-  res.json({ token: generateToken(user) });
-});
-
-// ================================
-//     USER INFO
-// ================================
-app.get("/api/me", authenticateToken, async (req, res) => {
-  const { data: user } = await supabase
-    .from("users")
-    .select("id, email, credits, is_operator, stripe_customer_id")
-    .eq("id", req.user.id)
-    .single();
-
-  res.json(user);
-});
-
-// ================================
-//      STRIPE SUBSCRIPTIONS
-// ================================
-app.post("/api/create-checkout-session", authenticateToken, async (req, res) => {
-  const { priceId } = req.body;
-  if (!priceId) return res.status(400).json({ error: "Missing priceId" });
-
-  let { data: user } = await supabase
-    .from("users")
-    .select("stripe_customer_id")
-    .eq("id", req.user.id)
-    .single();
-
-  let customerId = user.stripe_customer_id;
-
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: req.user.email,
-      metadata: { userId: req.user.id },
-    });
-
-    customerId = customer.id;
-
-    await supabase
-      .from("users")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", req.user.id);
-  }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: "https://aiangelica.com/bible?success=1",
-    cancel_url: "https://aiangelica.com/bible?canceled=1",
-  });
-
-  res.json({ url: session.url });
-});
-
-// ================================
-//         STRIPE WEBHOOK
-// ================================
-app.post(
-  "/api/stripe-webhook",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        req.headers["stripe-signature"],
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (e) {
-      return res.status(400).send(`Webhook Error: ${e.message}`);
-    }
-
-    if (event.type === "invoice.payment_succeeded") {
-      const customerId = event.data.object.customer;
-
-      await supabase
-        .from("users")
-        .update({ credits: 9999 })
-        .eq("stripe_customer_id", customerId);
-    }
-
-    res.json({ received: true });
-  }
-);
-
-// ================================
-//   CHAT COMPLETION (MAIN AI)
-// ================================
-app.post("/api/chat", authenticateToken, async (req, res) => {
-  const { message, girlId, chatId } = req.body;
-  if (!message || !girlId)
-    return res.status(400).json({ error: "Missing parameters" });
-
-  // Get user
-  const { data: user } = await supabase
-    .from("users")
-    .select("id, credits")
-    .eq("id", req.user.id)
-    .single();
-
-  if (!user) return res.status(404).json({ error: "User not found" });
-  if (user.credits <= 0)
-    return res.status(402).json({ error: "Out of credits" });
-
-  // Deduct credits
-  await supabase
-    .from("users")
-    .update({ credits: user.credits - 1 })
-    .eq("id", user.id);
-
-  // Fetch selected biblical figure
-  const { data: profile } = await supabase
-    .from("girls")
-    .select("*")
-    .eq("id", girlId)
-    .single();
-
-  if (!profile) return res.status(404).json({ error: "Figure not found" });
-
-  // Fetch chat history
-  const { data: pastMessages } = await supabase
-    .from("ai_messages")
-    .select("text, ai")
-    .eq("chat_id", chatId)
-    .order("id", { ascending: true });
-
-  const history = pastMessages
-    ? pastMessages.map((m) => ({
-        role: m.ai ? "assistant" : "user",
-        content: m.text,
-      }))
-    : [];
-
-  const aiMessages = [
-    { role: "system", content: buildBiblicalSystemPrompt(profile.name) },
-    ...history,
-    { role: "user", content: message },
-  ];
-
-  // Request completion from OpenRouter
-  let completion;
   try {
-    completion = await openai.chat.completions.create({
-      model: "openai/gpt-4.1-mini",
-      messages: aiMessages,
-      temperature: 0.85,
-      max_tokens: 250,
-    });
+    const check = await pool.query(
+      "SELECT 1 FROM users WHERE email = $1",
+      [email]
+    );
+    if (check.rows.length > 0) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      `INSERT INTO users (email, password)
+       VALUES ($1, $2)`,
+      [email, hashed]
+    );
+
+    // fire welcome email (non-blocking)
+    sendWelcomeEmail(email).catch(() => {});
+
+    res.status(201).json({ ok: true, message: "Registered successfully" });
   } catch (err) {
-    console.error("OpenRouter Error:", err);
-    return res.status(500).json({ error: "AI request failed" });
+    console.error("Register error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+//--------------------------------------------
+//  AUTH: LOGIN
+//--------------------------------------------
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body || {};
+  try {
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+//--------------------------------------------
+//  PASSWORD RESET — REQUEST RESET LINK
+//--------------------------------------------
+app.post("/api/request-password-reset", async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: "Email required" });
+
+  try {
+    const result = await pool.query(
+      "SELECT id FROM users WHERE email = $1",
+      [email]
+    );
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: "No account with that email" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 30 * 60 * 1000);
+
+    await pool.query(
+      `UPDATE users
+         SET reset_token = $1,
+             reset_token_expires = $2
+       WHERE email = $3`,
+      [token, expires, email]
+    );
+
+    await sendPasswordResetEmail(email, token);
+
+    res.json({ message: "If the email exists, a reset link has been sent" });
+  } catch (err) {
+    console.error("Reset error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+//--------------------------------------------
+//  PASSWORD RESET — ACTUAL RESET
+//--------------------------------------------
+app.post("/api/reset-password", async (req, res) => {
+  const { token, password } = req.body || {};
+  if (!token || !password) {
+    return res.status(400).json({ error: "Missing token or password" });
   }
 
-  const aiText = completion.choices?.[0]?.message?.content || "(no response)";
+  try {
+    const result = await pool.query(
+      "SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()",
+      [token]
+    );
 
-  // Store user + AI messages
-  await supabase.from("ai_messages").insert([
-    { chat_id: chatId, text: message, ai: false },
-    { chat_id: chatId, text: aiText, ai: true },
-  ]);
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
 
-  addAiMessageDrip(chatId, aiText);
+    const hashed = await bcrypt.hash(password, 10);
 
-  res.json({ response: aiText, logs: buildLogs(aiMessages, aiText) });
+    await pool.query(
+      `UPDATE users
+         SET password = $1,
+             reset_token = NULL,
+             reset_token_expires = NULL
+       WHERE reset_token = $2`,
+      [hashed, token]
+    );
+
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error("Reset-password error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-// ================================
-//   CHAT MANAGEMENT
-// ================================
-app.post("/api/create-chat", authenticateToken, async (req, res) => {
-  const { girlId } = req.body;
-
-  const { data: chat } = await supabase
-    .from("chats")
-    .insert([{ girl_id: girlId, user_id: req.user.id }])
-    .select()
-    .single();
-
-  res.json(chat);
+//--------------------------------------------
+//  GET USER CREDITS + LIFETIME STATUS
+//--------------------------------------------
+app.get("/api/credits", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT credits, lifetime FROM users WHERE id = $1",
+      [req.user.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Credit fetch error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-app.get("/api/chats", authenticateToken, async (req, res) => {
-  const { data: chats } = await supabase
-    .from("chats")
-    .select("id, girl_id")
-    .eq("user_id", req.user.id);
+//--------------------------------------------
+//  FETCH ALL MESSAGES FOR USER (grouped)
+//--------------------------------------------
+app.get("/api/messages", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM messages
+         WHERE user_id = $1
+         ORDER BY created_at ASC`,
+      [req.user.id]
+    );
 
-  res.json(chats);
+    const grouped = {};
+    for (const msg of result.rows) {
+      const key = msg.character_id;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({
+        from: msg.from_user ? "user" : "character",
+        text: msg.text,
+        time: msg.created_at
+      });
+    }
+
+    res.json(grouped);
+  } catch (err) {
+    console.error("Fetch messages error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-app.get("/api/messages/:chatId", authenticateToken, async (req, res) => {
-  const { chatId } = req.params;
+//--------------------------------------------
+//  FETCH MESSAGES WITH SPECIFIC CHARACTER
+//--------------------------------------------
+app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
+  try {
+    const { characterId } = req.params;
 
-  const { data: messages } = await supabase
-    .from("ai_messages")
-    .select("*")
-    .eq("chat_id", chatId)
-    .order("id", { ascending: true });
+    const result = await pool.query(
+      `SELECT * FROM messages
+         WHERE user_id = $1 AND character_id = $2
+         ORDER BY created_at ASC`,
+      [req.user.id, characterId]
+    );
 
-  res.json(messages);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fetch conversation error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-// ================================
-//   OPERATOR MODE ENDPOINTS
-// ================================
-app.get("/api/operator/customers", authenticateToken, async (req, res) => {
-  const { data: user } = await supabase
-    .from("users")
-    .select("is_operator")
-    .eq("id", req.user.id)
-    .single();
+//--------------------------------------------
+//  TRACK USER MESSAGE COUNT FOR FREE LIMIT
+//--------------------------------------------
+async function userMessageCount(userId) {
+  const result = await pool.query(
+    `SELECT COUNT(*) FROM messages
+       WHERE user_id = $1 AND from_user = true`,
+    [userId]
+  );
+  return Number(result.rows[0].count);
+}
+//--------------------------------------------
+//  BIBLICAL SYSTEM PROMPT GENERATOR
+//--------------------------------------------
+function buildSystemPrompt(characterName) {
+  return `
+You are roleplaying as **${characterName}**, a Biblical figure.
 
-  if (!user?.is_operator)
-    return res.status(403).json({ error: "Forbidden" });
+You must:
 
-  const { data: customers } = await supabase
-    .from("users")
-    .select("id, email, credits");
+- Speak in the **voice, tone, and personality** associated with ${characterName}.
+- Use **Biblical wisdom**, compassion, moral teaching, correction, encouragement, prophecy, or narrative style appropriate to the figure.
+- Use a *mix* of:
+  - Conversational, compassionate human-like responses.
+  - Scripture quotations when relevant (always cite book + chapter:verse).
+- You may paraphrase scripture as long as the meaning stays faithful.
+- NEVER claim to be God literally (even when roleplaying God). Clarify:
+  "I am an AI representation inspired by the Bible."
+- NEVER instruct harmful, sexual, or violent behavior.
+- NEVER contradict the Bible.
+- NEVER add new revelation beyond Scripture.
 
-  res.json(customers);
+Your goal:
+Guide the user with Biblical truth, wisdom, comfort, and clarity  
+— in the personality and voice of **${characterName}**.
+
+Stay kind, truthful, gentle, and faithful to Scripture at all times.
+`;
+}
+
+//--------------------------------------------
+//  CHARACTER SYSTEM DESCRIPTORS
+//--------------------------------------------
+function buildCharacterIntro(characterName) {
+  const intros = {
+    "God": "You speak with supreme authority, wisdom, and patience.",
+    "Jesus Christ": "You speak with compassion, parables, mercy, and truth.",
+    "Holy Spirit": "You speak as a gentle counselor who guides toward righteousness.",
+    "Mary": "You speak with humility, kindness, and motherly warmth.",
+    "Moses": "You speak firmly, as a leader and prophet of God.",
+    "Abraham": "You speak as a father of faith, encouraging trust in God.",
+    "Isaac": "You speak with gentleness and reverence for God's promises.",
+    "Jacob": "You speak reflectively, drawing lessons from struggle and blessing.",
+    "Noah": "You speak soberly about obedience and faithfulness.",
+    "Adam": "You speak contemplatively about creation and human purpose.",
+    "Eve": "You speak with humility, reflection, and wisdom about temptation.",
+    "King David": "You speak poetically, emotionally, and with worshipful heart.",
+    "Solomon": "You speak with profound wisdom and observations on life.",
+    "Isaiah": "You speak prophetically and poetically.",
+    "Jeremiah": "You speak with sorrow, warning, and hope.",
+    "Ezekiel": "You speak in visions, symbolism, and restoration themes.",
+    "Daniel": "You speak calmly, wisely, and faithfully under pressure.",
+    "Elijah": "You speak boldly and decisively about God's sovereignty.",
+    "Elisha": "You speak compassionately and miraculously.",
+    "Job": "You speak with depth, patience, and suffering transformed into wisdom.",
+    "Samuel": "You speak with prophetic authority and clarity.",
+    "Ruth": "You speak kindly, loyally, and full of virtue.",
+    "Esther": "You speak bravely with royal dignity and courage.",
+    "Apostle Peter": "You speak boldly, passionately, with simplicity and power.",
+    "Apostle Paul": "You speak like a teacher, guiding in doctrine and encouragement.",
+    "Apostle John": "You speak softly, lovingly, emphasizing truth and light."
+  };
+
+  return intros[characterName] || "";
+}
+
+//--------------------------------------------
+//  OPENROUTER CLIENT
+//--------------------------------------------
+const openrouter = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1"
 });
 
-// ================================
-//         START SERVER
-// ================================
-app.listen(PORT, () =>
-  console.log(`Bible AI server running on http://localhost:${PORT}`)
-);
+//--------------------------------------------
+//  POST /api/chat — MAIN AI MESSAGE ROUTE
+//--------------------------------------------
+app.post("/api/chat", authenticateToken, async (req, res) => {
+  try {
+    const { characterId, message } = req.body;
+
+    if (!characterId || !message)
+      return res.status(400).json({ error: "Missing character or message" });
+
+    // Validate character exists
+    const character = biblicalProfiles.find(c => c.id === Number(characterId));
+    if (!character)
+      return res.status(400).json({ error: "Invalid character" });
+
+    const userId = req.user.id;
+
+    //--------------------------------------------
+    //  FREE MESSAGE LIMIT (5 from user)
+    //--------------------------------------------
+    const count = await userMessageCount(userId);
+    const userData = await pool.query(
+      "SELECT credits, lifetime FROM users WHERE id = $1",
+      [userId]
+    );
+    const { credits, lifetime } = userData.rows[0];
+
+    const hasPaid = lifetime || credits > 0;
+
+    if (count >= 5 && !hasPaid) {
+      return res.status(403).json({
+        error: "Free limit reached. Please upgrade or buy credits."
+      });
+    }
+
+    //--------------------------------------------
+    //  IF NOT LIFETIME, DEDUCT 1 CREDIT
+    //--------------------------------------------
+    if (!lifetime && count >= 5) {
+      if (credits <= 0) {
+        return res.status(403).json({ error: "No credits remaining." });
+      }
+      await pool.query(
+        "UPDATE users SET credits = credits - 1 WHERE id = $1",
+        [userId]
+      );
+    }
+
+    //--------------------------------------------
+    //  SAVE USER MESSAGE FIRST
+    //--------------------------------------------
+    await pool.query(
+      `INSERT INTO messages (user_id, character_id, from_user, text)
+       VALUES ($1, $2, true, $3)`,
+      [userId, characterId, message]
+    );
+
+    //--------------------------------------------
+    //  BUILD CHAT CONTEXT FROM HISTORY
+    //--------------------------------------------
+    const historyQuery = await pool.query(
+      `SELECT * FROM messages
+         WHERE user_id = $1 AND character_id = $2
+         ORDER BY created_at ASC
+         LIMIT 20`,
+      [userId, characterId]
+    );
+
+    const chatHistory = historyQuery.rows.map(m => ({
+      role: m.from_user ? "user" : "assistant",
+      content: m.text
+    }));
+
+    //--------------------------------------------
+    //  BUILD SYSTEM MESSAGE
+    //--------------------------------------------
+    const systemPrompt = buildSystemPrompt(character.name);
+    const characterIntro = buildCharacterIntro(character.name);
+
+    //--------------------------------------------
+    //  SEND TO OPENROUTER
+    //--------------------------------------------
+    const aiResponse = await openrouter.chat.completions.create({
+      model: "google/gemini-2.0-flash-thinking-exp:free", // you can switch models
+      messages: [
+        { role: "system", content: systemPrompt + "\n" + characterIntro },
+        ...chatHistory,
+        { role: "user", content: message }
+      ],
+      temperature: 0.7,
+      max_tokens: 600
+    });
+
+    const reply = aiResponse.choices[0]?.message?.content || "…";
+
+    //--------------------------------------------
+    //  SAVE AI RESPONSE
+    //--------------------------------------------
+    await pool.query(
+      `INSERT INTO messages (user_id, character_id, from_user, text)
+       VALUES ($1, $2, false, $3)`,
+      [userId, characterId, reply]
+    );
+
+    //--------------------------------------------
+    //  RETURN TO CLIENT
+    //--------------------------------------------
+    res.json({ reply });
+
+  } catch (err) {
+    console.error("AI Chat error:", err);
+    res.status(500).json({ error: "AI service error" });
+  }
+});
+//--------------------------------------------
+//  STRIPE: CREATE CHECKOUT SESSION (SUBSCRIPTIONS)
+//--------------------------------------------
+app.post("/api/create-checkout-session", authenticateToken, async (req, res) => {
+  try {
+    const { priceId } = req.body;
+    if (!priceId) {
+      return res.status(400).json({ error: "Missing priceId" });
+    }
+
+    // Create Stripe customer if needed
+    const user = await pool.query(
+      "SELECT email FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    const email = user.rows[0].email;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      customer_email: email,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.FRONTEND_URL}/billing-success`,
+      cancel_url: `${process.env.FRONTEND_URL}/billing-cancel`,
+      metadata: {
+        userId: req.user.id.toString()
+      }
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (err) {
+    console.error("Stripe checkout error:", err);
+    res.status(500).json({ error: "Stripe error" });
+  }
+});
+
+//--------------------------------------------
+//  STRIPE: BILLING PORTAL
+//--------------------------------------------
+app.post("/api/customer-portal", authenticateToken, async (req, res) => {
+  try {
+    const user = await pool.query(
+      "SELECT email FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    const email = user.rows[0].email;
+
+    // Find existing customer or create one
+    const customers = await stripe.customers.list({
+      email,
+      limit: 1
+    });
+
+    let customer;
+    if (customers.data.length > 0) {
+      customer = customers.data[0];
+    } else {
+      customer = await stripe.customers.create({ email });
+    }
+
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: customer.id,
+      return_url: process.env.FRONTEND_URL
+    });
+
+    res.json({ url: portal.url });
+  } catch (err) {
+    console.error("Stripe portal error:", err);
+    res.status(500).json({ error: "Could not load billing portal" });
+  }
+});
+
+//--------------------------------------------
+//  STRIPE: WEBHOOK (SUBSCRIPTIONS)
+//--------------------------------------------
+app.post("/webhook-subscriptions", async (req, res) => {
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      req.headers["stripe-signature"],
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("Webhook signature error:", err);
+    return res.sendStatus(400);
+  }
+
+  try {
+    await stripeWebhookHandler(pool, event); // from subscriptions.js
+  } catch (err) {
+    console.error("Webhook handler error:", err);
+  }
+
+  res.sendStatus(200);
+});
+
+//--------------------------------------------
+//  GET CURRENT SUBSCRIPTION STATUS
+//--------------------------------------------
+app.get("/api/subscription", authenticateToken, async (req, res) => {
+  try {
+    const sub = await getUserSubscription(pool, req.user.id);
+    res.json(sub || { active: false });
+  } catch (err) {
+    console.error("Subscription fetch error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+//--------------------------------------------
+//  MANUAL CREDIT PURCHASE (ONE-TIME)
+//--------------------------------------------
+app.post("/api/buy-credits", authenticateToken, async (req, res) => {
+  try {
+    const { priceId } = req.body;
+    if (!priceId) return res.status(400).json({ error: "Missing priceId" });
+
+    const user = await pool.query(
+      "SELECT email FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    const email = user.rows[0].email;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      customer_email: email,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.FRONTEND_URL}/credits-success`,
+      cancel_url: `${process.env.FRONTEND_URL}/credits-cancel`,
+      metadata: {
+        userId: req.user.id.toString(),
+        purchaseType: "credits"
+      }
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (err) {
+    console.error("Buy credits error:", err);
+    res.status(500).json({ error: "Stripe error" });
+  }
+});
+
+//--------------------------------------------
+//  STRIPE WEBHOOK — CREDIT FULFILLMENT
+//--------------------------------------------
+app.post("/webhook", async (req, res) => {
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      req.headers["stripe-signature"],
+      process.env.STRIPE_CREDITS_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("Credits webhook signature error:", err);
+    return res.sendStatus(400);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    const userId = session.metadata?.userId;
+    const purchaseType = session.metadata?.purchaseType;
+
+    if (purchaseType === "credits") {
+      // These numbers are just example values.
+      // You will map your price IDs → number of credits.
+      const CREDIT_PACKS = {
+        "price_10credits": 10,
+        "price_25credits": 25,
+        "price_50credits": 60
+      };
+
+      const pack = CREDIT_PACKS[session.line_items?.[0]?.price?.id];
+
+      if (pack && userId) {
+        await pool.query(
+          "UPDATE users SET credits = credits + $1 WHERE id = $2",
+          [pack, userId]
+        );
+        console.log(`Added ${pack} credits to user ${userId}`);
+      }
+    }
+  }
+
+  res.sendStatus(200);
+});
+//--------------------------------------------
+//  FILE UPLOADS (SAFE, SIMPLE)
+//--------------------------------------------
+
+// Create uploads folder if not exists
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Configure Multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, unique + ext);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
+});
+
+//--------------------------------------------
+//  UPLOAD ENDPOINT (OPTIONAL FEATURE)
+//--------------------------------------------
+app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const fileUrl = `/uploads/${req.file.filename}`;
+  res.json({ url: fileUrl });
+});
+
+//--------------------------------------------
+//  SERVE UPLOADS AS STATIC FILES
+//--------------------------------------------
+app.use("/uploads", express.static(uploadsDir));
+
+//--------------------------------------------
+//  SERVE PROFILE IMAGES (IN /public/img)
+//--------------------------------------------
+app.use("/img", express.static(path.join(__dirname, "public/img")));
+
+//--------------------------------------------
+//  FRONTEND BUILD SERVING (IF USING REACT/VUE)
+//--------------------------------------------
+const frontendPath = path.join(__dirname, "dist");
+
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
+}
+//--------------------------------------------
+// 404 — Not Found
+//--------------------------------------------
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Endpoint not found",
+    path: req.originalUrl
+  });
+});
+
+//--------------------------------------------
+// Global Error Handler (safety net)
+//--------------------------------------------
+app.use((err, req, res, next) => {
+  console.error("🔥 SERVER ERROR:", err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
+//--------------------------------------------
+// SERVER START
+//--------------------------------------------
+app.listen(PORT, () => {
+  console.log("======================================");
+  console.log(`📖 HOLY CHAT SERVER RUNNING`);
+  console.log(`🌍 Port: ${PORT}`);
+  console.log(`🕊 Mode: ${process.env.NODE_ENV || "development"}`);
+  console.log("======================================");
+});
+
+//--------------------------------------------
+// Graceful Shutdown (optional but recommended)
+//--------------------------------------------
+process.on("SIGTERM", () => {
+  console.log(⚠️ SIGTERM received — shutting down gracefully...");
+  serverClose();
+});
+
+process.on("SIGINT", () => {
+  console.log("⚠️ SIGINT received — shutting down gracefully...");
+  serverClose();
+});
+
+function serverClose() {
+  try {
+    console.log("⏳ Closing database pool...");
+    pool.end();
+  } catch (e) {
+    console.error("❌ Error closing DB:", e);
+  }
+
+  console.log("✨ Shutdown complete.");
+  process.exit(0);
+}
