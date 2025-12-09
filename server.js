@@ -11,18 +11,14 @@ import pkg from "pg";
 import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
-import SibApiV3Sdk from "sib-api-v3-sdk";
 import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 
 import {
   ensureSubscriptionTables,
-  entitlementsFromRow,
   getUserSubscription,
-  requireEntitlement,
-  stripeWebhookHandler,
-  upsertSubscription
+  stripeWebhookHandler
 } from "./subscriptions.js";
 
 import {
@@ -45,7 +41,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 
-// Stripe needs raw body for webhooks
+// Stripe requires raw body for webhooks
 app.use((req, res, next) => {
   if (req.originalUrl === "/webhook" || req.originalUrl === "/webhook-subscriptions") {
     express.raw({ type: "application/json" })(req, res, next);
@@ -57,6 +53,7 @@ app.use((req, res, next) => {
 //--------------------------------------------
 //  DATABASE
 //--------------------------------------------
+
 const { Pool } = pkg;
 
 const pool = new Pool({
@@ -67,7 +64,6 @@ const pool = new Pool({
 // Initialize essential DB tables
 (async () => {
   try {
-    // USERS
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -80,7 +76,6 @@ const pool = new Pool({
       );
     `);
 
-    // MESSAGES
     await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
@@ -92,7 +87,6 @@ const pool = new Pool({
       );
     `);
 
-    // Subscription logic tables
     await ensureSubscriptionTables(pool);
 
     console.log("✅ Database ready");
@@ -134,7 +128,6 @@ export const biblicalProfiles = [
   { id: 26, name: "Apostle John", image: "/img/john.png", description: "Apostle of love, author of Revelation." }
 ];
 
-// API: List characters
 app.get("/api/profiles", (req, res) => {
   res.json(biblicalProfiles);
 });
@@ -142,6 +135,7 @@ app.get("/api/profiles", (req, res) => {
 //--------------------------------------------
 //  AUTH HELPERS
 //--------------------------------------------
+
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader?.split(" ")[1];
@@ -153,35 +147,30 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
 //--------------------------------------------
 //  AUTH: REGISTER
 //--------------------------------------------
+
 app.post("/api/register", async (req, res) => {
   let { email, password } = req.body || {};
-  if (!email || !password) {
+  if (!email || !password)
     return res.status(400).json({ error: "Email and password required" });
-  }
 
   email = email.trim().toLowerCase();
 
   try {
-    const check = await pool.query(
-      "SELECT 1 FROM users WHERE email = $1",
-      [email]
-    );
-    if (check.rows.length > 0) {
+    const check = await pool.query("SELECT 1 FROM users WHERE email = $1", [email]);
+    if (check.rows.length > 0)
       return res.status(400).json({ error: "User already exists" });
-    }
 
     const hashed = await bcrypt.hash(password, 10);
 
     await pool.query(
-      `INSERT INTO users (email, password)
-       VALUES ($1, $2)`,
+      `INSERT INTO users (email, password) VALUES ($1, $2)`,
       [email, hashed]
     );
 
-    // fire welcome email (non-blocking)
     sendWelcomeEmail(email).catch(() => {});
 
     res.status(201).json({ ok: true, message: "Registered successfully" });
@@ -194,20 +183,24 @@ app.post("/api/register", async (req, res) => {
 //--------------------------------------------
 //  AUTH: LOGIN
 //--------------------------------------------
+
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body || {};
+
   try {
     const result = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
-    if (result.rows.length === 0) {
+
+    if (result.rows.length === 0)
       return res.status(400).json({ error: "Invalid credentials" });
-    }
 
     const user = result.rows[0];
+
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ error: "Invalid credentials" });
+    if (!match)
+      return res.status(400).json({ error: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -223,8 +216,9 @@ app.post("/api/login", async (req, res) => {
 });
 
 //--------------------------------------------
-//  PASSWORD RESET — REQUEST RESET LINK
+//  PASSWORD RESET — REQUEST LINK
 //--------------------------------------------
+
 app.post("/api/request-password-reset", async (req, res) => {
   const { email } = req.body || {};
   if (!email) return res.status(400).json({ error: "Email required" });
@@ -234,18 +228,20 @@ app.post("/api/request-password-reset", async (req, res) => {
       "SELECT id FROM users WHERE email = $1",
       [email]
     );
-    if (result.rows.length === 0) {
+
+    if (result.rows.length === 0)
       return res.status(400).json({ error: "No account with that email" });
-    }
 
     const token = crypto.randomBytes(32).toString("hex");
     const expires = new Date(Date.now() + 30 * 60 * 1000);
 
     await pool.query(
-      `UPDATE users
-         SET reset_token = $1,
-             reset_token_expires = $2
-       WHERE email = $3`,
+      `
+      UPDATE users
+      SET reset_token = $1,
+          reset_token_expires = $2
+      WHERE email = $3
+    `,
       [token, expires, email]
     );
 
@@ -259,32 +255,34 @@ app.post("/api/request-password-reset", async (req, res) => {
 });
 
 //--------------------------------------------
-//  PASSWORD RESET — ACTUAL RESET
+//  PASSWORD RESET — APPLY NEW PASSWORD
 //--------------------------------------------
+
 app.post("/api/reset-password", async (req, res) => {
   const { token, password } = req.body || {};
-  if (!token || !password) {
+
+  if (!token || !password)
     return res.status(400).json({ error: "Missing token or password" });
-  }
 
   try {
     const result = await pool.query(
-      "SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()",
+      `SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()`,
       [token]
     );
 
-    if (result.rows.length === 0) {
+    if (result.rows.length === 0)
       return res.status(400).json({ error: "Invalid or expired token" });
-    }
 
     const hashed = await bcrypt.hash(password, 10);
 
     await pool.query(
-      `UPDATE users
-         SET password = $1,
-             reset_token = NULL,
-             reset_token_expires = NULL
-       WHERE reset_token = $2`,
+      `
+      UPDATE users
+      SET password = $1,
+          reset_token = NULL,
+          reset_token_expires = NULL
+      WHERE reset_token = $2
+    `,
       [hashed, token]
     );
 
@@ -298,15 +296,17 @@ app.post("/api/reset-password", async (req, res) => {
 //--------------------------------------------
 //  GET USER CREDITS + LIFETIME STATUS
 //--------------------------------------------
+
 app.get("/api/credits", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT credits, lifetime FROM users WHERE id = $1",
+      `SELECT credits, lifetime FROM users WHERE id = $1`,
       [req.user.id]
     );
-    if (result.rows.length === 0) {
+
+    if (result.rows.length === 0)
       return res.status(404).json({ error: "User not found" });
-    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Credit fetch error:", err);
@@ -315,22 +315,25 @@ app.get("/api/credits", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  FETCH ALL MESSAGES FOR USER (grouped)
+//  FETCH ALL MESSAGES (GROUPED BY CHARACTER)
 //--------------------------------------------
+
 app.get("/api/messages", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM messages
-         WHERE user_id = $1
-         ORDER BY created_at ASC`,
+      `
+      SELECT * FROM messages
+      WHERE user_id = $1
+      ORDER BY created_at ASC
+    `,
       [req.user.id]
     );
 
     const grouped = {};
     for (const msg of result.rows) {
-      const key = msg.character_id;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push({
+      if (!grouped[msg.character_id]) grouped[msg.character_id] = [];
+
+      grouped[msg.character_id].push({
         from: msg.from_user ? "user" : "character",
         text: msg.text,
         time: msg.created_at
@@ -345,16 +348,19 @@ app.get("/api/messages", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  FETCH MESSAGES WITH SPECIFIC CHARACTER
+//  FETCH MESSAGES FOR ONE CHARACTER
 //--------------------------------------------
+
 app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
   try {
     const { characterId } = req.params;
 
     const result = await pool.query(
-      `SELECT * FROM messages
-         WHERE user_id = $1 AND character_id = $2
-         ORDER BY created_at ASC`,
+      `
+      SELECT * FROM messages
+      WHERE user_id = $1 AND character_id = $2
+      ORDER BY created_at ASC
+    `,
       [req.user.id, characterId]
     );
 
@@ -366,76 +372,67 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  TRACK USER MESSAGE COUNT FOR FREE LIMIT
+//  COUNT USER MESSAGES (STAR LIMIT)
 //--------------------------------------------
+
 async function userMessageCount(userId) {
   const result = await pool.query(
-    `SELECT COUNT(*) FROM messages
-       WHERE user_id = $1 AND from_user = true`,
+    `
+    SELECT COUNT(*) FROM messages
+    WHERE user_id = $1 AND from_user = true
+  `,
     [userId]
   );
   return Number(result.rows[0].count);
 }
+
 //--------------------------------------------
-//  BIBLICAL SYSTEM PROMPT GENERATOR
+//  SYSTEM PROMPT BUILDER
 //--------------------------------------------
+
 function buildSystemPrompt(characterName) {
   return `
 You are roleplaying as **${characterName}**, a Biblical figure.
 
-You must:
+- Speak in the voice, tone, and personality of ${characterName}.
+- Use Biblical wisdom and encouragement.
+- Use scripture quotes when relevant (Book Chapter:Verse).
+- Never claim to literally be God. Clarify: "I am an AI representation inspired by the Bible."
+- No harmful, sexual, or violent instructions.
+- Stay aligned with Scripture.
 
-- Speak in the **voice, tone, and personality** associated with ${characterName}.
-- Use **Biblical wisdom**, compassion, moral teaching, correction, encouragement, prophecy, or narrative style appropriate to the figure.
-- Use a *mix* of:
-  - Conversational, compassionate human-like responses.
-  - Scripture quotations when relevant (always cite book + chapter:verse).
-- You may paraphrase scripture as long as the meaning stays faithful.
-- NEVER claim to be God literally (even when roleplaying God). Clarify:
-  "I am an AI representation inspired by the Bible."
-- NEVER instruct harmful, sexual, or violent behavior.
-- NEVER contradict the Bible.
-- NEVER add new revelation beyond Scripture.
-
-Your goal:
-Guide the user with Biblical truth, wisdom, comfort, and clarity  
-— in the personality and voice of **${characterName}**.
-
-Stay kind, truthful, gentle, and faithful to Scripture at all times.
+Guide the user with wisdom and truth.
 `;
 }
 
-//--------------------------------------------
-//  CHARACTER SYSTEM DESCRIPTORS
-//--------------------------------------------
 function buildCharacterIntro(characterName) {
   const intros = {
     "God": "You speak with supreme authority, wisdom, and patience.",
-    "Jesus Christ": "You speak with compassion, parables, mercy, and truth.",
-    "Holy Spirit": "You speak as a gentle counselor who guides toward righteousness.",
-    "Mary": "You speak with humility, kindness, and motherly warmth.",
-    "Moses": "You speak firmly, as a leader and prophet of God.",
-    "Abraham": "You speak as a father of faith, encouraging trust in God.",
-    "Isaac": "You speak with gentleness and reverence for God's promises.",
-    "Jacob": "You speak reflectively, drawing lessons from struggle and blessing.",
-    "Noah": "You speak soberly about obedience and faithfulness.",
-    "Adam": "You speak contemplatively about creation and human purpose.",
-    "Eve": "You speak with humility, reflection, and wisdom about temptation.",
-    "King David": "You speak poetically, emotionally, and with worshipful heart.",
-    "Solomon": "You speak with profound wisdom and observations on life.",
-    "Isaiah": "You speak prophetically and poetically.",
-    "Jeremiah": "You speak with sorrow, warning, and hope.",
-    "Ezekiel": "You speak in visions, symbolism, and restoration themes.",
-    "Daniel": "You speak calmly, wisely, and faithfully under pressure.",
-    "Elijah": "You speak boldly and decisively about God's sovereignty.",
-    "Elisha": "You speak compassionately and miraculously.",
-    "Job": "You speak with depth, patience, and suffering transformed into wisdom.",
-    "Samuel": "You speak with prophetic authority and clarity.",
-    "Ruth": "You speak kindly, loyally, and full of virtue.",
-    "Esther": "You speak bravely with royal dignity and courage.",
-    "Apostle Peter": "You speak boldly, passionately, with simplicity and power.",
-    "Apostle Paul": "You speak like a teacher, guiding in doctrine and encouragement.",
-    "Apostle John": "You speak softly, lovingly, emphasizing truth and light."
+    "Jesus Christ": "You speak with compassion, mercy, and truth.",
+    "Holy Spirit": "You speak as a gentle counselor.",
+    "Mary": "You speak with humility and warmth.",
+    "Moses": "You speak firmly as a leader and prophet.",
+    "Abraham": "You speak as a father of faith.",
+    "Isaac": "You speak with reverence for God's promises.",
+    "Jacob": "You speak reflectively.",
+    "Noah": "You speak about obedience and faith.",
+    "Adam": "You speak about creation and purpose.",
+    "Eve": "You speak with humility and wisdom.",
+    "King David": "You speak poetically and emotionally.",
+    "Solomon": "You speak with profound wisdom.",
+    "Isaiah": "You speak prophetically.",
+    "Jeremiah": "You speak with sorrow and hope.",
+    "Ezekiel": "You speak in visions and symbols.",
+    "Daniel": "You speak calmly and wisely.",
+    "Elijah": "You speak boldly.",
+    "Elisha": "You speak compassionately.",
+    "Job": "You speak from suffering transformed to wisdom.",
+    "Samuel": "You speak prophetically.",
+    "Ruth": "You speak kindly and loyally.",
+    "Esther": "You speak bravely.",
+    "Apostle Peter": "You speak passionately.",
+    "Apostle Paul": "You speak like a teacher.",
+    "Apostle John": "You speak lovingly, emphasizing truth and light."
   };
 
   return intros[characterName] || "";
@@ -444,22 +441,22 @@ function buildCharacterIntro(characterName) {
 //--------------------------------------------
 //  OPENROUTER CLIENT
 //--------------------------------------------
+
 const openrouter = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1"
 });
 
 //--------------------------------------------
-//  POST /api/chat — MAIN AI MESSAGE ROUTE
+//  POST /api/chat — MAIN CHAT ROUTE
 //--------------------------------------------
+
 app.post("/api/chat", authenticateToken, async (req, res) => {
   try {
     const { characterId, message } = req.body;
-
     if (!characterId || !message)
       return res.status(400).json({ error: "Missing character or message" });
 
-    // Validate character exists
     const character = biblicalProfiles.find(c => c.id === Number(characterId));
     if (!character)
       return res.status(400).json({ error: "Invalid character" });
@@ -467,30 +464,26 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     const userId = req.user.id;
 
     //--------------------------------------------
-    //  FREE MESSAGE LIMIT (5 from user)
+    // FREE LIMIT LOGIC
     //--------------------------------------------
+
     const count = await userMessageCount(userId);
     const userData = await pool.query(
       "SELECT credits, lifetime FROM users WHERE id = $1",
       [userId]
     );
-    const { credits, lifetime } = userData.rows[0];
 
+    const { credits, lifetime } = userData.rows[0];
     const hasPaid = lifetime || credits > 0;
 
     if (count >= 5 && !hasPaid) {
-      return res.status(403).json({
-        error: "Free limit reached. Please upgrade or buy credits."
-      });
+      return res.status(403).json({ error: "Free limit reached. Please upgrade or buy credits." });
     }
 
-    //--------------------------------------------
-    //  IF NOT LIFETIME, DEDUCT 1 CREDIT
-    //--------------------------------------------
     if (!lifetime && count >= 5) {
-      if (credits <= 0) {
+      if (credits <= 0)
         return res.status(403).json({ error: "No credits remaining." });
-      }
+
       await pool.query(
         "UPDATE users SET credits = credits - 1 WHERE id = $1",
         [userId]
@@ -498,22 +491,28 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     }
 
     //--------------------------------------------
-    //  SAVE USER MESSAGE FIRST
+    // SAVE USER MESSAGE
     //--------------------------------------------
+
     await pool.query(
-      `INSERT INTO messages (user_id, character_id, from_user, text)
-       VALUES ($1, $2, true, $3)`,
+      `
+      INSERT INTO messages (user_id, character_id, from_user, text)
+      VALUES ($1, $2, true, $3)
+    `,
       [userId, characterId, message]
     );
 
     //--------------------------------------------
-    //  BUILD CHAT CONTEXT FROM HISTORY
+    // LOAD LAST 20 MESSAGES
     //--------------------------------------------
+
     const historyQuery = await pool.query(
-      `SELECT * FROM messages
-         WHERE user_id = $1 AND character_id = $2
-         ORDER BY created_at ASC
-         LIMIT 20`,
+      `
+      SELECT * FROM messages
+      WHERE user_id = $1 AND character_id = $2
+      ORDER BY created_at ASC
+      LIMIT 20
+    `,
       [userId, characterId]
     );
 
@@ -523,16 +522,14 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     }));
 
     //--------------------------------------------
-    //  BUILD SYSTEM MESSAGE
+    // BUILD AI PAYLOAD
     //--------------------------------------------
+
     const systemPrompt = buildSystemPrompt(character.name);
     const characterIntro = buildCharacterIntro(character.name);
 
-    //--------------------------------------------
-    //  SEND TO OPENROUTER
-    //--------------------------------------------
     const aiResponse = await openrouter.chat.completions.create({
-      model: "google/gemini-2.0-flash-thinking-exp:free", // you can switch models
+      model: "google/gemini-2.0-flash-thinking-exp:free",
       messages: [
         { role: "system", content: systemPrompt + "\n" + characterIntro },
         ...chatHistory,
@@ -542,20 +539,20 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
       max_tokens: 600
     });
 
-    const reply = aiResponse.choices[0]?.message?.content || "…";
+    const reply = aiResponse?.choices?.[0]?.message?.content || "…";
 
     //--------------------------------------------
-    //  SAVE AI RESPONSE
+    // SAVE AI RESPONSE
     //--------------------------------------------
+
     await pool.query(
-      `INSERT INTO messages (user_id, character_id, from_user, text)
-       VALUES ($1, $2, false, $3)`,
+      `
+      INSERT INTO messages (user_id, character_id, from_user, text)
+      VALUES ($1, $2, false, $3)
+    `,
       [userId, characterId, reply]
     );
 
-    //--------------------------------------------
-    //  RETURN TO CLIENT
-    //--------------------------------------------
     res.json({ reply });
 
   } catch (err) {
@@ -563,17 +560,18 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "AI service error" });
   }
 });
+
 //--------------------------------------------
-//  STRIPE: CREATE CHECKOUT SESSION (SUBSCRIPTIONS)
+//  STRIPE: SUBSCRIPTIONS CHECKOUT
 //--------------------------------------------
+
 app.post("/api/create-checkout-session", authenticateToken, async (req, res) => {
   try {
     const { priceId } = req.body;
-    if (!priceId) {
-      return res.status(400).json({ error: "Missing priceId" });
-    }
 
-    // Create Stripe customer if needed
+    if (!priceId)
+      return res.status(400).json({ error: "Missing priceId" });
+
     const user = await pool.query(
       "SELECT email FROM users WHERE id = $1",
       [req.user.id]
@@ -588,12 +586,11 @@ app.post("/api/create-checkout-session", authenticateToken, async (req, res) => 
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.FRONTEND_URL}/billing-success`,
       cancel_url: `${process.env.FRONTEND_URL}/billing-cancel`,
-      metadata: {
-        userId: req.user.id.toString()
-      }
+      metadata: { userId: req.user.id.toString() }
     });
 
     res.json({ sessionId: session.id });
+
   } catch (err) {
     console.error("Stripe checkout error:", err);
     res.status(500).json({ error: "Stripe error" });
@@ -603,6 +600,7 @@ app.post("/api/create-checkout-session", authenticateToken, async (req, res) => 
 //--------------------------------------------
 //  STRIPE: BILLING PORTAL
 //--------------------------------------------
+
 app.post("/api/customer-portal", authenticateToken, async (req, res) => {
   try {
     const user = await pool.query(
@@ -612,18 +610,12 @@ app.post("/api/customer-portal", authenticateToken, async (req, res) => {
 
     const email = user.rows[0].email;
 
-    // Find existing customer or create one
-    const customers = await stripe.customers.list({
-      email,
-      limit: 1
-    });
+    const customers = await stripe.customers.list({ email, limit: 1 });
 
-    let customer;
-    if (customers.data.length > 0) {
-      customer = customers.data[0];
-    } else {
-      customer = await stripe.customers.create({ email });
-    }
+    let customer =
+      customers.data.length > 0
+        ? customers.data[0]
+        : await stripe.customers.create({ email });
 
     const portal = await stripe.billingPortal.sessions.create({
       customer: customer.id,
@@ -631,6 +623,7 @@ app.post("/api/customer-portal", authenticateToken, async (req, res) => {
     });
 
     res.json({ url: portal.url });
+
   } catch (err) {
     console.error("Stripe portal error:", err);
     res.status(500).json({ error: "Could not load billing portal" });
@@ -638,34 +631,31 @@ app.post("/api/customer-portal", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  STRIPE: WEBHOOK (SUBSCRIPTIONS)
+//  STRIPE: SUBSCRIPTION WEBHOOK
 //--------------------------------------------
-app.post("/webhook-subscriptions", async (req, res) => {
-  let event;
 
+app.post("/webhook-subscriptions", async (req, res) => {
   try {
-    event = stripe.webhooks.constructEvent(
+    const event = stripe.webhooks.constructEvent(
       req.body,
       req.headers["stripe-signature"],
       process.env.STRIPE_WEBHOOK_SECRET
     );
-  } catch (err) {
-    console.error("Webhook signature error:", err);
-    return res.sendStatus(400);
-  }
 
-  try {
-    await stripeWebhookHandler(pool, event); // from subscriptions.js
+    await stripeWebhookHandler(pool, event);
+
+    res.sendStatus(200);
+
   } catch (err) {
     console.error("Webhook handler error:", err);
+    res.sendStatus(400);
   }
-
-  res.sendStatus(200);
 });
 
 //--------------------------------------------
-//  GET CURRENT SUBSCRIPTION STATUS
+//  GET USER SUBSCRIPTION STATUS
 //--------------------------------------------
+
 app.get("/api/subscription", authenticateToken, async (req, res) => {
   try {
     const sub = await getUserSubscription(pool, req.user.id);
@@ -677,12 +667,14 @@ app.get("/api/subscription", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  MANUAL CREDIT PURCHASE (ONE-TIME)
+//  STRIPE: CREDIT PURCHASE
 //--------------------------------------------
+
 app.post("/api/buy-credits", authenticateToken, async (req, res) => {
   try {
     const { priceId } = req.body;
-    if (!priceId) return res.status(400).json({ error: "Missing priceId" });
+    if (!priceId)
+      return res.status(400).json({ error: "Missing priceId" });
 
     const user = await pool.query(
       "SELECT email FROM users WHERE id = $1",
@@ -705,6 +697,7 @@ app.post("/api/buy-credits", authenticateToken, async (req, res) => {
     });
 
     res.json({ sessionId: session.id });
+
   } catch (err) {
     console.error("Buy credits error:", err);
     res.status(500).json({ error: "Stripe error" });
@@ -712,114 +705,103 @@ app.post("/api/buy-credits", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  STRIPE WEBHOOK — CREDIT FULFILLMENT
+//  CREDIT FULFILLMENT WEBHOOK
 //--------------------------------------------
-app.post("/webhook", async (req, res) => {
-  let event;
 
+app.post("/webhook", async (req, res) => {
   try {
-    event = stripe.webhooks.constructEvent(
+    const event = stripe.webhooks.constructEvent(
       req.body,
       req.headers["stripe-signature"],
       process.env.STRIPE_CREDITS_WEBHOOK_SECRET
     );
-  } catch (err) {
-    console.error("Credits webhook signature error:", err);
-    return res.sendStatus(400);
-  }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const userId = session.metadata?.userId;
-    const purchaseType = session.metadata?.purchaseType;
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
 
-    if (purchaseType === "credits") {
-      // These numbers are just example values.
-      // You will map your price IDs → number of credits.
-      const CREDIT_PACKS = {
-        "price_10credits": 10,
-        "price_25credits": 25,
-        "price_50credits": 60
-      };
+      const userId = session.metadata?.userId;
+      const purchaseType = session.metadata?.purchaseType;
 
-      const pack = CREDIT_PACKS[session.line_items?.[0]?.price?.id];
+      if (purchaseType === "credits") {
+        // Map Stripe price IDs to number of credits
+        const CREDIT_PACKS = {
+          "price_10credits": 10,
+          "price_25credits": 25,
+          "price_50credits": 60
+        };
 
-      if (pack && userId) {
-        await pool.query(
-          "UPDATE users SET credits = credits + $1 WHERE id = $2",
-          [pack, userId]
-        );
-        console.log(`Added ${pack} credits to user ${userId}`);
+        const pack = CREDIT_PACKS[session.line_items?.[0]?.price?.id];
+
+        if (pack && userId) {
+          await pool.query(
+            "UPDATE users SET credits = credits + $1 WHERE id = $2",
+            [pack, userId]
+          );
+          console.log(`Added ${pack} credits to user ${userId}`);
+        }
       }
     }
+
+    res.sendStatus(200);
+
+  } catch (err) {
+    console.error("Credits webhook error:", err);
+    res.sendStatus(400);
   }
-
-  res.sendStatus(200);
 });
+
 //--------------------------------------------
-//  FILE UPLOADS (SAFE, SIMPLE)
+//  FILE UPLOADS
 //--------------------------------------------
 
-// Create uploads folder if not exists
 const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// Configure Multer storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, unique + ext);
+    cb(null, unique + path.extname(file.originalname));
   }
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-//--------------------------------------------
-//  UPLOAD ENDPOINT (OPTIONAL FEATURE)
-//--------------------------------------------
 app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => {
-  if (!req.file) {
+  if (!req.file)
     return res.status(400).json({ error: "No file uploaded" });
-  }
 
   const fileUrl = `/uploads/${req.file.filename}`;
   res.json({ url: fileUrl });
 });
 
-//--------------------------------------------
-//  SERVE UPLOADS AS STATIC FILES
-//--------------------------------------------
 app.use("/uploads", express.static(uploadsDir));
 
 //--------------------------------------------
-//  SERVE PROFILE IMAGES (IN /public/img)
+//  SERVE STATIC IMAGES
 //--------------------------------------------
+
 app.use("/img", express.static(path.join(__dirname, "public/img")));
 
 //--------------------------------------------
-//  FRONTEND BUILD SERVING (IF USING REACT/VUE)
+//  SERVE FRONTEND BUILD (React / Vue)
 //--------------------------------------------
-const frontendPath = path.join(__dirname, "dist");
 
+const frontendPath = path.join(__dirname, "dist");
 if (fs.existsSync(frontendPath)) {
   app.use(express.static(frontendPath));
-
   app.get("*", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
+
 //--------------------------------------------
-// 404 — Not Found
+// 404 HANDLER
 //--------------------------------------------
+
 app.use((req, res) => {
   res.status(404).json({
     error: "Endpoint not found",
@@ -828,16 +810,18 @@ app.use((req, res) => {
 });
 
 //--------------------------------------------
-// Global Error Handler (safety net)
+//  GLOBAL ERROR HANDLER
 //--------------------------------------------
+
 app.use((err, req, res, next) => {
   console.error("🔥 SERVER ERROR:", err);
   res.status(500).json({ error: "Internal server error" });
 });
 
 //--------------------------------------------
-// SERVER START
+//  SERVER START
 //--------------------------------------------
+
 app.listen(PORT, () => {
   console.log("======================================");
   console.log(`📖 HOLY CHAT SERVER RUNNING`);
@@ -847,8 +831,9 @@ app.listen(PORT, () => {
 });
 
 //--------------------------------------------
-// Graceful Shutdown (optional but recommended)
+//  GRACEFUL SHUTDOWN (FIXED)
 //--------------------------------------------
+
 process.on("SIGTERM", () => {
   console.log(⚠️ SIGTERM received — shutting down gracefully...");
   serverClose();
