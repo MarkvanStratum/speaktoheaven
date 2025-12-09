@@ -16,12 +16,6 @@ import fs from "fs";
 import multer from "multer";
 
 import {
-  ensureSubscriptionTables,
-  getUserSubscription,
-  stripeWebhookHandler
-} from "./subscriptions.js";
-
-import {
   sendWelcomeEmail,
   sendPasswordResetEmail
 } from "./email-ses.js";
@@ -41,9 +35,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 
-// Stripe requires raw body for webhooks
+// Stripe webhook: raw body
 app.use((req, res, next) => {
-  if (req.originalUrl === "/webhook" || req.originalUrl === "/webhook-subscriptions") {
+  if (req.originalUrl === "/webhook") {
     express.raw({ type: "application/json" })(req, res, next);
   } else {
     express.json()(req, res, next);
@@ -87,8 +81,6 @@ const pool = new Pool({
       );
     `);
 
-    await ensureSubscriptionTables(pool);
-
     console.log("✅ Database ready");
   } catch (err) {
     console.error("❌ DB Init error:", err);
@@ -109,23 +101,23 @@ export const biblicalProfiles = [
   { id: 7, name: "Isaac", image: "/img/isaac.png", description: "Child of promise." },
   { id: 8, name: "Jacob", image: "/img/jacob.png", description: "Father of the twelve tribes." },
   { id: 9, name: "Noah", image: "/img/noah.png", description: "Builder of the ark." },
-  { id: 10, name: "Adam", image: "/img/adam.png", description: "First man created by God." },
+  { id: 10, name: "Adam", image: "/img/adam.png", description: "First man." },
   { id: 11, name: "Eve", image: "/img/eve.png", description: "Mother of all living." },
-  { id: 12, name: "King David", image: "/img/david.png", description: "Poet, warrior, king of Israel." },
-  { id: 13, name: "Solomon", image: "/img/solomon.png", description: "King of Israel, known for wisdom." },
+  { id: 12, name: "King David", image: "/img/david.png", description: "Poet, warrior, king." },
+  { id: 13, name: "Solomon", image: "/img/solomon.png", description: "King of wisdom." },
   { id: 14, name: "Isaiah", image: "/img/isaiah.png", description: "Major prophet." },
   { id: 15, name: "Jeremiah", image: "/img/jeremiah.png", description: "Prophet of warning and hope." },
-  { id: 16, name: "Ezekiel", image: "/img/eze.png", description: "Prophet of visions and restoration." },
-  { id: 17, name: "Daniel", image: "/img/daniel.png", description: "Prophet, interpreter of dreams." },
-  { id: 18, name: "Elijah", image: "/img/elijah.png", description: "Prophet of fire and miracles." },
-  { id: 19, name: "Elisha", image: "/img/elisha.png", description: "Prophet of compassion and wonders." },
-  { id: 20, name: "Job", image: "/img/job.png", description: "Man of endurance and faith." },
+  { id: 16, name: "Ezekiel", image: "/img/eze.png", description: "Prophet of visions." },
+  { id: 17, name: "Daniel", image: "/img/daniel.png", description: "Interpreter of dreams." },
+  { id: 18, name: "Elijah", image: "/img/elijah.png", description: "Prophet of fire." },
+  { id: 19, name: "Elisha", image: "/img/elisha.png", description: "Prophet of compassion." },
+  { id: 20, name: "Job", image: "/img/job.png", description: "Man of endurance." },
   { id: 21, name: "Samuel", image: "/img/samuel.png", description: "Prophet who anointed kings." },
-  { id: 22, name: "Ruth", image: "/img/ruth.png", description: "Model of loyalty and kindness." },
-  { id: 23, name: "Esther", image: "/img/esther.png", description: "Queen who saved her people." },
-  { id: 24, name: "Apostle Peter", image: "/img/peter.png", description: "Disciple, bold apostle of Christ." },
-  { id: 25, name: "Apostle Paul", image: "/img/paul.png", description: "Writer of epistles, missionary." },
-  { id: 26, name: "Apostle John", image: "/img/john.png", description: "Apostle of love, author of Revelation." }
+  { id: 22, name: "Ruth", image: "/img/ruth.png", description: "Model of loyalty." },
+  { id: 23, name: "Esther", image: "/img/esther.png", description: "Queen who saved Israel." },
+  { id: 24, name: "Apostle Peter", image: "/img/peter.png", description: "Bold apostle." },
+  { id: 25, name: "Apostle Paul", image: "/img/paul.png", description: "Teacher and missionary." },
+  { id: 26, name: "Apostle John", image: "/img/john.png", description: "Apostle of love." }
 ];
 
 app.get("/api/profiles", (req, res) => {
@@ -294,7 +286,7 @@ app.post("/api/reset-password", async (req, res) => {
 });
 
 //--------------------------------------------
-//  GET USER CREDITS + LIFETIME STATUS
+//  GET USER CREDITS
 //--------------------------------------------
 
 app.get("/api/credits", authenticateToken, async (req, res) => {
@@ -315,7 +307,7 @@ app.get("/api/credits", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  FETCH ALL MESSAGES (GROUPED BY CHARACTER)
+//  FETCH ALL MESSAGES (GROUPED)
 //--------------------------------------------
 
 app.get("/api/messages", authenticateToken, async (req, res) => {
@@ -372,7 +364,7 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  COUNT USER MESSAGES (STAR LIMIT)
+//  COUNT USER MESSAGES
 //--------------------------------------------
 
 async function userMessageCount(userId) {
@@ -387,21 +379,18 @@ async function userMessageCount(userId) {
 }
 
 //--------------------------------------------
-//  SYSTEM PROMPT BUILDER
+//  SYSTEM PROMPTS
 //--------------------------------------------
 
 function buildSystemPrompt(characterName) {
   return `
 You are roleplaying as **${characterName}**, a Biblical figure.
 
-- Speak in the voice, tone, and personality of ${characterName}.
+- Speak in the tone and personality of ${characterName}.
 - Use Biblical wisdom and encouragement.
-- Use scripture quotes when relevant (Book Chapter:Verse).
-- Never claim to literally be God. Clarify: "I am an AI representation inspired by the Bible."
-- No harmful, sexual, or violent instructions.
-- Stay aligned with Scripture.
-
-Guide the user with wisdom and truth.
+- Reference scripture when relevant.
+- Never claim to literally be God; clarify you are an AI representation inspired by scripture.
+- Avoid harmful or inappropriate content.
 `;
 }
 
@@ -410,29 +399,13 @@ function buildCharacterIntro(characterName) {
     "God": "You speak with supreme authority, wisdom, and patience.",
     "Jesus Christ": "You speak with compassion, mercy, and truth.",
     "Holy Spirit": "You speak as a gentle counselor.",
-    "Mary": "You speak with humility and warmth.",
-    "Moses": "You speak firmly as a leader and prophet.",
+    "Mary": "You speak with humility and comfort.",
+    "Moses": "You speak firmly as a leader.",
     "Abraham": "You speak as a father of faith.",
-    "Isaac": "You speak with reverence for God's promises.",
-    "Jacob": "You speak reflectively.",
-    "Noah": "You speak about obedience and faith.",
-    "Adam": "You speak about creation and purpose.",
-    "Eve": "You speak with humility and wisdom.",
-    "King David": "You speak poetically and emotionally.",
     "Solomon": "You speak with profound wisdom.",
-    "Isaiah": "You speak prophetically.",
-    "Jeremiah": "You speak with sorrow and hope.",
-    "Ezekiel": "You speak in visions and symbols.",
-    "Daniel": "You speak calmly and wisely.",
-    "Elijah": "You speak boldly.",
-    "Elisha": "You speak compassionately.",
-    "Job": "You speak from suffering transformed to wisdom.",
-    "Samuel": "You speak prophetically.",
-    "Ruth": "You speak kindly and loyally.",
-    "Esther": "You speak bravely.",
-    "Apostle Peter": "You speak passionately.",
+    "King David": "You speak poetically.",
     "Apostle Paul": "You speak like a teacher.",
-    "Apostle John": "You speak lovingly, emphasizing truth and light."
+    "Apostle John": "You speak lovingly."
   };
 
   return intros[characterName] || "";
@@ -448,7 +421,7 @@ const openrouter = new OpenAI({
 });
 
 //--------------------------------------------
-//  POST /api/chat — MAIN CHAT ROUTE
+//  POST /api/chat — MAIN CHAT
 //--------------------------------------------
 
 app.post("/api/chat", authenticateToken, async (req, res) => {
@@ -464,10 +437,11 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     const userId = req.user.id;
 
     //--------------------------------------------
-    // FREE LIMIT LOGIC
+    // FREE / CREDIT LOGIC
     //--------------------------------------------
 
     const count = await userMessageCount(userId);
+
     const userData = await pool.query(
       "SELECT credits, lifetime FROM users WHERE id = $1",
       [userId]
@@ -477,7 +451,7 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     const hasPaid = lifetime || credits > 0;
 
     if (count >= 5 && !hasPaid) {
-      return res.status(403).json({ error: "Free limit reached. Please upgrade or buy credits." });
+      return res.status(403).json({ error: "Free limit reached. Please buy credits." });
     }
 
     if (!lifetime && count >= 5) {
@@ -522,16 +496,16 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     }));
 
     //--------------------------------------------
-    // BUILD AI PAYLOAD
+    // AI RESPONSE
     //--------------------------------------------
 
     const systemPrompt = buildSystemPrompt(character.name);
-    const characterIntro = buildCharacterIntro(character.name);
+    const intro = buildCharacterIntro(character.name);
 
     const aiResponse = await openrouter.chat.completions.create({
       model: "google/gemini-2.0-flash-thinking-exp:free",
       messages: [
-        { role: "system", content: systemPrompt + "\n" + characterIntro },
+        { role: "system", content: systemPrompt + "\n" + intro },
         ...chatHistory,
         { role: "user", content: message }
       ],
@@ -562,117 +536,13 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  STRIPE: SUBSCRIPTIONS CHECKOUT
-//--------------------------------------------
-
-app.post("/api/create-checkout-session", authenticateToken, async (req, res) => {
-  try {
-    const { priceId } = req.body;
-
-    if (!priceId)
-      return res.status(400).json({ error: "Missing priceId" });
-
-    const user = await pool.query(
-      "SELECT email FROM users WHERE id = $1",
-      [req.user.id]
-    );
-
-    const email = user.rows[0].email;
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      customer_email: email,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.FRONTEND_URL}/billing-success`,
-      cancel_url: `${process.env.FRONTEND_URL}/billing-cancel`,
-      metadata: { userId: req.user.id.toString() }
-    });
-
-    res.json({ sessionId: session.id });
-
-  } catch (err) {
-    console.error("Stripe checkout error:", err);
-    res.status(500).json({ error: "Stripe error" });
-  }
-});
-
-//--------------------------------------------
-//  STRIPE: BILLING PORTAL
-//--------------------------------------------
-
-app.post("/api/customer-portal", authenticateToken, async (req, res) => {
-  try {
-    const user = await pool.query(
-      "SELECT email FROM users WHERE id = $1",
-      [req.user.id]
-    );
-
-    const email = user.rows[0].email;
-
-    const customers = await stripe.customers.list({ email, limit: 1 });
-
-    let customer =
-      customers.data.length > 0
-        ? customers.data[0]
-        : await stripe.customers.create({ email });
-
-    const portal = await stripe.billingPortal.sessions.create({
-      customer: customer.id,
-      return_url: process.env.FRONTEND_URL
-    });
-
-    res.json({ url: portal.url });
-
-  } catch (err) {
-    console.error("Stripe portal error:", err);
-    res.status(500).json({ error: "Could not load billing portal" });
-  }
-});
-
-//--------------------------------------------
-//  STRIPE: SUBSCRIPTION WEBHOOK
-//--------------------------------------------
-
-app.post("/webhook-subscriptions", async (req, res) => {
-  try {
-    const event = stripe.webhooks.constructEvent(
-      req.body,
-      req.headers["stripe-signature"],
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-
-    await stripeWebhookHandler(pool, event);
-
-    res.sendStatus(200);
-
-  } catch (err) {
-    console.error("Webhook handler error:", err);
-    res.sendStatus(400);
-  }
-});
-
-//--------------------------------------------
-//  GET USER SUBSCRIPTION STATUS
-//--------------------------------------------
-
-app.get("/api/subscription", authenticateToken, async (req, res) => {
-  try {
-    const sub = await getUserSubscription(pool, req.user.id);
-    res.json(sub || { active: false });
-  } catch (err) {
-    console.error("Subscription fetch error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-//--------------------------------------------
-//  STRIPE: CREDIT PURCHASE
+//  STRIPE: BUY CREDITS (ONE-TIME PAYMENT)
 //--------------------------------------------
 
 app.post("/api/buy-credits", authenticateToken, async (req, res) => {
   try {
     const { priceId } = req.body;
+
     if (!priceId)
       return res.status(400).json({ error: "Missing priceId" });
 
@@ -705,7 +575,7 @@ app.post("/api/buy-credits", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-//  CREDIT FULFILLMENT WEBHOOK
+//  STRIPE WEBHOOK: ADD CREDITS AFTER PAYMENT
 //--------------------------------------------
 
 app.post("/webhook", async (req, res) => {
@@ -723,21 +593,23 @@ app.post("/webhook", async (req, res) => {
       const purchaseType = session.metadata?.purchaseType;
 
       if (purchaseType === "credits") {
-        // Map Stripe price IDs to number of credits
+        // Map Stripe price IDs → # of credits you want to give
         const CREDIT_PACKS = {
           "price_10credits": 10,
           "price_25credits": 25,
           "price_50credits": 60
         };
 
-        const pack = CREDIT_PACKS[session.line_items?.[0]?.price?.id];
+        const priceId = session?.line_items?.[0]?.price?.id;
+        const credits = CREDIT_PACKS[priceId];
 
-        if (pack && userId) {
+        if (credits && userId) {
           await pool.query(
             "UPDATE users SET credits = credits + $1 WHERE id = $2",
-            [pack, userId]
+            [credits, userId]
           );
-          console.log(`Added ${pack} credits to user ${userId}`);
+
+          console.log(`Added ${credits} credits to user ${userId}`);
         }
       }
     }
@@ -787,7 +659,7 @@ app.use("/uploads", express.static(uploadsDir));
 app.use("/img", express.static(path.join(__dirname, "public/img")));
 
 //--------------------------------------------
-//  SERVE FRONTEND BUILD (React / Vue)
+//  SERVE FRONTEND BUILD
 //--------------------------------------------
 
 const frontendPath = path.join(__dirname, "dist");
@@ -799,7 +671,7 @@ if (fs.existsSync(frontendPath)) {
 }
 
 //--------------------------------------------
-// 404 HANDLER
+//  404 HANDLER
 //--------------------------------------------
 
 app.use((req, res) => {
@@ -831,15 +703,16 @@ app.listen(PORT, () => {
 });
 
 //--------------------------------------------
-//  GRACEFUL SHUTDOWN (NO EMOJIS - SAFE)
+//  GRACEFUL SHUTDOWN
 //--------------------------------------------
+
 process.on("SIGTERM", () => {
-  console.log("SIGTERM received - shutting down gracefully...");
+  console.log("SIGTERM received — shutting down gracefully...");
   serverClose();
 });
 
 process.on("SIGINT", () => {
-  console.log("SIGINT received - shutting down gracefully...");
+  console.log("SIGINT received — shutting down gracefully...");
   serverClose();
 });
 
