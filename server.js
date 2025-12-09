@@ -647,7 +647,14 @@ app.use("/uploads", express.static(uploadsDir));
 //  SERVE STATIC IMAGES
 //--------------------------------------------
 
+app.use("/img", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+});
+
 app.use("/img", express.static(path.join(__dirname, "public/img")));
+
 
 //--------------------------------------------
 //  SERVE FRONTEND BUILD
