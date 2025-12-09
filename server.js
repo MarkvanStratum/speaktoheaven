@@ -1,5 +1,5 @@
 //--------------------------------------------
-//  SERVER.JS — BIBLICAL AI CHAT EDITION (FIXED)
+//  SERVER.JS — BIBLICAL AI CHAT EDITION (FINAL FIXED)
 //--------------------------------------------
 
 import express from "express";
@@ -30,7 +30,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 
-// Stripe webhook: raw body
+// Stripe webhook handling
 app.use((req, res, next) => {
   if (req.originalUrl === "/webhook") {
     express.raw({ type: "application/json" })(req, res, next);
@@ -122,9 +122,7 @@ function authenticateToken(req, res, next) {
 }
 
 //--------------------------------------------
-//  AUTH ENDPOINTS (unchanged)
-//--------------------------------------------
-// (Keeping them identical—no changes needed)
+//  REGISTER
 //--------------------------------------------
 
 app.post("/api/register", async (req, res) => {
@@ -148,28 +146,25 @@ app.post("/api/register", async (req, res) => {
 
     res.status(201).json({ ok: true, message: "Registered successfully" });
   } catch (err) {
-    console.error("Register error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
+//--------------------------------------------
+//  LOGIN
+//--------------------------------------------
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body || {};
 
   try {
-    const result = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email]
-    );
-
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (result.rows.length === 0)
       return res.status(400).json({ error: "Invalid credentials" });
 
     const user = result.rows[0];
-
     const match = await bcrypt.compare(password, user.password);
-    if (!match)
-      return res.status(400).json({ error: "Invalid credentials" });
+    if (!match) return res.status(400).json({ error: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -179,7 +174,6 @@ app.post("/api/login", async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error("Login error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -208,50 +202,31 @@ app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => 
   if (!req.file)
     return res.status(400).json({ error: "No file uploaded" });
 
-  const fileUrl = `/uploads/${req.file.filename}`;
-  res.json({ url: fileUrl });
+  res.json({ url: `/uploads/${req.file.filename}` });
 });
 
 app.use("/uploads", express.static(uploadsDir));
 
 //--------------------------------------------
-//  SERVE STATIC IMAGES — FIXED VERSION
+//  SERVE STATIC IMAGES
 //--------------------------------------------
 
 const imageDir = path.resolve(__dirname, "public/img");
-console.log("📸 Image folder:", imageDir);
-
-app.use("/img", (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Cross-Origin-Resource-Policy", "cross-origin");
-  next();
-});
-
-app.use("/img", express.static(imageDir, {
-  fallthrough: false,
-  index: false
-}));
-
-app.use("/img", (req, res) => {
-  console.log("❌ IMAGE NOT FOUND:", req.originalUrl);
-  res.status(404).send("Image not found");
-});
+app.use("/img", express.static(imageDir));
 
 //--------------------------------------------
-//  SERVE FRONTEND BUILD
+//  FRONTEND STATIC FILES
 //--------------------------------------------
 
 const frontendPath = path.join(__dirname, "public");
 if (fs.existsSync(frontendPath)) {
   app.use(express.static(frontendPath));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(frontendPath, "index.html"));
-  });
 }
 
 //--------------------------------------------
-//  OPENROUTER CLIENT (REQUIRED)
+//  OPENROUTER CLIENT
 //--------------------------------------------
+
 const openrouter = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
@@ -262,24 +237,26 @@ const openrouter = new OpenAI({
 });
 
 //--------------------------------------------
-//  BIBLICAL SYSTEM PROMPT
+//  SYSTEM PROMPT
 //--------------------------------------------
+
 function buildSystemPrompt(characterName) {
   return `
 You are roleplaying as **${characterName}**, a Biblical figure.
 
-- Stay faithful to Scripture.
+- Stay faithful to scripture.
 - Speak in the tone and personality of ${characterName}.
-- Provide wisdom, comfort, correction, and teaching.
+- Provide wisdom, comfort, and correction.
 - Quote scripture with (Book Chapter:Verse).
-- Never claim to be God literally.
+- Never claim to literally be God.
 - Say: "I am an AI inspired by the Bible."
 `;
 }
 
 //--------------------------------------------
-//  CHAT WITH AI
+//  CHAT ROUTE (THE ONLY ONE)
 //--------------------------------------------
+
 app.post("/api/chat", authenticateToken, async (req, res) => {
   try {
     const { characterId, message } = req.body;
@@ -293,34 +270,28 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
     const userId = req.user.id;
 
-    //--------------------------------------------
-    // SAVE USER MESSAGE
-    //--------------------------------------------
+    // Save user message
     await pool.query(
       `INSERT INTO messages (user_id, character_id, from_user, text)
        VALUES ($1, $2, true, $3)`,
       [userId, characterId, message]
     );
 
-    //--------------------------------------------
-    // LOAD LAST 20 MESSAGES
-    //--------------------------------------------
-    const historyQuery = await pool.query(
+    // Load chat history
+    const history = await pool.query(
       `SELECT * FROM messages
-         WHERE user_id = $1 AND character_id = $2
-         ORDER BY created_at ASC
-         LIMIT 20`,
+       WHERE user_id = $1 AND character_id = $2
+       ORDER BY created_at ASC
+       LIMIT 20`,
       [userId, characterId]
     );
 
-    const chatHistory = historyQuery.rows.map(m => ({
+    const chatHistory = history.rows.map(m => ({
       role: m.from_user ? "user" : "assistant",
       content: m.text
     }));
 
-    //--------------------------------------------
-    // SEND TO OPENROUTER
-    //--------------------------------------------
+    // Send to OpenRouter
     const aiResponse = await openrouter.chat.completions.create({
       model: "google/gemini-2.0-flash-thinking-exp",
       messages: [
@@ -332,47 +303,31 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
       max_tokens: 400
     });
 
-    const reply = aiResponse.choices?.[0]?.message?.content || "(No response)";
+    const reply = aiResponse.choices?.[0]?.message?.content;
 
-    //--------------------------------------------
-    // SAVE AI MESSAGE
-    //--------------------------------------------
-    await pool.query(
-      `INSERT INTO messages (user_id, character_id, from_user, text)
-       VALUES ($1, $2, false, $3)`,
-      [userId, characterId, reply]
-    );
+    // Save assistant reply
+    if (reply) {
+      await pool.query(
+        `INSERT INTO messages (user_id, character_id, from_user, text)
+         VALUES ($1, $2, false, $3)`,
+        [userId, characterId, reply]
+      );
+    }
 
-    //--------------------------------------------
-    // RETURN TO FRONTEND
-    //--------------------------------------------
-    res.json({ reply });
+    res.json({ reply: reply || "(No response)" });
 
   } catch (err) {
-    console.error("💥 Chat error:", err.response?.data || err);
+    console.error("🔥 Chat error:", err.response?.data || err);
     res.status(500).json({ error: "AI service error" });
   }
 });
-
 
 //--------------------------------------------
 //  404 HANDLER
 //--------------------------------------------
 
 app.use((req, res) => {
-  res.status(404).json({
-    error: "Endpoint not found",
-    path: req.originalUrl
-  });
-});
-
-//--------------------------------------------
-//  GLOBAL ERROR HANDLER
-//--------------------------------------------
-
-app.use((err, req, res, next) => {
-  console.error("🔥 SERVER ERROR:", err);
-  res.status(500).json({ error: "Internal server error" });
+  res.status(404).json({ error: "Endpoint not found" });
 });
 
 //--------------------------------------------
@@ -381,34 +336,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log("======================================");
-  console.log(`📖 HOLY CHAT SERVER RUNNING`);
+  console.log("📖 HOLY CHAT SERVER RUNNING");
   console.log(`🌍 Port: ${PORT}`);
-  console.log(`🕊 Mode: ${process.env.NODE_ENV || "development"}`);
   console.log("======================================");
 });
-
-//--------------------------------------------
-//  GRACEFUL SHUTDOWN
-//--------------------------------------------
-
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received — shutting down gracefully...");
-  serverClose();
-});
-
-process.on("SIGINT", () => {
-  console.log("SIGINT received — shutting down gracefully...");
-  serverClose();
-});
-
-function serverClose() {
-  try {
-    console.log("Closing database pool...");
-    pool.end();
-  } catch (e) {
-    console.error("Error closing DB:", e);
-  }
-
-  console.log("Shutdown complete.");
-  process.exit(0);
-}
