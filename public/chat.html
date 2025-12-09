@@ -174,9 +174,13 @@ header::after{
    ALL CHAT LOGIC PRESERVED – ONLY GIFT/PHOTO SYSTEM REMOVED
    ============================================================ */
 
-const backendUrl = "https://charmr-jfmc.onrender.com";
+/* CHANGE 1: Correct backend URL */
+const backendUrl = "https://speaktoheaven.onrender.com";
+
+/* CHANGE 2: Use ?character= instead of ?id= */
 const urlParams = new URLSearchParams(window.location.search);
-const girlId = urlParams.get("id"); // still used by your backend
+const girlId = urlParams.get("character");
+
 const token = localStorage.getItem("token");
 
 const chatContainer = document.getElementById("chat-container");
