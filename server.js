@@ -15,11 +15,6 @@ import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 
-import {
-  sendWelcomeEmail,
-  sendPasswordResetEmail
-} from "./email-ses.js";
-
 //--------------------------------------------
 //  BASIC SETUP
 //--------------------------------------------
@@ -163,8 +158,6 @@ app.post("/api/register", async (req, res) => {
       [email, hashed]
     );
 
-    sendWelcomeEmail(email).catch(() => {});
-
     res.status(201).json({ ok: true, message: "Registered successfully" });
   } catch (err) {
     console.error("Register error:", err);
@@ -236,8 +229,6 @@ app.post("/api/request-password-reset", async (req, res) => {
     `,
       [token, expires, email]
     );
-
-    await sendPasswordResetEmail(email, token);
 
     res.json({ message: "If the email exists, a reset link has been sent" });
   } catch (err) {
