@@ -152,6 +152,41 @@
 </head>
 
 <body>
+
+<!-- ⭐ Added: Save original query string -->
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<!-- ⭐ Added: Save affiliate SUB ID -->
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id", "subid", "aff_sub", "aff_sub4", "click_id", "cid", "tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+</script>
+
+<!-- ⭐ Added: Save GoAffPro ref -->
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref = qs.get("ref") 
+           || localStorage.getItem("gaf_ref") 
+           || (document.cookie.match(/gaf_ref=([^;]+)/) || [])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
+</script>
+
 <div class="safe">Bezpečná platba SSL</div>
 
 <div class="wrap">
@@ -364,7 +399,24 @@ window.addEventListener('DOMContentLoaded', () => {
         throw new Error("Platba nebyla dokončena.");
       }
 
-      window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+      /* ⭐ ZA-STYLE REDIRECT WITH PARAMS */
+      const orig = sessionStorage.getItem("orig_qs") || "";
+      const qs = new URLSearchParams(orig);
+
+      // Add Stripe paymentIntent.id to "v"
+      qs.set("v", conf.paymentIntent.id);
+
+      // Restore affiliate sub_id
+      const sub = localStorage.getItem("aff_sub_id");
+      if (sub) qs.set("sub_id", sub);
+
+      // Restore GoAffPro ref
+      const ref = localStorage.getItem("gaf_ref");
+      if (ref) qs.set("ref", ref);
+
+      window.location.href =
+        "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062"
+        + "?" + qs.toString();
 
     } catch(err) {
 
