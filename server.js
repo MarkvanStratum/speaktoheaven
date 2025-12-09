@@ -250,6 +250,112 @@ if (fs.existsSync(frontendPath)) {
 }
 
 //--------------------------------------------
+//  OPENROUTER CLIENT (REQUIRED)
+//--------------------------------------------
+const openrouter = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
+  defaultHeaders: {
+    "HTTP-Referer": "https://speaktoheaven.com",
+    "X-Title": "Speak To Heaven"
+  }
+});
+
+//--------------------------------------------
+//  BIBLICAL SYSTEM PROMPT
+//--------------------------------------------
+function buildSystemPrompt(characterName) {
+  return `
+You are roleplaying as **${characterName}**, a Biblical figure.
+
+- Stay faithful to Scripture.
+- Speak in the tone and personality of ${characterName}.
+- Provide wisdom, comfort, correction, and teaching.
+- Quote scripture with (Book Chapter:Verse).
+- Never claim to be God literally.
+- Say: "I am an AI inspired by the Bible."
+`;
+}
+
+//--------------------------------------------
+//  CHAT WITH AI
+//--------------------------------------------
+app.post("/api/chat", authenticateToken, async (req, res) => {
+  try {
+    const { characterId, message } = req.body;
+
+    if (!characterId || !message)
+      return res.status(400).json({ error: "Missing character or message" });
+
+    const character = biblicalProfiles.find(c => c.id === Number(characterId));
+    if (!character)
+      return res.status(400).json({ error: "Invalid character" });
+
+    const userId = req.user.id;
+
+    //--------------------------------------------
+    // SAVE USER MESSAGE
+    //--------------------------------------------
+    await pool.query(
+      `INSERT INTO messages (user_id, character_id, from_user, text)
+       VALUES ($1, $2, true, $3)`,
+      [userId, characterId, message]
+    );
+
+    //--------------------------------------------
+    // LOAD LAST 20 MESSAGES
+    //--------------------------------------------
+    const historyQuery = await pool.query(
+      `SELECT * FROM messages
+         WHERE user_id = $1 AND character_id = $2
+         ORDER BY created_at ASC
+         LIMIT 20`,
+      [userId, characterId]
+    );
+
+    const chatHistory = historyQuery.rows.map(m => ({
+      role: m.from_user ? "user" : "assistant",
+      content: m.text
+    }));
+
+    //--------------------------------------------
+    // SEND TO OPENROUTER
+    //--------------------------------------------
+    const aiResponse = await openrouter.chat.completions.create({
+      model: "google/gemini-2.0-flash-thinking-exp",
+      messages: [
+        { role: "system", content: buildSystemPrompt(character.name) },
+        ...chatHistory,
+        { role: "user", content: message }
+      ],
+      temperature: 0.7,
+      max_tokens: 400
+    });
+
+    const reply = aiResponse.choices?.[0]?.message?.content || "(No response)";
+
+    //--------------------------------------------
+    // SAVE AI MESSAGE
+    //--------------------------------------------
+    await pool.query(
+      `INSERT INTO messages (user_id, character_id, from_user, text)
+       VALUES ($1, $2, false, $3)`,
+      [userId, characterId, reply]
+    );
+
+    //--------------------------------------------
+    // RETURN TO FRONTEND
+    //--------------------------------------------
+    res.json({ reply });
+
+  } catch (err) {
+    console.error("💥 Chat error:", err.response?.data || err);
+    res.status(500).json({ error: "AI service error" });
+  }
+});
+
+
+//--------------------------------------------
 //  404 HANDLER
 //--------------------------------------------
 
