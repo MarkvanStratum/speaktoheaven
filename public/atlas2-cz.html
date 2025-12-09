@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Bezpečná pokladna</title>
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Google tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    :root{
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
+      --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
+    .safe{background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px}
+
+    .grid{
+      display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:18px;
+    }
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:#fff; border:1px solid var(--line);
+      padding:22px; border-radius:12px;
+    }
+
+    .page-title{
+      font-size:28px; font-weight:900; display:flex; gap:8px; margin:6px 0 14px;
+    }
+    .stars{ color:#f6b80c; font-size:15px }
+    .reviews{ color:var(--muted); font-size:13px; margin-left:6px }
+
+    .h2{ font-size:18px; font-weight:800; margin:10px 0 14px }
+    .sub{ font-size:13px; color:#5b6b82 }
+
+    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    @media(max-width:620px){ .form-grid{grid-template-columns:1fr} }
+
+    .input, .select, .el{
+      width:100%; border:1px solid #cfd6e4; border-radius:10px; padding:12px;
+      background:#fff; font-size:15px;
+    }
+
+    .btn{
+      width:100%; padding:12px; border:none; border-radius:12px;
+      background:#16a34a; color:#fff; cursor:pointer; font-weight:900;
+    }
+
+    .logos{display:flex; gap:10px; margin-top:12px}
+    .logos img{height:20px}
+
+    .err{
+      display:none; background:#fff1f1; border:1px solid #f5bcbc;
+      padding:10px; border-radius:10px; margin-top:10px; color:#9a1a1a;
+    }
+    .err[aria-hidden="false"]{display:block}
+
+    .widget{
+      background:#fff; border:1px solid var(--line);
+      padding:16px; border-radius:12px;
+    }
+    .widget + .widget{margin-top:12px}
+
+    .order-row{
+      display:flex; justify-content:space-between;
+      padding:6px 0; border-top:1px dashed #e6eaf1;
+    }
+
+    .delivery{
+      display:flex; gap:12px; padding:12px;
+      border:1px dashed #d9e2ef; border-radius:10px; background:#f7fbff;
+    }
+    .delivery img{
+      width:52px;height:52px;object-fit:cover;border-radius:8px;
+    }
+
+    .trust{
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;
+    }
+    .trust .box{border:1px solid var(--line); padding:8px; border-radius:10px}
+
+    .step{display:none}
+    .step[aria-hidden="false"]{display:block}
+
+    /* ================================
+       ZA-STYLE LOADING OVERLAY (OPTION B)
+       ================================ */
+    .loading-overlay{
+      position:fixed; inset:0;
+      background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center;
+      z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{display:flex;}
+
+    .loading-box{
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .loading-title{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:18px;
+      color:#2a3b55;
+    }
+
+    .progress-wrap{
+      width:100%;
+      height:12px;
+      background:#ecf1f8;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite;
+    }
+
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+<div class="safe">Bezpečná platba SSL</div>
+
+<div class="wrap">
+  <div class="page-title">
+    Bezpečná pokladna 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 recenzí)</span>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+
+      <!-- STEP 1 -->
+      <section id="step1" class="step" aria-hidden="false">
+        <div class="h2">1. Informace</div>
+
+        <div class="form-grid">
+          <div><div class="label">Jméno</div><input id="firstName" class="input" placeholder="Jana"></div>
+          <div><div class="label">Příjmení</div><input id="lastName" class="input" placeholder="Nováková"></div>
+        </div>
+
+        <div class="form-grid">
+          <div style="grid-column:1 / -1"><div class="label">Adresa</div><input id="billingStreet" class="input"></div>
+          <div><div class="label">PSČ</div><input id="billingPostcode" class="input"></div>
+          <div><div class="label">Město</div><input id="billingCity" class="input"></div>
+        </div>
+
+        <div class="form-grid">
+          <div><div class="label">E-mail</div><input id="emailInput" class="input" type="email"></div>
+          <div><div class="label">Země</div><input id="billingCountry" class="input" placeholder="Czechia"></div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <div class="label">Mezinárodní předvolba</div>
+            <select id="phonePrefix" class="select">
+              <option value="+420">+420 — Czechia</option>
+            </select>
+          </div>
+          <div><div class="label">Telefon</div><input id="phoneNumber" class="input"></div>
+        </div>
+
+        <input id="nameInput" class="input" style="display:none">
+
+        <button id="nextBtn" class="btn" type="button">Pokračovat</button>
+
+        <div class="logos">
+          <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Platba</div>
+        <p class="sub">Údaje o kartě jsou šifrované a zpracovává je Stripe.</p>
+
+        <div class="form-grid-1">
+          <div>
+            <div class="label">Číslo karty</div>
+            <div id="card-number" class="el"></div>
+          </div>
+          <div class="form-grid">
+            <div><div class="label">Platnost</div><div id="card-expiry" class="el"></div></div>
+            <div><div class="label">CVC</div><div id="card-cvc" class="el"></div></div>
+          </div>
+        </div>
+
+        <div id="err" class="err" aria-hidden="true"></div>
+
+        <div style="display:flex; gap:10px; margin-top:12px">
+          <button id="backBtn" class="btn muted" style="width:40%" type="button">← Zpět</button>
+          <button id="payNow" class="btn" style="width:60%" type="button">Zaplatit bezpečně</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT -->
+    <aside>
+      <div class="widget">
+        <div class="w-title" style="text-align:center">Co říkají naši zákazníci</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p class="tiny" style="text-align:center">Včera jsem svůj produkt obdržela. Skvělá zkušenost!</p>
+      </div>
+
+      <div class="widget">
+        <div class="delivery">
+          <img id="sidebarImg">
+          <div><div style="font-weight:800">Rychlé doručení</div><div class="tiny">3–5 pracovních dnů</div></div>
+          <div style="margin-left:auto;font-weight:800">Zdarma</div>
+        </div>
+
+        <div class="w-title" style="margin-top:14px">Shrnutí objednávky</div>
+        <div class="order-row"><span>Celkem</span><span id="orderTotal">50 Kč</span></div>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">DŮVĚRYHODNÝ OBCHOD</div>
+        <div class="trust">
+          <div class="box"><div class="big">99%</div><div class="small">Spokojenost</div></div>
+          <div class="box"><div class="big">SSL</div><div class="small">Zabezpečení</div></div>
+          <div class="box"><div class="big">250k Kč</div><div class="small">Ochrana</div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ⭐ ZA-STYLE LOADING OVERLAY (OPTION B) -->
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+  <div class="loading-box">
+    <div class="loading-title">Zpracováváme platbu…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Prosím čekejte, může to trvat několik sekund…</p>
+  </div>
+</div>
+
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3"></script>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const errBox = document.getElementById('err');
+
+  const nameInput = document.getElementById('nameInput');
+  const firstName = document.getElementById('firstName');
+  const lastName = document.getElementById('lastName');
+
+  function show(o){ o.setAttribute('aria-hidden','false'); }
+  function hide(o){ o.setAttribute('aria-hidden','true'); }
+
+  nextBtn.addEventListener('click', ()=>{
+    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+    hide(step1); show(step2);
+  });
+
+  backBtn.addEventListener('click', ()=>{
+    hide(step2); show(step1);
+  });
+
+  // Stripe elements
+  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const elements = stripe.elements();
+
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc = elements.create('cardCvc');
+
+  cardNumber.mount('#card-number');
+  cardExpiry.mount('#card-expiry');
+  cardCvc.mount('#card-cvc');
+
+  const payBtn = document.getElementById('payNow');
+
+  payBtn.addEventListener('click', async () => {
+
+    payBtn.disabled = true;
+    payBtn.style.pointerEvents = "none";
+    payBtn.style.opacity = "0.6";
+
+    errBox.setAttribute('aria-hidden','true');
+
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = "flex";
+    overlay.setAttribute('aria-hidden','false');
+
+    const name = nameInput.value;
+    const email = document.getElementById('emailInput').value;
+    const phone = document.getElementById('phoneNumber').value;
+
+    const address = {
+      line1: document.getElementById('billingStreet').value,
+      city: document.getElementById('billingCity').value,
+      postal_code: document.getElementById('billingPostcode').value,
+      country: "CZ"
+    };
+
+    try {
+      const pmRes = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: { name, email, phone, address }
+      });
+      if (pmRes.error) throw new Error(pmRes.error.message);
+
+      const resp = await fetch("/api/stripe/one-time-23-95", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          paymentMethodId: pmRes.paymentMethod.id,
+          name, email, phone, address
+        })
+      });
+
+      const data = await resp.json();
+      if (!data.clientSecret) throw new Error(data.error || "Nepodařilo se zahájit platbu.");
+
+      const conf = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: pmRes.paymentMethod.id
+      });
+
+      if (conf.error) throw new Error(conf.error.message);
+      if (!conf.paymentIntent || conf.paymentIntent.status !== "succeeded") {
+        throw new Error("Platba nebyla dokončena.");
+      }
+
+      window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+
+    } catch(err) {
+
+      errBox.textContent = err.message;
+      errBox.setAttribute('aria-hidden',"false");
+
+      payBtn.disabled = false;
+      payBtn.style.pointerEvents = "auto";
+      payBtn.style.opacity = "1";
+
+      const overlay = document.getElementById('loading-overlay');
+      overlay.style.display = "none";
+      overlay.setAttribute('aria-hidden','true');
+    }
+
+  });
+
+});
+</script>
+
+</body>
+</html>
