@@ -653,7 +653,7 @@ app.use("/img", express.static(path.join(__dirname, "public/img")));
 //  SERVE FRONTEND BUILD
 //--------------------------------------------
 
-const frontendPath = path.join(__dirname, "dist");
+const frontendPath = path.join(__dirname, "public");
 if (fs.existsSync(frontendPath)) {
   app.use(express.static(frontendPath));
   app.get("*", (req, res) => {
