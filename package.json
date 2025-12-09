@@ -1,24 +1,33 @@
 {
-  "name": "speaktoheaven",
+  "name": "holy-chat-server",
   "version": "1.0.0",
-  "description": "Bible AI chat using OpenRouter + Supabase + Stripe",
+  "description": "AI chat server where users speak with God, Jesus, Mary, Moses, and other biblical characters.",
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.2",
-    "openai": "^4.56.0",
-    "stripe": "^16.8.0",
-    "@supabase/supabase-js": "^2.43.1"
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.52.0",
+    "pg": "^8.11.3",
+    "sib-api-v3-sdk": "^8.5.0",
+    "stripe": "^14.0.0",
+    "path": "^0.12.7",
+    "fs": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   },
   "engines": {
-    "node": ">=18 <23"
-  }
+    "node": ">=18"
+  },
+  "license": "MIT"
 }
