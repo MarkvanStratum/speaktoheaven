@@ -1,292 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bible Voices – Chat</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Voice – Chat</title>
 
-<style>
-:root{
-  --gold:#d5b262;
-  --gold-soft:#ecd9a3;
-  --gold-light:#f8f1d8;
-  --white:#ffffff;
-  --parchment:#f7f3e8;
-  --bg:#faf9f4;
-  --text:#3b2f14;
-  --shadow:rgba(213,178,98,0.32);
-}
+  <style>
+    body {
+      margin: 0;
+      background: #faf8f0;
+      font-family: Georgia, serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-*{box-sizing:border-box;}
+    header {
+      text-align: center;
+      padding: 15px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      font-size: 24px;
+      color: #7b5e20;
+      font-weight: bold;
+    }
 
-body{
-  margin:0;
-  font-family:"Georgia", serif;
-  background:var(--bg);
-  color:var(--text);
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-  overflow:hidden;
-}
+    #chatBox {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
 
-/* HEADER */
-header{
-  background-image:url("god.webp");
-  background-size:cover;
-  background-position:center;
-  padding:22px 0 28px;
-  position:relative;
-  text-align:center;
-}
-header::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(255,255,255,0.75);
-  backdrop-filter:blur(4px);
-}
-.header-content{
-  position:relative;
-  z-index:2;
-}
-.halo-icon{
-  width:22px;
-  height:22px;
-  vertical-align:middle;
-  margin-right:6px;
-}
-.chat-name{
-  font-size:1.7rem;
-  color:#6a5521;
-  font-weight:700;
-}
+    .message {
+      max-width: 65%;
+      margin: 10px 0;
+      padding: 12px 16px;
+      border-radius: 14px;
+      line-height: 1.4;
+    }
 
-/* CHAT AREA */
-#chat-container{
-  flex:1;
-  overflow-y:auto;
-  padding:20px;
-  scroll-behavior:smooth;
-}
+    .user {
+      background: #e2e8f0;
+      margin-left: auto;
+    }
 
-.message-row{
-  margin-bottom:16px;
-  display:flex;
-  align-items:flex-start;
-}
+    .bot {
+      background: #fff;
+      border: 1px solid #e0d6c3;
+    }
 
-/* USER bubble */
-.message-user{
-  margin-left:auto;
-  background:var(--white);
-  color:#4d3d1d;
-  padding:12px 16px;
-  border-radius:14px;
-  border:1px solid var(--gold-soft);
-  box-shadow:0 8px 22px rgba(213,178,98,0.15);
-  max-width:70%;
-  white-space:pre-wrap;
-  line-height:1.45;
-}
+    #inputBar {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
 
-/* BIBLE VOICE bubble */
-.message-assistant{
-  margin-right:auto;
-  background:var(--parchment);
-  color:#3c2d18;
-  padding:14px 16px;
-  border-radius:14px;
-  border:1px solid var(--gold);
-  max-width:70%;
-  white-space:pre-wrap;
-  line-height:1.5;
-  box-shadow:0 12px 28px rgba(213,178,98,0.25);
-}
+    #messageInput {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      font-size: 16px;
+    }
 
-/* Input area */
-#input-area{
-  padding:16px;
-  background:var(--white);
-  border-top:1px solid var(--gold-soft);
-  display:flex;
-  gap:10px;
-}
-#message-input{
-  flex:1;
-  padding:14px;
-  border-radius:12px;
-  border:1px solid var(--gold-soft);
-  font-size:1.1rem;
-}
-#message-input:focus{
-  outline:none;
-  border-color:var(--gold);
-  box-shadow:0 0 0 4px rgba(213,178,98,0.28);
-}
+    #sendBtn {
+      padding: 12px 20px;
+      margin-left: 10px;
+      background: #c5a04e;
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
 
-#send-btn{
-  background:linear-gradient(180deg,var(--gold),#b69548);
-  border:none;
-  color:white;
-  padding:0 22px;
-  border-radius:12px;
-  cursor:pointer;
-  font-size:1.1rem;
-  font-weight:700;
-}
-#send-btn:hover{ filter:brightness(1.08); }
-
-/* Typing indicator */
-.typing-indicator{
-  margin:6px 0 0 4px;
-  font-style:italic;
-  font-size:0.9rem;
-  color:#7a6638;
-}
-</style>
+    #sendBtn:hover {
+      background: #a7853b;
+    }
+  </style>
 </head>
-
 <body>
 
-<header>
-  <div class="header-content">
-    <!-- Halo icon -->
-    <svg class="halo-icon" viewBox="0 0 64 64">
-      <ellipse cx="32" cy="20" rx="20" ry="6" fill="#d5b262"/>
-    </svg>
+<header id="chatName">Bible Voice</header>
 
-    <span id="characterName" class="chat-name">Bible Voice</span>
-  </div>
-</header>
+<div id="chatBox"></div>
 
-<div id="chat-container"></div>
-<div id="typingIndicator" class="typing-indicator" style="display:none;">The voice is considering your words...</div>
-
-<!-- INPUT AREA -->
-<div id="input-area">
-  <input id="message-input" type="text" placeholder="Speak your heart or ask your question..." autocomplete="off"/>
-  <button id="send-btn">Send</button>
+<div id="inputBar">
+  <input id="messageInput" type="text" placeholder="Speak your heart or ask your question…" />
+  <button id="sendBtn" onclick="sendMessage()">Send</button>
 </div>
 
 <script>
-/* ============================================================
-   ALL CHAT LOGIC PRESERVED – ONLY GIFT/PHOTO SYSTEM REMOVED
-   ============================================================ */
+  const backendUrl = "https://speaktoheaven.onrender.com";
 
-/* CHANGE 1: Correct backend URL */
-const backendUrl = "https://speaktoheaven.onrender.com";
+  const params = new URLSearchParams(window.location.search);
+  const characterId = Number(params.get("character"));
 
-/* CHANGE 2: Use ?character= instead of ?id= */
-const urlParams = new URLSearchParams(window.location.search);
-const girlId = urlParams.get("character");
+  const token = localStorage.getItem("token");
 
-const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first.");
+    window.location.href = "/login.html";
+  }
 
-const chatContainer = document.getElementById("chat-container");
-const input = document.getElementById("message-input");
-const sendBtn = document.getElementById("send-btn");
-const typingIndicator = document.getElementById("typingIndicator");
-const characterNameEl = document.getElementById("characterName");
+  if (!characterId) {
+    alert("Error: No character selected.");
+  }
 
-if (!token){
-  alert("Please log in first.");
-  window.location.href = "login.html";
-}
+  const chatBox = document.getElementById("chatBox");
+  const chatName = document.getElementById("chatName");
 
-/* Load character name for header */
-async function loadCharacterProfile(){
-  try{
-    const res = await fetch(`${backendUrl}/api/profile/${girlId}`);
+  // Load profile info
+  async function loadProfile() {
+    const res = await fetch(`${backendUrl}/api/profiles`);
+    const profiles = await res.json();
+    const profile = profiles.find(p => p.id === characterId);
+
+    if (profile) {
+      chatName.textContent = profile.name;
+    }
+  }
+
+  // Load messages
+  async function loadMessages() {
+    const res = await fetch(`${backendUrl}/api/messages/${characterId}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
     const data = await res.json();
-    if (data && data.name){
-      characterNameEl.textContent = data.name;
-    }
-  }catch(e){}
-}
-loadCharacterProfile();
+    chatBox.innerHTML = "";
 
-/* Render messages */
-function addMessage(text, sender){
-  const row = document.createElement("div");
-  row.className = "message-row";
-
-  const bubble = document.createElement("div");
-  bubble.className = sender === "user" ? "message-user" : "message-assistant";
-  bubble.textContent = text;
-
-  row.appendChild(bubble);
-  chatContainer.appendChild(row);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-/* Load chat history */
-async function loadMessages(){
-  try {
-    const res = await fetch(`${backendUrl}/api/messages/${girlId}`, {
-      headers:{ "Authorization":`Bearer ${token}` }
+    data.forEach(msg => {
+      addMessage(msg.text, msg.from_user ? "user" : "bot");
     });
-    const messages = await res.json();
 
-    chatContainer.innerHTML = "";
-    messages.forEach(m=>{
-      addMessage(m.text, m.from === "user" ? "user" : "assistant");
-    });
-  } catch(e){
-    console.error("Error loading messages:", e);
+    chatBox.scrollTop = chatBox.scrollHeight;
   }
-}
-loadMessages();
 
-/* Send message */
-async function sendMessage(){
-  const text = input.value.trim();
-  if (!text) return;
+  function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.className = `message ${sender}`;
+    div.textContent = text;
+    chatBox.appendChild(div);
+  }
 
-  addMessage(text, "user");
-  input.value = "";
-  typingIndicator.style.display = "block";
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    if (!text) return;
 
-  try {
-    await fetch(`${backendUrl}/api/send`, {
-      method:"POST",
-      headers:{
-        "Authorization":`Bearer ${token}`,
-        "Content-Type":"application/json"
+    addMessage(text, "user");
+    input.value = "";
+
+    const res = await fetch(`${backendUrl}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
-      body:JSON.stringify({ girlId, text })
+      body: JSON.stringify({
+        characterId,
+        message: text
+      })
     });
 
-    // Poll for response
-    setTimeout(checkForNewMessages, 1500);
+    const data = await res.json();
 
-  } catch(e){
-    console.error("Send error:", e);
+    addMessage(data.reply || "(No response)", "bot");
+
+    chatBox.scrollTop = chatBox.scrollHeight;
   }
-}
 
-async function checkForNewMessages(){
-  try{
-    const res = await fetch(`${backendUrl}/api/messages/${girlId}`, {
-      headers:{ "Authorization":`Bearer ${token}` }
-    });
-    const messages = await res.json();
-
-    const last = messages[messages.length-1];
-    if (last && last.from !== "user"){
-      typingIndicator.style.display = "none";
-      addMessage(last.text, "assistant");
-    }
-  }catch(e){
-    console.error("Message poll error:", e);
-  }
-}
-
-/* EVENTS */
-sendBtn.onclick = sendMessage;
-input.onkeydown = e=>{
-  if (e.key === "Enter") sendMessage();
-};
+  // Initialize
+  loadProfile();
+  loadMessages();
 </script>
 
 </body>
