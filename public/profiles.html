@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bible Voices – Choose a Voice to Speak With</title>
+
+  <!-- Google tag (unchanged) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8');
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+
+<style>
+  :root{
+    --gold:#d5b262;
+    --gold-soft:#ecd9a3;
+    --gold-light:#f8f1d8;
+    --white:#ffffff;
+    --bg:#faf9f4;
+    --text:#3b2f14;
+    --shadow:rgba(213,178,98,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Georgia", serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* HEADER (Divine Style) */
+  header{
+    text-align:center;
+    padding: 40px 20px 20px;
+    background-image:url("god.webp");
+    background-size:cover;
+    background-position:center;
+    position:relative;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(4px);
+  }
+  .header-content{
+    position:relative;
+    z-index:2;
+  }
+
+  /* SVG LOGO */
+  .logo-svg{
+    width:200px;
+    height:auto;
+    display:block;
+    margin:0 auto;
+  }
+  .header-sub{
+    margin-top:10px;
+    font-size:1rem;
+    color:#5d4c27;
+    font-style:italic;
+  }
+
+  /* NAV BAR (kept logic, changed visuals) */
+  nav{
+    background:#fff;
+    border-bottom:1px solid #e6dab2;
+    padding:10px 20px;
+    display:flex;
+    justify-content:flex-end;
+    gap:20px;
+  }
+  nav a{
+    font-size:24px;
+    color:#8d743c;
+    text-decoration:none;
+  }
+  nav a:hover{
+    color:#b69548;
+  }
+
+  /* Credits bubble */
+  #credit-info{
+    text-align:center;
+    background:var(--white);
+    border:1px solid var(--gold-soft);
+    box-shadow:0 10px 25px rgba(213,178,98,0.15);
+    padding:10px 20px;
+    font-size:1rem;
+    font-weight:600;
+    color:#6a5521;
+    width:fit-content;
+    margin:20px auto;
+    border-radius:999px;
+  }
+
+  /* Main title & button */
+  .page-title{
+    text-align:center;
+    font-size:2rem;
+    color:#6a5521;
+    margin-bottom:10px;
+  }
+
+  .subtitle{
+    text-align:center;
+    font-size:1rem;
+    color:#7a6638;
+    font-style:italic;
+    margin-top:-6px;
+  }
+
+  .jump-btn{
+    margin:14px auto 20px;
+    display:inline-block;
+    padding:12px 20px;
+    background:linear-gradient(180deg, var(--gold), #b69548);
+    color:#fff;
+    font-weight:700;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:0 10px 25px rgba(213,178,98,0.25);
+  }
+  .jump-btn:hover{
+    filter:brightness(1.08);
+  }
+
+  /* Profile grid */
+  .profile-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 22px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+  }
+
+  .profile-card {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(213,178,98,.18);
+    border: 1px solid var(--gold-soft);
+    text-align: center;
+    padding: 12px;
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+  .profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 50px rgba(213,178,98,.28);
+  }
+  .profile-card img {
+    width: 100%;
+    border-radius: 10px;
+  }
+  .profile-card h3 {
+    margin: 10px 0 4px;
+    font-size: 1.15rem;
+    color:#5b4823;
+  }
+  .profile-card p {
+    margin: 4px 0 0;
+    color:#7a6638;
+    font-size: .95rem;
+  }
+
+  /* Buttons */
+  .btn-group {
+    margin-top: 10px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+  }
+  .btn-group button {
+    padding: 8px 14px;
+    background: linear-gradient(180deg, var(--gold), #b69548);
+    color: #fff;
+    border:none;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .btn-group button:hover {
+    filter:brightness(1.08);
+  }
+
+  /* Section divider for AI */
+  .section-break{
+    grid-column:1/-1;
+    text-align:center;
+    margin:20px 0;
+  }
+  .section-break hr{
+    border:0;
+    border-top:1px dashed var(--gold-soft);
+    margin-bottom:6px;
+  }
+  .section-title{
+    color:#6a5521;
+    font-weight:800;
+    font-size:1.2rem;
+  }
+
+  /* Notification popup */
+  .notification-popup {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: var(--white);
+    border:1px solid var(--gold-soft);
+    padding: 12px 16px;
+    border-radius:14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    box-shadow:0 12px 30px rgba(0,0,0,0.18);
+    animation:slideIn .4s ease forwards;
+    z-index:2000;
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateX(50%); }
+    to { opacity:1; transform:translateX(0); }
+  }
+  .notif-avatar{ width:40px; height:40px; border-radius:50%; object-fit:cover; }
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-content">
+    <!-- SVG LOGO -->
+    <svg class="logo-svg" viewBox="0 0 300 80">
+      <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+        font-family="Garamond, serif" font-size="42"
+        fill="#b69548" stroke="#e5d6a4" stroke-width="1.2">
+        Bible Voices
+      </text>
+      <circle cx="150" cy="16" r="12" stroke="#d5b262" stroke-width="2" fill="none"/>
+    </svg>
+
+    <p class="header-sub">
+      Choose a voice to begin your spiritual journey
+    </p>
+
+    <nav>
+      <a href="inbox.html">&#9993;</a>
+      <a href="myprofile.html">&#128100;</a>
+    </nav>
+  </div>
+</header>
+
+<div id="credit-info">Loading credits...</div>
+
+<h1 class="page-title">Available Voices</h1>
+<p class="subtitle">(Biblical figures will appear here soon)</p>
+
+<button id="jumpToAi" class="jump-btn">Jump to AI Voices</button>
+
+<div class="profile-container" id="profileContainer">
+  <!-- Profiles load dynamically -->
+</div>
+
+<script>
+/* ✔ ALL YOUR EXISTING JS LOGIC KEPT EXACTLY THE SAME ✔ */
+
+window.onload = async function() {
+  const backendUrl = "https://charmr-jfmc.onrender.com";
+  const token = localStorage.getItem("token");
+  let lastMessageTime = null;
+
+  if (!token) {
+    alert("You're not logged in. Please log in.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  document.getElementById("jumpToAi").onclick = () => {
+    const el = document.getElementById("ai-section");
+    if (el) el.scrollIntoView({ behavior:"smooth" });
+  };
+
+  async function loadProfiles() {
+    const res = await fetch(`${backendUrl}/api/profiles`);
+    const profiles = await res.json();
+    const container = document.getElementById("profileContainer");
+    container.innerHTML = "";
+
+    const normal = profiles.filter(p => Number(p.id) <= 330);
+    const ai = profiles.filter(p => Number(p.id) >= 331);
+
+    function makeCard(p){
+      const div = document.createElement("div");
+      div.className = "profile-card";
+      div.innerHTML = `
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <p>City: ${p.city}</p>
+        <div class="btn-group">
+          <button onclick="window.location.href='chat.html?id=${p.id}'">Chat</button>
+          <button onclick="window.location.href='profile.html?id=${p.id}'">View</button>
+        </div>
+      `;
+      return div;
+    }
+
+    normal.forEach(p => container.appendChild(makeCard(p)));
+
+    if (ai.length){
+      const div = document.createElement("div");
+      div.className="section-break";
+      div.id="ai-section";
+      div.innerHTML = `<hr><div class="section-title">AI Voices</div>`;
+      container.appendChild(div);
+      ai.forEach(p => container.appendChild(makeCard(p)));
+    }
+
+    return profiles;
+  }
+
+  function getRandomDelay(){ return Math.floor(Math.random()*27000)+3000; }
+
+  function sendRandomMessageLoop(profiles){
+    async function sendMsg(){
+      const girl = profiles[Math.floor(Math.random()*profiles.length)];
+      try{
+        await fetch(`${backendUrl}/api/send-initial-message`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${token}`},
+          body:JSON.stringify({ girlId:girl.id })
+        });
+      } catch(e){}
+      setTimeout(sendMsg, getRandomDelay());
+    }
+    sendMsg();
+  }
+
+  async function checkForNewMessages(){
+    const res = await fetch(`${backendUrl}/api/messages`, {
+      headers:{ "Authorization":`Bearer ${token}` }
+    });
+    const chats = await res.json();
+    const all = Object.values(chats).flat();
+    if (!all.length) return;
+    const latest = all[all.length-1];
+
+    if (!lastMessageTime || new Date(latest.time) > new Date(lastMessageTime)){
+      lastMessageTime = latest.time;
+      showNotification(latest.from, latest.text, latest.avatar || "default-avatar.png");
+    }
+  }
+
+  function showNotification(from,text,avatar){
+    const notif = document.createElement("div");
+    notif.className="notification-popup";
+    notif.innerHTML = `
+      <img src="${avatar}" class="notif-avatar">
+      <div><strong>${from}</strong><br>${text}</div>
+    `;
+    notif.onclick = () => window.location.href="inbox.html";
+    document.body.appendChild(notif);
+    setTimeout(()=>notif.remove(),5000);
+  }
+
+  const profiles = await loadProfiles();
+  sendRandomMessageLoop(profiles);
+  setTimeout(() => {
+    checkForNewMessages();
+    setInterval(checkForNewMessages,5000);
+  }, 5000);
+};
+
+async function loadCredits(){
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  try{
+    const res = await fetch("https://charmr-jfmc.onrender.com/api/credits", {
+      headers:{ "Authorization":`Bearer ${token}` }
+    });
+    const data = await res.json();
+    document.getElementById("credit-info").textContent =
+      data.lifetime ? "💎 Unlimited Messages" : `📜 ${data.credits} Messages Remaining`;
+  }catch(e){
+    document.getElementById("credit-info").textContent="Unable to load credits.";
+  }
+}
+loadCredits();
+</script>
+
+<footer style="text-align:center;padding:20px;margin-top:40px;color:#7a6638;font-size:14px;">
+  <a href="tc.html" style="color:#7a6638;text-decoration:none;">Terms & Conditions</a> |
+  <a href="privacy.html" style="color:#7a6638;text-decoration:none;">Privacy Policy</a>
+</footer>
+
+</body>
+</html>

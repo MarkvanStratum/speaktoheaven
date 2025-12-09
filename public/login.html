@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bible Voices – Login</title>
+
+  <!-- Meta Pixel Code (unchanged) -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '4130317333911358');
+  fbq('track', 'PageView');
+  fbq('track', 'Lead');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=4130317333911358&ev=PageView&noscript=1"/>
+  </noscript>
+
+  <!-- Google tag (unchanged) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17486667499"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-17486667499');
+  </script>
+
+  <!-- Google Analytics (unchanged) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8');
+  </script>
+
+  <!-- Affiliate loader -->
+  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+<style>
+  :root{
+    --gold:#d5b262;
+    --gold-soft:#ecd9a3;
+    --gold-light:#f8f1d8;
+    --white:#ffffff;
+    --bg:#faf9f4;
+    --text:#3b2f14;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    font-family:"Georgia", serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  /* HEADER */
+  header{
+    width:100%;
+    padding:30px 0 36px;
+    background-image:url("god.webp");
+    background-size:cover;
+    background-position:center;
+    position:relative;
+    text-align:center;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(4px);
+  }
+
+  .logo-wrapper{
+    position:relative;
+    z-index:2;
+  }
+  .logo-svg{width:180px;height:auto;}
+
+  .subtext{
+    position:relative;
+    z-index:2;
+    margin-top:8px;
+    font-size:1rem;
+    font-style:italic;
+    color:#5d4c27;
+  }
+
+  /* MAIN CARD */
+  main{
+    max-width:500px;
+    margin:0 auto;
+    padding:20px;
+  }
+
+  .card{
+    background:var(--white);
+    padding:32px;
+    border-radius:22px;
+    border:1px solid var(--gold-soft);
+    box-shadow:0 20px 50px rgba(213,178,98,0.35);
+  }
+
+  h1{
+    margin-top:0;
+    text-align:center;
+    font-size:2rem;
+    color:#6a5521;
+    margin-bottom:24px;
+  }
+
+  /* HALO ICON */
+  .icon{
+    width:26px;
+    height:26px;
+    vertical-align:middle;
+    margin-right:6px;
+  }
+
+  form{display:grid;gap:16px;}
+
+  label{
+    font-weight:600;
+    color:#4a3b1a;
+  }
+
+  input{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid var(--gold-soft);
+    font-size:1rem;
+    background:white;
+  }
+  input:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 4px rgba(213,178,98,0.28);
+  }
+
+  button{
+    background:linear-gradient(180deg, var(--gold), #b69548);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:1.15rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+  }
+  button:hover{
+    filter:brightness(1.08);
+  }
+
+  .center-text{
+    text-align:center;
+    margin-top:18px;
+    font-size:1rem;
+  }
+
+  a{
+    color:#b69548;
+    font-weight:600;
+    text-decoration:none;
+  }
+  a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrapper">
+    <!-- SAME SVG LOGO AS SIGNUP PAGE -->
+    <svg class="logo-svg" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+      <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+            font-family="Garamond, serif"
+            font-size="42"
+            fill="#b69548"
+            stroke="#e5d6a4"
+            stroke-width="1.2">
+        Bible Voices
+      </text>
+      <circle cx="150" cy="16" r="12" stroke="#d5b262" stroke-width="2" fill="none"/>
+    </svg>
+  </div>
+  <p class="subtext">Return to your spiritual conversations</p>
+</header>
+
+<main>
+  <div class="card">
+
+    <h1>
+      <svg class="icon" viewBox="0 0 64 64">
+        <ellipse cx="32" cy="20" rx="20" ry="6" fill="#d5b262"/>
+      </svg>
+      Login
+    </h1>
+
+    <form id="login-form">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required placeholder="Enter your email" />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required placeholder="Enter your password" />
+
+      <button type="submit">Login</button>
+    </form>
+
+    <p class="center-text">
+      Don’t have an account?
+      <a href="index.html">Sign Up</a>
+    </p>
+
+  </div>
+</main>
+
+<script>
+  /* ⚠️ LOGIN LOGIC PRESERVED EXACTLY AS YOU PROVIDED */
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    try {
+      const response = await fetch("https://charmr-jfmc.onrender.com/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.removeItem("cachedMessages"); 
+        alert("Login successful!");
+        window.location.href = "profiles.html";
+      } else {
+        alert(data.error || "Login failed. Please check your credentials.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Error logging in. Please try again later.");
+    }
+  });
+</script>
+
+<footer style="text-align:center; padding:20px; margin-top:40px; font-size:14px; color:#6b5b30;">
+  <a href="tc.html" style="margin:0 12px; color:#6b5b30; text-decoration:none;">Terms &amp; Conditions</a> |
+  <a href="privacy.html" style="margin:0 12px; color:#6b5b30; text-decoration:none;">Privacy Policy</a>
+</footer>
+
+</body>
+</html>

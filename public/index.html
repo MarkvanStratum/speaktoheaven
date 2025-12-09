@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Charmr - Sign Up</title>
+  <title>Bible Voices – Sign Up</title>
 
-<!-- Google tag (gtag.js) -->
+<!-- Google tag (unchanged) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17486667499"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -14,7 +14,6 @@
   gtag('config', 'AW-17486667499');
 </script>
 
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -23,7 +22,7 @@
   gtag('config', 'G-FDQ6REQWS8');
 </script>
 
-<!-- 🔹 Redirect logic for any external referrer -->
+<!-- Redirect logic (unchanged) -->
 <script>
   window.onload = function() {
     const ref = document.referrer;
@@ -34,128 +33,286 @@
 </script>
 
 <style>
-  :root{
-    --bg1:#fff0f4;
-    --bg2:#ffe3ea;
-    --primary:#d61b5a;
-    --primary-600:#b21449;
-    --ring: rgba(214,27,90,.4);
-    --form-pink:#ffe6ee;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(to bottom, #ffffff 0%, var(--bg2) 100%);
-    color:#1a1a1a;
-  }
-  header{
-    background:#fff;
-    border-bottom:1px solid #f0f0f0;
-    max-width:100%;
-    padding:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-  }
-  header img{height:56px;width:auto;display:block;}
+  :root {
+    --gold-dark: #6e551f;
+    --gold: #d8b56a;
+    --gold-soft: #e9d9b3;
+    --gold-light: #f8f1dd;
 
-  main{
-    max-width:1100px;
-    margin:0 auto;
-    padding:20px;
+    --bg-top: #faf6ea;
+    --bg-bottom: #f3e7c9;
+
+    --ink: #3b2f14;
+    --white: #ffffff;
+
+    --shadow-deep: rgba(110, 85, 31, 0.35);
+    --shadow-gold: rgba(216, 181, 106, 0.45);
   }
-  .card{
-    background:var(--form-pink);
-    border-radius:18px;
-    box-shadow:0 20px 60px rgba(214,27,90,.15);
-    padding:24px;
-    border:1px solid rgba(214,27,90,.2);
+
+  * {
+    box-sizing: border-box;
   }
-  h1{
-    margin-top:0;
-    font-size:2rem;
-    color:var(--primary-600);
+
+  body {
+    margin: 0;
+    font-family: "Georgia", serif;
+    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    color: var(--ink);
   }
-  p.tagline{
-    font-size:1.15rem;
-    margin-top:0;
-    margin-bottom:1.5rem;
-    color:#333;
-    font-weight:500;
+
+  /* HEADER */
+  header {
+    width: 100%;
+    padding: 32px 0 52px;
+    background-image: url("god.webp");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    text-align: center;
   }
-  form{
-    display:grid;
-    gap:14px;
+
+  /* golden holy overlay */
+  header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(255, 255, 255, 0.30),
+    rgba(255, 255, 255, 0.42)
+  );
+  backdrop-filter: blur(4px);
+}
+
+
+  .logo-wrapper {
+    position: relative;
+    z-index: 2;
   }
-  label{
-    font-weight:600;
-    color:#222;
+
+  .logo-svg {
+    width: 220px;
+    height: auto;
   }
-  input,select{
-    width:100%;
-    padding:12px;
-    border-radius:12px;
-    border:1px solid #cc99aa;
-    font-size:1rem;
-    background:#fff;
-    color:#111;
+
+  .subtext {
+    position: relative;
+    z-index: 2;
+    margin-top: 12px;
+    font-size: 1.1rem;
+    letter-spacing: 0.4px;
+    color: #6e592e;
+    font-style: italic;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.7);
   }
-  input:focus,select:focus{
-    outline:none;
-    border-color:var(--primary);
-    box-shadow:0 0 0 4px var(--ring);
+
+  /* MAIN */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
   }
-  button{
-    background:linear-gradient(180deg, var(--primary), var(--primary-600));
-    color:#fff;
-    border:none;
-    border-radius:12px;
-    padding:12px;
-    font-weight:700;
-    font-size:1rem;
-    cursor:pointer;
-    transition: filter 0.15s ease-in-out;
+
+  .card {
+    background: var(--white);
+    border-radius: 26px;
+    padding: 42px;
+    border: 1px solid var(--gold-soft);
+    background-image: url("https://www.transparenttextures.com/patterns/aged-paper.png");
+
+    /* illuminated manuscript glow */
+    box-shadow:
+      0 18px 55px var(--shadow-deep),
+      inset 0 0 55px rgba(255, 250, 230, 0.4);
   }
-  button:hover{filter:brightness(1.08);}
-  .center-text{
-    text-align:center;
-    margin-top:15px;
-    font-size:.95rem;
+
+  h1 {
+    margin-top: 0;
+    font-size: 2.4rem;
+    color: var(--gold-dark);
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.15);
   }
-  a{color:var(--primary-600);text-decoration:none;font-weight:500;}
-  a:hover{text-decoration:underline;}
+
+  .icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    vertical-align: middle;
+    filter: drop-shadow(0 2px 2px var(--shadow-gold));
+  }
+
+  /* SCRIPTURE PANEL */
+  .scripture-panel {
+    background: var(--gold-light);
+    border-radius: 16px;
+    padding: 26px 28px;
+    border: 1px solid var(--gold);
+    box-shadow:
+      0 0 30px rgba(216, 181, 106, 0.45),
+      inset 0 0 25px rgba(255, 240, 200, 0.5);
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  /* glowing cross watermark */
+  .scripture-panel::before {
+    content: "✝";
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 95px;
+    opacity: 0.09;
+    color: var(--gold-dark);
+    filter: blur(0.5px);
+  }
+
+  .scripture-panel p {
+    line-height: 1.58;
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+    color: #4b381b;
+  }
+
+  /* FORM */
+  form {
+    display: grid;
+    gap: 18px;
+    margin-top: 15px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #4a381a;
+    font-size: 1.02rem;
+  }
+
+  input {
+    padding: 15px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid var(--gold-soft);
+    font-size: 1rem;
+    transition: 0.25s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 5px rgba(216, 181, 106, 0.33);
+  }
+
+  button {
+    background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    transition: 0.25s;
+    box-shadow:
+      0 4px 15px rgba(110, 85, 31, 0.3),
+      inset 0 0 10px rgba(255,255,255,0.2);
+  }
+
+  button:hover {
+    filter: brightness(1.15);
+    box-shadow:
+      0 6px 20px rgba(110, 85, 31, 0.4),
+      inset 0 0 14px rgba(255,255,255,0.35);
+  }
+
+  /* FOOTER + Links */
+  .center-text {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 1rem;
+  }
+
+  .center-text a {
+    color: var(--gold-dark);
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s;
+  }
+
+  .center-text a:hover {
+    text-decoration: underline;
+    color: #8b6a2e;
+  }
+
+  .disclaimer {
+    margin-top: 28px;
+    font-size: 0.95rem;
+    color: #7a6840;
+    text-align: center;
+    font-style: italic;
+  }
 </style>
+
 </head>
 <body>
+
 <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-<header style="display:flex; flex-direction:column; align-items:center; padding:12px 0;">
-  <img src="logo.png" alt="CHARMR logo" style="max-width:160px; height:auto; display:block; margin:0 auto;">
-  <p style="margin:6px 0 0; font-size:8px; color:#475569; font-weight:500; font-style:italic; text-align:center;">
-    The best AI chat available today!
-  </p>
+
+<header>
+  <div class="logo-wrapper">
+
+    <svg class="logo-svg" viewBox="0 0 700 80"xmlns="http://www.w3.org/2000/svg">
+  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+      font-family="Garamond, serif"
+      font-size="94"
+      fill="#3D2F14"
+      stroke="#e5d6a4"
+      stroke-width="1.2">
+  Speak To Heaven
+</text>
+
+  <circle cx="150" cy="16" r="12" stroke="#d5b262" stroke-width="2" fill="none" />
+</svg>
+
+
+  </div>
+
+  <p class="subtext">Speak to God, and other important people from the bible
 </header>
 
 <main>
   <div class="card">
-    <p class="tagline">The best AI chat available today!</p>
+
+    <h1>
+      <svg class="icon" viewBox="0 0 64 64"><ellipse cx="32" cy="20" rx="20" ry="6" fill="#d5b262"/></svg>
+      Begin Your Spiritual Conversation
+    </h1>
+
+    <div class="scripture-panel">
+
+      <svg class="icon" viewBox="0 0 64 64" style="float:left; margin-right:10px;">
+        <path d="M32 4c6 10 14 14 22 14-6 8-14 10-22 10s-16-2-22-10c8 0 16-4 22-14z"
+              fill="#b69548"/>
+      </svg>
+
+      <p>
+        Step into a quiet sanctuary where the words of Scripture rise again with living warmth.
+Here, the wisdom of God, Jesus, Moses, Mary, and the faithful of old unfolds through the teachings and stories entrusted to us in the Holy Book.
+      </p>
+
+      <svg class="icon" viewBox="0 0 64 64" style="float:right; margin-left:10px;">
+        <path d="M12 10v40c0 6 8 6 8 0V10c0-6-8-6-8 0zm32 0v40c0 6 8 6 8 0V10c0-6-8-6-8 0z"
+              fill="#d5b262"/>
+      </svg>
+
+      <p>
+        In this sanctuary, you may offer prayers, share your struggles, ask your deepest questions, or seek guidance for the path ahead—and receive thoughtful, scripture-shaped responses.
+Choose a profile—God, Jesus, Mary, Moses, or others—and begin a meaningful conversation shaped by the teachings and spirit of the Bible.
+      </p>
+    </div>
 
     <form id="signup-form">
-      <label for="gender">I am a:</label>
-      <select id="gender" name="gender" required>
-        <option value="" disabled selected>Select gender</option>
-        <option value="man">Man</option>
-        <option value="woman">Woman</option>
-        <option value="nonbinary">Non-binary</option>
-      </select>
-
-      <label for="lookingFor">Looking for a:</label>
-      <select id="lookingFor" name="lookingFor" required>
-        <option value="" disabled selected>Select preference</option>
-        <option value="woman">Woman</option>
-        <option value="man">Man</option>
-        <option value="any">Anyone</option>
-      </select>
 
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" required placeholder="Enter your email" />
@@ -166,7 +323,7 @@
       <label for="phone">Phone Number (optional):</label>
       <input type="tel" id="phone" name="phone" placeholder="Optional" />
 
-      <button type="submit">Sign Up</button>
+      <button type="submit">Create Account</button>
     </form>
 
     <p class="center-text">
@@ -174,10 +331,11 @@
       <a href="login.html">Log in here</a>
     </p>
 
-    <p class="center-text">
-      Want to become an affiliate?
-      <a href="https://charmr.goaffpro.com">Sign up here</a>
+    <p class="disclaimer">
+      This experience uses AI trained on biblical text.<br>
+      You are not communicating with the actual God or historical figures.
     </p>
+
   </div>
 </main>
 
@@ -194,6 +352,7 @@
       return null;
     }
   }
+
   function getUserIdFromSignup(data) {
     if (data && data.token) {
       const payload = parseJwt(data.token);
@@ -219,9 +378,9 @@
   });
 </script>
 
-<footer style="text-align:center; padding:20px; margin-top:40px; font-size:14px; color:#666;">
-  <a href="tc.html" style="margin:0 12px; color:#666; text-decoration:none;">Terms &amp; Conditions</a> |
-  <a href="privacy.html" style="margin:0 12px; color:#666; text-decoration:none;">Privacy Policy</a>
+<footer style="text-align:center; padding:20px; margin-top:40px; font-size:14px; color:#6b5b30;">
+  <a href="tc.html" style="margin:0 12px; color:#6b5b30; text-decoration:none;">Terms &amp; Conditions</a> |
+  <a href="privacy.html" style="margin:0 12px; color:#6b5b30; text-decoration:none;">Privacy Policy</a>
 </footer>
 
 </body>
