@@ -228,12 +228,8 @@ if (fs.existsSync(frontendPath)) {
 //--------------------------------------------
 
 const openrouter = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
-  defaultHeaders: {
-    "HTTP-Referer": "https://speaktoheaven.com",
-    "X-Title": "Speak To Heaven"
-  }
+  apiKey: process.env.OPENROUTER_API_KEY
 });
 
 //--------------------------------------------
@@ -317,10 +313,29 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     res.json({ reply: reply || "(No response)" });
 
   } catch (err) {
-    console.error("🔥 Chat error:", err.response?.data || err);
+    console.error("🔥 Chat error FULL:", JSON.stringify(err, null, 2));
     res.status(500).json({ error: "AI service error" });
   }
 });
+
+app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
+  try {
+    const { characterId } = req.params;
+
+    const result = await pool.query(
+      `SELECT * FROM messages
+       WHERE user_id = $1 AND character_id = $2
+       ORDER BY created_at ASC`,
+      [req.user.id, characterId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fetch messages error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 //--------------------------------------------
 //  404 HANDLER
