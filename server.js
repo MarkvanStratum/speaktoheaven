@@ -831,27 +831,26 @@ app.listen(PORT, () => {
 });
 
 //--------------------------------------------
-//  GRACEFUL SHUTDOWN (FIXED)
+//  GRACEFUL SHUTDOWN (NO EMOJIS - SAFE)
 //--------------------------------------------
-
 process.on("SIGTERM", () => {
-  console.log(⚠️ SIGTERM received — shutting down gracefully...");
+  console.log("SIGTERM received - shutting down gracefully...");
   serverClose();
 });
 
 process.on("SIGINT", () => {
-  console.log("⚠️ SIGINT received — shutting down gracefully...");
+  console.log("SIGINT received - shutting down gracefully...");
   serverClose();
 });
 
 function serverClose() {
   try {
-    console.log("⏳ Closing database pool...");
+    console.log("Closing database pool...");
     pool.end();
   } catch (e) {
-    console.error("❌ Error closing DB:", e);
+    console.error("Error closing DB:", e);
   }
 
-  console.log("✨ Shutdown complete.");
+  console.log("Shutdown complete.");
   process.exit(0);
 }
