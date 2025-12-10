@@ -288,7 +288,7 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     }));
 
     // Send to OpenRouter
-    const aiResponse = await openai.chat.completions.create({
+    const aiResponse = await openrouter.chat.completions.create({ // <-- CORRECTED
       model: "google/gemini-2.0-flash-thinking-exp",
       messages: [
         { role: "system", content: buildSystemPrompt(character.name) },
