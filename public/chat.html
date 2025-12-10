@@ -2,923 +2,184 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Voice – Chat</title>
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-FDQ6REQWS8');
-  </script>
-
-  <link rel="stylesheet" href="style.css" />
   <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(#ffcccc, #ffe6e6);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
+    body {
+      margin: 0;
+      background: #faf8f0;
+      font-family: Georgia, serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-  .chat-container {
-    width: 400px;
-    height: 90vh;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+    header {
+      text-align: center;
+      padding: 15px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      font-size: 24px;
+      color: #7b5e20;
+      font-weight: bold;
+    }
 
-  .chat-header {
-    background: #ff4d6d;
-    color: #fff;
-    padding: 15px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .chat-header img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
+    #chatBox {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
 
-  .gift-bar {
-    background: #fff6f9;
-    padding: 8px;
-    text-align: center;
-    border-bottom: 1px solid #ffd6e0;
-  }
-  .gift-bar p {
-    margin: 4px 0;
-    font-size: 14px;
-    color: #555;
-  }
+    .message {
+      max-width: 65%;
+      margin: 10px 0;
+      padding: 12px 16px;
+      border-radius: 14px;
+      line-height: 1.4;
+    }
 
-  /* gifts row */
-  .gift-bar .row{
-    display:flex !important;
-    flex-direction:row !important;
-    flex-wrap:wrap;
-    justify-content:center;
-    align-items:center;
-    gap:10px;
-    margin-top:6px;
-  }
-  .gift-chip{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:36px; height:36px;
-    border-radius:999px;
-    background:#fff;
-    border:1px solid #ffd1dc;
-    font-size:18px;
-    cursor:pointer;
-    transition:transform .08s ease;
-    line-height:1;
-  }
-  .gift-chip:hover{ transform: translateY(-1px); }
+    .user {
+      background: #e2e8f0;
+      margin-left: auto;
+    }
 
-  .gifts { display: flex; justify-content: center; gap: 10px; }
-  .gift-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
-  .gift-btn:hover { transform: scale(1.2); }
+    .bot {
+      background: #fff;
+      border: 1px solid #e0d6c3;
+    }
 
-  .chat-box {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-    background: #fff0f5;
-    min-height: 0;
-  }
+    #inputBar {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
 
-  .message {
-    margin: 8px 0;
-    padding: 10px;
-    border-radius: 8px;
-    max-width: 75%;
-    word-wrap: break-word;
-  }
-  .message.user { background: #d1e7dd; margin-left: auto; }
-  .message.girl { background: #ffe6eb; margin-right: auto; }
+    #messageInput {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      font-size: 16px;
+    }
 
-  .message.premium {
-    background: #fff3cd;
-    border: 1px solid #ffeeba;
-    color: #856404;
-    font-size: 14px;
-    text-align: center;
-    margin: 10px auto;
-    max-width: 90%;
-  }
+    #sendBtn {
+      padding: 12px 20px;
+      margin-left: 10px;
+      background: #c5a04e;
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
 
-  .chat-input {
-    display: flex;
-    padding: 10px;
-    background: #fff;
-    border-top: 1px solid #ddd;
-  }
-  .chat-input textarea,
-  .chat-input input[type="text"]{
-    flex: 1;
-    resize: none;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-  }
-  .chat-input button {
-    background: #ff4d6d;
-    border: none;
-    color: #fff;
-    padding: 10px 15px;
-    margin-left: 8px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  .chat-input button:hover { background: #e63b5e; }
-
-  .cta-bar {
-    display: block;
-    border-top: 1px solid #ffd1dc;
-    background: #fff5f7;
-    padding: 10px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-  .cta-bar a.cta-link{
-    display:inline-block;
-    background:#ef476f;
-    color:#fff !important;
-    padding:8px 12px;
-    border-radius:8px;
-    text-decoration:none !important;
-    font-weight:bold;
-  }
-  .cta-bar a.cta-link:hover{ filter:brightness(0.95); }
-
-  .upgrade-btn { background: #ff4d6d; border: none; color: #fff; padding: 12px; font-size: 16px; cursor: pointer; border-radius: 0 0 10px 10px; text-align: center; }
-  .upgrade-btn:hover { background: #e63b5e; }
-
-  /* neutral “system notice” */
-  .system-card{
-    background:#ffffff;
-    border:1px solid #ffd1dc;
-    border-radius:12px;
-    padding:12px;
-    margin:10px auto;
-    text-align:center;
-    max-width:90%;
-    color:#444;
-    box-shadow:0 2px 6px rgba(0,0,0,.04);
-  }
-  .system-card img{ max-width:64px; height:auto; display:block; margin:0 auto 6px; }
-  .system-card .title{ font-weight:700; color:#d81b60; margin-bottom:6px; }
-  .system-card p{ margin:0; line-height:1.35; font-size:14px; }
-
-  /* image + lock overlay */
-  .image-wrap{ position: relative; display: inline-block; border-radius: 10px; overflow: hidden; }
-  .image-wrap img{ display:block; max-width: 220px; max-height: 260px; border-radius: 10px; object-fit: cover; }
-  .image-wrap.locked img{ filter: blur(10px); }
-  .image-overlay{
-    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:10px; background: rgba(0,0,0,0.45); color:#fff; font-size:13px; gap:8px;
-  }
-  .image-overlay a{ display:inline-block; background:#ef476f; color:#fff; text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:bold; }
-
-  /* promo modal */
-  .promo-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:10000;align-items:center;justify-content:center}
-  .promo-card{width:min(520px,92vw);background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;border:1px solid #ffd1dc}
-  .promo-head{background:#ff4d6d;color:#fff;padding:14px 16px;font-weight:bold}
-  .promo-body{padding:16px}
-  .promo-title{font-size:18px;font-weight:800;margin:0 0 6px}
-  .promo-sub{color:#555;margin:0 0 10px;line-height:1.35}
-  .promo-list{margin:0 0 12px 16px;padding:0;color:#444}
-  .promo-list li{margin:4px 0}
-  .promo-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-  .btn{padding:10px 12px;border-radius:10px;border:1px solid #ffd1dc;background:#fff;cursor:pointer}
-  .btn.primary{background:#ef476f;color:#fff;border:none}
-  .btn.ghost{background:#fff;color:#111;border:1px solid #e6e6e6}
-  .promo-questions .q{margin:12px 0}
-  .promo-questions label{display:block;font-weight:600;margin-bottom:6px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chips label{cursor:pointer}
-  .chips input{display:none}
-  .chips .chip{border:1px solid #e6e6e6;border-radius:999px;padding:8px 12px}
-  .chips input:checked + .chip{border-color:#ef476f;background:#fff5f7}
-  .progress{height:8px;background:#f1f1f1;border-radius:999px;overflow:hidden}
-  .progress>div{height:100%;width:0;background:#ef476f;transition:width .2s}
+    #sendBtn:hover {
+      background: #a7853b;
+    }
   </style>
-
-  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <img id="chatPhoto" src="" alt="Girl Photo">
-      <h2 id="chatName"></h2>
-    </div>
 
-    <!-- Gift bar -->
-    <div id="giftBar" class="gift-bar">
-      <div style="margin-bottom:6px;">Send <strong id="giftGirlName">her</strong> a gift:</div>
-      <div class="row">
-        <div class="gift-chip" data-gift="flowers" title="Flowers">💐</div>
-        <div class="gift-chip" data-gift="ring" title="Ring">💍</div>
-        <div class="gift-chip" data-gift="candy" title="Chocolate">🍫</div>
-        <div class="gift-chip" data-gift="puppy" title="Puppy">🐶</div>
-      </div>
-    </div>
+<header id="chatName">Bible Voice</header>
 
-    <!-- Live banner -->
-    <div id="liveBanner" style="display:none"></div>
+<div id="chatBox"></div>
 
-    <div class="chat-box" id="chatBox"></div>
+<div id="inputBar">
+  <input id="messageInput" type="text" placeholder="Speak your heart or ask your question…" />
+  <button id="sendBtn" onclick="sendMessage()">Send</button>
+</div>
 
-    <!-- persistent CTA bar -->
-    <div id="ctaBar" class="cta-bar">
-      <a class="cta-link" href="https://charmr.xyz/checkout.html">GET PREMIUM NOW!</a>
-    </div>
+<script>
+  const backendUrl = "https://speaktoheaven.onrender.com";
 
-    <div class="chat-input">
-      <input type="text" id="messageInput" placeholder="Type a message...">
-      <button onclick="sendMessage()">Send</button>
-      <button id="sendPhotoBtn" type="button">Send photo</button>
-      <input id="photoInput" type="file" accept="image/*" style="display:none" />
-    </div>
-  </div>
+  const params = new URLSearchParams(window.location.search);
+  let characterId = Number(params.get("character"));
+if (!characterId) characterId = 1; // default to God or any ID you want
 
-  <!-- Promo modal -->
-  <div id="promoBackdrop" class="promo-backdrop" aria-hidden="true">
-    <div class="promo-card" role="dialog" aria-modal="true" aria-labelledby="promoTitle">
-      <div class="promo-head">Charmr Premium Invitation</div>
 
-      <div id="promoStepIntro" class="promo-body">
-        <h3 id="promoTitle" class="promo-title">CONGRATULATIONS! You have been selected for a chance to try Charmr for FREE!</h3>
-        <p class="promo-sub">
-          Get <strong>unlimited messages</strong>, <strong>unlimited sending and receiving of images</strong>,
-          <strong>contact and social media sharing</strong>, <strong>gift sending</strong> and more.<br>
-          <strong>Value £99</strong> — <strong>your price: FREE</strong>.
-        </p>
-        <p class="promo-sub"><em>But first, answer a few questions to see if you qualify.</em></p>
-        <div class="promo-actions">
-          <button id="promoStart" class="btn primary">Start</button>
-        </div>
-      </div>
+  const token = localStorage.getItem("token");
 
-      <div id="promoQ1" class="promo-body" style="display:none">
-        <div class="promo-questions">
-          <div class="q">
-            <label>Are you a man or a woman?</label>
-            <div class="chips">
-              <label><input type="radio" name="q_gender" value="man"><span class="chip">Man</span></label>
-              <label><input type="radio" name="q_gender" value="woman"><span class="chip">Woman</span></label>
-            </div>
-          </div>
-        </div>
-      </div>
+  if (!token) {
+    alert("Please login first.");
+    window.location.href = "/login.html";
+  }
 
-      <div id="promoQ2" class="promo-body" style="display:none">
-        <div class="promo-questions">
-          <div class="q">
-            <label>Are you over 40 years of age?</label>
-            <div class="chips">
-              <label><input type="radio" name="q_over40" value="yes"><span class="chip">Yes</span></label>
-              <label><input type="radio" name="q_over40" value="no"><span class="chip">No</span></label>
-            </div>
-          </div>
-        </div>
-      </div>
+  if (!characterId) {
+    alert("Error: No character selected.");
+  }
 
-      <div id="promoQ3" class="promo-body" style="display:none">
-        <div class="promo-questions">
-          <div class="q">
-            <label>Do you have a job?</label>
-            <div class="chips">
-              <label><input type="radio" name="q_job" value="yes"><span class="chip">Yes</span></label>
-              <label><input type="radio" name="q_job" value="no"><span class="chip">No</span></label>
-            </div>
-          </div>
-        </div>
-      </div>
+  const chatBox = document.getElementById("chatBox");
+  const chatName = document.getElementById("chatName");
 
-      <div id="promoQ4" class="promo-body" style="display:none">
-        <div class="promo-questions">
-          <div class="q">
-            <label>What are you looking for on Charmr?</label>
-            <div class="chips">
-              <label><input type="radio" name="q_goal" value="sex"><span class="chip">Sex</span></label>
-              <label><input type="radio" name="q_goal" value="love"><span class="chip">Love</span></label>
-            </div>
-          </div>
-        </div>
-      </div>
+  // Load profile info
+  async function loadProfile() {
+    const res = await fetch(`${backendUrl}/api/profiles`);
+    const profiles = await res.json();
+    const profile = profiles.find(p => p.id === characterId);
 
-      <div id="promoStepLoading" class="promo-body" style="display:none">
-        <p class="promo-sub">Processing answers…</p>
-        <div class="progress"><div id="promoProgress"></div></div>
-      </div>
-
-      <div id="promoStepDone" class="promo-body" style="display:none">
-        <h3 class="promo-title">CONGRATULATIONS! You've qualified to try the premium features of Charmr for FREE!</h3>
-        <ul class="promo-list">
-          <li>Unlimited messages</li>
-          <li>Unlimited sending and receiving of images</li>
-          <li>Contact and social media sharing</li>
-          <li>Gift sending and more</li>
-        </ul>
-        <p class="promo-sub"><strong>Value £99</strong> — <strong>your price: FREE</strong>.</p>
-        <p class="promo-sub">
-          In order to make sure everyone on this site is 18+ we use Visa, Mastercard and the Age Verification Providers
-          Association to verify your age using your Visa or Mastercard on the next page. This works because banks only
-          issue credit cards to people over 18, so it’s a fast way to keep our community adult-only.
-        </p>
-        <div class="promo-actions">
-          <a class="btn primary" href="https://www.charmr.xyz/verification.html">VERIFY MY AGE</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="girls.js"></script>
-  <script>
-    const backendUrl = "https://charmr-jfmc.onrender.com";
-    const token = localStorage.getItem("token");
-    if (!token) { window.location.href = "login.html"; }
-
-    const params = new URLSearchParams(window.location.search);
-    const girlId = parseInt(params.get('id'));
-    const chatBox = document.getElementById('chatBox');
-    const ctaBar  = document.getElementById('ctaBar');
-
-    // header (with server fallback)
-    async function setHeader(){
-      const nameEl = document.getElementById('chatName');
-      const photoEl = document.getElementById('chatPhoto');
-
-      let g = (typeof girls !== 'undefined' && Array.isArray(girls))
-             ? girls.find(x => Number(x.id) === Number(girlId))
-             : null;
-
-      if (!g) {
-        try {
-          const r = await fetch(`${backendUrl}/api/profiles`);
-          const list = await r.json();
-          g = Array.isArray(list) ? list.find(x => Number(x.id) === Number(girlId)) : null; // /api/profiles
-        } catch {}
-      }
-
-      nameEl.textContent = g?.name || 'Unknown';
-      document.getElementById('giftGirlName').textContent = (g?.name || 'her').split(' ')[0];
-
-      photoEl.src = g?.image || 'default-avatar.png';
-      photoEl.onerror = () => { photoEl.onerror = null; photoEl.src = 'default-avatar.png'; };
+    if (profile) {
+      chatName.textContent = profile.name;
     }
+  }
 
-    // state
-    let TAKEOVER = false;
-    let pollTimer = null;
-
-    // entitlements
-    let ENTITLEMENTS = {
-      tier: "free",
-      status: "inactive",
-      canSendGifts: false,
-      canSendImages: false,
-      maxReceivedImagesUnblurred: 2,
-      canShareContacts: false
-    };
-    let IS_PREMIUM = false;
-    let MSGS_TIMER = null;
-
-    // received images gating
-    let RECEIVED_GIRL_IMAGE_COUNT = 0;
-    let FREE_IMAGE_LIMIT = 2;
-
-    // promo trigger
-    let PREMIUM_BLOCK_COUNT = 0;
-    let PROMO_TIMER = null;
-    let PROMO_SHOWN = false;
-
-    // persistent notices
-    const LOCAL_NOTICES = []; // { text, index }
-    function appendPersistentNotice(text){
-      const indexAtInsert = chatBox.children.length;
-      appendSystemNotice(text);
-      LOCAL_NOTICES.push({ text, index: indexAtInsert });
-    }
-
-    function recordPremiumBlock(){
-      if (PROMO_SHOWN) return;
-      PREMIUM_BLOCK_COUNT++;
-      if (PREMIUM_BLOCK_COUNT >= 2){
-        if (PROMO_TIMER) clearTimeout(PROMO_TIMER);
-        PROMO_TIMER = setTimeout(()=>{ openPromoIntro(); }, 15000);
-      }
-    }
-
-    function showCTA(){ ctaBar.style.display = 'block'; }
-    function hideCTA(){ ctaBar.style.display = 'none'; }
-
-    function ensureMessagesPolling(){
-      if (TAKEOVER){
-        if (MSGS_TIMER){ clearInterval(MSGS_TIMER); MSGS_TIMER = null; }
-        return;
-      }
-      if (!MSGS_TIMER){
-        MSGS_TIMER = setInterval(loadMessages, 2000);
-      }
-    }
-
-    function appendMessage(text, sender, isTyping=false){
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `message ${sender}`;
-
-      if (isTyping){
-        msgDiv.classList.add('typing');
-        msgDiv.textContent = '...';
-      } else {
-        // Gift render: GIFT:<type>
-        const g = /^GIFT:\s*(flowers|ring|chocolate|puppy)\b/i.exec(text || "");
-        if (g){
-          const name = g[1].toLowerCase();
-          const wrap = document.createElement('div');
-          wrap.className = 'image-wrap';
-          const img = document.createElement('img');
-          img.src = `/images/${name}.png`;
-          img.alt = `${name} gift`;
-          wrap.appendChild(img);
-          msgDiv.appendChild(wrap);
-        } else {
-          // Image render: IMAGE:<url> or <img src="..."> or bare .png/.jpg URL
-          const m = /IMAGE:\s*([^\s<>"']+)/i.exec(text || "");
-          const tag = !m ? /<img[^>]*src=["']([^"']+)["'][^>]*>/i.exec(text || "") : null;
-          const urlOnly = (!m && !tag) ? /(https?:\/\/[^\s"'()]+?\.(?:png|jpe?g|gif|webp))(?:[^\s"')]*)?/i.exec(text || "") : null;
-
-          if (m || tag || urlOnly){
-            const url = m ? m[1] : (tag ? tag[1] : urlOnly[1]);
-            const wrap = document.createElement('div');
-            wrap.className = 'image-wrap';
-
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = 'image';
-            img.loading = 'eager';
-            img.decoding = 'sync';
-            img.referrerPolicy = 'no-referrer';
-            wrap.appendChild(img);
-
-            if (sender === 'girl') {
-              RECEIVED_GIRL_IMAGE_COUNT += 1;
-              const limit = ENTITLEMENTS.maxReceivedImagesUnblurred ?? FREE_IMAGE_LIMIT;
-              const isBlur = !(ENTITLEMENTS.canSendImages) && RECEIVED_GIRL_IMAGE_COUNT > limit;
-              if (isBlur) {
-                wrap.classList.add('locked');
-                const overlay = document.createElement('div');
-                overlay.className = 'image-overlay';
-                overlay.innerHTML = `
-                  <div>You've received the maximum amount of pictures on your current plan.</div>
-                  <a href="https://charmr.xyz/checkout.html">Upgrade to Premium</a>
-                `;
-                wrap.appendChild(overlay);
-              }
-            }
-
-            msgDiv.appendChild(wrap);
-          } else {
-            msgDiv.textContent = text;
-          }
-        }
-      }
-
-      chatBox.appendChild(msgDiv);
-
-      const im = msgDiv.querySelector('img');
-      if (im) {
-        if (im.complete) {
-          chatBox.scrollTop = chatBox.scrollHeight;
-        } else {
-          im.addEventListener('load', () => { chatBox.scrollTop = chatBox.scrollHeight; }, { once: true });
-          im.addEventListener('error', () => {}, { once: true });
-        }
-      } else {
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-
-      return msgDiv;
-    }
-
-    function appendSystemNotice(text){
-      const card = document.createElement('div');
-      card.className = 'system-card';
-      const logo = document.createElement('img');
-      logo.src = 'logo.png';
-      logo.alt = 'Site logo';
-      const title = document.createElement('div');
-      title.className = 'title';
-      title.textContent = 'Premium Feature';
-      const p = document.createElement('p');
-      p.textContent = text;
-      card.appendChild(logo);
-      card.appendChild(title);
-      card.appendChild(p);
-      chatBox.appendChild(card);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      return card;
-    }
-
-    function randomDelay(min=700, max=2000){ return Math.floor(Math.random()*(max-min+1))+min; }
-
-    // detect phone/email/links/handles/WhatsApp etc.
-    function isContactAttempt(text) {
-      if (!text) return false;
-      const patterns = [
-        /@/i,
-        /\b(whats?app|telegram|snap(chat)?|instagram|insta|tg|wechat|signal|viber)\b/i,
-        /\b(phone|number|call|text|dm|pm)\b/i,
-        /https?:\/\/|www\./i,
-        /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/,
-        /\b\+?\d{1,3}[-.\s]?\d{6,14}\b/
-      ];
-      return patterns.some(re => re.test(text));
-    }
-
-    async function loadMessages(){
-      try{
-        const res = await fetch(`${backendUrl}/api/messages/${girlId}`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        const data = await res.json();
-        chatBox.innerHTML = "";
-
-        RECEIVED_GIRL_IMAGE_COUNT = 0;
-
-        data.forEach(msg => appendMessage(msg.text, msg.from_user ? "user" : "girl"));
-
-        if (LOCAL_NOTICES.length){
-          const sorted = [...LOCAL_NOTICES].sort((a,b)=>a.index-b.index);
-          for (const n of sorted){
-            const card = document.createElement('div');
-            card.className = 'system-card';
-            const logo = document.createElement('img');
-            logo.src = 'logo.png';
-            logo.alt = 'Site logo';
-            const title = document.createElement('div');
-            title.className = 'title';
-            title.textContent = 'Premium Feature';
-            const p = document.createElement('p');
-            p.textContent = n.text;
-            card.appendChild(logo); card.appendChild(title); card.appendChild(p);
-
-            const beforeChild = chatBox.children[n.index] || null;
-            chatBox.insertBefore(card, beforeChild);
-          }
-          chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        showCTA();
-      }catch(e){ console.error("Error loading messages:", e); }
-    }
-
-    async function checkTakeover(){
-      try{
-        const res = await fetch(`${backendUrl}/api/takeover/status/${girlId}`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        const data = await res.json();
-        TAKEOVER = !!data.takeover;
-        const banner = document.getElementById('liveBanner');
-        if (TAKEOVER){
-          banner.style.display = '';
-          banner.textContent = data.operatorName ? `🔴 ${data.operatorName} is live` : '';
-          if (!pollTimer) pollTimer = setInterval(loadMessages, 2000);
-        } else {
-          banner.style.display = 'none';
-          if (pollTimer){ clearInterval(pollTimer); pollTimer = null; }
-        }
-        ensureMessagesPolling();
-      }catch{
-        ensureMessagesPolling();
-      }
-    }
-
-    async function refreshEntitlements(){
-      try{
-        const r = await fetch(`${backendUrl}/api/me/entitlements`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (r.ok){
-          const e = await r.json();
-          ENTITLEMENTS = {
-            tier: e.tier || ENTITLEMENTS.tier,
-            status: e.status || ENTITLEMENTS.status,
-            canSendGifts: !!e.canSendGifts,
-            canSendImages: !!e.canSendImages,
-            maxReceivedImagesUnblurred: Number.isFinite(e.maxReceivedImagesUnblurred) ? e.maxReceivedImagesUnblurred : ENTITLEMENTS.maxReceivedImagesUnblurred,
-            canShareContacts: !!e.canShareContacts
-          };
-          IS_PREMIUM = ENTITLEMENTS.canSendImages || ENTITLEMENTS.canShareContacts || ENTITLEMENTS.canSendGifts;
-          FREE_IMAGE_LIMIT = ENTITLEMENTS.maxReceivedImagesUnblurred ?? 2;
-          showCTA();
-          return;
-        }
-      }catch{}
-
-      // fallback to legacy credits
-      try{
-        const r = await fetch(`${backendUrl}/api/credits`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (r.ok){
-          const c = await r.json();
-          IS_PREMIUM = !!c?.lifetime;
-          ENTITLEMENTS.canSendImages = IS_PREMIUM;
-          ENTITLEMENTS.canSendGifts = IS_PREMIUM;
-          ENTITLEMENTS.canShareContacts = IS_PREMIUM;
-          ENTITLEMENTS.maxReceivedImagesUnblurred = IS_PREMIUM ? 9999 : 2;
-          FREE_IMAGE_LIMIT = ENTITLEMENTS.maxReceivedImagesUnblurred;
-        }
-      }catch{}
-    }
-
-    async function sendMessage(){
-      const input = document.getElementById('messageInput');
-      const messageText = input.value.trim();
-      if (!messageText) return;
-
-      // contact gating
-      if (isContactAttempt(messageText)) {
-        if (!ENTITLEMENTS.canShareContacts) {
-          appendPersistentNotice(
-            "Sharing numbers, WhatsApp, emails or links is a Premium feature (included in the £20/mo plan and VIP). Tap the pink button below to upgrade."
-          );
-          showCTA();
-          recordPremiumBlock();
-          return;
-        } else {
-          appendMessage(messageText, 'user');
-          input.value = '';
-          try {
-            await fetch(`${backendUrl}/api/contacts/share`, {
-              method: "POST",
-              headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-              body: JSON.stringify({ girlId, contactText: messageText })
-            });
-          } catch(e) { console.error("Contact share failed:", e); }
-          return;
-        }
-      }
-
-      appendMessage(messageText, 'user');
-      input.value = '';
-      const typingBubble = appendMessage("...", 'girl', true);
-
-      try{
-        const res = await fetch(`${backendUrl}/api/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-          body: JSON.stringify({ girlId, message: messageText })
-        });
-
-        if (res.status === 403){
-          const data = await res.json();
-          typingBubble.remove();
-          appendMessage(data.error || "You're out of credits!", 'girl');
-          showCTA();
-          chatBox.scrollTop = chatBox.scrollHeight;
-          return;
-        }
-
-        const data = await res.json();
-        await new Promise(r => setTimeout(r, randomDelay()));
-        typingBubble.remove();
-
-        if (data.takeover){
-          TAKEOVER = true;
-          checkTakeover();
-          appendMessage("…", "girl", true);
-          if (!pollTimer) pollTimer = setInterval(loadMessages, 2000);
-          return;
-        }
-
-        appendMessage(data.reply || "(No reply received)", 'girl');
-        refreshEntitlements();
-      }catch(e){
-        console.error("Chat error:", e);
-        typingBubble.remove();
-      }
-    }
-
-    // gift prices
-    const GIFT_PRICES_GBP = { chocolate: 5, flowers: 15, puppy: 25, ring: 99 };
-
-    document.getElementById('giftBar').addEventListener('click', async (e)=>{
-      const chip = e.target.closest('.gift-chip');
-      if (!chip) return;
-
-      if (!ENTITLEMENTS.canSendGifts){
-        const labelBlocked = (chip.getAttribute('title') || 'gift').toLowerCase();
-        appendPersistentNotice(
-          `Sending ${labelBlocked} is a Premium feature. Upgrade using the pink button at the bottom to unlock gifts & pics.`
-        );
-        showCTA();
-        recordPremiumBlock();
-        return;
-      }
-
-      let type = (chip.dataset.gift || '').toLowerCase();
-      if (type === 'candy') type = 'chocolate';
-      const label = (chip.getAttribute('title') || type).toLowerCase();
-      const price = GIFT_PRICES_GBP[type];
-      if (!price) { console.warn('Unknown gift type:', type); return; }
-
-      const ok = confirm(`Send ${label} for £${price}?`);
-      if (!ok) return;
-
-      try{
-        const resp = await fetch(`${backendUrl}/api/gifts/buy`, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ girlId, giftType: type })
-        });
-        const data = await resp.json();
-
-        if (!resp.ok){
-          alert(data?.error || 'Payment failed');
-          return;
-        }
-
-        appendMessage(`You sent ${label} 💝`, 'user');
-        refreshEntitlements();
-      }catch(err){
-        console.error("Gift purchase failed:", err);
-        alert('Payment failed');
+  // Load messages
+  async function loadMessages() {
+    const res = await fetch(`${backendUrl}/api/messages/${characterId}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
       }
     });
 
-    // send photo gating + upload
-    const photoBtn = document.getElementById('sendPhotoBtn');
-    const photoInput = document.getElementById('photoInput');
+    const data = await res.json();
+    chatBox.innerHTML = "";
 
-    photoBtn.addEventListener('click', ()=>{
-      if (!ENTITLEMENTS.canSendImages){
-        appendPersistentNotice(
-          "Sending photos is a Premium feature. Upgrade using the pink button at the bottom to unlock it."
-        );
-        showCTA();
-        recordPremiumBlock();
-        return;
-      }
-      photoInput.click();
+    data.forEach(msg => {
+      addMessage(msg.text, msg.from_user ? "user" : "bot");
     });
 
-    photoInput.addEventListener('change', async ()=>{
-      const file = photoInput.files && photoInput.files[0];
-      if (!file) return;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-      try {
-        const fd = new FormData();
-        fd.append("girlId", String(girlId));
-        fd.append("image", file);
+  function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.className = `message ${sender}`;
+    div.textContent = text;
+    chatBox.appendChild(div);
+  }
 
-        const resp = await fetch(`${backendUrl}/api/photos/send`, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${token}` },
-          body: fd
-        });
-        const data = await resp.json();
-        if (data?.ok && data?.url) {
-          appendMessage(`IMAGE:${data.url}`, 'user');
-        } else {
-          appendPersistentNotice("Photo upload failed. Please try again.");
-        }
-      } catch (e) {
-        console.error("Photo send failed:", e);
-        appendPersistentNotice("Photo upload failed. Please try again.");
-      } finally {
-        photoInput.value = "";
-      }
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    const res = await fetch(`${backendUrl}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        characterId,
+        message: text
+      })
     });
 
-    // promo modal logic
-    function showStep(id){
-      const ids = ['promoStepIntro','promoQ1','promoQ2','promoQ3','promoQ4','promoStepLoading','promoStepDone'];
-      ids.forEach(x => { const el = document.getElementById(x); if (el) el.style.display = 'none'; });
-      const tgt = document.getElementById(id); if (tgt) tgt.style.display = '';
-    }
-    function openPromoIntro(){
-      if (PROMO_SHOWN) return;
-      PROMO_SHOWN = true;
-      const backdrop = document.getElementById('promoBackdrop');
-      showStep('promoStepIntro');
-      backdrop.style.display = 'flex';
-      backdrop.setAttribute('aria-hidden','false');
-    }
-    (function wirePromo(){
-      const backdrop = document.getElementById('promoBackdrop');
-      const btnStart = document.getElementById('promoStart');
-      const progressEl = document.getElementById('promoProgress');
+    const data = await res.json();
 
-      btnStart?.addEventListener('click', ()=>{ showStep('promoQ1'); });
+    addMessage(data.reply || "(No response)", "bot");
 
-      function wireAutoAdvance(stepId, inputName, nextStepId){
-        const step = document.getElementById(stepId);
-        if (!step) return;
-        step.addEventListener('change', (e)=>{
-          const inp = e.target;
-          if (inp && inp.name === inputName){
-            setTimeout(()=>{ if (nextStepId) showStep(nextStepId); }, 120);
-          }
-        });
-      }
-      wireAutoAdvance('promoQ1', 'q_gender', 'promoQ2');
-      wireAutoAdvance('promoQ2', 'q_over40', 'promoQ3');
-      wireAutoAdvance('promoQ3', 'q_job', 'promoQ4');
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-      (function wireLast(){
-        const step = document.getElementById('promoQ4');
-        if (!step) return;
-        step.addEventListener('change', (e)=>{
-          const inp = e.target;
-          if (inp && inp.name === 'q_goal'){
-            setTimeout(()=>{
-              showStep('promoStepLoading');
-              let elapsed = 0;
-              progressEl.style.width = '0%';
-              const total = 5000, tick = 100;
-              const t = setInterval(()=>{
-                elapsed += tick;
-                progressEl.style.width = Math.min(100, Math.floor(elapsed/total*100)) + '%';
-                if (elapsed >= total){
-                  clearInterval(t);
-                  showStep('promoStepDone');
-                }
-              }, tick);
-            }, 120);
-          }
-        });
-      })();
+  // Initialize
+  loadProfile();
+  loadMessages();
+</script>
 
-      backdrop.addEventListener('click', (e)=>{
-        if (e.target === backdrop){
-          const doneVisible = document.getElementById('promoStepDone').style.display !== 'none';
-          if (doneVisible){
-            backdrop.style.display = 'none';
-            backdrop.setAttribute('aria-hidden','true');
-          }
-        }
-      });
-    })();
-
-    // AI auto-picture drip (IDs 331..358)
-    let AI_DRIP_TIMER = null;
-    function startAiAutoDrip(){
-      if (!Number.isInteger(girlId) || girlId < 331 || girlId > 358) return;
-      if (AI_DRIP_TIMER) return;
-
-      async function tick(){
-        try {
-          if (TAKEOVER) return;
-          await fetch(`${backendUrl}/api/ai/drip`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ girlId })
-          });
-        } catch (e) {
-          console.warn("AI drip failed:", e);
-        }
-      }
-      const baseMs = 12 * 60 * 1000;
-      const jitter = () => Math.floor(Math.random()*120000) - 60000;
-      AI_DRIP_TIMER = setInterval(tick, baseMs + jitter());
-      window.addEventListener('beforeunload', ()=>{ if (AI_DRIP_TIMER) clearInterval(AI_DRIP_TIMER); });
-    }
-
-    // boot
-    (async function init(){
-      await setHeader();                 // header/name/photo (with fallback)
-      await refreshEntitlements();       // so gating behaves instantly
-      loadMessages();
-      checkTakeover();
-      ensureMessagesPolling();
-      setInterval(checkTakeover, 10000);
-      setInterval(refreshEntitlements, 15000);
-      startAiAutoDrip();                 // only runs for AI IDs
-    })();
-  </script>
 </body>
 </html>
