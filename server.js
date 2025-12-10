@@ -7,7 +7,6 @@ import pkg from "pg";
 import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
-import SibApiV3Sdk from 'sib-api-v3-sdk';
 import crypto from 'crypto';
 import { sendWelcomeEmail, sendPasswordResetEmail, sendNewMessageEmail } from './email-ses.js';
 
@@ -30,10 +29,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-const defaultClient = SibApiV3Sdk.ApiClient.instance;
-const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const transactionalEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
