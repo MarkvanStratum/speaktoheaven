@@ -8,7 +8,6 @@ import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
 import crypto from 'crypto';
-import { sendWelcomeEmail, sendPasswordResetEmail, sendNewMessageEmail } from './email-ses.js';
 
 // 🔹 NEW: file ops + uploads
 import fs from "fs";
