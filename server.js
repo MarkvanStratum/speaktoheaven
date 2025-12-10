@@ -1,5 +1,5 @@
 //--------------------------------------------
-//  SERVER.JS — BIBLICAL AI CHAT EDITION (FINAL FIXED)
+//  SERVER.JS — BIBLICAL AI CHAT EDITION (WITH CHARMR CHAT LOGIC)
 //--------------------------------------------
 
 import express from "express";
@@ -69,7 +69,7 @@ const pool = new Pool({
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
         user_id INT REFERENCES users(id) ON DELETE CASCADE,
-        character_id INT NOT NULL,
+        character_id INT NOT NULL, // KEPT: character_id
         from_user BOOLEAN NOT NULL,
         text TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
@@ -224,45 +224,29 @@ if (fs.existsSync(frontendPath)) {
 }
 
 //--------------------------------------------
-//  OPENROUTER CLIENT
+//  OPENAI/OPENROUTER CLIENT (ADAPTED FROM CHARMR.JS)
 //--------------------------------------------
 
-//--------------------------------------------
-//  OPENROUTER CLIENT (THE FIXED SECTION)
-//--------------------------------------------
-
-const openrouter = new OpenAI({
+const openai = new OpenAI({ 
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
-  // === CRITICAL FIX: ADD THESE HEADERS ===
+  // Essential headers for OpenRouter
   defaultHeaders: {
-    // 1. The required URL for OpenRouter to track where the request came from
     'HTTP-Referer': 'https://speaktoheaven.onrender.com', 
-    // 2. A title for your app, which appears in your OpenRouter dashboard
     'X-Title': 'Biblical AI Chat Edition'                 
   }
-  // =======================================
 });
 
 //--------------------------------------------
-//  SYSTEM PROMPT
+//  SYSTEM PROMPT (IMPORTED FROM CHARMR.JS SNIPPET)
 //--------------------------------------------
 
-function buildSystemPrompt(characterName) {
-  return `
-You are roleplaying as **${characterName}**, a Biblical figure.
-
-- Stay faithful to scripture.
-- Speak in the tone and personality of ${characterName}.
-- Provide wisdom, comfort, and correction.
-- Quote scripture with (Book Chapter:Verse).
-- Never claim to literally be God.
-- Say: "I am an AI inspired by the Bible."
+const SYSTEM_PROMPT = `
+You are a bubbly, playful character who loves chatting with people in a lighthearted, positive way. You enjoy making others smile, giving compliments, and keeping conversations fun and engaging. You speak simply and casually, never too formal, and you avoid lecturing or being overly serious. You’re curious about people’s hobbies, interests, and day-to-day lives, and you like to encourage them with friendly banter. You sometimes use flirty humor or teasing, but you always keep it wholesome and respectful. You never engage in sexual or explicit talk. If someone gets off topic or quiet, you keep the energy up by asking fun questions.
 `;
-}
 
 //--------------------------------------------
-//  CHAT ROUTE (THE ONLY ONE)
+//  CHAT ROUTE (MODIFIED BASED ON CHARMR.JS LOGIC)
 //--------------------------------------------
 
 app.post("/api/chat", authenticateToken, async (req, res) => {
@@ -299,11 +283,11 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
       content: m.text
     }));
 
-    // Send to OpenRouter
-    const aiResponse = await openrouter.chat.completions.create({ // <-- CORRECTED
-      model: "openai/gpt-3.5-turbo", // **FIXED: Changed to a stable, reliable model**
+    // Send to OpenRouter/OpenAI
+    const aiResponse = await openai.chat.completions.create({ 
+      model: "openai/gpt-3.5-turbo", 
       messages: [
-        { role: "system", content: buildSystemPrompt(character.name) },
+        { role: "system", content: SYSTEM_PROMPT }, // **CHANGED: Static Charmr prompt**
         ...chatHistory,
         { role: "user", content: message }
       ],
@@ -329,6 +313,10 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "AI service error" });
   }
 });
+
+//--------------------------------------------
+//  FETCH MESSAGES ROUTE
+//--------------------------------------------
 
 app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
   try {
