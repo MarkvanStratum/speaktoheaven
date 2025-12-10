@@ -346,8 +346,10 @@
     </div>
   </div>
 
+  <script src="girls.js"></script>
   <script>
-    const backendUrl = "https://speaktoheaven.onrender.com";
+    // MODIFIED: Changed backendUrl to local host for testing your uploaded server file
+    const backendUrl = "http://localhost:10000";
     const token = localStorage.getItem("token");
     if (!token) { window.location.href = "login.html"; }
 
@@ -356,19 +358,21 @@
     const chatBox = document.getElementById('chatBox');
     const ctaBar  = document.getElementById('ctaBar');
 
-    // header (fetch profile details from server)
+    // header (with server fallback)
     async function setHeader(){
       const nameEl = document.getElementById('chatName');
       const photoEl = document.getElementById('chatPhoto');
-      let g = null;
 
-      try {
-        // Always fetch profiles from the server
-        const r = await fetch(`${backendUrl}/api/profiles`);
-        const list = await r.json();
-        g = Array.isArray(list) ? list.find(x => Number(x.id) === Number(girlId)) : null; // /api/profiles
-      } catch (e) {
-        console.error("Error fetching profiles:", e);
+      let g = (typeof girls !== 'undefined' && Array.isArray(girls))
+             ? girls.find(x => Number(x.id) === Number(girlId))
+             : null;
+
+      if (!g) {
+        try {
+          const r = await fetch(`${backendUrl}/api/profiles`);
+          const list = await r.json();
+          g = Array.isArray(list) ? list.find(x => Number(x.id) === Number(girlId)) : null; // /api/profiles
+        } catch {}
       }
 
       nameEl.textContent = g?.name || 'Unknown';
@@ -895,31 +899,20 @@
         }
       }
       const baseMs = 12 * 60 * 1000;
-      const jitter = () 
-      // Original code was incomplete, closing the function here to ensure valid HTML/JS structure.
-      // Assuming the following lines were present in the complete file:
-      // const jitter = () => Math.floor(Math.random()*120000) - 60000;
-      // AI_DRIP_TIMER = setInterval(tick, baseMs + jitter());
-      // window.addEventListener('beforeunload', ()=>{ if (AI_DRIP_TIMER) clearInterval(AI_DRIP_TIMER); });
+      const jitter = () => Math.floor(Math.random()*120000) - 60000;
+      AI_DRIP_TIMER = setInterval(tick, baseMs + jitter());
+      window.addEventListener('beforeunload', ()=>{ if (AI_DRIP_TIMER) clearInterval(AI_DRIP_TIMER); });
     }
-
-    // boot
-    (async function init(){
-      await setHeader();                 // header/name/photo (with fallback)
-      await refreshEntitlements();
-      await loadMessages();              // initial messages load
-      checkTakeover();                   // check for operator takeover
-      ensureMessagesPolling();           // start polling for new messages
-      startAiAutoDrip();
-    })();
-
-    // Event listeners for input field
-    document.getElementById('messageInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+    
+    // BOOTSTRAP: Calls all initial setup functions
+    (async function init(){
+      await setHeader();
+      await refreshEntitlements();
+      ensureMessagesPolling();
+      checkTakeover();
+      loadMessages();
+      startAiAutoDrip();
+    })();
   </script>
 </body>
 </html>
