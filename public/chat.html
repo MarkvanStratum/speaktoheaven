@@ -91,7 +91,112 @@
   <button id="sendBtn" onclick="sendMessage()">Send</button>
 </div>
 
-<script src="chat.js"></script> 
+<script>
+  const backendUrl = "https://speaktoheaven.onrender.com";
+
+  const params = new URLSearchParams(window.location.search);
+  let characterId = Number(params.get("character"));
+  if (!characterId) characterId = 1; // default to God
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Please login first.");
+    window.location.href = "/login.html";
+  }
+
+  if (!characterId) {
+    alert("Error: No character selected.");
+  }
+
+  const chatBox = document.getElementById("chatBox");
+  const chatName = document.getElementById("chatName");
+
+  function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.className = `message ${sender}`;
+    div.textContent = text;
+    chatBox.appendChild(div);
+  }
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${backendUrl}/api/profiles`);
+      const profiles = await res.json();
+      const profile = profiles.find(p => p.id === characterId);
+      if (profile) chatName.textContent = profile.name;
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+    }
+  }
+
+  async function loadMessages() {
+    try {
+      const res = await fetch(`${backendUrl}/api/messages/${characterId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to load messages (${res.status})`);
+      }
+
+      const data = await res.json();
+      chatBox.innerHTML = "";
+
+      data.forEach(msg => {
+        addMessage(msg.text, msg.from_user ? "user" : "bot");
+      });
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (err) {
+      console.error("Error loading messages:", err);
+      chatBox.innerHTML = '<div class="message bot">(Could not load chat history)</div>';
+    }
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    try {
+      const res = await fetch(`${backendUrl}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          characterId,
+          message: text
+        })
+      });
+
+      if (!res.ok) {
+        addMessage("(Failed to send message)", "bot");
+        return;
+      }
+
+      const data = await res.json();
+      addMessage(data.reply || "(No response)", "bot");
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (err) {
+      console.error("Error sending message:", err);
+      addMessage("(Error sending message)", "bot");
+    }
+  }
+
+  // Initialize only if token exists
+  if (token) {
+    loadProfile();
+    loadMessages();
+  }
+</script>
 
 </body>
 </html>
