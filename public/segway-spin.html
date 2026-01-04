@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Segway Spin — 3 Free Spins</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+
+  <style>
+    /* your entire original CSS — unchanged */
+    :root {
+      --maxw: 420px;
+      --ring: 10px;
+      --transition: 3.2s cubic-bezier(0.12,0.64,0.05,1);
+      --bg-top:#030014;
+      --bg-bottom:#111827;
+      --gold:#facc15;
+      --purple:#4f46e5;
+      --pink:#ec4899;
+      --text:#f9fafb;
+      --muted:#9ca3af;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top,rgba(254,249,195,.08),transparent 55%),linear-gradient(to bottom,var(--bg-top),var(--bg-bottom));color:var(--text);-webkit-tap-highlight-color:transparent}
+    .wrap{min-height:100svh;display:flex;flex-direction:column;align-items:center}
+    header{width:100%;max-width:var(--maxw);padding:24px 16px 4px;text-align:center}
+    h1{margin:0;font-size:30px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fef9c3;text-shadow:0 3px 14px rgba(0,0,0,.9)}
+    .sub{margin-top:4px;font-size:13px;color:var(--muted)}
+    .sub b{color:#22c55e}
+    .main{width:100%;max-width:var(--maxw);flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 16px 14px}
+    .pointer{position:relative;width:100%;display:flex;justify-content:center;margin-bottom:0;z-index:10}
+    .pointer:after{content:"";position:absolute;top:0;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:30px solid var(--gold);filter:drop-shadow(0 3px 6px rgba(0,0,0,.9))}
+    .pointer:before{content:"";position:absolute;top:28px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 20%,#fefce8,#fed7aa,#b45309);box-shadow:0 2px 4px rgba(0,0,0,.7)}
+    .wheel-wrap{position:relative;width:min(74vw,var(--maxw));height:min(74vw,var(--maxw));display:flex;align-items:center;justify-content:center}
+    .wheel-halo{position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(250,250,210,.16),transparent 70%);filter:blur(2px);z-index:0}
+    .wheel{position:absolute;inset:0;margin:auto;border-radius:50%;overflow:hidden;border:var(--ring) solid #fef3c7;box-shadow:0 18px 40px rgba(0,0,0,.95),0 0 0 5px #a16207,0 0 0 8px #facc15;background:#111827;transform:rotate(0deg);z-index:2}
+    .wheel.spinning{transition:transform var(--transition)}
+    .bulb{position:absolute;width:9px;height:9px;border-radius:50%;background:#fef3c7;box-shadow:0 0 8px rgba(250,250,210,.95);z-index:3}
+    .seg-label-item{position:absolute;pointer-events:none;z-index:4;transform-origin:center center}
+    .seg-label-stack{display:flex;flex-direction:column;align-items:center;line-height:1.05}
+    .seg-label-amount{font-family:'Bangers',system-ui,sans-serif;font-size:16px;font-weight:900;letter-spacing:.02em;color:#fff;text-shadow:-1px -1px 0 #111827,1px -1px 0 #111827,-1px 1px 0 #111827,1px 1px 0 #111827}
+    .seg-label-sub{font-size:10px;font-weight:700;text-transform:uppercase;color:#fef9c3;text-shadow:-1px -1px 0 #111827,1px -1px 0 #111827,-1px 1px 0 #111827,1px 1px 0 #111827}
+    .seg-label-zero{font-family:'Bangers',system-ui,sans-serif;font-size:18px;font-weight:900;color:#111827;text-shadow:-1px -1px 0 #f9fafb,1px -1px 0 #f9fafb,-1px 1px 0 #f9fafb,1px 1px 0 #f9fafb}
+    .seg-label-img{width:84px;height:84px;display:flex;align-items:center;justify-content:center}
+    .seg-label-img img{max-width:100%;max-height:100%;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.85))}
+    .cap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
+    .cap div{width:22%;height:22%;border-radius:50%;background:radial-gradient(circle at 30% 20%,#fef9c3,#fde68a,#b45309);box-shadow:inset 0 2px 5px rgba(0,0,0,.25),0 3px 8px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#111827}
+    .stand{position:relative;width:52%;max-width:200px;height:52px;margin-top:2px;background:linear-gradient(to bottom,#facc15,#b45309);border-radius:0 0 32px 32px;box-shadow:0 -4px 10px rgba(0,0,0,.6);clip-path:polygon(18% 0,82% 0,100% 75%,0 75%);z-index:1}
+    .stand-base{position:relative;margin-top:-2px;width:70%;height:10px;background:linear-gradient(to right,#b45309,#facc15,#b45309);border-radius:999px;box-shadow:0 6px 14px rgba(0,0,0,.85);z-index:0}
+    .btn{width:100%;max-width:var(--maxw);margin-top:4px;padding:14px 18px;border:none;border-radius:999px;font-weight:900;font-size:17px;text-transform:uppercase;letter-spacing:.06em;background:linear-gradient(to right,var(--purple),var(--pink));color:#fff;box-shadow:0 12px 26px rgba(236,72,153,.6)}
+    .btn:disabled{background:#6b7280;color:#e5e7eb;box-shadow:none}
+    .msg{text-align:center;font-size:13px;color:#e5e7eb;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+    .hint{text-align:center;font-size:10px;color:var(--muted)}
+    footer{width:100%;max-width:var(--maxw);padding:0 16px 16px;text-align:center;font-size:9px;color:#6b7280}
+    .result-popup{position:fixed;left:50%;top:50%;transform:translate(-50%,10px) scale(.96);padding:12px 22px;border-radius:18px;background:rgba(15,23,42,.98);color:#e5e7eb;font-size:15px;box-shadow:0 16px 40px rgba(0,0,0,.85);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+    .result-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    .result-popup.jackpot{background:linear-gradient(to right,#22c55e,#15803d);color:#f9fafb;font-weight:800;box-shadow:0 18px 48px rgba(34,197,94,.8)}
+    .final{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:40px 16px;background:linear-gradient(to bottom,#020817,#020817);color:#f9fafb;text-align:center}
+    .card{width:100%;max-width:var(--maxw);background:radial-gradient(circle at top,#020817,#000814);border-radius:22px;padding:26px 20px;box-shadow:0 18px 40px rgba(0,0,0,.9);border:1px solid rgba(250,250,250,.08)}
+    .cta{display:block;margin-top:16px;padding:14px 18px;border-radius:16px;font-weight:800;background:linear-gradient(to right,#22c55e,#a3e635);color:#020817;text-decoration:none;box-shadow:0 10px 24px rgba(34,197,94,.6)}
+    .hide{display:none}
+  </style>
+</head>
+<body>
+  <section id="game" class="wrap">
+    <header>
+      <h1>Segway Spin</h1>
+      <div class="sub">3 free spins to win <b>Segway discounts</b> up to <b>R500</b> or the <b>Ninebot MAX G2</b>.</div>
+    </header>
+
+    <main class="main">
+      <div class="pointer"></div>
+      <div class="wheel-wrap">
+        <div class="wheel-halo"></div>
+        <div id="wheel" class="wheel"></div>
+        <div class="cap"><div>⚡</div></div>
+      </div>
+      <div class="stand"></div>
+      <div class="stand-base"></div>
+      <button id="spinBtn" class="btn">Spin the wheel</button>
+      <div id="msg" class="msg">You have 3 free spins.</div>
+      <div class="hint">Spin 1: discount • Spin 2: no prize • Spin 3: Segway Ninebot MAX G2</div>
+    </main>
+    <footer>Demo only. Example campaign for the South African market.</footer>
+  </section>
+
+  <div id="spinResult" class="result-popup hide"></div>
+
+  <section id="final" class="final hide">
+    <div class="card">
+      <div style="display:flex; justify-content:center; margin-bottom:10px;">
+        <img src="segway.jpg" alt="Segway Ninebot MAX G2" style="max-width:180px; height:auto; filter:drop-shadow(0 6px 16px rgba(0,0,0,.9)); border-radius:10px;">
+      </div>
+      <h2 style="margin:0 0 6px; font-size:24px; font-weight:800;">JACKPOT WINNER</h2>
+      <p style="margin:0 0 14px; font-size:17px;">You've won a <b>Segway Ninebot MAX G2</b>!</p>
+      <a class="cta" href="https://cudsr.bemobtrcks.com/click">Click here to confirm shipping details and pay the Post Office express shipping fee:</a>
+    </div>
+  </section>
+
+  <script>
+    /* === all your original JS stays, wheel generation unchanged === */
+    const segments=[{amount:"R100",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R200",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R300",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R400",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R500",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R200",sub:"discount!",type:"discount"},{label:"Segway Ninebot MAX G2",type:"jackpot",img:"segway.jpg"}];
+    const SEGMENT_COUNT=segments.length,DEG_PER=360/SEGMENT_COUNT;
+    const wheel=document.getElementById("wheel");
+    const colors=["#f97316","#22c55e","#60a5fa","#facc15","#ec4899","#38bdf8","#a855f7","#fb7185"];
+    const stops=segments.map((seg,i)=>`${(seg.type==="jackpot"&&seg.img)?"#fff":colors[i%colors.length]} ${(i/SEGMENT_COUNT)*100}% ${((i+1)/SEGMENT_COUNT)*100}%`).join(",");
+    wheel.style.background=`conic-gradient(${stops})`;
+    (function addBulbs(){const bulbCount=36,rect=wheel.getBoundingClientRect(),c=rect.width/2,r=c+14;for(let i=0;i<bulbCount;i++){const a=(i/bulbCount)*2*Math.PI,x=c+Math.cos(a)*r,y=c+Math.sin(a)*r,b=document.createElement("div");b.className="bulb";b.style.left=x+"px";b.style.top=y+"px";wheel.parentElement.appendChild(b)}})();
+    (function placeLabels(){const rect=wheel.getBoundingClientRect(),radius=rect.width/2,rText=radius-34,rImg=radius-64;segments.forEach((seg,i)=>{const ang=i*DEG_PER+DEG_PER/2,rad=ang*Math.PI/180;if(seg.type==="jackpot"&&seg.img){const x=radius+Math.sin(rad)*rImg,y=radius-Math.cos(rad)*rImg,wrap=document.createElement("div");wrap.className="seg-label-item seg-label-img";wrap.style.left=x+"px";wrap.style.top=y+"px";wrap.style.transform=`translate(-50%,-50%) rotate(${ang}deg)`;const img=document.createElement("img");img.src=seg.img;wrap.appendChild(img);wheel.appendChild(wrap)}else{const x=radius+Math.sin(rad)*rText,y=radius-Math.cos(rad)*rText,wrap=document.createElement("div");wrap.className="seg-label-item";wrap.style.left=x+"px";wrap.style.top=y+"px";wrap.style.transform=`translate(-50%,-50%) rotate(${ang}deg)`;if(seg.type==="zero"){const s=document.createElement("div");s.className="seg-label-zero";s.textContent="0";wrap.appendChild(s)}else{const st=document.createElement("div");st.className="seg-label-stack";const amt=document.createElement("div");amt.className="seg-label-amount";amt.textContent=seg.amount;const sub=document.createElement("div");sub.className="seg-label-sub";sub.textContent=seg.sub;st.appendChild(amt);st.appendChild(sub);wrap.appendChild(st)}wheel.appendChild(wrap)}})})();
+    const TYPE_INDEXES=segments.reduce((a,s,i)=>((a[s.type]??=[]).push(i),a),{}),SEQUENCE=["discount","zero","jackpot"];
+    let spinCount=0,rotation=0;
+    const btn=document.getElementById("spinBtn"),msg=document.getElementById("msg"),game=document.getElementById("game"),final=document.getElementById("final"),spinResult=document.getElementById("spinResult");
+
+    /* === SOUND ENGINE added (pure WebAudio, no missing files) === */
+    let audioCtx;function getAudioCtx(){if(!audioCtx){const Ctx=window.AudioContext||window.webkitAudioContext;audioCtx=new Ctx()}return audioCtx}
+    function beep(f=800,d=0.08,v=0.25){const c=getAudioCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type="square";o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)}
+    function spinSound(){for(let i=0;i<14;i++)setTimeout(()=>beep(260+i*24,0.03,0.2),i*40)}
+    function winSound(){[800,1050,1300].forEach((f,i)=>setTimeout(()=>beep(f,0.08,0.35),i*90))}
+    function loseSound(){beep(400,0.07,0.22);setTimeout(()=>beep(260,0.1,0.22),90)}
+    function jackpotSound(){[900,1150,1400,1700,1400,1150].forEach((f,i)=>setTimeout(()=>beep(f,0.09,0.45),i*80))}
+    function finalPopupSound(){[784,988,1319,1568].forEach((f,i)=>setTimeout(()=>beep(f,0.14,0.45),i*110))}
+    document.addEventListener("click",()=>getAudioCtx(),{once:true});
+
+    function pickIndex(t){return(TYPE_INDEXES[t]||[0])[spinCount%TYPE_INDEXES[t].length]}
+    function showResultPopup(text,j=false){spinResult.textContent=text;spinResult.classList.remove("hide","jackpot");if(j)spinResult.classList.add("jackpot");void spinResult.offsetWidth;spinResult.classList.add("show");setTimeout(()=>{spinResult.classList.remove("show","jackpot");spinResult.classList.add("hide")},j?1600:1000)}
+    function spin(){if(btn.disabled||spinCount>=3)return;const outcomeType=SEQUENCE[spinCount],targetIndex=pickIndex(outcomeType),targetCenter=targetIndex*DEG_PER+DEG_PER/2,fullTurns=7+spinCount*2,currentNorm=((rotation%360)+360)%360,extra=(currentNorm+targetCenter)%360,nextRotation=rotation-(fullTurns*360+extra);
+      spinSound();wheel.classList.add("spinning");btn.disabled=true;btn.textContent="Spinning…";msg.textContent="Spinning…";
+      requestAnimationFrame(()=>wheel.style.transform=`rotate(${nextRotation}deg)`);
+      wheel.addEventListener("transitionend",function end(){wheel.removeEventListener("transitionend",end);wheel.classList.remove("spinning");rotation=nextRotation;spinCount++;
+        const seg=segments[targetIndex];let text,isJack=false;
+        if(outcomeType==="zero"){text="No luck this time. Try again!";loseSound();}
+        else if(outcomeType==="jackpot"){text="JACKPOT! You’ve won a Segway Ninebot MAX G2!";isJack=true;jackpotSound();setTimeout(()=>{game.classList.add("hide");final.classList.remove("hide");finalPopupSound()},2000);}
+        else{text=`You’ve won ${seg.amount} Segway discount!`;winSound();}
+        msg.textContent=text;showResultPopup(text,isJack);
+        btn.disabled=spinCount>=3;btn.textContent=spinCount>=3?"Spins used":"Spin the wheel";});
+    }
+    btn.addEventListener("click",spin);
+  </script>
+</body>
+</html>
