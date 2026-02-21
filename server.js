@@ -338,16 +338,10 @@ const userResult = await pool.query(
 
 const userData = userResult.rows[0];
 
-if (!userData.plan || userData.plan === "free") {
-	return res.status(403).json({ error: "Please purchase access to chat" });
-}
-
-if (!canAccessCharacter(userData, Number(characterId))) {
-	return res.status(403).json({
-		error: "Access expired or upgrade required"
-	});
-}
-
+// TEMPORARY: Allow testing for all users
+// if (!userData.plan || userData.plan === "free") {
+// 	return res.status(403).json({ error: "Please purchase access to chat" });
+// }
 		// Save user message
 		await pool.query(
 			`INSERT INTO messages (user_id, character_id, from_user, text)
