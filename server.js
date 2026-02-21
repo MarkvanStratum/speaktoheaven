@@ -48,9 +48,10 @@ const { Pool } = pkg;
 
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
-	ssl: { rejectUnauthorized: false }
+	ssl: {
+		rejectUnauthorized: false
+	}
 });
-
 // Initialize essential DB tables
 (async () => {
 	try {
@@ -62,7 +63,9 @@ const pool = new Pool({
 				credits INT DEFAULT 10,
 				lifetime BOOLEAN DEFAULT false,
 				reset_token TEXT,
-				reset_token_expires TIMESTAMP
+				reset_token_expires TIMESTAMP,
+				plan TEXT DEFAULT 'free',
+				expires_at TIMESTAMP
 			);
 		`);
 
@@ -306,7 +309,7 @@ const openai = new OpenAI({
 	apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
 	// Essential headers for OpenRouter
 	defaultHeaders: {
-		'HTTP-Referer': 'https://speaktoheaven.onrender.com',	
+		'HTTP-Referer': 'https://speaktoheaven.com',	
 		'X-Title': 'Biblical AI Chat Edition'	 	 	 	 	
 	}
 });
@@ -335,6 +338,10 @@ const userResult = await pool.query(
 );
 
 const userData = userResult.rows[0];
+
+if (!userData.plan || userData.plan === "free") {
+	return res.status(403).json({ error: "Please purchase access to chat" });
+}
 
 if (!canAccessCharacter(userData, Number(characterId))) {
 	return res.status(403).json({
@@ -466,7 +473,11 @@ try {
 				[email]
 			);
 
-			const user = userRes.rows[0];
+			if (userRes.rows.length === 0) {
+	return res.json({ received: true });
+}
+
+const user = userRes.rows[0];
 
 			let expiresAt = null;
 			let lifetime = false;
@@ -484,6 +495,7 @@ try {
 
 			if (plan === "lifetime") {
 				lifetime = true;
+				expiresAt = null;
 			}
 
 			await pool.query(
