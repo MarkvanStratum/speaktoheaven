@@ -218,8 +218,18 @@
       $("chatInput").value = "";
       const res = await fetch("/api/chat", { method: "POST", headers: authHeaders(), body: JSON.stringify({ characterId: selectedId, message }) });
       const data = await res.json();
-      if (res.ok) { $("chatLog").innerHTML += `<div class="bubble them">${data.reply}</div>`; }
-      else { alert(data.error); }
+      if (res.ok) { 
+        $("chatLog").innerHTML += `<div class="bubble them">${data.reply}</div>`; 
+      } else { 
+        if (data.error === "LIMIT_REACHED") {
+            alert(data.message);
+            // Show the pricing section
+            document.getElementById("authSection").classList.remove("hide");
+            document.getElementById("authSection").scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert(data.error); 
+        }
+      }
       $("chatLog").scrollTop = $("chatLog").scrollHeight;
     };
 

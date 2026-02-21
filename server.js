@@ -81,9 +81,10 @@ const pool = new Pool({
 		`);
 
 		console.log("✅ Database ready");
-await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';`);
+		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';`);
 		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP;`);
 		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS lifetime BOOLEAN DEFAULT false;`);
+		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS messages_sent INT DEFAULT 0;`);
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -333,18 +334,22 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
 		const userId = req.user.id;
 
-// 🔒 Check user access
-const userResult = await pool.query(
-	"SELECT plan, lifetime, expires_at FROM users WHERE id = $1",
-	[userId]
-);
+// 🔒 Check user access and free message limit
+		const userResult = await pool.query(
+			"SELECT plan, lifetime, expires_at, messages_sent FROM users WHERE id = $1",
+			[userId]
+		);
+		const userData = userResult.rows[0];
 
-const userData = userResult.rows[0];
+		const isPaid = userData.lifetime || (userData.expires_at && new Date(userData.expires_at) > new Date());
 
-// TEMPORARY: Allow testing for all users
-// if (!userData.plan || userData.plan === "free") {
-// 	return res.status(403).json({ error: "Please purchase access to chat" });
-// }
+		// Block users who are not paid and have sent 3 or more messages
+		if (!isPaid && userData.messages_sent >= 3) {
+			return res.status(403).json({ 
+				error: "LIMIT_REACHED", 
+				message: "You have used your 3 free divine consultations. Please choose a plan to continue." 
+			});
+		}
 		// Save user message
 		await pool.query(
 			`INSERT INTO messages (user_id, character_id, from_user, text)
@@ -405,6 +410,9 @@ Remain in character at all times.
 				[userId, characterId, reply]
 			);
 		}
+
+// Increment free message counter
+		await pool.query("UPDATE users SET messages_sent = messages_sent + 1 WHERE id = $1", [userId]);
 
 		res.json({ reply: reply || "(No response)" });
 
