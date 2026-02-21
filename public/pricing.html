@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sacred Offerings — Speak to Heaven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-heaven: #fdfcfb; 
+      --marble: #ffffff;
+      --gold-divine: #c5a059;
+      --blue-saint: #2c3e50;
+      --text-main: #33302c;
+      --border-holy: rgba(197, 160, 89, 0.25);
+      --divine-shadow: 0 20px 60px rgba(0,0,0,0.07);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--text-main); background-color: var(--bg-heaven);
+      background-image: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.15), transparent 50%);
+      font-family: "EB Garamond", serif; font-size: 19px; line-height: 1.6;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+    }
+
+    .header { display: flex; flex-direction: column; align-items: center; padding: 70px 20px 50px; text-align: center; }
+    .logo { 
+      width: 65px; height: 65px; background: white; border: 1.5px solid var(--gold-divine); 
+      border-radius: 50%; display: grid; place-items: center; 
+      font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 30px; margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(197, 160, 89, 0.2);
+    }
+    h1 { font-family: "Cinzel", serif; font-size: 46px; color: var(--blue-saint); margin: 0; letter-spacing: 3px; }
+    .subtitle { color: var(--gold-divine); font-family: "Cinzel"; font-size: 14px; letter-spacing: 4px; margin-top: 12px; font-weight: 600; }
+
+    .pricing-grid { 
+      display: grid; grid-template-columns: repeat(3, 1fr); 
+      gap: 35px; width: 100%; max-width: 1100px; padding: 20px; 
+    }
+
+    @media (max-width: 950px) { .pricing-grid { grid-template-columns: 1fr; padding: 40px; } }
+
+    .card { 
+      background: var(--marble); border: 1px solid var(--border-holy); border-radius: 15px; 
+      box-shadow: var(--divine-shadow); padding: 50px 35px; text-align: center;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
+      display: flex; flex-direction: column;
+    }
+    .card:hover { transform: translateY(-12px); border-color: var(--gold-divine); }
+    .card.featured { border: 2px solid var(--gold-divine); position: relative; }
+    
+    .featured-label {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--gold-divine); color: white; padding: 5px 20px;
+      font-family: "Cinzel"; font-size: 12px; border-radius: 25px; letter-spacing: 1px; font-weight: 700;
+    }
+
+    .plan-name { font-family: "Cinzel"; font-size: 24px; color: var(--blue-saint); margin-bottom: 15px; font-weight: 700; }
+    .price { font-family: "Cinzel"; font-size: 42px; color: var(--gold-divine); margin-bottom: 5px; font-weight: 700; }
+    .duration { font-family: "Cinzel"; font-size: 13px; color: var(--text-muted); opacity: 0.6; margin-bottom: 30px; letter-spacing: 1px; }
+
+    .features { list-style: none; padding: 0; margin: 0 0 40px 0; flex-grow: 1; }
+    .features li { padding: 14px 0; border-bottom: 1px solid rgba(197, 160, 89, 0.1); font-size: 18px; color: #4a4a4a; }
+    .features li:last-child { border-bottom: none; }
+
+    .btn { 
+      padding: 18px 25px; border-radius: 8px; font-family: "Cinzel", serif; cursor: pointer; 
+      border: 2px solid var(--gold-divine); background: transparent; color: var(--gold-divine); 
+      text-transform: uppercase; letter-spacing: 2px; font-size: 15px; transition: 0.3s;
+      font-weight: 700;
+    }
+    .btn:hover { background: #fdf9f2; transform: scale(1.02); }
+    .featured .btn { background: var(--gold-divine); color: white; }
+    .featured .btn:hover { background: #b08d4a; box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3); }
+
+    .back-link { margin: 50px 0; color: var(--gold-divine); text-decoration: none; font-family: "Cinzel"; font-size: 14px; opacity: 0.7; transition: 0.3s; }
+    .back-link:hover { opacity: 1; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">†</div>
+    <h1>Sacred Offerings</h1>
+    <div class="subtitle">Continue Your Divine Dialogue</div>
+  </header>
+
+  <div class="pricing-grid">
+    <div class="card">
+      <div class="plan-name">Prophet Access</div>
+      <div class="price">$29.95</div>
+      <div class="duration">One-Time Payment • 30 Days</div>
+      <ul class="features">
+        <li>Guidance from any 1 Figure</li>
+        <li>Full Message History</li>
+        <li>Holy Scripture Integration</li>
+      </ul>
+      <button class="btn" onclick="checkout('god')">Select Offering</button>
+    </div>
+
+    <div class="card featured">
+      <div class="featured-label">Most Chosen</div>
+      <div class="plan-name">Celestial Access</div>
+      <div class="price">$35.95</div>
+      <div class="duration">One-Time Payment • 30 Days</div>
+      <ul class="features">
+        <li>Access to All Divine Figures</li>
+        <li>Priority Response Time</li>
+        <li>Full Conversation Memory</li>
+      </ul>
+      <button class="btn" onclick="checkout('all')">Select Offering</button>
+    </div>
+
+    <div class="card">
+      <div class="plan-name">Eternal Life</div>
+      <div class="price">$49.95</div>
+      <div class="duration">One-Time Payment • Forever</div>
+      <ul class="features">
+        <li>Unlimited Lifetime Access</li>
+        <li>All Future Prophets Included</li>
+        <li>The Ultimate Divine Bond</li>
+      </ul>
+      <button class="btn" onclick="checkout('lifetime')">Select Offering</button>
+    </div>
+  </div>
+
+  <a href="/" class="back-link">Return to the Sanctuary</a>
+
+  <script>
+    function checkout(planName) {
+      const customURLs = {
+        'god': 'https://yourcustomsite.com/checkout-prophet',
+        'all': 'https://yourcustomsite.com/checkout-celestial',
+        'lifetime': 'https://yourcustomsite.com/checkout-eternal'
+      };
+
+      const targetURL = customURLs[planName];
+      if (targetURL) {
+        window.location.href = targetURL;
+      } else {
+        alert("Sacred path not found. Please contact support.");
+      }
+    }
+  </script>
+
+</body>
+</html>
