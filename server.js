@@ -27,6 +27,7 @@ const PORT = process.env.PORT || 10000;
 const SECRET_KEY = process.env.SECRET_KEY || "supersecret";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 app.use(cors());
 
@@ -122,6 +123,29 @@ function authenticateToken(req, res, next) {
 }
 
 //--------------------------------------------
+// ACCESS CONTROL HELPERS
+//--------------------------------------------
+
+function hasActiveAccess(user) {
+	if (user.lifetime) return true;
+	if (!user.expires_at) return false;
+
+	return new Date(user.expires_at) > new Date();
+}
+
+function canAccessCharacter(user, characterId) {
+	if (!hasActiveAccess(user)) return false;
+
+	if (user.lifetime) return true;
+
+	if (user.plan === "all") return true;
+
+	if (user.plan === "god" && characterId === 1) return true;
+
+	return false;
+}
+
+//--------------------------------------------
 //	REGISTER
 //--------------------------------------------
 
@@ -179,6 +203,56 @@ app.post("/api/login", async (req, res) => {
 });
 
 //--------------------------------------------
+// STRIPE CHECKOUT (ONE-TIME PAYMENTS)
+//--------------------------------------------
+
+app.post("/api/create-checkout", authenticateToken, async (req, res) => {
+	try {
+		const { plan } = req.body;
+
+		let amount;
+		let name;
+
+		if (plan === "god") {
+			amount = 2995;
+			name = "God Access (30 days)";
+		} else if (plan === "all") {
+			amount = 3595;
+			name = "Full Access (30 days)";
+		} else if (plan === "lifetime") {
+			amount = 4995;
+			name = "Lifetime Access";
+		} else {
+			return res.status(400).json({ error: "Invalid plan" });
+		}
+
+		const session = await stripe.checkout.sessions.create({
+			payment_method_types: ["card"],
+			mode: "payment",
+			customer_email: req.user.email,
+			line_items: [
+				{
+					price_data: {
+						currency: "usd",
+						product_data: { name },
+						unit_amount: amount
+					},
+					quantity: 1
+				}
+			],
+			metadata: { plan },
+			success_url: "https://your-site.com/success",
+			cancel_url: "https://your-site.com/cancel"
+		});
+
+		res.json({ url: session.url });
+	} catch (err) {
+		console.error("Checkout error:", err);
+		res.status(500).json({ error: "Stripe error" });
+	}
+});
+
+//--------------------------------------------
 //	FILE UPLOADS
 //--------------------------------------------
 
@@ -229,7 +303,7 @@ if (fs.existsSync(frontendPath)) {
 
 const openai = new OpenAI({	
 	baseURL: "https://openrouter.ai/api/v1",
-	apiKey: process.env.OPENROUTER_API_KEY,
+	apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
 	// Essential headers for OpenRouter
 	defaultHeaders: {
 		'HTTP-Referer': 'https://speaktoheaven.onrender.com',	
@@ -254,6 +328,20 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
 		const userId = req.user.id;
 
+// 🔒 Check user access
+const userResult = await pool.query(
+	"SELECT plan, lifetime, expires_at FROM users WHERE id = $1",
+	[userId]
+);
+
+const userData = userResult.rows[0];
+
+if (!canAccessCharacter(userData, Number(characterId))) {
+	return res.status(403).json({
+		error: "Access expired or upgrade required"
+	});
+}
+
 		// Save user message
 		await pool.query(
 			`INSERT INTO messages (user_id, character_id, from_user, text)
@@ -276,7 +364,21 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 		}));
 
 		// 🔑 NEW: Dynamically set the system prompt based on the character's description
-		const systemPrompt = `You are ${character.name}. ${character.description}. Adopt this personality and speaking style for your entire response.`;
+		const systemPrompt = `
+You are ${character.name}, a biblical figure.
+
+${character.description}
+
+RULES:
+- Speak in a biblical tone.
+- Do NOT say you are an AI.
+- Do NOT mention modern technology.
+- Stay fully in character as ${character.name}.
+- Speak with wisdom, authority, or humility appropriate to this figure.
+- Give spiritual and reflective answers.
+
+Remain in character at all times.
+`;
 
 		// Send to OpenRouter/OpenAI
 		const aiResponse = await openai.chat.completions.create({	
@@ -331,6 +433,83 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 	}
 });
 
+//--------------------------------------------
+// STRIPE WEBHOOK
+//--------------------------------------------
+
+app.post("/webhook", async (req, res) => {
+	let event;
+
+try {
+	const sig = req.headers["stripe-signature"];
+
+	event = stripe.webhooks.constructEvent(
+		req.body,
+		sig,
+		endpointSecret
+	);
+} catch (err) {
+	console.error("Webhook signature error:", err.message);
+	return res.status(400).send(`Webhook Error: ${err.message}`);
+}
+
+try {
+
+		if (event.type === "checkout.session.completed") {
+			const session = event.data.object;
+
+			const email = session.customer_email;
+			const plan = session.metadata.plan;
+
+			const userRes = await pool.query(
+				"SELECT expires_at FROM users WHERE email = $1",
+				[email]
+			);
+
+			const user = userRes.rows[0];
+
+			let expiresAt = null;
+			let lifetime = false;
+
+			if (plan === "god" || plan === "all") {
+				let baseDate = new Date();
+
+				if (user.expires_at && new Date(user.expires_at) > baseDate) {
+					baseDate = new Date(user.expires_at);
+				}
+
+				baseDate.setDate(baseDate.getDate() + 30);
+				expiresAt = baseDate;
+			}
+
+			if (plan === "lifetime") {
+				lifetime = true;
+			}
+
+			await pool.query(
+				`UPDATE users
+				 SET plan = $1,
+				     expires_at = $2,
+				     lifetime = $3
+				 WHERE email = $4`,
+				[plan, expiresAt, lifetime, email]
+			);
+		}
+
+		res.json({ received: true });
+	} catch (err) {
+		console.error("Webhook error:", err);
+		res.status(500).json({ error: "Webhook error" });
+	}
+});
+
+app.get("/", (req, res) => {
+	const indexPath = path.join(__dirname, "public", "index.html");
+	if (fs.existsSync(indexPath)) {
+		return res.sendFile(indexPath);
+	}
+	res.status(200).send("Server is running, but public/index.html is missing.");
+});
 
 //--------------------------------------------
 //	404 HANDLER
