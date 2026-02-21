@@ -81,6 +81,9 @@ const pool = new Pool({
 		`);
 
 		console.log("✅ Database ready");
+await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';`);
+		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP;`);
+		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS lifetime BOOLEAN DEFAULT false;`);
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
