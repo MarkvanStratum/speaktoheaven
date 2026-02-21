@@ -41,12 +41,10 @@
 
     .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: hidden; }
     
-    /* Input Styling */
     input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0ddd5; font-family: inherit; font-size: 16px; }
     .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     .btn.primary { background: var(--gold-divine); color: white; }
 
-    /* Chat Styling */
     .chat-shell { display: grid; grid-template-columns: 260px 1fr; height: 650px; }
     .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 20px; overflow-y: auto; }
     .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; transition: 0.2s; }
@@ -61,7 +59,6 @@
     .tab.active { background: white; color: var(--gold-divine); border-top: 2px solid var(--gold-divine); }
     .hide { display: none !important; }
     .msg { margin-top: 10px; font-size: 14px; text-align: center; }
-    .msg.ok { color: green; } .msg.err { color: #d9534f; }
   </style>
 </head>
 
@@ -77,13 +74,13 @@
       </div>
     </header>
 
-    <section class="proclamation">
+    <section class="proclamation" id="heroSection">
       <h2>Divine Advice for Your Life</h2>
-      <p>Speak with the Heavens. Seek guidance from God, Jesus, and the Prophets to illuminate your path and find spiritual peace.</p>
+      <p>Speak with the Heavens. Seek guidance from God, Jesus, and the Prophets to illuminate your path.</p>
     </section>
 
-    <div class="grid">
-      <div class="stack">
+    <div class="grid" id="mainGrid">
+      <div class="stack" id="authColumn">
         <div class="card" style="margin-bottom: 30px;">
           <div class="tabs">
             <div class="tab active" id="tabLogin">Sign In</div>
@@ -94,14 +91,11 @@
               <input id="loginEmail" type="email" placeholder="Email Address" />
               <input id="loginPassword" type="password" placeholder="Password" />
               <button class="btn primary" id="loginBtn">Enter the Sanctuary</button>
-              <div id="loginMsg" class="msg hide"></div>
             </div>
-
             <div id="registerPane" class="hide">
               <input id="regEmail" type="email" placeholder="Email Address" />
               <input id="regPassword" type="password" placeholder="Choose Password" />
               <button class="btn primary" id="registerBtn">Begin Pilgrimage</button>
-              <div id="registerMsg" class="msg hide"></div>
             </div>
           </div>
         </div>
@@ -111,14 +105,12 @@
           <button class="btn" id="buyGodBtn" style="margin-bottom: 10px;">God Access ($29.95)</button>
           <button class="btn" id="buyAllBtn" style="margin-bottom: 10px;">Full Access ($35.95)</button>
           <button class="btn primary" id="buyLifeBtn">Lifetime Access ($49.95)</button>
-          <div id="purchaseMsg" class="msg hide"></div>
         </div>
       </div>
 
       <div class="card">
         <div class="chat-shell">
-          <div class="sidebar" id="profiles">
-            </div>
+          <div class="sidebar" id="profiles"></div>
           <div style="display: flex; flex-direction: column; height: 100%;">
             <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); display: flex; align-items: center; gap: 15px;">
               <div id="chatAvatar" style="width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--gold-divine); display: grid; place-items: center; font-family: Cinzel;">✶</div>
@@ -127,7 +119,7 @@
             <div class="chat-log" id="chatLog">
               <div style="text-align: center; color: var(--text-muted); font-style: italic; margin-top: 100px;">Please sign in and select a figure.</div>
             </div>
-            <div style="padding: 20px; border-top: 1px solid var(--border-holy); display: flex; gap: 12px; background: white;">
+            <div style="padding: 20px; border-top: 1px solid var(--border-holy); display: flex; gap: 12px;">
               <textarea id="chatInput" placeholder="Your question..." disabled style="flex:1; border: 1px solid #e0ddd5; border-radius: 8px; padding: 10px; resize: none;"></textarea>
               <button class="btn primary" id="sendBtn" disabled style="width: auto;">Send</button>
             </div>
@@ -139,42 +131,33 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const apiBase = ""; 
+    let selectedId = null;
 
-    // --- Authentication & UI State ---
     function getToken() { return localStorage.getItem("jwt") || ""; }
     function setToken(t) { localStorage.setItem("jwt", t); }
     function authHeaders() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
 
     function setLoggedInUI(loggedIn) {
-  // Toggle the logout button visibility
-  $("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
+      $("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
+      
+      const authCol = $("authColumn");
+      const hero = $("heroSection");
+      const grid = $("mainGrid");
 
-  // Elements to hide when logged in
-  const authColumn = document.querySelector('.stack');
-  const heroSection = document.querySelector('.proclamation');
-  const mainGrid = document.querySelector('.grid');
+      if (loggedIn) {
+        if(authCol) authCol.style.display = "none";
+        if(hero) hero.style.display = "none";
+        if(grid) grid.style.gridTemplateColumns = "1fr";
+      } else {
+        if(authCol) authCol.style.display = "block";
+        if(hero) hero.style.display = "block";
+        if(grid) grid.style.gridTemplateColumns = window.innerWidth > 950 ? "1fr 1.3fr" : "1fr";
+      }
 
-  if (loggedIn) {
-    if (authColumn) authColumn.style.display = "none";
-    if (heroSection) heroSection.style.display = "none";
-    // Expand chat to full width
-    if (mainGrid) mainGrid.style.gridTemplateColumns = "1fr";
-  } else {
-    if (authColumn) authColumn.style.display = "block";
-    if (heroSection) heroSection.style.display = "block";
-    // Restore split layout for mobile/desktop
-    if (mainGrid) mainGrid.style.gridTemplateColumns = window.innerWidth > 950 ? "1fr 1.3fr" : "1fr";
-  }
+      $("chatInput").disabled = !loggedIn || !selectedId;
+      $("sendBtn").disabled = !loggedIn || !selectedId;
+    }
 
-  // Handle input states
-  $("chatInput").disabled = !loggedIn || !selectedId;
-  $("sendBtn").disabled = !loggedIn || !selectedId;
-}
-
-    let selectedId = null;
-
-    // --- Tab Switching ---
     $("tabLogin").onclick = () => {
       $("loginPane").classList.remove("hide"); $("registerPane").classList.add("hide");
       $("tabLogin").classList.add("active"); $("tabRegister").classList.remove("active");
@@ -184,28 +167,24 @@
       $("tabRegister").classList.add("active"); $("tabLogin").classList.remove("active");
     };
 
-    // --- Registration & Login ---
-    $("registerBtn").onclick = async () => {
-      const email = $("regEmail").value;
-      const password = $("regPassword").value;
-      const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
-      const data = await res.json();
-      if (res.ok) { alert("Registration successful! Please log in."); $("tabLogin").click(); }
-      else { alert(data.error); }
-    };
-
     $("loginBtn").onclick = async () => {
       const email = $("loginEmail").value;
       const password = $("loginPassword").value;
       const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
       const data = await res.json();
-      if (res.ok) { setToken(data.token); setLoggedInUI(true); location.reload(); }
-      else { alert(data.error); }
+      if (res.ok) { setToken(data.token); location.reload(); } else { alert(data.error); }
+    };
+
+    $("registerBtn").onclick = async () => {
+      const email = $("regEmail").value;
+      const password = $("regPassword").value;
+      const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      const data = await res.json();
+      if (res.ok) { alert("Success! Please sign in."); $("tabLogin").click(); } else { alert(data.error); }
     };
 
     $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
 
-    // --- Load Profiles from Server ---
     async function loadProfiles() {
       const res = await fetch("/api/profiles");
       const profiles = await res.json();
@@ -213,7 +192,7 @@
       profiles.forEach(p => {
         const div = document.createElement("div");
         div.className = "pitem";
-        div.innerHTML = `<div style="font-family: Cinzel; font-size: 14px;">${p.name}</div>`;
+        div.innerHTML = `<div style="font-family: Cinzel;">${p.name}</div>`;
         div.onclick = () => {
           document.querySelectorAll('.pitem').forEach(el => el.classList.remove('active'));
           div.classList.add('active');
@@ -227,45 +206,18 @@
       });
     }
 
-    // --- Chat Functionality ---
     $("sendBtn").onclick = async () => {
       const message = $("chatInput").value;
       if (!message) return;
-      
-      const log = $("chatLog");
-      log.innerHTML += `<div class="bubble me">${message}</div>`;
+      $("chatLog").innerHTML += `<div class="bubble me">${message}</div>`;
       $("chatInput").value = "";
-
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ characterId: selectedId, message })
-      });
+      const res = await fetch("/api/chat", { method: "POST", headers: authHeaders(), body: JSON.stringify({ characterId: selectedId, message }) });
       const data = await res.json();
-      if (res.ok) { log.innerHTML += `<div class="bubble them">${data.reply}</div>`; }
-      else { alert(data.error); }
-      log.scrollTop = log.scrollHeight;
+      if (res.ok) { $("chatLog").innerHTML += `<div class="bubble them">${data.reply}</div>`; } else { alert(data.error); }
+      $("chatLog").scrollTop = $("chatLog").scrollHeight;
     };
 
-    // --- Stripe Checkout ---
-    async function checkout(plan) {
-      const res = await fetch("/api/create-checkout", { method: "POST", headers: authHeaders(), body: JSON.stringify({ plan }) });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    }
-    $("buyGodBtn").onclick = () => checkout("god");
-    $("buyAllBtn").onclick = () => checkout("all");
-    $("buyLifeBtn").onclick = () => checkout("lifetime");
-
-    window.onload = () => { 
-  loadProfiles(); 
-  const token = getToken();
-  if (token) {
-    setLoggedInUI(true);
-  } else {
-    setLoggedInUI(false);
-  }
-};
+    window.onload = () => { loadProfiles(); setLoggedInUI(!!getToken()); };
   </script>
 </body>
 </html>
