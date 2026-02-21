@@ -136,10 +136,8 @@
     function setToken(t) { localStorage.setItem("jwt", t); }
     function authHeaders() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
 
-    // SURGICAL FIX: This function now handles the hiding/showing of the login boxes
     function setLoggedInUI(loggedIn) {
       $("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
-      
       const authSection = $("authSection");
       const heroText = $("heroText");
       const mainGrid = $("mainGrid");
@@ -147,7 +145,7 @@
       if (loggedIn) {
         authSection.classList.add("hide");
         heroText.classList.add("hide");
-        mainGrid.style.gridTemplateColumns = "1fr"; // Expand chat to full width
+        mainGrid.style.gridTemplateColumns = "1fr"; 
         if($("welcomeMessage")) $("welcomeMessage").textContent = "Please select a figure to begin your consultation.";
       } else {
         authSection.classList.remove("hide");
@@ -175,7 +173,8 @@
       const data = await res.json();
       if (res.ok) { 
         setToken(data.token); 
-        setLoggedInUI(true); // Update UI immediately
+        setLoggedInUI(true);
+        location.reload();
       } else { alert(data.error); }
     };
 
@@ -205,20 +204,18 @@
           $("chatTitle").textContent = p.name;
           $("chatAvatar").textContent = p.name[0];
           setLoggedInUI(!!getToken());
-          // Load old messages from database to ensure memory across sessions
+          
           fetch(`/api/chat/history?characterId=${p.id}`, { headers: authHeaders() })
             .then(r => r.json())
             .then(messages => {
-              $("chatLog").innerHTML = ""; // Clear the "Select figure" text
+              $("chatLog").innerHTML = ""; 
               messages.forEach(m => {
                 const side = m.from_user ? "me" : "them";
                 $("chatLog").innerHTML += `<div class="bubble ${side}">${m.text}</div>`;
               });
-              // If there's no history, show the default greeting
               if(messages.length === 0) {
                 $("chatLog").innerHTML = `<div class="bubble them">Peace be with you. What is on your mind?</div>`;
               }
-              // Scroll to the bottom of the old conversation
               $("chatLog").scrollTo({ top: $("chatLog").scrollHeight });
             });
         };
@@ -228,7 +225,7 @@
 
     $("sendBtn").onclick = async () => {
       const message = $("chatInput").value;
-      if (!message) return;
+      if (!message || !selectedId) return;
       
       $("chatLog").innerHTML += `<div class="bubble me">${message}</div>`;
       $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
@@ -246,8 +243,8 @@
         $("chatLog").innerHTML += `<div class="bubble them">${data.reply}</div>`; 
       } else { 
         if (data.error === "LIMIT_REACHED") {
-            // Trigger our beautiful custom modal
             $("limitModal").classList.remove("hide");
+            $("limitModal").style.display = "flex";
         } else {
             alert(data.error); 
         }
@@ -255,29 +252,21 @@
       $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
     };
 
-        } else {
-            alert(data.error); 
-        }
-      }
-      $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
-    };
-
-    // Ensure state is checked correctly on page load
     window.onload = () => { 
       loadProfiles(); 
       setLoggedInUI(!!getToken()); 
     };
   </script>
 
-<div id="limitModal" class="hide" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
-  <div class="card" style="max-width: 450px; width: 90%; padding: 40px; text-align: center; border: 2px solid var(--gold-divine);">
-    <div class="logo" style="margin: 0 auto 20px;">†</div>
-    <h3 style="font-family: Cinzel; color: var(--blue-saint); font-size: 24px; margin-bottom: 15px;">A Moment of Reflection</h3>
-    <p style="color: var(--text-muted); font-style: italic; margin-bottom: 30px;">Your free consultations have reached their limit. To continue your spiritual journey, please choose an offering.</p>
-    <button class="btn primary" onclick="window.location.href='/pricing.html'">View Offerings</button>
-    <button class="btn" style="border: none; margin-top: 15px; font-size: 12px; opacity: 0.6;" onclick="document.getElementById('limitModal').classList.add('hide')">Dismiss</button>
+  <div id="limitModal" class="hide" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); display: none;">
+    <div class="card" style="max-width: 450px; width: 90%; padding: 40px; text-align: center; border: 2px solid var(--gold-divine); background: white;">
+      <div class="logo" style="margin: 0 auto 20px;">†</div>
+      <h3 style="font-family: Cinzel; color: var(--blue-saint); font-size: 24px; margin-bottom: 15px;">A Moment of Reflection</h3>
+      <p style="color: var(--text-muted); font-style: italic; margin-bottom: 30px;">Your free consultations have reached their limit. To continue your spiritual journey, please choose an offering.</p>
+      <button class="btn primary" onclick="window.location.href='/pricing.html'">View Offerings</button>
+      <button class="btn" style="border: none; margin-top: 15px; font-size: 12px; opacity: 0.6;" onclick="document.getElementById('limitModal').style.display='none'">Dismiss</button>
+    </div>
   </div>
-</div>
 
 </body>
 </html>
