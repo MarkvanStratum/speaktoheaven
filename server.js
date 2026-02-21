@@ -406,8 +406,8 @@ Remain in character at all times.
 		res.json({ reply: reply || "(No response)" });
 
 	} catch (err) {
-		console.error("🔥 Chat error FULL:", JSON.stringify(err, null, 2));
-		res.status(500).json({ error: "AI service error" });
+		console.error("DEBUG ERROR:", err);
+		res.status(500).json({ error: "Server Error: " + (err.message || "Unknown") });
 	}
 });
 
