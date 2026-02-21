@@ -321,6 +321,25 @@ const openai = new OpenAI({
 //	CHAT ROUTE (NOW DYNAMICALLY USES CHARACTER PROFILES)
 //--------------------------------------------
 
+app.get("/api/chat/history", async (req, res) => {
+	try {
+		const authHeader = req.headers.authorization;
+		const token = authHeader && authHeader.split(" ")[1];
+		if (!token) return res.status(401).json({ error: "No token" });
+		const decoded = jwt.verify(token, SECRET_KEY);
+		const userId = decoded.userId;
+		const { characterId } = req.query;
+
+		const history = await pool.query(
+			"SELECT * FROM messages WHERE user_id = $1 AND character_id = $2 ORDER BY created_at ASC LIMIT 50",
+			[userId, characterId]
+		);
+		res.json(history.rows);
+	} catch (err) {
+		res.status(500).json({ error: "Failed to load history" });
+	}
+});
+
 app.post("/api/chat", authenticateToken, async (req, res) => {
 	try {
 		const { characterId, message } = req.body;

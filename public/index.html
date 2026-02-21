@@ -205,7 +205,22 @@
           $("chatTitle").textContent = p.name;
           $("chatAvatar").textContent = p.name[0];
           setLoggedInUI(!!getToken());
-          $("chatLog").innerHTML = `<div class="bubble them">Peace be with you. What is on your mind?</div>`;
+          // Load old messages from database to ensure memory across sessions
+          fetch(`/api/chat/history?characterId=${p.id}`, { headers: authHeaders() })
+            .then(r => r.json())
+            .then(messages => {
+              $("chatLog").innerHTML = ""; // Clear the "Select figure" text
+              messages.forEach(m => {
+                const side = m.from_user ? "me" : "them";
+                $("chatLog").innerHTML += `<div class="bubble ${side}">${m.text}</div>`;
+              });
+              // If there's no history, show the default greeting
+              if(messages.length === 0) {
+                $("chatLog").innerHTML = `<div class="bubble them">Peace be with you. What is on your mind?</div>`;
+              }
+              // Scroll to the bottom of the old conversation
+              $("chatLog").scrollTo({ top: $("chatLog").scrollHeight });
+            });
         };
         container.appendChild(div);
       });
