@@ -369,6 +369,17 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 				message: "You have used your 3 free divine consultations. Please choose a plan to continue." 
 			});
 		}
+
+// 🔒 Check if free user has reached the 3-message limit
+		if (!userData.lifetime && userData.plan === 'free') {
+			const countRes = await pool.query(
+				"SELECT COUNT(*) FROM messages WHERE user_id = $1 AND from_user = true", 
+				[userId]
+			);
+			if (parseInt(countRes.rows[0].count) >= 3) {
+				return res.status(403).json({ error: "LIMIT_REACHED" });
+			}
+		}
 		// Save user message
 		await pool.query(
 			`INSERT INTO messages (user_id, character_id, from_user, text)
