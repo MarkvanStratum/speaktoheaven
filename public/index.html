@@ -147,10 +147,30 @@
     function authHeaders() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
 
     function setLoggedInUI(loggedIn) {
-      $("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
-      $("chatInput").disabled = !loggedIn || !selectedId;
-      $("sendBtn").disabled = !loggedIn || !selectedId;
-    }
+  // Toggle the logout button visibility
+  $("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
+
+  // Elements to hide when logged in
+  const authColumn = document.querySelector('.stack');
+  const heroSection = document.querySelector('.proclamation');
+  const mainGrid = document.querySelector('.grid');
+
+  if (loggedIn) {
+    if (authColumn) authColumn.style.display = "none";
+    if (heroSection) heroSection.style.display = "none";
+    // Expand chat to full width
+    if (mainGrid) mainGrid.style.gridTemplateColumns = "1fr";
+  } else {
+    if (authColumn) authColumn.style.display = "block";
+    if (heroSection) heroSection.style.display = "block";
+    // Restore split layout for mobile/desktop
+    if (mainGrid) mainGrid.style.gridTemplateColumns = window.innerWidth > 950 ? "1fr 1.3fr" : "1fr";
+  }
+
+  // Handle input states
+  $("chatInput").disabled = !loggedIn || !selectedId;
+  $("sendBtn").disabled = !loggedIn || !selectedId;
+}
 
     let selectedId = null;
 

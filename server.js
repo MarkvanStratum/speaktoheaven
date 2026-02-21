@@ -73,7 +73,7 @@ const pool = new Pool({
 			CREATE TABLE IF NOT EXISTS messages (
 				id SERIAL PRIMARY KEY,
 				user_id INT REFERENCES users(id) ON DELETE CASCADE,
-				character_id INT NOT NULL, // KEPT: character_id
+				character_id INT NOT NULL,
 				from_user BOOLEAN NOT NULL,
 				text TEXT NOT NULL,
 				created_at TIMESTAMP DEFAULT NOW()
