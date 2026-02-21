@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Speak to Heaven — Biblical AI Chat</title>
+  <meta name="description" content="A reverent chat experience with biblical figures like God, Jesus, Moses, Mary, and more." />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#111a33;
+      --card2:#0f1730;
+      --text:#eaf0ff;
+      --muted:#aab6da;
+      --line:rgba(255,255,255,.10);
+      --gold:#f6d27b;
+      --gold2:#caa14b;
+      --accent:#7aa7ff;
+      --danger:#ff6b6b;
+      --ok:#40d39c;
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 700px at 15% -10%, rgba(246,210,123,.25), transparent 60%),
+        radial-gradient(900px 550px at 85% 0%, rgba(122,167,255,.18), transparent 60%),
+        radial-gradient(900px 700px at 50% 100%, rgba(64,211,156,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    a{ color:var(--accent); text-decoration:none; }
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 16px 48px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 10px 0 22px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(246,210,123,.95), rgba(122,167,255,.8));
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display:grid;place-items:center;
+      font-weight:900;color:#0b1020;
+      letter-spacing:.4px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      border:1px solid var(--line);
+      background: rgba(17,26,51,.55);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--muted);
+      backdrop-filter: blur(10px);
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background: rgba(17,26,51,.75);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      font-weight:650;
+      letter-spacing:.2px;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .btn:hover{ background: rgba(17,26,51,.92); border-color: rgba(255,255,255,.18); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      border:1px solid rgba(246,210,123,.35);
+      background: linear-gradient(135deg, rgba(246,210,123,.22), rgba(122,167,255,.14));
+    }
+    .btn.gold{
+      border:1px solid rgba(246,210,123,.45);
+      background: linear-gradient(135deg, rgba(246,210,123,.28), rgba(202,161,75,.15));
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(17,26,51,.92), rgba(15,23,48,.85));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .head{
+      padding: 16px 16px 10px;
+      border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .card .head h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.25px;
+    }
+    .card .body{ padding:16px; }
+    .hero{
+      padding: 16px;
+    }
+    .hero h3{
+      margin:0 0 8px;
+      font-size:26px;
+      letter-spacing:.2px;
+      line-height:1.15;
+    }
+    .hero p{
+      margin:0 0 12px;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:14px;
+    }
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      border-left: 3px solid rgba(246,210,123,.55);
+      padding: 10px 12px;
+      background: rgba(246,210,123,.08);
+      border-radius: 12px;
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding: 0 16px 16px;
+      border-bottom:1px solid var(--line);
+    }
+    .tab{
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(17,26,51,.55);
+      font-weight:700;
+      font-size:13px;
+      cursor:pointer;
+      color:var(--muted);
+      user-select:none;
+    }
+    .tab.active{
+      color: var(--text);
+      border-color: rgba(246,210,123,.40);
+      background: rgba(246,210,123,.10);
+    }
+    .row{
+      display:grid;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 540px){
+      .row2{ grid-template-columns: 1fr; }
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin: 0 0 6px;
+    }
+    input, select, textarea{
+      width:100%;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(9,14,30,.65);
+      color: var(--text);
+      padding: 11px 12px;
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(122,167,255,.45);
+      box-shadow: 0 0 0 3px rgba(122,167,255,.12);
+    }
+    .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
+    .msg{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(17,26,51,.55);
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+    .msg.ok{ border-color: rgba(64,211,156,.35); background: rgba(64,211,156,.10); color: rgba(230,255,245,.92); }
+    .msg.err{ border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.10); color: rgba(255,235,235,.92); }
+
+    /* Chat */
+    .chat-shell{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      height: 560px;
+    }
+    @media (max-width: 980px){
+      .chat-shell{ grid-template-columns: 1fr; height:auto; }
+      .sidebar{ border-right:none !important; border-bottom:1px solid var(--line); }
+    }
+    .sidebar{
+      border-right:1px solid var(--line);
+      background: rgba(9,14,30,.25);
+      padding:12px;
+    }
+    .profile-list{
+      display:flex; flex-direction:column; gap:8px;
+      max-height: 460px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .pitem{
+      display:flex; gap:10px; align-items:center;
+      padding:10px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(17,26,51,.50);
+      cursor:pointer;
+      user-select:none;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .pitem:hover{ border-color: rgba(255,255,255,.18); background: rgba(17,26,51,.72); }
+    .pitem.active{
+      border-color: rgba(246,210,123,.45);
+      background: rgba(246,210,123,.10);
+    }
+    .avatar{
+      width:36px;height:36px;border-radius: 12px;
+      background: linear-gradient(135deg, rgba(122,167,255,.30), rgba(246,210,123,.22));
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+      display:grid; place-items:center;
+      font-weight:900;
+      color: rgba(234,240,255,.92);
+    }
+    .pmeta{ min-width:0; }
+    .pmeta .name{ font-weight:800; font-size:13px; }
+    .pmeta .desc{
+      font-size:12px; color:var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 160px;
+    }
+    .chat{
+      display:flex;
+      flex-direction:column;
+      height:100%;
+    }
+    .chat-top{
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      background: rgba(9,14,30,.10);
+    }
+    .chat-top .who{
+      display:flex; align-items:center; gap:10px;
+      min-width:0;
+    }
+    .chat-top .who .title{
+      font-weight:900;
+      letter-spacing:.2px;
+      font-size:14px;
+      margin:0;
+    }
+    .chat-top .who .sub{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 520px;
+    }
+    .chat-log{
+      padding: 14px;
+      flex:1;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .bubble{
+      max-width: 84%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(17,26,51,.58);
+      line-height:1.45;
+      font-size:14px;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+    }
+    .bubble.me{
+      margin-left:auto;
+      border-color: rgba(122,167,255,.25);
+      background: rgba(122,167,255,.10);
+    }
+    .bubble.them{
+      border-color: rgba(246,210,123,.25);
+      background: rgba(246,210,123,.08);
+    }
+    .composer{
+      padding:12px;
+      border-top:1px solid var(--line);
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+      background: rgba(9,14,30,.10);
+    }
+    textarea{
+      resize:none;
+      min-height: 46px;
+      max-height: 160px;
+    }
+    .small{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .pricing{
+      display:grid;
+      gap:10px;
+    }
+    .price{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding:12px;
+      background: rgba(17,26,51,.52);
+    }
+    .price h4{ margin:0 0 6px; font-size:14px; }
+    .price p{ margin:0 0 10px; color:var(--muted); font-size:13px; line-height:1.45; }
+    .price .amt{
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:.2px;
+      color: var(--gold);
+      margin-bottom:10px;
+    }
+    .divider{
+      height:1px;background:var(--line);
+      margin:14px 0;
+    }
+    .footer{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .hide{ display:none !important; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">✶</div>
+        <div>
+          <h1>Speak to Heaven</h1>
+          <p>Biblical AI Chat — a reverent conversation experience</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="pill" id="statusPill">Status: <span id="statusText">Not logged in</span></div>
+        <button class="btn" id="logoutBtn" style="display:none">Log out</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Hero + Auth -->
+      <div class="card">
+        <div class="hero">
+          <h3>Conversations with biblical figures — with reverence.</h3>
+          <p>
+            Choose a biblical figure and ask your questions. This experience is designed to feel thoughtful, calm, and spiritually grounded.
+            It is an AI interpretation inspired by biblical teachings — not a claim of divine identity.
+          </p>
+          <div class="note">
+            Note: Access requires a one-time purchase (30 days) or lifetime access. If your access is expired, chat will be locked until you purchase again.
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" id="tabLogin">Log in</div>
+          <div class="tab" id="tabRegister">Create account</div>
+        </div>
+
+        <div class="body">
+          <!-- LOGIN -->
+          <div id="loginPane">
+            <div class="row">
+              <div>
+                <label>Email</label>
+                <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+              </div>
+              <div>
+                <label>Password</label>
+                <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" />
+              </div>
+            </div>
+            <button class="btn primary" id="loginBtn">Log in</button>
+            <div class="msg hide" id="loginMsg"></div>
+          </div>
+
+          <!-- REGISTER -->
+          <div id="registerPane" class="hide">
+            <div class="row">
+              <div class="row2">
+                <div>
+                  <label>Display name (optional)</label>
+                  <input id="regName" type="text" autocomplete="nickname" placeholder="Mark" />
+                  <div class="hint">Your server currently stores email + password only.</div>
+                </div>
+                <div>
+                  <label>Email</label>
+                  <input id="regEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+                </div>
+              </div>
+              <div class="row2">
+                <div>
+                  <label>Password</label>
+                  <input id="regPassword" type="password" autocomplete="new-password" placeholder="Choose a password" />
+                </div>
+                <div>
+                  <label>Confirm password</label>
+                  <input id="regPassword2" type="password" autocomplete="new-password" placeholder="Repeat password" />
+                </div>
+              </div>
+            </div>
+            <button class="btn gold" id="registerBtn">Create account</button>
+            <div class="msg hide" id="registerMsg"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="pricing">
+            <div class="price">
+              <h4>God Access — 30 Days</h4>
+              <div class="amt">$29.95</div>
+              <p>Talk to God for 30 days. If you want another month, purchase again.</p>
+              <button class="btn gold" data-plan="god" id="buyGodBtn">Buy God Access</button>
+            </div>
+
+            <div class="price">
+              <h4>Full Access — 30 Days</h4>
+              <div class="amt">$35.95</div>
+              <p>Talk to God and all available biblical figures for 30 days.</p>
+              <button class="btn gold" data-plan="all" id="buyAllBtn">Buy Full Access</button>
+            </div>
+
+            <div class="price">
+              <h4>Lifetime Access</h4>
+              <div class="amt">$49.95</div>
+              <p>One-time purchase. Lifetime access to God and all biblical figures.</p>
+              <button class="btn primary" data-plan="lifetime" id="buyLifeBtn">Buy Lifetime</button>
+            </div>
+
+            <div class="msg hide" id="purchaseMsg"></div>
+          </div>
+
+          <div class="footer">
+            <strong>Disclaimer:</strong> This is an AI-generated experience inspired by Scripture and Christian tradition.
+            It is not clergy counsel and not a substitute for professional spiritual or mental-health support.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Chat -->
+      <div class="card">
+        <div class="head">
+          <h2>Chat</h2>
+          <div class="small" id="chatSmall">Choose a figure, then send a message.</div>
+        </div>
+
+        <div class="chat-shell">
+          <div class="sidebar">
+            <div class="small" style="margin-bottom:8px;">Biblical Figures</div>
+            <div class="profile-list" id="profiles"></div>
+            <div class="divider"></div>
+            <button class="btn" id="refreshProfilesBtn">Refresh figures</button>
+            <div class="hint">If your access is expired, chat will be locked until you purchase.</div>
+          </div>
+
+          <div class="chat">
+            <div class="chat-top">
+              <div class="who">
+                <div class="avatar" id="chatAvatar">✶</div>
+                <div style="min-width:0">
+                  <p class="title" id="chatTitle">Not selected</p>
+                  <p class="sub" id="chatSubtitle">Select a biblical figure from the left.</p>
+                </div>
+              </div>
+              <button class="btn" id="loadHistoryBtn" disabled>Load history</button>
+            </div>
+
+            <div class="chat-log" id="chatLog">
+              <div class="msg">Log in and choose a figure to begin.</div>
+            </div>
+
+            <div class="composer">
+              <textarea id="chatInput" placeholder="Write your message..." disabled></textarea>
+              <button class="btn primary" id="sendBtn" disabled>Send</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- Helpers ---
+  const $ = (id) => document.getElementById(id);
+  const apiBase = ""; // same domain
+
+  function setMsg(el, text, type){
+    el.classList.remove("hide","ok","err");
+    el.classList.add(type === "ok" ? "ok" : "err");
+    el.textContent = text;
+  }
+  function clearMsg(el){
+    el.classList.add("hide");
+    el.textContent = "";
+    el.classList.remove("ok","err");
+  }
+
+  function getToken(){ return localStorage.getItem("jwt") || ""; }
+  function setToken(t){ localStorage.setItem("jwt", t); }
+  function clearToken(){ localStorage.removeItem("jwt"); }
+
+  function authHeaders(){
+    const t = getToken();
+    return t ? { "Authorization": "Bearer " + t } : {};
+  }
+
+  async function safeJson(res){
+    const text = await res.text();
+    try { return JSON.parse(text); } catch { return { raw: text }; }
+  }
+
+  // --- UI State ---
+  let selectedCharacterId = null;
+  let selectedCharacter = null;
+
+  function setLoggedInUI(loggedIn){
+    $("logoutBtn").style.display = loggedIn ? "" : "none";
+    $("statusText").textContent = loggedIn ? "Logged in" : "Not logged in";
+    $("chatInput").disabled = !loggedIn || !selectedCharacterId;
+    $("sendBtn").disabled = !loggedIn || !selectedCharacterId;
+    $("loadHistoryBtn").disabled = !loggedIn || !selectedCharacterId;
+  }
+
+  function setChatHeader(character){
+    if(!character){
+      $("chatAvatar").textContent = "✶";
+      $("chatTitle").textContent = "Not selected";
+      $("chatSubtitle").textContent = "Select a biblical figure from the left.";
+      return;
+    }
+    $("chatAvatar").textContent = character.name?.slice(0,1)?.toUpperCase() || "✶";
+    $("chatTitle").textContent = character.name || "Selected";
+    $("chatSubtitle").textContent = character.description || "";
+  }
+
+  function addBubble(text, who){
+    const div = document.createElement("div");
+    div.className = "bubble " + (who === "me" ? "me" : "them");
+    div.textContent = text;
+    $("chatLog").appendChild(div);
+    $("chatLog").scrollTop = $("chatLog").scrollHeight;
+  }
+
+  function addSystem(text, type){
+    const div = document.createElement("div");
+    div.className = "msg " + (type || "");
+    div.textContent = text;
+    $("chatLog").appendChild(div);
+    $("chatLog").scrollTop = $("chatLog").scrollHeight;
+  }
+
+  // --- Tabs ---
+  $("tabLogin").onclick = () => {
+    $("tabLogin").classList.add("active");
+    $("tabRegister").classList.remove("active");
+    $("loginPane").classList.remove("hide");
+    $("registerPane").classList.add("hide");
+    clearMsg($("loginMsg"));
+    clearMsg($("registerMsg"));
+  };
+
+  $("tabRegister").onclick = () => {
+    $("tabRegister").classList.add("active");
+    $("tabLogin").classList.remove("active");
+    $("registerPane").classList.remove("hide");
+    $("loginPane").classList.add("hide");
+    clearMsg($("loginMsg"));
+    clearMsg($("registerMsg"));
+  };
+
+  // --- Auth ---
+  $("registerBtn").onclick = async () => {
+    clearMsg($("registerMsg"));
+    const name = $("regName").value.trim();
+    const email = $("regEmail").value.trim();
+    const p1 = $("regPassword").value;
+    const p2 = $("regPassword2").value;
+    if(!email || !p1) return setMsg($("registerMsg"), "Email and password are required.", "err");
+    if(p1 !== p2) return setMsg($("registerMsg"), "Passwords do not match.", "err");
+
+    // server accepts only email + password
+    const res = await fetch(apiBase + "/api/register", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email, password: p1 })
+    });
+    const data = await safeJson(res);
+    if(!res.ok){
+      return setMsg($("registerMsg"), data.error || "Registration failed.", "err");
+    }
+
+    if(name) localStorage.setItem("displayName", name);
+    setMsg($("registerMsg"), "Account created. Now log in.", "ok");
+    $("tabLogin").click();
+  };
+
+  $("loginBtn").onclick = async () => {
+    clearMsg($("loginMsg"));
+    const email = $("loginEmail").value.trim();
+    const password = $("loginPassword").value;
+    if(!email || !password) return setMsg($("loginMsg"), "Enter email and password.", "err");
+
+    const res = await fetch(apiBase + "/api/login", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await safeJson(res);
+    if(!res.ok){
+      return setMsg($("loginMsg"), data.error || "Login failed.", "err");
+    }
+
+    setToken(data.token);
+    setLoggedInUI(true);
+    setMsg($("loginMsg"), "Logged in successfully.", "ok");
+    addSystem("You are now logged in. Choose a figure and begin.", "ok");
+  };
+
+  $("logoutBtn").onclick = () => {
+    clearToken();
+    setLoggedInUI(false);
+    $("chatLog").innerHTML = "";
+    addSystem("Logged out. Log in again to continue.", "");
+  };
+
+  // --- Profiles ---
+  async function loadProfiles(){
+    $("profiles").innerHTML = "";
+    const res = await fetch(apiBase + "/api/profiles");
+    const list = await safeJson(res);
+    (Array.isArray(list) ? list : []).forEach(p => {
+      const item = document.createElement("div");
+      item.className = "pitem";
+      item.onclick = () => selectProfile(p, item);
+      item.innerHTML = `
+        <div class="avatar">${(p.name || "✶").slice(0,1).toUpperCase()}</div>
+        <div class="pmeta">
+          <div class="name">${p.name || "Unknown"}</div>
+          <div class="desc">${p.description || ""}</div>
+        </div>
+      `;
+      $("profiles").appendChild(item);
+    });
+  }
+
+  function selectProfile(p, itemEl){
+    [...document.querySelectorAll(".pitem")].forEach(x => x.classList.remove("active"));
+    itemEl.classList.add("active");
+    selectedCharacterId = p.id;
+    selectedCharacter = p;
+    setChatHeader(p);
+    const loggedIn = !!getToken();
+    $("chatInput").disabled = !loggedIn;
+    $("sendBtn").disabled = !loggedIn;
+    $("loadHistoryBtn").disabled = !loggedIn;
+    $("chatLog").innerHTML = "";
+    addSystem(`Selected: ${p.name}.`, "");
+  }
+
+  $("refreshProfilesBtn").onclick = loadProfiles;
+
+  // --- Chat ---
+  $("loadHistoryBtn").onclick = async () => {
+    if(!selectedCharacterId) return;
+    const res = await fetch(apiBase + "/api/messages/" + selectedCharacterId, {
+      headers: { ...authHeaders() }
+    });
+    const data = await safeJson(res);
+    if(!res.ok){
+      addSystem(data.error || "Could not load history.", "err");
+      return;
+    }
+    $("chatLog").innerHTML = "";
+    if(!data.length){
+      addSystem("No history yet. Say hello.", "");
+      return;
+    }
+    for(const m of data){
+      addBubble(m.text, m.from_user ? "me" : "them");
+    }
+  };
+
+  $("sendBtn").onclick = async () => {
+    const text = $("chatInput").value.trim();
+    if(!text || !selectedCharacterId) return;
+    $("chatInput").value = "";
+    addBubble(text, "me");
+
+    const res = await fetch(apiBase + "/api/chat", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        ...authHeaders()
+      },
+      body: JSON.stringify({ characterId: selectedCharacterId, message: text })
+    });
+    const data = await safeJson(res);
+
+    if(!res.ok){
+      // This matches your server errors like:
+      // - "Please purchase access to chat"
+      // - "Access expired or upgrade required"
+      addSystem(data.error || "Chat request failed.", "err");
+      return;
+    }
+
+    addBubble(data.reply || "(No response)", "them");
+  };
+
+  // --- Payments ---
+  async function startCheckout(plan){
+    clearMsg($("purchaseMsg"));
+
+    if(!getToken()){
+      return setMsg($("purchaseMsg"), "Please log in before purchasing.", "err");
+    }
+
+    const res = await fetch(apiBase + "/api/create-checkout", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        ...authHeaders()
+      },
+      body: JSON.stringify({ plan })
+    });
+    const data = await safeJson(res);
+
+    if(!res.ok){
+      return setMsg($("purchaseMsg"), data.error || "Could not start checkout.", "err");
+    }
+
+    if(!data.url){
+      return setMsg($("purchaseMsg"), "Checkout URL missing. Check server config.", "err");
+    }
+
+    setMsg($("purchaseMsg"), "Redirecting to Stripe checkout…", "ok");
+    window.location.href = data.url;
+  }
+
+  $("buyGodBtn").onclick = () => startCheckout("god");
+  $("buyAllBtn").onclick = () => startCheckout("all");
+  $("buyLifeBtn").onclick = () => startCheckout("lifetime");
+
+  // --- Init ---
+  (async function init(){
+    await loadProfiles();
+    setLoggedInUI(!!getToken());
+  })();
+</script>
+</body>
+</html>
