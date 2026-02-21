@@ -257,7 +257,15 @@
     $("buyAllBtn").onclick = () => checkout("all");
     $("buyLifeBtn").onclick = () => checkout("lifetime");
 
-    window.onload = () => { loadProfiles(); setLoggedInUI(!!getToken()); };
+    window.onload = () => { 
+  loadProfiles(); 
+  const token = getToken();
+  if (token) {
+    setLoggedInUI(true);
+  } else {
+    setLoggedInUI(false);
+  }
+};
   </script>
 </body>
 </html>
