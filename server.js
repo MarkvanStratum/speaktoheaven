@@ -4,6 +4,8 @@
 
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 import OpenAI from "openai";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -14,6 +16,7 @@ import { fileURLToPath } from "url";
 import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
+
 
 //--------------------------------------------
 //	BASIC SETUP
@@ -230,7 +233,8 @@ app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
             automatic_payment_methods: { enabled: true },
             metadata: { 
                 plan: plan, 
-                email: email 
+                email: email,
+                userId: String(req.user.id)
             }
         });
 
@@ -465,7 +469,9 @@ Remain in character at all times.
 		}
 
 // Increment free message counter
-		await pool.query("UPDATE users SET messages_sent = messages_sent + 1 WHERE id = $1", [userId]);
+				if (!isPaid) {
+			await pool.query("UPDATE users SET messages_sent = messages_sent + 1 WHERE id = $1", [userId]);
+		}
 
 		res.json({ reply: reply || "(No response)" });
 
@@ -502,8 +508,8 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 //--------------------------------------------
 
 // UPDATED: Webhook to handle PaymentIntents and Plan persistence
-app.post("/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
+app.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+    const sig = req.headers["stripe-signature"];
     let event;
 
     try {
@@ -513,38 +519,76 @@ app.post("/webhook", express.raw({ type: 'application/json' }), async (req, res)
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    if (event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
-        const email = paymentIntent.metadata.email;
-        const plan = paymentIntent.metadata.plan;
-
-        console.log(`Payment success for ${email} - Plan: ${plan}`);
-
+    async function applyPlan(plan, userId, email) {
         let expiresAt = null;
         let isLifetime = false;
 
-        if (plan === 'god' || plan === 'all') {
+        if (plan === "god" || plan === "all") {
             const date = new Date();
             date.setDate(date.getDate() + 30);
             expiresAt = date;
-        } else if (plan === 'lifetime') {
+        } else if (plan === "lifetime") {
             isLifetime = true;
+        } else {
+            console.error("Unknown plan:", plan);
+            return;
         }
 
         try {
-            await pool.query(
-                `UPDATE users 
-                 SET plan = $1, 
-                     expires_at = $2, 
-                     lifetime = $3, 
-                     messages_sent = 0 
-                 WHERE email = $4`,
-                [plan, expiresAt, isLifetime, email]
-            );
-            console.log(`✅ User ${email} updated to ${plan}`);
+            if (userId) {
+                await pool.query(
+                    `UPDATE users 
+                     SET plan = $1, 
+                         expires_at = $2, 
+                         lifetime = $3, 
+                         messages_sent = 0 
+                     WHERE id = $4`,
+                    [plan, expiresAt, isLifetime, Number(userId)]
+                );
+                console.log(`✅ User id=${userId} updated to ${plan}`);
+            } else if (email) {
+                await pool.query(
+                    `UPDATE users 
+                     SET plan = $1, 
+                         expires_at = $2, 
+                         lifetime = $3, 
+                         messages_sent = 0 
+                     WHERE email = $4`,
+                    [plan, expiresAt, isLifetime, email]
+                );
+                console.log(`✅ User email=${email} updated to ${plan}`);
+            } else {
+                console.error("No userId or email provided to applyPlan()");
+            }
         } catch (dbErr) {
             console.error("DB Update Error during webhook:", dbErr);
         }
+    }
+
+    // PaymentIntent flow (THIS is what checkout.html uses)
+    if (event.type === "payment_intent.succeeded") {
+        const paymentIntent = event.data.object;
+        const plan = paymentIntent.metadata && paymentIntent.metadata.plan;
+        const email = paymentIntent.metadata && paymentIntent.metadata.email;
+        const userId = paymentIntent.metadata && paymentIntent.metadata.userId;
+
+        console.log("🔥 payment_intent.succeeded", { plan, email, userId });
+
+        await applyPlan(plan, userId, email);
+    }
+
+    // Checkout flow (if you ever use /api/create-checkout)
+    if (event.type === "checkout.session.completed") {
+        const session = event.data.object;
+        const plan = session.metadata && session.metadata.plan;
+        const email =
+            (session.metadata && session.metadata.email) ||
+            (session.customer_details && session.customer_details.email);
+        const userId = session.metadata && session.metadata.userId;
+
+        console.log("🔥 checkout.session.completed", { plan, email, userId });
+
+        await applyPlan(plan, userId, email);
     }
 
     res.json({ received: true });
