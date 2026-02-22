@@ -242,7 +242,7 @@ body.logged-in .chat-shell {
       $("chatTitle").innerText = p.name;
       $("welcomeMessage").style.display = "none";
       $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
-      $("chatAvatar").src = "/img/" + (profileImages[p.name] || "");
+      $("chatAvatar").src = "/img/" + (profileImages[p.name] || "") + "?t=" + Date.now();
       $("chatAvatar").style.display = "block";
       
       if (getToken() || !guestTeaserUsed) {
