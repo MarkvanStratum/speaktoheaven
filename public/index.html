@@ -150,8 +150,8 @@
     let selectedId = null;
     let guestTeaserUsed = false;
 
-    // Use current origin to ensure connection to the server
-    const API_BASE = window.location.origin;
+    // Use empty string to make requests relative to the current host/port
+    const API_BASE = "";
 
     const profileImages = {
       "God": "god.jpg",
@@ -194,6 +194,7 @@
     async function loadProfiles() {
       try {
         const res = await fetch(`${API_BASE}/api/profiles`);
+        if (!res.ok) throw new Error("Connection failed");
         const profiles = await res.json();
         const container = $("profiles");
         container.innerHTML = "";
@@ -232,6 +233,7 @@
         const res = await fetch(`${API_BASE}/api/chat/history?characterId=${selectedId}`, {
           headers: authHeaders()
         });
+        if (!res.ok) return;
         const history = await res.json();
         history.forEach(m => {
           appendMessage(m.from_user ? "me" : "them", m.text);
