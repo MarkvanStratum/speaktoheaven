@@ -240,8 +240,9 @@ body.logged-in .chat-shell {
       el.classList.add("active");
       selectedId = p.id;
       $("chatTitle").innerText = p.name;
-      $("welcomeMessage").style.display = "none";
-      $("chatLog").innerHTML = "";
+      const wm = $("welcomeMessage");
+if (wm) wm.style.display = "none";
+$("chatLog").innerHTML = "";
       const avatar = $("chatAvatar");
 
 avatar.src = p.image + "?t=" + Date.now();
