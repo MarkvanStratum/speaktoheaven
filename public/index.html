@@ -9,14 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
   <style>
+    #limitModal {
+      pointer-events: none;
+    }
 
-#limitModal {
-  pointer-events: none;
-}
-
-#limitModal[style*="flex"] {
-  pointer-events: auto;
-}
+    #limitModal[style*="flex"] {
+      pointer-events: auto;
+    }
     :root {
       --bg-heaven: #fdfcfb; 
       --marble: #ffffff;
@@ -38,13 +37,13 @@
 
     .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 80px; }
     header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border-holy);
-  margin-bottom: 1px; /* was 40px */
-}
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-holy);
+      margin-bottom: 1px;
+    }
     .brand { display: flex; align-items: center; gap: 15px; }
     .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
     
@@ -131,7 +130,6 @@
           <div style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
             <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); display: flex; align-items: center; gap: 15px;">
               <img id="chatAvatar" src="" alt="" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--gold-divine); object-fit: cover; display: none;">
-
               <div id="chatTitle" style="font-family: Cinzel; color: var(--blue-saint);">Select a Prophet</div>
             </div>
             <div class="chat-log" id="chatLog">
@@ -151,6 +149,9 @@
     const $ = (id) => document.getElementById(id);
     let selectedId = null;
     let guestTeaserUsed = false;
+
+    // Use current origin to ensure connection to the server
+    const API_BASE = window.location.origin;
 
     const profileImages = {
       "God": "god.jpg",
@@ -177,7 +178,6 @@
       };
     }
 
-    // --- TAB LOGIC ---
     $("tabLogin").onclick = () => {
       $("tabLogin").classList.add("active");
       $("tabRegister").classList.remove("active");
@@ -191,19 +191,22 @@
       $("loginPane").classList.add("hide");
     };
 
-    // --- INITIAL LOAD ---
     async function loadProfiles() {
-      const res = await fetch("/api/profiles");
-      const profiles = await res.json();
-      const container = $("profiles");
-      container.innerHTML = "";
-      profiles.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "pitem";
-        div.innerHTML = `<strong>${p.name}</strong>`;
-        div.onclick = () => selectProfile(p, div);
-        container.appendChild(div);
-      });
+      try {
+        const res = await fetch(`${API_BASE}/api/profiles`);
+        const profiles = await res.json();
+        const container = $("profiles");
+        container.innerHTML = "";
+        profiles.forEach(p => {
+          const div = document.createElement("div");
+          div.className = "pitem";
+          div.innerHTML = `<strong>${p.name}</strong>`;
+          div.onclick = () => selectProfile(p, div);
+          container.appendChild(div);
+        });
+      } catch (e) {
+        console.error("Failed to load profiles", e);
+      }
     }
 
     function selectProfile(p, el) {
@@ -216,7 +219,6 @@
       $("chatAvatar").src = profileImages[p.name] || "";
       $("chatAvatar").style.display = "block";
       
-      // If user is logged in, enable chat. If not, they get 1 free teaser.
       if (getToken() || !guestTeaserUsed) {
         $("chatInput").disabled = false;
         $("sendBtn").disabled = false;
@@ -227,7 +229,7 @@
     async function loadHistory() {
       if (!getToken() || !selectedId) return;
       try {
-        const res = await fetch(`/api/chat/history?characterId=${selectedId}`, {
+        const res = await fetch(`${API_BASE}/api/chat/history?characterId=${selectedId}`, {
           headers: authHeaders()
         });
         const history = await res.json();
@@ -245,38 +247,49 @@
       $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
     }
 
-    // --- AUTH ACTIONS ---
     $("registerBtn").onclick = async () => {
       const email = $("regEmail").value;
       const password = $("regPassword").value;
-      const res = await fetch("/api/register", { // FIXED: Matched to server.js route
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        alert("Pilgrimage account created. Please Sign In.");
-        $("tabLogin").click();
-      } else {
-        alert(data.error);
+      if(!email || !password) return alert("Please fill all fields.");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("Pilgrimage account created. Please Sign In.");
+          $("tabLogin").click();
+        } else {
+          alert(data.error || "Registration failed.");
+        }
+      } catch (e) {
+        alert("Server connection failed.");
       }
     };
 
     $("loginBtn").onclick = async () => {
       const email = $("loginEmail").value;
       const password = $("loginPassword").value;
-      const res = await fetch("/api/login", { // FIXED: Matched to server.js route
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (data.token) {
-        setToken(data.token);
-        setLoggedInUI(true);
-      } else {
-        alert(data.error);
+      if(!email || !password) return alert("Please fill all fields.");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.token) {
+          setToken(data.token);
+          setLoggedInUI(true);
+        } else {
+          alert(data.error || "Login failed.");
+        }
+      } catch (e) {
+        alert("Server connection failed.");
       }
     };
 
@@ -297,7 +310,6 @@
       }
     }
 
-    // --- CHAT ACTION ---
     $("sendBtn").onclick = async () => {
       const text = $("chatInput").value;
       if (!text || !selectedId) return;
@@ -306,7 +318,7 @@
       $("chatInput").value = "";
 
       try {
-        const res = await fetch("/api/chat", {
+        const res = await fetch(`${API_BASE}/api/chat`, {
           method: "POST",
           headers: authHeaders(),
           body: JSON.stringify({ characterId: selectedId, message: text })
@@ -317,12 +329,11 @@
           appendMessage("them", data.reply);
           if (!getToken()) guestTeaserUsed = true;
         } else if (res.status === 403 && data.error === "LIMIT_REACHED") {
-            // Show the limit modal
             const modal = $("limitModal");
             modal.style.display = "flex";
             modal.style.pointerEvents = "auto";
         } else {
-          alert(data.error);
+          alert(data.error || "Message failed.");
         }
       } catch(e) {
         alert("The connection to the heavens was interrupted.");
