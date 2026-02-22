@@ -242,8 +242,10 @@ body.logged-in .chat-shell {
       $("chatTitle").innerText = p.name;
       $("welcomeMessage").style.display = "none";
       $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
-      let name = p.name.toLowerCase();
-let img = "god.jpg"; // default
+      const oldAvatar = $("chatAvatar");
+
+let name = (p.name || "").toLowerCase();
+let img = "god.jpg";
 
 if (name.includes("jesus")) img = "jesus.jpg";
 else if (name.includes("holy")) img = "holyspirit.jpg";
@@ -258,15 +260,21 @@ else if (name.includes("paul")) img = "paul.jpg";
 else if (name.includes("peter")) img = "peter.jpg";
 else if (name.includes("god")) img = "god.jpg";
 
-$("chatAvatar").src = "/img/" + img + "?t=" + Date.now();
-$("chatAvatar").style.display = "block";
-      $("chatAvatar").style.display = "block";
+// 🔴 RECREATE IMAGE ELEMENT (fixes bug completely)
+const newAvatar = oldAvatar.cloneNode(true);
+
+newAvatar.src = "/img/" + img + "?t=" + Date.now();
+newAvatar.style.display = "block";
+
+oldAvatar.parentNode.replaceChild(newAvatar, oldAvatar);
+newAvatar.id = "chatAvatar";
+
       
       if (getToken() || !guestTeaserUsed) {
         $("chatInput").disabled = false;
         $("sendBtn").disabled = false;
       }
-      loadHistory();
+      setTimeout(() => loadHistory(), 100);
     }
 
     async function loadHistory() {
@@ -385,32 +393,43 @@ document.body.classList.add("logged-in");
 // 🔴 FREE MODE (NOT LOGGED IN)
 if (!getToken()) {
 
-  if (guestTeaserUsed) {
-    appendMessage("them", "To continue this sacred conversation, you must create an account.");
-    $("chatInput").disabled = true;
-    $("sendBtn").disabled = true;
-    return;
-  }
+  let name = $("chatTitle").innerText;
 
-  let title = $("chatTitle").innerText;
   let reply = "";
 
-  if (title.includes("God")) {
-    reply = "I am the Alpha and the Omega, the beginning and the end. Speak, and I shall answer you.";
-  } else if (title.includes("Jesus")) {
-    reply = "Peace be with you. Ask, and I will guide you in truth.";
-  } else if (title.includes("David")) {
-    reply = "I am David, shepherd and king. I have known triumph and sorrow. Speak, and I will counsel you.";
-  } else {
-    reply = "Speak, and I will listen.";
+  if (name.includes("God")) {
+    reply = "I am the Alpha and the Omega, the beginning and the end. I know your heart before you speak.";
+  } 
+  else if (name.includes("Jesus")) {
+    reply = "Peace be with you. Come to me with your burdens, and I will give you rest.";
+  } 
+  else if (name.includes("Holy Spirit")) {
+    reply = "I am the Comforter, the Spirit of truth. I guide those who listen.";
+  } 
+  else if (name.includes("Mary")) {
+    reply = "My child, walk in humility and trust in the Lord with all your heart.";
+  } 
+  else if (name.includes("Moses")) {
+    reply = "I have walked through the wilderness with God. Trust Him, even when the path is unclear.";
+  } 
+  else if (name.includes("David")) {
+    reply = "The Lord is my shepherd; I shall not want. Seek Him, and He will guide you.";
+  } 
+  else {
+    reply = "Seek wisdom and you shall find it.";
   }
 
-  appendMessage("them", reply);
+  appendMessage("them",
+    reply +
+    "\n\nTo continue this sacred conversation, you must create an account and enter the sanctuary."
+  );
 
-  guestTeaserUsed = true;
+  $("chatInput").disabled = true;
+  $("sendBtn").disabled = true;
 
-  return; // 🔥 VERY IMPORTANT
+  return; // 🔴 IMPORTANT
 }
+
       $("chatInput").value = "";
 
       try {
@@ -437,6 +456,9 @@ if (!getToken()) {
     };
 
     window.onload = () => { 
+$("buyGodBtn").onclick = () => { window.location.href = "/register.html"; };
+$("buyAllBtn").onclick = () => { window.location.href = "/register.html"; };
+$("buyLifeBtn").onclick = () => { window.location.href = "/register.html"; };
       loadProfiles(); 
       if (getToken()) setLoggedInUI(true); 
     };
