@@ -359,7 +359,7 @@ app.get("/api/chat/history", async (req, res) => {
 		const token = authHeader && authHeader.split(" ")[1];
 		if (!token) return res.status(401).json({ error: "No token" });
 		const decoded = jwt.verify(token, SECRET_KEY);
-		const userId = decoded.id; // Corrected from userId to id
+		const userId = decoded.id;
 		const { characterId } = req.query;
 
 		const history = await pool.query(
