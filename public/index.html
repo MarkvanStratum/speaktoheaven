@@ -161,8 +161,8 @@
         mainGrid.style.gridTemplateColumns = window.innerWidth > 950 ? "1fr 1.3fr" : "1fr";
       }
 
-      $("chatInput").disabled = !loggedIn || !selectedId;
-      $("sendBtn").disabled = !loggedIn || !selectedId;
+      $("chatInput").disabled = !loggedIn;
+$("sendBtn").disabled = !loggedIn;
     }
 
     $("tabLogin").onclick = () => {
