@@ -234,6 +234,29 @@ $("sendBtn").disabled = !loggedIn;
       });
     }
 
+
+
+async function typeReply(text) {
+  const chat = $("chatLog");
+
+  // create empty bubble
+  const bubble = document.createElement("div");
+  bubble.className = "bubble them";
+  chat.appendChild(bubble);
+
+  let i = 0;
+
+  while (i < text.length) {
+    bubble.textContent += text[i];
+    i++;
+
+    // scroll while typing
+    chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
+
+    await new Promise(r => setTimeout(r, 15));
+  }
+}
+
     $("sendBtn").onclick = async () => {
       const message = $("chatInput").value;
       if (!message || !selectedId) return;
@@ -251,7 +274,7 @@ $("sendBtn").disabled = !loggedIn;
       const data = await res.json();
       
       if (res.ok) { 
-        $("chatLog").innerHTML += `<div class="bubble them">${data.reply}</div>`; 
+        await typeReply(data.reply);
       } else { 
         if (data.error === "LIMIT_REACHED") {
     $("limitModal").style.display = "flex";
