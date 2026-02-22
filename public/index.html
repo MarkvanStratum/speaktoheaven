@@ -56,15 +56,22 @@ body.logged-in .wrap {
     .proclamation { text-align: center; padding: 0px 0; max-width: 800px; margin: 0 auto; }
     .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
     
-    .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
+   .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
 
-body.logged-in .grid {
-  grid-template-columns: 300px 1fr;
-  gap: 20px;
+body.logged-in #mainGrid {
+  grid-template-columns: 1fr;
+  gap: 0;
 }
+
+body.logged-in #chatCard {
+  width: 100%;
+}
+
     @media (max-width: 950px) { .grid { grid-template-columns: 1fr !important; } }
 
     .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: visible; }
+
+
     
     input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0ddd5; font-family: inherit; font-size: 16px; }
     .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
