@@ -242,7 +242,24 @@ body.logged-in .chat-shell {
       $("chatTitle").innerText = p.name;
       $("welcomeMessage").style.display = "none";
       $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
-      $("chatAvatar").src = "/img/" + (profileImages[p.name] || "") + "?t=" + Date.now();
+      let name = p.name.toLowerCase();
+let img = "god.jpg"; // default
+
+if (name.includes("jesus")) img = "jesus.jpg";
+else if (name.includes("holy")) img = "holyspirit.jpg";
+else if (name.includes("mary")) img = "mary.jpg";
+else if (name.includes("moses")) img = "moses.jpg";
+else if (name.includes("eve")) img = "eve.jpg";
+else if (name.includes("david")) img = "david.jpg";
+else if (name.includes("isaiah")) img = "isaiah.jpg";
+else if (name.includes("daniel")) img = "daniel.jpg";
+else if (name.includes("john")) img = "john.jpg";
+else if (name.includes("paul")) img = "paul.jpg";
+else if (name.includes("peter")) img = "peter.jpg";
+else if (name.includes("god")) img = "god.jpg";
+
+$("chatAvatar").src = "/img/" + img + "?t=" + Date.now();
+$("chatAvatar").style.display = "block";
       $("chatAvatar").style.display = "block";
       
       if (getToken() || !guestTeaserUsed) {
