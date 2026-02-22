@@ -359,7 +359,7 @@ app.get("/api/chat/history", async (req, res) => {
 		const token = authHeader && authHeader.split(" ")[1];
 		if (!token) return res.status(401).json({ error: "No token" });
 		const decoded = jwt.verify(token, SECRET_KEY);
-		const userId = decoded.userId;
+		const userId = decoded.id; // Corrected from userId to id
 		const { characterId } = req.query;
 
 		const history = await pool.query(
@@ -394,24 +394,15 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
 		const isPaid = userData.lifetime || (userData.expires_at && new Date(userData.expires_at) > new Date());
 
-		// Block users who are not paid and have sent 3 or more messages
-		if (!isPaid && userData.messages_sent >= 3) {
+		// Only block if they are NOT paid AND their specific message counter is 3 or more.
+		// When they pay, the Webhook sets messages_sent back to 0, which unlocks this.
+		if (!isPaid && parseInt(userData.messages_sent) >= 3) {
 			return res.status(403).json({ 
 				error: "LIMIT_REACHED", 
-				message: "You have used your 3 free divine consultations. Please choose a plan to continue." 
+				message: "You have used your 3 free divine consultations. Please choose an offering to continue." 
 			});
 		}
 
-// 🔒 Check if free user has reached the 3-message limit
-		if (!userData.lifetime && userData.plan === 'free') {
-			const countRes = await pool.query(
-				"SELECT COUNT(*) FROM messages WHERE user_id = $1 AND from_user = true", 
-				[userId]
-			);
-			if (parseInt(countRes.rows[0].count) >= 3) {
-				return res.status(403).json({ error: "LIMIT_REACHED" });
-			}
-		}
 		// Save user message
 		await pool.query(
 			`INSERT INTO messages (user_id, character_id, from_user, text)
