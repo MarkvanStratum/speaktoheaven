@@ -207,7 +207,11 @@
     $("loginBtn").onclick = async () => {
       const email = $("loginEmail").value;
       const password = $("loginPassword").value;
-      const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      const res = await fetch("/login", { 
+  method: "POST", 
+  headers: { "Content-Type": "application/json" }, 
+  body: JSON.stringify({ email, password }) 
+});
       const data = await res.json();
       if (res.ok) { 
         setToken(data.token); 
@@ -219,7 +223,11 @@
     $("registerBtn").onclick = async () => {
       const email = $("regEmail").value;
       const password = $("regPassword").value;
-      const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      const res = await fetch("/register", { 
+  method: "POST", 
+  headers: { "Content-Type": "application/json" }, 
+  body: JSON.stringify({ email, password }) 
+});
       const data = await res.json();
       if (res.ok) { alert("Registration successful! Please sign in."); $("tabLogin").click(); }
       else { alert(data.error); }
