@@ -179,8 +179,8 @@
         mainGrid.style.gridTemplateColumns = window.innerWidth > 950 ? "1fr 1.3fr" : "1fr";
       }
 
-      $("chatInput").disabled = !loggedIn;
-$("sendBtn").disabled = !loggedIn;
+      $("chatInput").disabled = false;
+$("sendBtn").disabled = false;
     }
 
     $("tabLogin").onclick = () => {
@@ -274,18 +274,68 @@ async function typeReply(text) {
 }
 
     $("sendBtn").onclick = async () => {
-      const message = $("chatInput").value;
-      if (!message || !selectedId) return;
-      
-      $("chatLog").innerHTML += `<div class="bubble me">${message}</div>`;
-      $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
-      $("chatInput").value = "";
 
-      const res = await fetch("/api/chat", { 
-        method: "POST", 
-        headers: authHeaders(), 
-        body: JSON.stringify({ characterId: selectedId, message }) 
-      });
+  const message = $("chatInput").value.trim();
+  if (!message) return;
+
+  // show user message
+  $("chatLog").innerHTML += `<div class="bubble me">${message}</div>`;
+  $("chatInput").value = "";
+
+  // 🔴 IF USER IS NOT LOGGED IN → FAKE RESPONSE
+  if (!getToken()) {
+
+    let reply = "";
+    const title = $("chatTitle").textContent;
+
+    if (title.includes("God")) {
+      reply = "My child... you seek guidance, but first you must enter the covenant. Create an account to continue this sacred conversation.";
+    } else if (title.includes("Jesus")) {
+      reply = "Peace be with you. To walk further in this conversation, you must first join us. Please create an account or log in.";
+    } else if (title.includes("Moses")) {
+      reply = "You stand at the threshold. To proceed, you must enter. Create an account, and the path shall open before you.";
+    } else if (title.includes("Mary")) {
+      reply = "Dear soul, I hear your heart. But to continue, you must first create an account or sign in.";
+    } else if (title.includes("David")) {
+      reply = "My heart rejoices at your words, but to continue this conversation, you must first join us. Sign in or create an account.";
+    } else {
+      reply = "To continue this sacred conversation, please create an account or sign in. The path awaits you.";
+    }
+
+    await typeReply(reply + "\n\n→ Create an account or log in on the left.");
+    return;
+  }
+
+  // 🟢 NORMAL (LOGGED IN) CHAT FLOW
+  if (!selectedId) return;
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getToken()
+      },
+      body: JSON.stringify({
+        message,
+        profileId: selectedId
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.error === "LIMIT_REACHED") {
+      alert("You have reached your free message limit.");
+      return;
+    }
+
+    await typeReply(data.reply);
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong.");
+  }
+};
       
       const data = await res.json();
       
