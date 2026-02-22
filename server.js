@@ -50,12 +50,20 @@ app.use((req, res, next) => {
 const { Pool } = pkg;
 
 const pool = new Pool({
-	connectionString: process.env.DATABASE_URL,
-	ssl: {
-		rejectUnauthorized: false
-	}
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes("localhost") 
+       ? false 
+       : { rejectUnauthorized: false }
 });
-// Initialize essential DB tables
+
+// Add this to verify the connection in your terminal
+pool.connect((err) => {
+  if (err) {
+    console.error("❌ Database connection failed:", err.stack);
+  } else {
+    console.log("✅ Connected to PostgreSQL database");
+  }
+});// Initialize essential DB tables
 (async () => {
 	try {
 		await pool.query(`
