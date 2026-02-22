@@ -365,6 +365,35 @@ document.body.classList.add("logged-in");
       if (!text || !selectedId) return;
 
       appendMessage("me", text);
+// 🔴 FREE MODE (NOT LOGGED IN)
+if (!getToken()) {
+
+  if (guestTeaserUsed) {
+    appendMessage("them", "To continue this sacred conversation, you must create an account.");
+    $("chatInput").disabled = true;
+    $("sendBtn").disabled = true;
+    return;
+  }
+
+  let title = $("chatTitle").innerText;
+  let reply = "";
+
+  if (title.includes("God")) {
+    reply = "I am the Alpha and the Omega, the beginning and the end. Speak, and I shall answer you.";
+  } else if (title.includes("Jesus")) {
+    reply = "Peace be with you. Ask, and I will guide you in truth.";
+  } else if (title.includes("David")) {
+    reply = "I am David, shepherd and king. I have known triumph and sorrow. Speak, and I will counsel you.";
+  } else {
+    reply = "Speak, and I will listen.";
+  }
+
+  appendMessage("them", reply);
+
+  guestTeaserUsed = true;
+
+  return; // 🔥 VERY IMPORTANT
+}
       $("chatInput").value = "";
 
       try {
