@@ -220,7 +220,7 @@
       $("chatTitle").innerText = p.name;
       $("welcomeMessage").style.display = "none";
       $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
-      $("chatAvatar").src = profileImages[p.name] || "";
+      $("chatAvatar").src = "/img/" + (profileImages[p.name] || "");
       $("chatAvatar").style.display = "block";
       
       if (getToken() || !guestTeaserUsed) {
@@ -236,8 +236,12 @@
         const res = await fetch(`${API_BASE}/api/chat/history?characterId=${selectedId}`, {
           headers: authHeaders()
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+  alert("Error loading chat history (" + res.status + ")");
+  return;
+}
         const history = await res.json();
+$("chatLog").innerHTML = "";
         history.forEach(m => {
           appendMessage(m.from_user ? "me" : "them", m.text);
         });
