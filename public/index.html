@@ -150,8 +150,6 @@
   <script>
     const $ = (id) => document.getElementById(id);
     let selectedId = null;
-
-    // NEW: guest lock (1 free teaser reply, then require login)
     let guestTeaserUsed = false;
 
     const profileImages = {
@@ -171,282 +169,180 @@
 
     function getToken() { return localStorage.getItem("jwt") || ""; }
     function setToken(t) { localStorage.setItem("jwt", t); }
-    function authHeaders() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
 
-    function setLoggedInUI(loggedIn) {
-      $("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
-      const authSection = $("authSection");
-      const heroText = $("heroText");
-      const mainGrid = $("mainGrid");
-
-      if (loggedIn) {
-        authSection.classList.add("hide");
-        heroText.classList.add("hide");
-        mainGrid.style.gridTemplateColumns = "1fr"; 
-        if($("welcomeMessage")) $("welcomeMessage").textContent = "Please select a figure to begin your consultation.";
-      } else {
-        authSection.classList.remove("hide");
-        heroText.classList.remove("hide");
-        mainGrid.style.gridTemplateColumns = window.innerWidth > 950 ? "1fr 1.3fr" : "1fr";
-      }
-
-      // Keep teaser enabled for guests too
-      $("chatInput").disabled = false;
-      $("sendBtn").disabled = false;
+    function authHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${getToken()}`
+      };
     }
 
+    // --- TAB LOGIC ---
     $("tabLogin").onclick = () => {
-      $("loginPane").classList.remove("hide"); $("registerPane").classList.add("hide");
-      $("tabLogin").classList.add("active"); $("tabRegister").classList.remove("active");
+      $("tabLogin").classList.add("active");
+      $("tabRegister").classList.remove("active");
+      $("loginPane").classList.remove("hide");
+      $("registerPane").classList.add("hide");
     };
     $("tabRegister").onclick = () => {
-      $("registerPane").classList.remove("hide"); $("loginPane").classList.add("hide");
-      $("tabRegister").classList.add("active"); $("tabLogin").classList.remove("active");
+      $("tabRegister").classList.add("active");
+      $("tabLogin").classList.remove("active");
+      $("registerPane").classList.remove("hide");
+      $("loginPane").classList.add("hide");
+    };
+
+    // --- INITIAL LOAD ---
+    async function loadProfiles() {
+      const res = await fetch("/api/profiles");
+      const profiles = await res.json();
+      const container = $("profiles");
+      container.innerHTML = "";
+      profiles.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "pitem";
+        div.innerHTML = `<strong>${p.name}</strong>`;
+        div.onclick = () => selectProfile(p, div);
+        container.appendChild(div);
+      });
+    }
+
+    function selectProfile(p, el) {
+      document.querySelectorAll(".pitem").forEach(i => i.classList.remove("active"));
+      el.classList.add("active");
+      selectedId = p.id;
+      $("chatTitle").innerText = p.name;
+      $("welcomeMessage").style.display = "none";
+      $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
+      $("chatAvatar").src = profileImages[p.name] || "";
+      $("chatAvatar").style.display = "block";
+      
+      // If user is logged in, enable chat. If not, they get 1 free teaser.
+      if (getToken() || !guestTeaserUsed) {
+        $("chatInput").disabled = false;
+        $("sendBtn").disabled = false;
+      }
+      loadHistory();
+    }
+
+    async function loadHistory() {
+      if (!getToken() || !selectedId) return;
+      try {
+        const res = await fetch(`/api/chat/history?characterId=${selectedId}`, {
+          headers: authHeaders()
+        });
+        const history = await res.json();
+        history.forEach(m => {
+          appendMessage(m.from_user ? "me" : "them", m.text);
+        });
+      } catch(e) {}
+    }
+
+    function appendMessage(side, text) {
+      const div = document.createElement("div");
+      div.className = `bubble ${side}`;
+      div.innerText = text;
+      $("chatLog").appendChild(div);
+      $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
+    }
+
+    // --- AUTH ACTIONS ---
+    $("registerBtn").onclick = async () => {
+      const email = $("regEmail").value;
+      const password = $("regPassword").value;
+      const res = await fetch("/api/register", { // FIXED: Matched to server.js route
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert("Pilgrimage account created. Please Sign In.");
+        $("tabLogin").click();
+      } else {
+        alert(data.error);
+      }
     };
 
     $("loginBtn").onclick = async () => {
       const email = $("loginEmail").value;
       const password = $("loginPassword").value;
-      const res = await fetch("/login", { 
-  method: "POST", 
-  headers: { "Content-Type": "application/json" }, 
-  body: JSON.stringify({ email, password }) 
-});
-      const data = await res.json();
-      if (res.ok) { 
-        setToken(data.token); 
-        setLoggedInUI(true);
-        location.reload();
-      } else { alert(data.error); }
-    };
-
-    $("registerBtn").onclick = async () => {
-      const email = $("regEmail").value;
-      const password = $("regPassword").value;
-      const res = await fetch("/register", { 
-  method: "POST", 
-  headers: { "Content-Type": "application/json" }, 
-  body: JSON.stringify({ email, password }) 
-});
-      const data = await res.json();
-      if (res.ok) { alert("Registration successful! Please sign in."); $("tabLogin").click(); }
-      else { alert(data.error); }
-    };
-
-    $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
-
-    // NEW: Offerings buttons go to pricing
-    $("buyGodBtn").onclick = () => { window.location.href = "/register.html"; };
-    $("buyAllBtn").onclick = () => { window.location.href = "/register.html"; };
-    $("buyLifeBtn").onclick = () => { window.location.href = "/register.html"; };
-
-    async function loadProfiles() {
-      const res = await fetch("/api/profiles");
-      const profiles = await res.json();
-      const container = $("profiles");
-      container.innerHTML = ""; // avoid duplicates if reloaded
-
-      profiles.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "pitem";
-        div.innerHTML = `<div style="font-family: Cinzel; font-size: 14px;">${p.name}</div>`;
-        div.onclick = () => {
-          document.querySelectorAll('.pitem').forEach(el => el.classList.remove('active'));
-          div.classList.add('active');
-          selectedId = p.id;
-          $("chatTitle").textContent = p.name;
-          $("chatAvatar").src = "/img/" + (profileImages[p.name] || "god.jpg");
-          $("chatAvatar").style.display = "block";
-          setLoggedInUI(!!getToken());
-
-          // Only load history if logged in
-          if (!getToken()) {
-            $("chatLog").innerHTML = `<div class="bubble them">Peace be with you. Ask one question, and I will answer—then you must create an account to continue.</div>`;
-            $("chatLog").scrollTo({ top: $("chatLog").scrollHeight });
-            return;
-          }
-
-          fetch(`/api/chat/history?characterId=${p.id}`, { headers: authHeaders() })
-            .then(r => r.json())
-            .then(messages => {
-              $("chatLog").innerHTML = ""; 
-              messages.forEach(m => {
-                const side = m.from_user ? "me" : "them";
-                $("chatLog").innerHTML += `<div class="bubble ${side}">${m.text}</div>`;
-              });
-              if(messages.length === 0) {
-                $("chatLog").innerHTML = `<div class="bubble them">Peace be with you. What is on your mind?</div>`;
-              }
-              $("chatLog").scrollTo({ top: $("chatLog").scrollHeight });
-            });
-        };
-        container.appendChild(div);
+      const res = await fetch("/api/login", { // FIXED: Matched to server.js route
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
       });
-    }
+      const data = await res.json();
+      if (data.token) {
+        setToken(data.token);
+        setLoggedInUI(true);
+      } else {
+        alert(data.error);
+      }
+    };
 
-    async function typeReply(text) {
-      const chat = $("chatLog");
+    $("logoutBtn").onclick = () => {
+      localStorage.removeItem("jwt");
+      location.reload();
+    };
 
-      // create empty bubble
-      const bubble = document.createElement("div");
-      bubble.className = "bubble them";
-      chat.appendChild(bubble);
-
-      let i = 0;
-      while (i < text.length) {
-        bubble.textContent += text[i];
-        i++;
-        chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
-        await new Promise(r => setTimeout(r, 15));
+    function setLoggedInUI(isLoggedIn) {
+      if (isLoggedIn) {
+        $("authSection").classList.add("hide");
+        $("logoutBtn").style.display = "block";
+        $("heroText").innerHTML = "<h2>Welcome Back, Seeker</h2><p>Continue your sacred dialogue below.</p>";
+        if (selectedId) {
+          $("chatInput").disabled = false;
+          $("sendBtn").disabled = false;
+        }
       }
     }
 
+    // --- CHAT ACTION ---
     $("sendBtn").onclick = async () => {
+      const text = $("chatInput").value;
+      if (!text || !selectedId) return;
 
-      // NEW: require selecting a character first
-      if (!selectedId) {
-        alert("Please select a figure first.");
-        return;
-      }
-
-      const message = $("chatInput").value.trim();
-      if (!message) return;
-
-      // show user message
-      $("chatLog").innerHTML += `<div class="bubble me">${message}</div>`;
+      appendMessage("me", text);
       $("chatInput").value = "";
 
-      // 🔴 IF USER IS NOT LOGGED IN → 1 teaser reply, then lock
-      if (!getToken()) {
-
-        if (guestTeaserUsed) {
-          await typeReply("To continue this sacred conversation, you must create an account and enter the sanctuary.");
-          $("chatInput").disabled = true;
-          $("sendBtn").disabled = true;
-          return;
-        }
-
-        const title = $("chatTitle").textContent;
-        let reply = "";
-
-        if (title.includes("God")) {
-          reply = "I am the Alpha and the Omega, the beginning and the end. I know your heart before you speak. Ask, and I shall answer you with wisdom.";
-        }
-
-        else if (title.includes("Jesus")) {
-          reply = "Peace be with you. I have come that you may have life, and have it abundantly. Speak, and I will guide you in truth and love.";
-        }
-
-        else if (title.includes("Holy Spirit")) {
-          reply = "I am the Comforter, the Spirit of truth. I dwell within and guide the hearts of those who listen. Speak, and I will give you understanding.";
-        }
-
-        else if (title.includes("Mary")) {
-          reply = "My child, I have walked in faith and surrender to the will of God. Speak to me, and I will listen with a gentle heart.";
-        }
-
-        else if (title.includes("Moses")) {
-          reply = "I am Moses, servant of the Lord. I have walked through the wilderness and spoken with God upon the mountain. What guidance do you seek?";
-        }
-
-        else if (title.includes("Eve")) {
-          reply = "I am Eve, mother of all living. I have known both innocence and the weight of choice. Speak, and I will reflect with you.";
-        }
-
-        else if (title.includes("King David")) {
-          reply = "I am David, son of Jesse, shepherd and king. I have known victory and repentance, joy and sorrow. Speak, and I will counsel you from the depths of my heart.";
-        }
-
-        else if (title.includes("Isaiah")) {
-          reply = "I am Isaiah, prophet of the Lord. I have seen visions of glory and judgment. Speak, and I will reveal what is laid upon my heart.";
-        }
-
-        else if (title.includes("Daniel")) {
-          reply = "I am Daniel, servant of the Most High. I have stood firm in faith and witnessed the power of God in exile. Speak, and I will give you wisdom.";
-        }
-
-        else if (title.includes("Peter")) {
-          reply = "I am Peter, a fisherman called to follow the Lord. My faith has faltered, yet I have been restored. Speak, and I will answer you with honesty.";
-        }
-
-        else if (title.includes("Paul")) {
-          reply = "I am Paul, a servant of Jesus Christ. I have traveled far and endured much to spread the truth. Speak, and I will reason with you.";
-        }
-
-        else if (title.includes("John")) {
-          reply = "I am John, the beloved disciple. I speak of love, light, and truth. Speak, and I will share what has been revealed to me.";
-        }
-
-        else {
-          reply = "Speak, and I will listen with wisdom given from above.";
-        }
-
-        guestTeaserUsed = true;
-
-        await typeReply(
-          reply +
-          "\n\nTo continue this sacred conversation, you must create an account and enter the sanctuary."
-        );
-
-        $("chatInput").disabled = true;
-        $("sendBtn").disabled = true;
-
-        return;
-      }
-
-      // 🟢 NORMAL (LOGGED IN) CHAT FLOW
       try {
         const res = await fetch("/api/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + getToken()
-          },
-          body: JSON.stringify({
-            message,
-            characterId: selectedId // FIX: matches server.js
-          })
+          headers: authHeaders(),
+          body: JSON.stringify({ characterId: selectedId, message: text })
         });
-
         const data = await res.json();
 
-        if (!res.ok) {
-          if (data.error === "LIMIT_REACHED") {
-            const m = document.getElementById("limitModal");
-            if (m) m.style.display = "flex";
-            return;
-          }
-          alert(data.error || "Something went wrong.");
-          return;
+        if (res.ok) {
+          appendMessage("them", data.reply);
+          if (!getToken()) guestTeaserUsed = true;
+        } else if (res.status === 403 && data.error === "LIMIT_REACHED") {
+            // Show the limit modal
+            const modal = $("limitModal");
+            modal.style.display = "flex";
+            modal.style.pointerEvents = "auto";
+        } else {
+          alert(data.error);
         }
-
-        await typeReply(data.reply || "(No response)");
-
-      } catch (err) {
-        console.error(err);
-        alert("Something went wrong.");
+      } catch(e) {
+        alert("The connection to the heavens was interrupted.");
       }
     };
 
     window.onload = () => { 
       loadProfiles(); 
-      setLoggedInUI(!!getToken()); 
-
-      const m = document.getElementById("limitModal");
-      if (m) m.style.display = "none";
+      if (getToken()) setLoggedInUI(true); 
     };
   </script>
 
   <div id="limitModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px);">
-
     <div class="card" style="max-width: 450px; width: 90%; padding: 40px; text-align: center; border: 2px solid var(--gold-divine); background: white;">
       <div class="logo" style="margin: 0 auto 20px;">†</div>
       <h3 style="font-family: Cinzel; color: var(--blue-saint); font-size: 24px; margin-bottom: 15px;">A Moment of Reflection</h3>
-      <p style="color: var(--text-muted); font-style: italic; margin-bottom: 30px;">Your free consultations have reached their limit. To continue your spiritual journey, please choose an offering.</p>
-      <button class="btn primary" onclick="window.location.href='/pricing.html'">View Offerings</button>
-      <button class="btn" style="border: none; margin-top: 15px; font-size: 12px; opacity: 0.6;" onclick="const m=document.getElementById('limitModal'); m.style.display='none';">Dismiss</button>
+      <p style="color: var(--text-muted); font-style: italic; margin-bottom: 30px;">Your free consultations have reached their limit. To continue your spiritual journey, please consider a sacred offering.</p>
+      <button class="btn primary" onclick="window.location.href='/pricing.html'">View Sacred Offerings</button>
+      <button class="btn" style="border:none; margin-top:15px;" onclick="$('limitModal').style.display='none'; $('limitModal').style.pointerEvents='none';">Dismiss</button>
     </div>
   </div>
-
 </body>
 </html>
