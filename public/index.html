@@ -205,16 +205,56 @@
     };
 
     $("loginBtn").onclick = async () => {
-      const email = $("loginEmail").value;
-      const password = $("loginPassword").value;
-      const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
-      const data = await res.json();
-      if (res.ok) { 
-        setToken(data.token); 
-        setLoggedInUI(true);
-        location.reload();
-      } else { alert(data.error); }
-    };
+
+  // 🔴 normalize email (VERY IMPORTANT)
+  const email = $("loginEmail").value.trim().toLowerCase();
+  const password = $("loginPassword").value;
+
+  if (!email || !password) {
+    alert("Please enter email and password.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    // 🔴 protect against bad responses
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      alert("Server error (invalid response).");
+      return;
+    }
+
+    if (!res.ok) {
+      alert(data.error || "Login failed.");
+      return;
+    }
+
+    if (!data.token) {
+      alert("Login failed: no token returned.");
+      return;
+    }
+
+    // ✅ SUCCESS
+    setToken(data.token);
+
+    // refresh UI
+    setLoggedInUI(true);
+
+    // 🔴 force reload so everything updates
+    window.location.reload();
+
+  } catch (err) {
+    console.error(err);
+    alert("Connection error. Check console.");
+  }
+};
 
     $("registerBtn").onclick = async () => {
       const email = $("regEmail").value;
