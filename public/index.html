@@ -264,7 +264,7 @@
       <h3 style="font-family: Cinzel; color: var(--blue-saint); font-size: 24px; margin-bottom: 15px;">A Moment of Reflection</h3>
       <p style="color: var(--text-muted); font-style: italic; margin-bottom: 30px;">Your free consultations have reached their limit. To continue your spiritual journey, please choose an offering.</p>
       <button class="btn primary" onclick="window.location.href='/pricing.html'">View Offerings</button>
-      <button class="btn" style="border: none; margin-top: 15px; font-size: 12px; opacity: 0.6;" onclick="document.getElementById('limitModal').style.display='none'">Dismiss</button>
+      <button class="btn" style="border: none; margin-top: 15px; font-size: 12px; opacity: 0.6;" onclick="const m=$('limitModal'); m.style.display='none'; m.classList.add('hide');">Dismiss</button>
     </div>
   </div>
 
