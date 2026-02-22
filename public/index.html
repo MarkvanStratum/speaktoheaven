@@ -261,14 +261,10 @@ else if (name.includes("peter")) img = "peter.jpg";
 else if (name.includes("god")) img = "god.jpg";
 
 // 🔴 RECREATE IMAGE ELEMENT (fixes bug completely)
-const newAvatar = oldAvatar.cloneNode(true);
+const avatar = $("chatAvatar");
 
-newAvatar.src = "/img/" + img + "?t=" + Date.now();
-newAvatar.style.display = "block";
-
-oldAvatar.parentNode.replaceChild(newAvatar, oldAvatar);
-newAvatar.id = "chatAvatar";
-
+avatar.src = "/img/" + img + "?t=" + Date.now();
+avatar.style.display = "block";
       
       if (getToken() || !guestTeaserUsed) {
         $("chatInput").disabled = false;
