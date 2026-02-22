@@ -205,56 +205,16 @@
     };
 
     $("loginBtn").onclick = async () => {
-
-  // 🔴 normalize email (VERY IMPORTANT)
-  const email = $("loginEmail").value.trim().toLowerCase();
-  const password = $("loginPassword").value;
-
-  if (!email || !password) {
-    alert("Please enter email and password.");
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    // 🔴 protect against bad responses
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      alert("Server error (invalid response).");
-      return;
-    }
-
-    if (!res.ok) {
-      alert(data.error || "Login failed.");
-      return;
-    }
-
-    if (!data.token) {
-      alert("Login failed: no token returned.");
-      return;
-    }
-
-    // ✅ SUCCESS
-    setToken(data.token);
-
-    // refresh UI
-    setLoggedInUI(true);
-
-    // 🔴 force reload so everything updates
-    window.location.reload();
-
-  } catch (err) {
-    console.error(err);
-    alert("Connection error. Check console.");
-  }
-};
+      const email = $("loginEmail").value;
+      const password = $("loginPassword").value;
+      const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      const data = await res.json();
+      if (res.ok) { 
+        setToken(data.token); 
+        setLoggedInUI(true);
+        location.reload();
+      } else { alert(data.error); }
+    };
 
     $("registerBtn").onclick = async () => {
       const email = $("regEmail").value;
@@ -351,95 +311,65 @@
       // 🔴 IF USER IS NOT LOGGED IN → 1 teaser reply, then lock
       if (!getToken()) {
 
-  if (guestTeaserUsed) {
-    await typeReply("To continue this sacred conversation, you must create an account and enter the sanctuary.");
-    $("chatInput").disabled = true;
-    $("sendBtn").disabled = true;
-    return;
-  }
+        if (guestTeaserUsed) {
+          await typeReply("To continue this sacred conversation, you must create an account and enter the sanctuary.");
+          $("chatInput").disabled = true;
+          $("sendBtn").disabled = true;
+          return;
+        }
 
-  const title = $("chatTitle").textContent;
-  let reply = "";
-
-  if (title.includes("God")) {
-    reply = "I am the Alpha and the Omega, the beginning and the end. I know your heart before you speak. Ask, and I shall answer you with wisdom.";
-  }
-
-  else if (title.includes("Jesus")) {
-    reply = "Peace be with you. I have come that you may have life, and have it abundantly. Speak, and I will guide you in truth and love.";
-  }
-
-  else if (title.includes("Holy Spirit")) {
-    reply = "I am the Comforter, the Spirit of truth. I dwell within and guide the hearts of those who listen. Speak, and I will give you understanding.";
-  }
-
-  else if (title.includes("Mary")) {
-    reply = "My child, I have walked in faith and surrender to the will of God. Speak to me, and I will listen with a gentle heart.";
-  }
-
-  else if (title.includes("Moses")) {
-    reply = "I am Moses, servant of the Lord. I have walked through the wilderness and spoken with God upon the mountain. What guidance do you seek?";
-  }
-
-  else if (title.includes("Eve")) {
-    reply = "I am Eve, mother of all living. I have known both innocence and the weight of choice. Speak, and I will reflect with you.";
-  }
-
-  else if (title.includes("King David")) {
-    reply = "I am David, son of Jesse, shepherd and king. I have known victory and repentance, joy and sorrow. Speak, and I will counsel you from the depths of my heart.";
-  }
-
-  else if (title.includes("Isaiah")) {
-    reply = "I am Isaiah, prophet of the Lord. I have seen visions of glory and judgment. Speak, and I will reveal what is laid upon my heart.";
-  }
-
-  else if (title.includes("Daniel")) {
-    reply = "I am Daniel, servant of the Most High. I have stood firm in faith and witnessed the power of God in exile. Speak, and I will give you wisdom.";
-  }
-
-  else if (title.includes("Peter")) {
-    reply = "I am Peter, a fisherman called to follow the Lord. My faith has faltered, yet I have been restored. Speak, and I will answer you with honesty.";
-  }
-
-  else if (title.includes("Paul")) {
-    reply = "I am Paul, a servant of Jesus Christ. I have traveled far and endured much to spread the truth. Speak, and I will reason with you.";
-  }
-
-  else if (title.includes("John")) {
-    reply = "I am John, the beloved disciple. I speak of love, light, and truth. Speak, and I will share what has been revealed to me.";
-  }
-
-  else {
-    reply = "Speak, and I will listen with wisdom given from above.";
-  }
-
-  guestTeaserUsed = true;
-
-  await typeReply(
-    reply +
-    "\n\nTo continue this sacred conversation, you must create an account and enter the sanctuary."
-  );
-
-  $("chatInput").disabled = true;
-  $("sendBtn").disabled = true;
-
-  return;
-}
-
-        let reply = "";
         const title = $("chatTitle").textContent;
+        let reply = "";
 
         if (title.includes("God")) {
-          reply = "My child… I see your heart and know your thoughts. Speak, and I will answer with wisdom and mercy.";
-        } else if (title.includes("Jesus")) {
-          reply = "Peace be with you. Speak, and I will teach you the way with compassion and truth.";
-        } else if (title.includes("Moses")) {
-          reply = "You stand at the threshold as Israel once stood at the sea. Speak plainly, and I will answer with firmness and counsel.";
-        } else if (title.includes("Mary")) {
-          reply = "Dear soul, I hear you with a gentle heart. Speak, and I will offer comfort and guidance.";
-        } else if (title.includes("David")) {
-          reply = "I am David, son of Jesse—shepherd, warrior, and king. I have known triumph, sorrow, and repentance. Speak, and I will counsel you.";
-        } else {
+          reply = "I am the Alpha and the Omega, the beginning and the end. I know your heart before you speak. Ask, and I shall answer you with wisdom.";
+        }
+
+        else if (title.includes("Jesus")) {
+          reply = "Peace be with you. I have come that you may have life, and have it abundantly. Speak, and I will guide you in truth and love.";
+        }
+
+        else if (title.includes("Holy Spirit")) {
+          reply = "I am the Comforter, the Spirit of truth. I dwell within and guide the hearts of those who listen. Speak, and I will give you understanding.";
+        }
+
+        else if (title.includes("Mary")) {
+          reply = "My child, I have walked in faith and surrender to the will of God. Speak to me, and I will listen with a gentle heart.";
+        }
+
+        else if (title.includes("Moses")) {
+          reply = "I am Moses, servant of the Lord. I have walked through the wilderness and spoken with God upon the mountain. What guidance do you seek?";
+        }
+
+        else if (title.includes("Eve")) {
+          reply = "I am Eve, mother of all living. I have known both innocence and the weight of choice. Speak, and I will reflect with you.";
+        }
+
+        else if (title.includes("King David")) {
+          reply = "I am David, son of Jesse, shepherd and king. I have known victory and repentance, joy and sorrow. Speak, and I will counsel you from the depths of my heart.";
+        }
+
+        else if (title.includes("Isaiah")) {
+          reply = "I am Isaiah, prophet of the Lord. I have seen visions of glory and judgment. Speak, and I will reveal what is laid upon my heart.";
+        }
+
+        else if (title.includes("Daniel")) {
+          reply = "I am Daniel, servant of the Most High. I have stood firm in faith and witnessed the power of God in exile. Speak, and I will give you wisdom.";
+        }
+
+        else if (title.includes("Peter")) {
+          reply = "I am Peter, a fisherman called to follow the Lord. My faith has faltered, yet I have been restored. Speak, and I will answer you with honesty.";
+        }
+
+        else if (title.includes("Paul")) {
+          reply = "I am Paul, a servant of Jesus Christ. I have traveled far and endured much to spread the truth. Speak, and I will reason with you.";
+        }
+
+        else if (title.includes("John")) {
+          reply = "I am John, the beloved disciple. I speak of love, light, and truth. Speak, and I will share what has been revealed to me.";
+        }
+
+        else {
           reply = "Speak, and I will listen with wisdom given from above.";
         }
 
@@ -447,12 +377,12 @@
 
         await typeReply(
           reply +
-          "\n\nTo continue this sacred conversation, you must create an account and sign in."
+          "\n\nTo continue this sacred conversation, you must create an account and enter the sanctuary."
         );
 
-        // lock after the teaser reply
         $("chatInput").disabled = true;
         $("sendBtn").disabled = true;
+
         return;
       }
 
