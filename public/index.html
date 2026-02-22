@@ -228,7 +228,7 @@ $("sendBtn").disabled = !loggedIn;
           div.classList.add('active');
           selectedId = p.id;
           $("chatTitle").textContent = p.name;
-                    $("chatAvatar").src = "/ind/" + (profileImages[p.name] || "god.jpg");
+                    $("chatAvatar").src = "/img/" + (profileImages[p.name] || "god.jpg");
           $("chatAvatar").style.display = "block";
           setLoggedInUI(!!getToken());
           
