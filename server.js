@@ -65,7 +65,8 @@ const pool = new Pool({
 				reset_token TEXT,
 				reset_token_expires TIMESTAMP,
 				plan TEXT DEFAULT 'free',
-				expires_at TIMESTAMP
+				expires_at TIMESTAMP,
+				messages_sent INT DEFAULT 0
 			);
 		`);
 
@@ -207,6 +208,37 @@ app.post("/api/login", async (req, res) => {
 	} catch (err) {
 		res.status(500).json({ error: "Server error" });
 	}
+});
+
+// NEW: Custom Payment Intent Endpoint
+app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
+    try {
+        const { plan } = req.body;
+        const email = req.user.email; 
+        
+        const amounts = {
+            'god': 2995,      // $29.95
+            'all': 3595,      // $35.95
+            'lifetime': 4995  // $49.95
+        };
+
+        if (!amounts[plan]) return res.status(400).json({ error: "Invalid plan selected" });
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amounts[plan],
+            currency: "usd",
+            automatic_payment_methods: { enabled: true },
+            metadata: { 
+                plan: plan, 
+                email: email 
+            }
+        });
+
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (e) {
+        console.error("Stripe Intent Error:", e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 //--------------------------------------------
@@ -478,75 +510,53 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 // STRIPE WEBHOOK
 //--------------------------------------------
 
-app.post("/webhook", async (req, res) => {
-	let event;
+// UPDATED: Webhook to handle PaymentIntents and Plan persistence
+app.post("/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
 
-try {
-	const sig = req.headers["stripe-signature"];
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err) {
+        console.error("Webhook Signature Error:", err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
 
-	event = stripe.webhooks.constructEvent(
-		req.body,
-		sig,
-		endpointSecret
-	);
-} catch (err) {
-	console.error("Webhook signature error:", err.message);
-	return res.status(400).send(`Webhook Error: ${err.message}`);
-}
+    if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const email = paymentIntent.metadata.email;
+        const plan = paymentIntent.metadata.plan;
 
-try {
+        console.log(`Payment success for ${email} - Plan: ${plan}`);
 
-		if (event.type === "checkout.session.completed") {
-			const session = event.data.object;
+        let expiresAt = null;
+        let isLifetime = false;
 
-			const email = session.customer_email;
-			const plan = session.metadata.plan;
+        if (plan === 'god' || plan === 'all') {
+            const date = new Date();
+            date.setDate(date.getDate() + 30);
+            expiresAt = date;
+        } else if (plan === 'lifetime') {
+            isLifetime = true;
+        }
 
-			const userRes = await pool.query(
-				"SELECT expires_at FROM users WHERE email = $1",
-				[email]
-			);
+        try {
+            await pool.query(
+                `UPDATE users 
+                 SET plan = $1, 
+                     expires_at = $2, 
+                     lifetime = $3, 
+                     messages_sent = 0 
+                 WHERE email = $4`,
+                [plan, expiresAt, isLifetime, email]
+            );
+            console.log(`✅ User ${email} updated to ${plan}`);
+        } catch (dbErr) {
+            console.error("DB Update Error during webhook:", dbErr);
+        }
+    }
 
-			if (userRes.rows.length === 0) {
-	return res.json({ received: true });
-}
-
-const user = userRes.rows[0];
-
-			let expiresAt = null;
-			let lifetime = false;
-
-			if (plan === "god" || plan === "all") {
-				let baseDate = new Date();
-
-				if (user.expires_at && new Date(user.expires_at) > baseDate) {
-					baseDate = new Date(user.expires_at);
-				}
-
-				baseDate.setDate(baseDate.getDate() + 30);
-				expiresAt = baseDate;
-			}
-
-			if (plan === "lifetime") {
-				lifetime = true;
-				expiresAt = null;
-			}
-
-			await pool.query(
-				`UPDATE users
-				 SET plan = $1,
-				     expires_at = $2,
-				     lifetime = $3
-				 WHERE email = $4`,
-				[plan, expiresAt, lifetime, email]
-			);
-		}
-
-		res.json({ received: true });
-	} catch (err) {
-		console.error("Webhook error:", err);
-		res.status(500).json({ error: "Webhook error" });
-	}
+    res.json({ received: true });
 });
 
 app.get("/", (req, res) => {

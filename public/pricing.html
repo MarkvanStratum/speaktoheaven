@@ -132,18 +132,8 @@
 
   <script>
     function checkout(planName) {
-      const customURLs = {
-        'god': 'https://yourcustomsite.com/checkout-prophet',
-        'all': 'https://yourcustomsite.com/checkout-celestial',
-        'lifetime': 'https://yourcustomsite.com/checkout-eternal'
-      };
-
-      const targetURL = customURLs[planName];
-      if (targetURL) {
-        window.location.href = targetURL;
-      } else {
-        alert("Sacred path not found. Please contact support.");
-      }
+      // This sends the user to your new checkout page with the plan as a URL parameter
+      window.location.href = `/checkout.html?plan=${planName}`;
     }
   </script>
 
