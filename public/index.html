@@ -36,6 +36,12 @@
     }
 
     .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 80px; }
+
+body.logged-in .wrap {
+  max-width: none;
+  width: 100%;
+  padding: 0 10px 40px;
+}
     header {
       display: flex;
       align-items: center;
@@ -51,6 +57,11 @@
     .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
     
     .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
+
+body.logged-in .grid {
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+}
     @media (max-width: 950px) { .grid { grid-template-columns: 1fr !important; } }
 
     .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: visible; }
@@ -60,6 +71,10 @@
     .btn.primary { background: var(--gold-divine); color: white; }
 
     .chat-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 650px; }
+
+body.logged-in .chat-shell {
+  height: calc(100vh - 120px);
+}
     .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 20px; overflow-y: auto; }
     .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; transition: 0.2s; }
     .pitem.active { border-color: var(--gold-divine); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -327,6 +342,7 @@ $("chatLog").innerHTML = "";
 
     function setLoggedInUI(isLoggedIn) {
       if (isLoggedIn) {
+document.body.classList.add("logged-in");
         $("authSection").classList.add("hide");
         $("logoutBtn").style.display = "block";
         $("heroText").innerHTML = "<h2>Welcome Back, Seeker</h2><p>Continue your sacred dialogue below.</p>";
