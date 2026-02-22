@@ -241,7 +241,7 @@ body.logged-in .chat-shell {
       selectedId = p.id;
       $("chatTitle").innerText = p.name;
       $("welcomeMessage").style.display = "none";
-      $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
+      $("chatLog").innerHTML = "";
       const oldAvatar = $("chatAvatar");
 
 let name = (p.name || "").toLowerCase();
@@ -270,14 +270,18 @@ avatar.style.display = "block";
         $("chatInput").disabled = false;
         $("sendBtn").disabled = false;
       }
-      setTimeout(() => loadHistory(), 100);
+      if (getToken()) {
+  loadHistory(p.id);
+} else {
+  appendMessage("them", `I am ${p.name}. What seeks your heart?`);
+}
     }
 
-    async function loadHistory() {
-      if (!getToken() || !selectedId) return;
+    async function loadHistory(characterId) {
+      if (!characterId) return;
       try {
-        const res = await fetch(`${API_BASE}/api/chat/history?characterId=${selectedId}`, {
-          headers: authHeaders()
+        const res = await fetch(`${API_BASE}/api/chat/history?characterId=${characterId}`, {
+  headers: getToken() ? authHeaders() : {}
         });
         if (!res.ok) {
   alert("Error loading chat history (" + res.status + ")");
