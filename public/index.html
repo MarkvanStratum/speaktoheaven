@@ -242,28 +242,9 @@ body.logged-in .chat-shell {
       $("chatTitle").innerText = p.name;
       $("welcomeMessage").style.display = "none";
       $("chatLog").innerHTML = "";
-      const oldAvatar = $("chatAvatar");
+      const avatar = $("chatAvatar");
 
-let name = (p.name || "").toLowerCase();
-let img = "god.jpg";
-
-if (name.includes("jesus")) img = "jesus.jpg";
-else if (name.includes("holy")) img = "holyspirit.jpg";
-else if (name.includes("mary")) img = "mary.jpg";
-else if (name.includes("moses")) img = "moses.jpg";
-else if (name.includes("eve")) img = "eve.jpg";
-else if (name.includes("david")) img = "david.jpg";
-else if (name.includes("isaiah")) img = "isaiah.jpg";
-else if (name.includes("daniel")) img = "daniel.jpg";
-else if (name.includes("john")) img = "john.jpg";
-else if (name.includes("paul")) img = "paul.jpg";
-else if (name.includes("peter")) img = "peter.jpg";
-else if (name.includes("god")) img = "god.jpg";
-
-// 🔴 RECREATE IMAGE ELEMENT (fixes bug completely)
-const avatar = $("chatAvatar");
-
-avatar.src = "/img/" + img + "?t=" + Date.now();
+avatar.src = p.image + "?t=" + Date.now();
 avatar.style.display = "block";
       
       if (getToken() || !guestTeaserUsed) {
