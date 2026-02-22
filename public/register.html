@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Begin Pilgrimage — Speak to Heaven</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-heaven: #fdfcfb;
+      --marble: #ffffff;
+      --gold-divine: #c5a059;
+      --blue-saint: #2c3e50;
+      --text-main: #33302c;
+      --text-muted: #8a8276;
+      --border-holy: rgba(197, 160, 89, 0.25);
+      --radius: 12px;
+      --divine-shadow: 0 15px 50px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text-main);
+      background-color: var(--bg-heaven);
+      background-image: radial-gradient(circle at 50% 0%, rgba(197,160,89,0.12), transparent 50%);
+      font-family: "EB Garamond", serif;
+      font-size: 19px;
+      line-height: 1.7;
+    }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 20px 80px; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-holy);
+      margin-bottom: 40px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 15px; }
+    .logo {
+      width: 50px; height: 50px;
+      background: white;
+      border: 1.5px solid var(--gold-divine);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: "Cinzel", serif;
+      color: var(--gold-divine);
+      font-size: 22px;
+    }
+
+    h1 { margin: 0; font-family: "Cinzel", serif; color: var(--blue-saint); font-size: 26px; }
+
+    .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; }
+    @media (max-width: 950px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--marble);
+      border: 1px solid var(--border-holy);
+      border-radius: var(--radius);
+      box-shadow: var(--divine-shadow);
+      overflow: hidden;
+    }
+
+    .proclamation { padding: 35px 30px; }
+    .proclamation h2 {
+      font-family: "Cinzel", serif;
+      color: var(--blue-saint);
+      font-size: 36px;
+      margin: 0 0 10px;
+    }
+    .proclamation p { margin: 0; color: var(--text-muted); font-style: italic; }
+
+    .pane { padding: 30px; }
+
+    .tabs { display: flex; background: #f8f8f8; cursor: pointer; }
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      font-family: "Cinzel", serif;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .tab.active {
+      background: white;
+      color: var(--gold-divine);
+      border-top: 2px solid var(--gold-divine);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 14px;
+      border-radius: 8px;
+      border: 1px solid #e0ddd5;
+      font-family: inherit;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-family: "Cinzel", serif;
+      cursor: pointer;
+      border: 1px solid var(--gold-divine);
+      background: transparent;
+      color: var(--gold-divine);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      width: 100%;
+    }
+    .btn.primary { background: var(--gold-divine); color: white; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .msg {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: none;
+      font-size: 16px;
+    }
+    .msg.error { display: block; border-color: rgba(220, 0, 0, 0.25); background: rgba(220, 0, 0, 0.06); color: #8b0000; }
+    .msg.ok { display: block; border-color: rgba(0, 140, 70, 0.25); background: rgba(0, 140, 70, 0.06); color: #0a5a2a; }
+
+    .small {
+      margin-top: 14px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    .small a { color: var(--gold-divine); text-decoration: none; }
+
+    .top-actions { display: flex; gap: 10px; }
+    .top-actions .btn { width: auto; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">†</div>
+        <h1>Speak to Heaven</h1>
+      </div>
+      <div class="top-actions">
+        <button class="btn" type="button" id="goHomeBtn">Back</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="proclamation">
+          <h2>Enter the Sanctuary</h2>
+          <p>Create an account to continue your divine consultations and offerings.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active" id="tabRegister">New Account</div>
+          <div class="tab" id="tabLogin">Sign In</div>
+        </div>
+
+        <div class="pane">
+          <div id="msgBox" class="msg"></div>
+
+          <!-- REGISTER -->
+          <div id="registerPane">
+            <input id="regEmail" type="email" placeholder="Email Address" autocomplete="email" />
+            <input id="regPassword" type="password" placeholder="Choose Password" autocomplete="new-password" />
+            <input id="regPassword2" type="password" placeholder="Confirm Password" autocomplete="new-password" />
+            <button class="btn primary" id="registerBtn">Begin Pilgrimage</button>
+
+            <div class="small">
+              By creating an account, you can continue your conversation and purchase offerings.
+            </div>
+          </div>
+
+          <!-- LOGIN -->
+          <div id="loginPane" style="display:none;">
+            <input id="loginEmail" type="email" placeholder="Email Address" autocomplete="email" />
+            <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
+            <button class="btn primary" id="loginBtn">Enter the Sanctuary</button>
+
+            <div class="small">
+              New here? <a href="#" id="goRegisterLink">Create an account</a>
+            </div>
+          </div>
+
+          <div class="small" style="margin-top:18px;">
+            After sign-in, you’ll be redirected to <strong>/pricing.html</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function setToken(t) { localStorage.setItem("jwt", t); }
+    function showMsg(type, text) {
+      const box = $("msgBox");
+      box.className = "msg " + (type === "ok" ? "ok" : "error");
+      box.textContent = text;
+      box.style.display = "block";
+    }
+    function clearMsg() {
+      const box = $("msgBox");
+      box.style.display = "none";
+      box.textContent = "";
+      box.className = "msg";
+    }
+    function setBusy(busy) {
+      $("registerBtn").disabled = busy;
+      $("loginBtn").disabled = busy;
+    }
+
+    // Tabs
+    $("tabRegister").onclick = () => {
+      clearMsg();
+      $("tabRegister").classList.add("active");
+      $("tabLogin").classList.remove("active");
+      $("registerPane").style.display = "block";
+      $("loginPane").style.display = "none";
+    };
+    $("tabLogin").onclick = () => {
+      clearMsg();
+      $("tabLogin").classList.add("active");
+      $("tabRegister").classList.remove("active");
+      $("registerPane").style.display = "none";
+      $("loginPane").style.display = "block";
+    };
+    $("goRegisterLink").onclick = (e) => {
+      e.preventDefault();
+      $("tabRegister").click();
+    };
+
+    // Back
+    $("goHomeBtn").onclick = () => { window.location.href = "/"; };
+
+    // REGISTER + AUTO-LOGIN + REDIRECT
+    $("registerBtn").onclick = async () => {
+      clearMsg();
+
+      const email = $("regEmail").value.trim();
+      const password = $("regPassword").value;
+      const password2 = $("regPassword2").value;
+
+      if (!email || !password || !password2) {
+        showMsg("error", "Email and password are required.");
+        return;
+      }
+      if (password.length < 6) {
+        showMsg("error", "Password must be at least 6 characters.");
+        return;
+      }
+      if (password !== password2) {
+        showMsg("error", "Passwords do not match.");
+        return;
+      }
+
+      setBusy(true);
+      try {
+        // 1) Register
+        const r1 = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const d1 = await r1.json().catch(() => ({}));
+        if (!r1.ok) {
+          showMsg("error", d1.error || "Registration failed.");
+          setBusy(false);
+          return;
+        }
+
+        // 2) Auto-login (gets JWT from your server)
+        const r2 = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const d2 = await r2.json().catch(() => ({}));
+        if (!r2.ok || !d2.token) {
+          // Registration succeeded, but login failed — still recoverable:
+          showMsg("ok", "Account created. Please sign in.");
+          $("tabLogin").click();
+          $("loginEmail").value = email;
+          setBusy(false);
+          return;
+        }
+
+        setToken(d2.token);
+        showMsg("ok", "Account created. Entering the sanctuary…");
+
+        // 3) Redirect to pricing
+        setTimeout(() => {
+          window.location.href = "/pricing.html";
+        }, 650);
+
+      } catch (err) {
+        console.error(err);
+        showMsg("error", "Server error. Please try again.");
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    // LOGIN + REDIRECT
+    $("loginBtn").onclick = async () => {
+      clearMsg();
+      const email = $("loginEmail").value.trim();
+      const password = $("loginPassword").value;
+
+      if (!email || !password) {
+        showMsg("error", "Email and password are required.");
+        return;
+      }
+
+      setBusy(true);
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.token) {
+          showMsg("error", data.error || "Invalid credentials.");
+          setBusy(false);
+          return;
+        }
+
+        setToken(data.token);
+        showMsg("ok", "Welcome back. Redirecting…");
+
+        setTimeout(() => {
+          window.location.href = "/pricing.html";
+        }, 500);
+
+      } catch (err) {
+        console.error(err);
+        showMsg("error", "Server error. Please try again.");
+      } finally {
+        setBusy(false);
+      }
+    };
+  </script>
+</body>
+</html>

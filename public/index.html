@@ -221,9 +221,9 @@
     $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
 
     // NEW: Offerings buttons go to pricing
-    $("buyGodBtn").onclick = () => { window.location.href = "/pricing.html"; };
-    $("buyAllBtn").onclick = () => { window.location.href = "/pricing.html"; };
-    $("buyLifeBtn").onclick = () => { window.location.href = "/pricing.html"; };
+    $("buyGodBtn").onclick = () => { window.location.href = "/register.html"; };
+    $("buyAllBtn").onclick = () => { window.location.href = "/register.html"; };
+    $("buyLifeBtn").onclick = () => { window.location.href = "/register.html"; };
 
     async function loadProfiles() {
       const res = await fetch("/api/profiles");
