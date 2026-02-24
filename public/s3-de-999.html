@@ -34,11 +34,11 @@
     .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
     .h2{font-size:18px;font-weight:800;margin-bottom:14px}
     .label{font-weight:700;font-size:13px;margin:4px 0}
-    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px}
+    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px;font-size:16px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .form-grid-1{display:grid;grid-template-columns:1fr;gap:10px}
     @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
-    .btn{width:100%;border:none;border-radius:12px;padding:12px;font-weight:900;background:#16a34a;color:#fff;cursor:pointer}
+    .btn{width:100%;border:none;border-radius:12px;padding:14px;font-weight:900;background:#16a34a;color:#fff;cursor:pointer;font-size:16px}
     .btn.muted{background:#f1f4f8;color:#20324d;border:1px solid var(--line)}
     .logos{display:flex;gap:10px;margin-top:12px}
     .logos img{height:20px}
@@ -46,13 +46,8 @@
     .step[aria-hidden="false"]{display:block}
     .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
     .err[aria-hidden="false"]{display:block}
-    .hero{display:none;margin-bottom:10px;padding:10px;border:1px solid var(--line);border-radius:12px;gap:10px;align-items:center}
-    .hero img{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);object-fit:cover}
-    .hero .title{font-weight:900;font-size:14px}
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
-    .delivery{display:flex;gap:12px;align-items:center}
-    .delivery img{width:52px;height:52px;border-radius:8px;border:1px solid var(--line)}
     .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
     .tiny{font-size:12px;color:var(--muted)}
 
@@ -63,33 +58,10 @@
       z-index:9999;
     }
     .loading-overlay[aria-hidden="false"]{display:flex}
-
-    .loading-box{
-      width:min(92vw,460px);
-      background:#fff;
-      border:1px solid #e6edf5;
-      border-radius:14px;
-      padding:24px;
-      text-align:center;
-      box-shadow:0 6px 18px rgba(0,0,0,0.06);
-    }
-    .loading-title{
-      font-size:20px;font-weight:800;margin-bottom:18px
-    }
-    .progress-wrap{
-      width:100%;height:12px;background:#ecf1f8;
-      border-radius:999px;overflow:hidden
-    }
-    .progress-bar{
-      width:0%;height:100%;
-      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
-      animation:loadingBar 2.2s ease-in-out infinite
-    }
-    @keyframes loadingBar{
-      0%{width:0%}
-      60%{width:80%}
-      100%{width:100%}
-    }
+    .loading-box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;border-radius:14px;padding:24px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .progress-wrap{width:100%;height:12px;background:#ecf1f8;border-radius:999px;overflow:hidden;margin:15px 0}
+    .progress-bar{width:0%;height:100%;background:linear-gradient(90deg,#7aa3ff,#2dd4bf);animation:loadingBar 2.2s ease-in-out infinite}
+    @keyframes loadingBar{0%{width:0%} 60%{width:80%} 100%{width:100%}}
   </style>
 </head>
 
@@ -106,7 +78,7 @@
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
-        <div class="h2">1. Angaben</div>
+        <div class="h2">1. Ihre Angaben</div>
 
         <div class="form-grid">
           <div>
@@ -134,14 +106,14 @@
           </div>
         </div>
 
-        <div class="form-grid">
-          <div style="grid-column:1/-1">
-            <div class="label">E-Mail</div>
-            <input id="emailInput" class="input" placeholder="beispiel@mail.de">
+        <div class="form-grid-1">
+          <div>
+            <div class="label">E-Mail (Wichtig für Ihren Zugang)</div>
+            <input id="emailInput" type="email" class="input" placeholder="beispiel@mail.de" required>
           </div>
         </div>
 
-        <button id="nextBtn" class="btn" style="margin-top:15px">Weiter</button>
+        <button id="nextBtn" class="btn" style="margin-top:15px">Weiter zur Zahlung</button>
 
         <div class="logos">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
@@ -150,19 +122,27 @@
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Zahlung</div>
+        <div class="h2">2. Sicher bezahlen</div>
 
         <div class="form-grid-1">
-          <div><div id="card-number" class="el"></div></div>
+          <div class="label">Kartennummer</div>
+          <div id="card-number" class="el"></div>
+          
           <div class="form-grid">
-            <div><div id="card-expiry" class="el"></div></div>
-            <div><div id="card-cvc" class="el"></div></div>
+            <div>
+              <div class="label">Ablaufdatum</div>
+              <div id="card-expiry" class="el"></div>
+            </div>
+            <div>
+              <div class="label">CVC</div>
+              <div id="card-cvc" class="el"></div>
+            </div>
           </div>
         </div>
 
         <div id="err" class="err"></div>
 
-        <div style="display:flex;gap:10px;margin-top:12px">
+        <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Zurück</button>
           <button id="payNow" class="btn" style="width:60%">Sicher bezahlen (€49,95)</button>
         </div>
@@ -171,23 +151,21 @@
 
     <aside>
       <div class="widget">
-        <div style="font-weight:800;margin-top:12px">Bestellübersicht</div>
-        <div style="display:flex;justify-content:space-between; margin-top:10px">
-          <span>Lifetime Access</span><span>$49.95</span>
+        <div style="font-weight:800;margin-bottom:10px">Bestellübersicht</div>
+        <div style="display:flex;justify-content:space-between">
+          <span>Lebenslanger Zugang</span><span>$49.95</span>
         </div>
-        <hr style="border:0; border-top:1px solid var(--line); margin:10px 0">
-        <div style="display:flex;justify-content:space-between; font-weight:900">
-          <span>Gesamt</span><span>$49.95</span>
+        <hr style="border:0; border-top:1px solid var(--line); margin:15px 0">
+        <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
+          <span>Gesamtbetrag</span><span>$49.95</span>
         </div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800">VERTRAUENSWÜRDIGER SHOP</div>
-        <div class="trust">
-          <div><b>99%</b><div class="tiny">Zufrieden</div></div>
-          <div><b>Sicher</b><div class="tiny">SSL</div></div>
-          <div><b>Lifetime</b><div class="tiny">Zugang</div></div>
-        </div>
+        <div style="font-weight:800; margin-bottom:10px">IHRE VORTEILE</div>
+        <div class="tiny" style="margin-bottom:5px">✓ Einmalzahlung - Kein Abo</div>
+        <div class="tiny" style="margin-bottom:5px">✓ Unbegrenzte Nachrichten</div>
+        <div class="tiny">✓ Alle Propheten freigeschaltet</div>
       </div>
     </aside>
   </div>
@@ -195,16 +173,16 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div class="loading-title">Zahlung wird verarbeitet…</div>
+    <div style="font-size:20px;font-weight:800">Verarbeitung erfolgt...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="tiny" style="margin-top:10px">Bitte warten Sie einen Moment…</p>
+    <p class="tiny">Bitte schließen Sie dieses Fenster nicht.</p>
   </div>
 </div>
 
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-  // New Stripe Account Publishable Key
+  // Use your live key
   const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
   
   const elements = stripe.elements();
@@ -216,6 +194,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const step2 = document.getElementById('step2');
   
   document.getElementById('nextBtn').onclick = () => {
+    const email = document.getElementById('emailInput').value;
+    if(!email || !email.includes('@')) {
+        alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+        return;
+    }
     step1.setAttribute('aria-hidden', 'true');
     step2.setAttribute('aria-hidden', 'false');
   };
@@ -229,34 +212,33 @@ window.addEventListener('DOMContentLoaded', () => {
     const payBtn = document.getElementById('payNow');
     const err = document.getElementById('err');
     const overlay = document.getElementById("loading-overlay");
+    const email = document.getElementById('emailInput').value;
 
     payBtn.disabled = true;
     err.setAttribute("aria-hidden", "true");
     overlay.setAttribute("aria-hidden", "false");
 
     try {
-      const token = localStorage.getItem('token');
-      
-      // 1. Request Payment Intent from your new server file for the 'lifetime' plan ($49.95)
-      const response = await fetch("/api/create-payment-intent", {
+      // 1. Call the NEW endpoint in payments.js
+      const response = await fetch("/api/create-landing-payment", {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ plan: 'lifetime' }) // Triggers the 4995 amount in server.js
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            plan: 'lifetime',
+            email: email 
+        })
       });
 
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      // 2. Confirm the payment using Stripe.js
+      // 2. Stripe Confirmation
       const result = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
           card: cn,
           billing_details: {
             name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-            email: document.getElementById('emailInput').value,
+            email: email,
             address: {
               line1: document.getElementById('billingStreet').value,
               city: document.getElementById('billingCity').value,
@@ -270,8 +252,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (result.error) throw result.error;
 
       if (result.paymentIntent.status === 'succeeded') {
-        // Redirect on success
-        window.location.href = '/chat?status=success';
+        window.location.href = '/chat?status=success&email=' + encodeURIComponent(email);
       }
 
     } catch(e) {
