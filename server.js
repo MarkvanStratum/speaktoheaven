@@ -222,7 +222,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // NEW: Custom Payment Intent Endpoint
-app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
+app.post("/api/create-payment-intent", async (req, res) => {
     try {
         const { plan } = req.body;
         const email = req.user.email; 
