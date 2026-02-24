@@ -254,13 +254,13 @@ app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-// STRIPE CHECKOUT (ONE-TIME PAYMENTS)
+// STRIPE CHECKOUT - ALL ENDPOINTS
 //--------------------------------------------
 
+// KEEP THIS: Original endpoint for your existing payment page
 app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 	try {
 		const { plan } = req.body;
-
 		let amount;
 		let name;
 
@@ -281,17 +281,15 @@ app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 			payment_method_types: ["card"],
 			mode: "payment",
 			customer_email: req.user.email,
-			line_items: [
-				{
-					price_data: {
-						currency: "usd",
-						product_data: { name },
-						unit_amount: amount
-					},
-					quantity: 1
-				}
-			],
-			metadata: { plan },
+			line_items: [{
+				price_data: {
+					currency: "usd",
+					product_data: { name },
+					unit_amount: amount
+				},
+				quantity: 1
+			}],
+			metadata: { plan, userId: String(req.user.id) },
 			success_url: "https://your-site.com/success",
 			cancel_url: "https://your-site.com/cancel"
 		});
@@ -301,6 +299,22 @@ app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 		console.error("Checkout error:", err);
 		res.status(500).json({ error: "Stripe error" });
 	}
+});
+
+// ADD THESE: New dedicated endpoints for your affiliate landing pages
+app.post("/api/pay/god", authenticateToken, async (req, res) => {
+    // Logic same as above, but hardcoded to 2995 and plan: "god"
+    // ... (rest of code for $29.95)
+});
+
+app.post("/api/pay/all", authenticateToken, async (req, res) => {
+    // Logic same as above, but hardcoded to 3595 and plan: "all"
+    // ... (rest of code for $35.95)
+});
+
+app.post("/api/pay/lifetime", authenticateToken, async (req, res) => {
+    // Logic same as above, but hardcoded to 4995 and plan: "lifetime"
+    // ... (rest of code for $49.95)
 });
 
 //--------------------------------------------
