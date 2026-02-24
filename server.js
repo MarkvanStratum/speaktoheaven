@@ -308,18 +308,17 @@ app.post("/api/create-checkout", , async (req, res) => {
 //--------------------------------------------
 
 // 1. ENDPOINT FOR $49.95 (LIFETIME)
-app.post("/api/pay/49-95", , async (req, res) => {
+app.post("/api/pay/49-95", async (req, res) => {
     try {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: 4995, // $49.95
             currency: "usd",
             automatic_payment_methods: { enabled: true },
             metadata: { 
-                metadata: { 
-    plan: "lifetime", 
-    userId: req.user ? String(req.user.id) : null,
-    email: req.body.email || (req.user ? req.user.email : null)
-}
+                plan: "lifetime", 
+                userId: (req.user && req.user.id) ? String(req.user.id) : null,
+                email: req.body.email || (req.user ? req.user.email : null)
+            }
         });
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (e) {
@@ -334,11 +333,11 @@ app.post("/api/pay/35-95", , async (req, res) => {
             amount: 3595, // $35.95
             currency: "usd",
             automatic_payment_methods: { enabled: true },
-            metadata: { 
-                plan: "all", 
-                userId: String(req.user.id),
-                email: req.user.email 
-            }
+           metadata: { 
+    plan: "all", 
+    userId: (req.user && req.user.id) ? String(req.user.id) : null,
+    email: req.body.email || (req.user ? req.user.email : null)
+}
         });
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (e) {
@@ -354,10 +353,10 @@ app.post("/api/pay/25-95", , async (req, res) => {
             currency: "usd",
             automatic_payment_methods: { enabled: true },
             metadata: { 
-                plan: "god", 
-                userId: String(req.user.id),
-                email: req.user.email 
-            }
+    plan: "god", 
+    userId: (req.user && req.user.id) ? String(req.user.id) : null,
+    email: req.body.email || (req.user ? req.user.email : null)
+}
         });
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (e) {
