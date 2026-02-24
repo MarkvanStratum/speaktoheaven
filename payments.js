@@ -3,29 +3,29 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const handleCreateIntent = async (req, res) => {
     try {
-        const { plan, email } = req.body;
+        const { plan, email } = req.body || {};
 
-        // Validation: We MUST have an email for guest checkout
         if (!email) {
             return res.status(400).json({ error: "Email is required for checkout." });
         }
 
+        // New Plan Names matching your requested prices
         const amounts = {
-            'god': 2995,
-            'all': 3595,
-            'lifetime': 4995
+            '2995': 2995, // $29.95
+            '3595': 3595, // $35.95
+            '4995': 4995  // $49.95
         };
 
+        // Looks up the price based on the new names
         const amount = amounts[plan] || 4995;
 
-        // Create the Stripe Intent
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency: "usd",
             metadata: { 
                 plan: plan, 
                 email: email.toLowerCase().trim(),
-                isGuest: "true" // A flag to tell our webhook this came from a landing page
+                isGuest: "true"
             },
         });
 
