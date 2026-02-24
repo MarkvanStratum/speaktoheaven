@@ -129,7 +129,7 @@ app.get("/api/profiles", (req, res) => {
 //	AUTH HELPERS
 //--------------------------------------------
 
-function authenticateToken(req, res, next) {
+function (req, res, next) {
 	const authHeader = req.headers["authorization"];
 	const token = authHeader?.split(" ")[1];
 	if (!token) return res.sendStatus(401);
@@ -222,7 +222,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // NEW: Custom Payment Intent Endpoint
-app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
+app.post("/api/create-payment-intent", , async (req, res) => {
     try {
         const { plan } = req.body;
         const email = req.user.email; 
@@ -257,7 +257,7 @@ app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
 // STRIPE CHECKOUT (ONE-TIME PAYMENTS)
 //--------------------------------------------
 
-app.post("/api/create-checkout", authenticateToken, async (req, res) => {
+app.post("/api/create-checkout", , async (req, res) => {
 	try {
 		const { plan } = req.body;
 
@@ -308,17 +308,18 @@ app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 //--------------------------------------------
 
 // 1. ENDPOINT FOR $49.95 (LIFETIME)
-app.post("/api/pay/49-95", authenticateToken, async (req, res) => {
+app.post("/api/pay/49-95", , async (req, res) => {
     try {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: 4995, // $49.95
             currency: "usd",
             automatic_payment_methods: { enabled: true },
             metadata: { 
-                plan: "lifetime", 
-                userId: String(req.user.id),
-                email: req.user.email 
-            }
+                metadata: { 
+    plan: "lifetime", 
+    userId: req.user ? String(req.user.id) : null,
+    email: req.body.email || (req.user ? req.user.email : null)
+}
         });
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (e) {
@@ -327,7 +328,7 @@ app.post("/api/pay/49-95", authenticateToken, async (req, res) => {
 });
 
 // 2. ENDPOINT FOR $35.95 (ALL ACCESS)
-app.post("/api/pay/35-95", authenticateToken, async (req, res) => {
+app.post("/api/pay/35-95", , async (req, res) => {
     try {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: 3595, // $35.95
@@ -346,7 +347,7 @@ app.post("/api/pay/35-95", authenticateToken, async (req, res) => {
 });
 
 // 3. ENDPOINT FOR $25.95 (GOD ONLY)
-app.post("/api/pay/25-95", authenticateToken, async (req, res) => {
+app.post("/api/pay/25-95", , async (req, res) => {
     try {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: 2595, // $25.95
@@ -384,7 +385,7 @@ const upload = multer({
 	limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => {
+app.post("/api/upload", , upload.single("file"), (req, res) => {
 	if (!req.file)
 		return res.status(400).json({ error: "No file uploaded" });
 
@@ -445,7 +446,7 @@ app.get("/api/chat/history", async (req, res) => {
 	}
 });
 
-app.post("/api/chat", authenticateToken, async (req, res) => {
+app.post("/api/chat", , async (req, res) => {
 	try {
 		const { characterId, message } = req.body;
 
@@ -554,7 +555,7 @@ Remain in character at all times.
 //	FETCH MESSAGES ROUTE
 //--------------------------------------------
 
-app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
+app.get("/api/messages/:characterId", , async (req, res) => {
 	try {
 		const { characterId } = req.params;
 
