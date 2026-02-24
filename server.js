@@ -254,13 +254,13 @@ app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
 });
 
 //--------------------------------------------
-// STRIPE CHECKOUT - ALL ENDPOINTS
+// STRIPE CHECKOUT (ONE-TIME PAYMENTS)
 //--------------------------------------------
 
-// KEEP THIS: Original endpoint for your existing payment page
 app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 	try {
 		const { plan } = req.body;
+
 		let amount;
 		let name;
 
@@ -281,15 +281,17 @@ app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 			payment_method_types: ["card"],
 			mode: "payment",
 			customer_email: req.user.email,
-			line_items: [{
-				price_data: {
-					currency: "usd",
-					product_data: { name },
-					unit_amount: amount
-				},
-				quantity: 1
-			}],
-			metadata: { plan, userId: String(req.user.id) },
+			line_items: [
+				{
+					price_data: {
+						currency: "usd",
+						product_data: { name },
+						unit_amount: amount
+					},
+					quantity: 1
+				}
+			],
+			metadata: { plan },
 			success_url: "https://your-site.com/success",
 			cancel_url: "https://your-site.com/cancel"
 		});
@@ -301,20 +303,65 @@ app.post("/api/create-checkout", authenticateToken, async (req, res) => {
 	}
 });
 
-// ADD THESE: New dedicated endpoints for your affiliate landing pages
-app.post("/api/pay/god", authenticateToken, async (req, res) => {
-    // Logic same as above, but hardcoded to 2995 and plan: "god"
-    // ... (rest of code for $29.95)
+//--------------------------------------------
+//	LANDING PAGE DYNAMIC PAYMENT INTENTS
+//--------------------------------------------
+
+// 1. ENDPOINT FOR $49.95 (LIFETIME)
+app.post("/api/pay/49-95", authenticateToken, async (req, res) => {
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: 4995, // $49.95
+            currency: "usd",
+            automatic_payment_methods: { enabled: true },
+            metadata: { 
+                plan: "lifetime", 
+                userId: String(req.user.id),
+                email: req.user.email 
+            }
+        });
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
-app.post("/api/pay/all", authenticateToken, async (req, res) => {
-    // Logic same as above, but hardcoded to 3595 and plan: "all"
-    // ... (rest of code for $35.95)
+// 2. ENDPOINT FOR $35.95 (ALL ACCESS)
+app.post("/api/pay/35-95", authenticateToken, async (req, res) => {
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: 3595, // $35.95
+            currency: "usd",
+            automatic_payment_methods: { enabled: true },
+            metadata: { 
+                plan: "all", 
+                userId: String(req.user.id),
+                email: req.user.email 
+            }
+        });
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
-app.post("/api/pay/lifetime", authenticateToken, async (req, res) => {
-    // Logic same as above, but hardcoded to 4995 and plan: "lifetime"
-    // ... (rest of code for $49.95)
+// 3. ENDPOINT FOR $25.95 (GOD ONLY)
+app.post("/api/pay/25-95", authenticateToken, async (req, res) => {
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: 2595, // $25.95
+            currency: "usd",
+            automatic_payment_methods: { enabled: true },
+            metadata: { 
+                plan: "god", 
+                userId: String(req.user.id),
+                email: req.user.email 
+            }
+        });
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 //--------------------------------------------
