@@ -212,42 +212,38 @@ window.addEventListener('DOMContentLoaded', () => {
     const payBtn = document.getElementById('payNow');
     const err = document.getElementById('err');
     const overlay = document.getElementById("loading-overlay");
-    const email = document.getElementById('emailInput').value;
+    const emailValue = document.getElementById('emailInput').value;
 
     payBtn.disabled = true;
     err.setAttribute("aria-hidden", "true");
     overlay.setAttribute("aria-hidden", "false");
 
     try {
-      // 1. Call the NEW endpoint in payments.js
+      const pm = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cn, 
+        billing_details: {
+          name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+          email: emailValue
+        }
+      });
+
+      if (pm.error) throw pm.error;
+
       const response = await fetch("/api/create-landing-payment", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            plan: 'lifetime',
-            email: email 
+            paymentMethodId: pm.paymentMethod.id,
+            email: emailValue,
+            plan: '4995'
         })
       });
 
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      // 2. Stripe Confirmation
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: cn,
-          billing_details: {
-            name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-            email: email,
-            address: {
-              line1: document.getElementById('billingStreet').value,
-              city: document.getElementById('billingCity').value,
-              postal_code: document.getElementById('billingPostcode').value,
-              country: 'DE'
-            }
-          }
-        }
-      });
+      const result = await stripe.confirmCardPayment(data.clientSecret);
 
       if (result.error) throw result.error;
 
