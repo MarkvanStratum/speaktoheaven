@@ -221,38 +221,42 @@ app.post("/api/login", async (req, res) => {
 	}
 });
 
-// NEW: Custom Payment Intent Endpoint
+// 1. Remove 'authenticateToken' from this route to allow guests
 app.post("/api/create-payment-intent", async (req, res) => {
     try {
-        const { plan } = req.body;
-        const email = req.user.email; 
+        const { plan, email: guestEmail } = req.body; // Get email from the form
         
+        // 2. Use the logged-in user's email, OR the guest email from the form
+        const email = req.user ? req.user.email : guestEmail;
+        const userId = req.user ? req.user.id : null;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
         const amounts = {
-            'god': 2995,      // $29.95
-            'all': 3595,      // $35.95
-            'lifetime': 4995  // $49.95
+            'god': 2995,
+            'all': 3595,
+            'lifetime': 4995
         };
 
-        if (!amounts[plan]) return res.status(400).json({ error: "Invalid plan selected" });
+        const amount = amounts[plan];
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amounts[plan],
+            amount,
             currency: "usd",
-            automatic_payment_methods: { enabled: true },
             metadata: { 
-                plan: plan, 
-                email: email,
-                userId: String(req.user.id)
-            }
+                plan, 
+                email, // Essential for the webhook to find the user
+                userId 
+            },
         });
 
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (e) {
-        console.error("Stripe Intent Error:", e);
         res.status(500).json({ error: e.message });
     }
 });
-
 //--------------------------------------------
 // STRIPE CHECKOUT (ONE-TIME PAYMENTS)
 //--------------------------------------------
