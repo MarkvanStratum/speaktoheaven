@@ -16,6 +16,7 @@ import { fileURLToPath } from "url";
 import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
+import { handleCreateIntent } from "./payments.js";
 
 
 //--------------------------------------------
@@ -33,6 +34,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 app.use(cors());
+
+app.post("/api/create-landing-payment", handleCreateIntent);
 
 // Stripe webhook handling
 app.use((req, res, next) => {
