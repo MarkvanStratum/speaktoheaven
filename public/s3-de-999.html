@@ -66,6 +66,11 @@
 </head>
 
 <body>
+
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
 <div class="safe">SSL-gesicherte Zahlung</div>
 
 <div class="wrap">
@@ -245,7 +250,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (result.error) throw result.error;
 
       if (result.paymentIntent.status === 'succeeded') {
-        window.location.href = '/chat?status=success&email=' + encodeURIComponent(emailValue);
+       window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
       }
 
     } catch(e) {
