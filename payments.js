@@ -3,35 +3,33 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const handleCreateIntent = async (req, res) => {
     try {
-        const { plan, email } = req.body || {};
+        // We grab paymentMethodId and email just like your working server
+        const { paymentMethodId, email, plan } = req.body;
 
         if (!email) {
-            return res.status(400).json({ error: "Email is required for checkout." });
+            return res.status(400).json({ error: "Email is required" });
         }
 
-        // New Plan Names matching your requested prices
-        const amounts = {
-            '2995': 2995, // $29.95
-            '3595': 3595, // $35.95
-            '4995': 4995  // $49.95
-        };
-
-        // Looks up the price based on the new names
+        // Map the plan names to the prices
+        const amounts = { '2995': 2995, '3595': 3595, '4995': 4995 };
         const amount = amounts[plan] || 4995;
 
+        // This is the EXACT logic from your working server file
         const paymentIntent = await stripe.paymentIntents.create({
-            amount,
+            amount: amount,
             currency: "usd",
+            payment_method: paymentMethodId,
+            confirm: true,
+            automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
             metadata: { 
                 plan: plan, 
-                email: email.toLowerCase().trim(),
-                isGuest: "true"
+                email: email.toLowerCase().trim() 
             },
         });
 
         res.json({ clientSecret: paymentIntent.client_secret });
-    } catch (e) {
-        console.error("Payment Error:", e.message);
-        res.status(500).json({ error: e.message });
+    } catch (err) {
+        console.error("❌ Stripe Error:", err.message);
+        res.status(500).json({ error: err.message });
     }
 };
