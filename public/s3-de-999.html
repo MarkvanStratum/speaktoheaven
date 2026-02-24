@@ -219,36 +219,33 @@ window.addEventListener('DOMContentLoaded', () => {
     overlay.setAttribute("aria-hidden", "false");
 
     try {
-      const pm = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cn, 
-        billing_details: {
-          name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-          email: emailValue
-        }
-      });
-
-      if (pm.error) throw pm.error;
-
+      
       const response = await fetch("/api/create-landing-payment", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            paymentMethodId: pm.paymentMethod.id,
-            email: emailValue,
-            plan: '4995'
-        })
+    email: emailValue,
+    plan: '4995'
+})
       });
 
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      const result = await stripe.confirmCardPayment(data.clientSecret);
+      const result = await stripe.confirmCardPayment(data.clientSecret, {
+  payment_method: {
+    card: cn,
+    billing_details: {
+      name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+      email: emailValue
+    }
+  }
+});
 
       if (result.error) throw result.error;
 
       if (result.paymentIntent.status === 'succeeded') {
-        window.location.href = '/chat?status=success&email=' + encodeURIComponent(email);
+        window.location.href = '/chat?status=success&email=' + encodeURIComponent(emailValue);
       }
 
     } catch(e) {
