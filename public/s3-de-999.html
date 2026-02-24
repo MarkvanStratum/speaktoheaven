@@ -214,10 +214,11 @@ window.addEventListener('DOMContentLoaded', () => {
       if (pm.error) throw pm.error;
 
       // Hitting the new endpoint for $49.95
-      const r = await fetch("/api/pay/49-95", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
-      });
+const r = await fetch("/api/pay/49-95", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email: document.getElementById('emailInput').value })
+});
 
       const d = await r.json();
       const c = await stripe.confirmCardPayment(d.clientSecret, { payment_method: pm.paymentMethod.id });
