@@ -4,7 +4,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const handleCreateIntent = async (req, res) => {
     try {
         // We grab paymentMethodId and email just like your working server
-        const { paymentMethodId, email, plan } = req.body;
+        const { email, plan } = req.body;
 
         if (!email) {
             return res.status(400).json({ error: "Email is required" });
@@ -16,16 +16,13 @@ export const handleCreateIntent = async (req, res) => {
 
         // This is the EXACT logic from your working server file
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,
-            currency: "usd",
-            payment_method: paymentMethodId,
-            confirm: true,
-            automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
-            metadata: { 
-                plan: plan, 
-                email: email.toLowerCase().trim() 
-            },
-        });
+    amount: amount,
+    currency: "usd",
+    metadata: { 
+        plan: plan, 
+        email: email.toLowerCase().trim() 
+    },
+});
 
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (err) {

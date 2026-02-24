@@ -35,16 +35,20 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 app.use(cors());
 
-app.post("/api/create-landing-payment", handleCreateIntent);
+// JSON parser FIRST
+app.use(express.json());
 
-// Stripe webhook handling
+// Only special-case webhook AFTER
 app.use((req, res, next) => {
 	if (req.originalUrl === "/webhook") {
 		express.raw({ type: "application/json" })(req, res, next);
 	} else {
-		express.json()(req, res, next);
+		next();
 	}
 });
+
+// THEN routes
+app.post("/api/create-landing-payment", handleCreateIntent);
 
 //--------------------------------------------
 //	DATABASE
