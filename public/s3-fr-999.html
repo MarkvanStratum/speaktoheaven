@@ -251,7 +251,10 @@ window.addEventListener('DOMContentLoaded', () => {
       if (data.error) throw new Error(data.error);
 
       // 3. Final Confirmation
-      const result = await stripe.confirmCardPayment(data.clientSecret);
+      // 3. Confirm (Passing the specific payment method ID)
+      const result = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: resultPM.paymentMethod.id
+      });
 
       if (result.error) throw result.error;
 
