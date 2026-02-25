@@ -49,6 +49,8 @@ app.use((req, res, next) => {
 
 // THEN routes
 app.post("/api/create-landing-payment", handleCreateIntent);
+app.post("/api/create-au-payment-3595", handleCreateIntent);
+app.post("/api/create-payment-2995", handleCreateIntent);
 
 //--------------------------------------------
 //	DATABASE
