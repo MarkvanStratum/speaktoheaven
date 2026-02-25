@@ -236,7 +236,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       if (resultPM.error) throw resultPM.error;
 
-      // 2. Send to your payments.js endpoint
+     // 2. Send to your server endpoint
       const response = await fetch("/api/create-landing-payment", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
