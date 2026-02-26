@@ -69,6 +69,35 @@
 
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
+</script>
+
 <div class="safe">SSL պաշտպանված վճարում</div>
 
 <div class="wrap">
@@ -236,24 +265,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (result.error) throw result.error;
             if (result.paymentIntent.status === 'succeeded') {
-    // 1. Get the current tracking info (SubID, etc.) from your URL
-    const currentQuery = window.location.search; 
-    
-    // 2. Build the final URL by attaching that tracking info
-    const finalUrl = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7" + currentQuery;
 
-    // 3. Trigger GoAffPro before leaving
-    if (window.goaffproTrackConversion) {
-        window.goaffproTrackConversion({
-            order_id: result.paymentIntent.id,
-            order_total: 29.95
-        });
-    }
+    // Get all current URL parameters
+    const qs = new URLSearchParams(window.location.search);
 
-    // 4. Redirect with the tracking info attached
+    // Get affiliate ref (GoAffPro)
+    let ref = qs.get("ref") || localStorage.getItem("gaf_ref");
+
+    // Get click ID (affiliate network / Bemob)
+    let clickId =
+        qs.get("sub_id") ||
+        qs.get("click_id") ||
+        qs.get("cid") ||
+        localStorage.getItem("aff_sub_id");
+
+    // Make sure ref is in the URL
+    if (ref) qs.set("ref", ref);
+
+    // Make sure click ID is in the URL
+    if (clickId) qs.set("sub_id", clickId);
+
+    // Build final URL
+    const finalUrl =
+        "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+        qs.toString();
+
+    // Redirect after short delay
     setTimeout(() => {
         window.location.href = finalUrl;
-    }, 500);
+    }, 1500);
+}
 }
         } catch(e) {
             errDiv.textContent = e.message;
