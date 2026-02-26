@@ -82,6 +82,35 @@
 
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
+  }
+})();
+</script>
+
 <div class="safe">Paiement sécurisé par SSL</div>
 
 <div class="wrap">
@@ -316,7 +345,28 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (result.error) throw result.error;
             if (result.paymentIntent.status === 'succeeded') {
-                window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?";
+                const qs2 = new URLSearchParams(window.location.search);
+
+// Get affiliate ref
+let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
+
+// Get click id
+let clickId =
+  qs2.get("sub_id") ||
+  qs2.get("click_id") ||
+  qs2.get("cid") ||
+  localStorage.getItem("aff_sub_id");
+
+// Ensure they exist
+if (ref) qs2.set("ref", ref);
+if (clickId) qs2.set("sub_id", clickId);
+
+// Build final URL
+const finalUrl =
+  "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" +
+  qs2.toString();
+
+window.location.href = finalUrl;
             }
         } catch(e) {
             err.textContent = e.message;
