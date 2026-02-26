@@ -236,8 +236,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (result.error) throw result.error;
             if (result.paymentIntent.status === 'succeeded') {
-                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
-            }
+    // 1. Get the current tracking info (SubID, etc.) from your URL
+    const currentQuery = window.location.search; 
+    
+    // 2. Build the final URL by attaching that tracking info
+    const finalUrl = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7" + currentQuery;
+
+    // 3. Trigger GoAffPro before leaving
+    if (window.goaffproTrackConversion) {
+        window.goaffproTrackConversion({
+            order_id: result.paymentIntent.id,
+            order_total: 29.95
+        });
+    }
+
+    // 4. Redirect with the tracking info attached
+    setTimeout(() => {
+        window.location.href = finalUrl;
+    }, 500);
+}
         } catch(e) {
             errDiv.textContent = e.message;
             errDiv.setAttribute('aria-hidden', 'false');
