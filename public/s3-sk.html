@@ -94,7 +94,6 @@
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
-        
         <div id="hero">
           <img id="heroImg" src="" alt="">
           <div>
@@ -104,102 +103,55 @@
         </div>
 
         <div class="h2">1. Vaše údaje</div>
-
         <div class="form-grid">
-          <div>
-            <div class="label">Meno</div>
-            <input id="firstName" class="input" placeholder="Meno">
-          </div>
-          <div>
-            <div class="label">Priezvisko</div>
-            <input id="lastName" class="input" placeholder="Priezvisko">
-          </div>
+          <div><div class="label">Meno</div><input id="firstName" class="input" placeholder="Meno"></div>
+          <div><div class="label">Priezvisko</div><input id="lastName" class="input" placeholder="Priezvisko"></div>
         </div>
-
         <div class="form-grid">
-          <div style="grid-column:1/-1">
-            <div class="label">Adresa</div>
-            <input id="billingStreet" class="input" placeholder="Ulica, číslo domu">
-          </div>
-          <div>
-            <div class="label">PSČ</div>
-            <input id="billingPostcode" class="input" placeholder="PSČ">
-          </div>
-          <div>
-            <div class="label">Mesto</div>
-            <input id="billingCity" class="input" placeholder="Mesto">
-          </div>
+          <div style="grid-column:1/-1"><div class="label">Adresa</div><input id="billingStreet" class="input" placeholder="Ulica, číslo"></div>
+          <div><div class="label">PSČ</div><input id="billingPostcode" class="input" placeholder="PSČ"></div>
+          <div><div class="label">Mesto</div><input id="billingCity" class="input" placeholder="Mesto"></div>
         </div>
-
         <div class="form-grid-1">
-          <div>
-            <div class="label">E-mailová adresa (nutná pre prístup)</div>
-            <input id="emailInput" type="email" class="input" placeholder="email@priklad.sk">
-          </div>
-          <div>
-            <div class="label">Telefónne číslo</div>
-            <input id="phoneNumber" class="input" placeholder="Telefón">
-          </div>
+          <div><div class="label">E-mail</div><input id="emailInput" type="email" class="input" placeholder="email@priklad.sk"></div>
+          <div><div class="label">Telefón</div><input id="phoneNumber" class="input" placeholder="Telefón"></div>
         </div>
-
-        <button id="nextBtn" class="btn" style="margin-top:15px">Pokračovať k platbe</button>
-
-        <div class="logos">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-        </div>
+        <button id="nextBtn" class="btn" style="margin-top:15px">Pokračovať</button>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Bezpečná platba</div>
         <div class="form-grid-1">
-          <div class="label">Číslo karty</div>
-          <div id="card-number" class="el"></div>
+          <div class="label">Číslo karty</div><div id="card-number" class="el"></div>
           <div class="form-grid">
-            <div>
-              <div class="label">Platnosť do</div>
-              <div id="card-expiry" class="el"></div>
-            </div>
-            <div>
-              <div class="label">CVC</div>
-              <div id="card-cvc" class="el"></div>
-            </div>
+            <div><div class="label">Platnosť</div><div id="card-expiry" class="el"></div></div>
+            <div><div class="label">CVC</div><div id="card-cvc" class="el"></div></div>
           </div>
         </div>
         <div id="err" class="err"></div>
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Späť</button>
-          <button id="payNow" class="btn" style="width:60%">Zaplatiť bezpečne (29,95 €)</button>
+          <button id="payNow" class="btn" style="width:60%">Zaplatiť (2,00 €)</button>
         </div>
       </section>
     </div>
 
     <aside>
       <div class="widget">
-        <div style="text-align:center;font-weight:800;margin-bottom:5px">Čo hovoria naši zákazníci</div>
+        <div style="text-align:center;font-weight:800;margin-bottom:5px">Zákazníci o nás</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center;font-size:13px;color:var(--muted)">Môj produkt dorazil včera. Rýchle dodanie a skvelý servis!</p>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">Rýchle dodanie a skvelý servis!</p>
       </div>
-
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Zhrnutie objednávky</div>
+        <div style="font-weight:800;margin-bottom:10px">Zhrnutie</div>
         <div style="display:flex;justify-content:space-between; align-items:center;">
-          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;margin-right:10px;object-fit:cover">
-          <span id="summaryTitle">Doživotný prístup</span><span>29,95 €</span>
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;object-fit:cover">
+          <span id="summaryTitle">Doživotný prístup</span><span>2,00 €</span>
         </div>
-        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
+        <hr style="border:0; border-top:1px dashed var(--line); margin:15px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Celkom</span><span>29,95 €</span>
-        </div>
-      </div>
-
-      <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Dôveryhodný obchod</div>
-        <div class="trust">
-          <div class="box"><div>😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Spokojnosť</div></div>
-          <div class="box"><div>🔒</div><div style="font-weight:800;font-size:11px">Bezpečné</div><div class="tiny" style="font-size:9px">SSL</div></div>
-          <div class="box"><div>🛡️</div><div style="font-weight:800;font-size:11px">10k€</div><div class="tiny" style="font-size:9px">Ochrana</div></div>
+          <span>Celkom</span><span>2,00 €</span>
         </div>
       </div>
     </aside>
@@ -210,7 +162,6 @@
   <div class="loading-box">
     <div style="font-size:20px;font-weight:800">Spracováva sa...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="tiny">Prosím, nezatvárajte toto okno.</p>
   </div>
 </div>
 
@@ -220,6 +171,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const qs = new URLSearchParams(window.location.search);
     const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
 
+    // --- Dynamic Prefills ---
     const hero = document.getElementById('hero');
     const heroImg = document.getElementById('heroImg');
     const heroTitle = document.getElementById('heroTitle');
@@ -230,14 +182,11 @@ window.addEventListener('DOMContentLoaded', () => {
         hero.style.display = 'flex';
         if (qs.get('sub1')) {
             const t = decode(qs.get('sub1'));
-            heroTitle.innerText = t;
-            summaryTitle.innerText = t;
+            heroTitle.innerText = t; summaryTitle.innerText = t;
         }
         if (qs.get('sub2')) {
             const imgUrl = decode(qs.get('sub2'));
-            heroImg.src = imgUrl;
-            sidebarImg.src = imgUrl;
-            sidebarImg.style.display = 'block';
+            heroImg.src = imgUrl; sidebarImg.src = imgUrl; sidebarImg.style.display = 'block';
         }
     }
 
@@ -249,6 +198,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
     if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
 
+    // --- Stripe Fixed Logic ---
     const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
     const elements = stripe.elements();
     const cn = elements.create('cardNumber'); cn.mount('#card-number');
@@ -256,10 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
 
     document.getElementById('nextBtn').onclick = () => {
-        if(!document.getElementById('emailInput').value.includes('@')) {
-            alert("Prosím, zadajte platnú e-mailovú adresu.");
-            return;
-        }
+        if(!document.getElementById('emailInput').value.includes('@')) { alert("Zadajte e-mail."); return; }
         document.getElementById('step1').setAttribute('aria-hidden', 'true');
         document.getElementById('step2').setAttribute('aria-hidden', 'false');
     };
@@ -279,28 +226,24 @@ window.addEventListener('DOMContentLoaded', () => {
         overlay.setAttribute("aria-hidden", "false");
 
         try {
-            const pm = await stripe.createPaymentMethod({
+            // 1. Create PaymentMethod
+            const pmResult = await stripe.createPaymentMethod({
                 type: "card",
                 card: cn,
                 billing_details: {
                     name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
                     email: document.getElementById('emailInput').value,
-                    phone: document.getElementById('phoneNumber').value,
-                    address: {
-                        line1: document.getElementById('billingStreet').value,
-                        city: document.getElementById('billingCity').value,
-                        postal_code: document.getElementById('billingPostcode').value,
-                        country: 'SK'
-                    }
                 }
             });
-            if (pm.error) throw pm.error;
 
+            if (pmResult.error) throw pmResult.error;
+
+            // 2. Fetch Client Secret from server
             const response = await fetch("/api/create-payment-2995", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    paymentMethodId: pm.paymentMethod.id,
+                    paymentMethodId: pmResult.paymentMethod.id,
                     email: document.getElementById('emailInput').value,
                     plan: '2995'
                 })
@@ -309,7 +252,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.error) throw new Error(data.error);
 
-            const result = await stripe.confirmCardPayment(data.clientSecret);
+            // 3. CONFIRM (Crucial Fix: Pass the payment_method ID)
+            const result = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: pmResult.paymentMethod.id
+            });
+
             if (result.error) throw result.error;
 
             if (result.paymentIntent.status === 'succeeded') {
