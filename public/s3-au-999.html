@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Secure Checkout - Lifetime Access</title>
+  <title>Secure Checkout - Special Access</title>
   <meta name="referrer" content="no-referrer">
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -48,8 +48,22 @@
     .err[aria-hidden="false"]{display:block}
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
-    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
+    
+    /* Trust badges & Hero Logic */
+    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
     .tiny{font-size:12px;color:var(--muted)}
+    
+    #hero {
+      display: none; margin-bottom: 24px; padding: 12px;
+      border: 1px solid var(--line); border-radius: 12px;
+      gap: 12px; align-items: center;
+    }
+    #heroImg {
+      width: 54px; height: 54px; border-radius: 10px;
+      border: 1px solid var(--line); object-fit: cover;
+    }
+    #heroTitle { font-weight: 900; font-size: 16px; line-height: 1.2; }
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -68,7 +82,8 @@
 <body>
 
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-<div class="safe">SSL Secured Payment</div>
+
+<div class="safe">SSL Secured Checkout</div>
 
 <div class="wrap">
   <div class="page-title">
@@ -80,7 +95,16 @@
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
-        <div class="h2">1. Your Details</div>
+        
+        <div id="hero">
+          <img id="heroImg" src="" alt="">
+          <div>
+            <div id="heroTitle"></div>
+            <div class="tiny">Product from your link</div>
+          </div>
+        </div>
+
+        <div class="h2">1. Your Information</div>
 
         <div class="form-grid">
           <div>
@@ -96,7 +120,7 @@
         <div class="form-grid">
           <div style="grid-column:1/-1">
             <div class="label">Address</div>
-            <input id="billingStreet" class="input" placeholder="Street Address">
+            <input id="billingStreet" class="input" placeholder="Street Name, No.">
           </div>
           <div>
             <div class="label">Postcode</div>
@@ -110,8 +134,12 @@
 
         <div class="form-grid-1">
           <div>
-            <div class="label">Email (Important for your access)</div>
-            <input id="emailInput" type="email" class="input" placeholder="example@mail.com.au" required>
+            <div class="label">Email Address</div>
+            <input id="emailInput" type="email" class="input" placeholder="email@example.com">
+          </div>
+          <div>
+            <div class="label">Phone Number</div>
+            <input id="phoneNumber" class="input" placeholder="Phone Number">
           </div>
         </div>
 
@@ -125,11 +153,9 @@
 
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Secure Payment</div>
-
         <div class="form-grid-1">
           <div class="label">Card Number</div>
           <div id="card-number" class="el"></div>
-          
           <div class="form-grid">
             <div>
               <div class="label">Expiry Date</div>
@@ -141,33 +167,41 @@
             </div>
           </div>
         </div>
-
         <div id="err" class="err"></div>
-
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Back</button>
-          <button id="payNow" class="btn" style="width:60%">Pay Now ($ 9.95)</button>
+          <button id="payNow" class="btn" style="width:60%">Pay Securely ($9.95)</button>
         </div>
       </section>
     </div>
 
     <aside>
       <div class="widget">
+        <div style="text-align:center;font-weight:800;margin-bottom:5px">What our customers say</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">Fast shipping and great service. Arrived exactly as described!</p>
+      </div>
+
+      <div class="widget">
         <div style="font-weight:800;margin-bottom:10px">Order Summary</div>
-        <div style="display:flex;justify-content:space-between">
-          <span>Lifetime Access</span><span>$ 9.95</span>
+        <div style="display:flex;justify-content:space-between; align-items:center;">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;margin-right:10px;object-fit:cover">
+          <span id="summaryTitle">Lifetime Access</span><span>$9.95</span>
         </div>
-        <hr style="border:0; border-top:1px solid var(--line); margin:15px 0">
+        <hr style="border:0; border-top:1px dashed var(--line); margin:15px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Total</span><span>$ 9.95</span>
+          <span>Total</span><span>$9.95</span>
         </div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800; margin-bottom:10px">YOUR BENEFITS</div>
-        <div class="tiny" style="margin-bottom:5px">✓ One-time payment - No subscription</div>
-        <div class="tiny" style="margin-bottom:5px">✓ Unlimited messages</div>
-        <div class="tiny">✓ All prophets unlocked</div>
+        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Trusted Store</div>
+        <div class="trust">
+          <div class="box"><div>😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Happy</div></div>
+          <div class="box"><div>🔒</div><div style="font-weight:800;font-size:11px">Secure</div><div class="tiny" style="font-size:9px">SSL</div></div>
+          <div class="box"><div>🛡️</div><div style="font-weight:800;font-size:11px">$10k</div><div class="tiny" style="font-size:9px">Protection</div></div>
+        </div>
       </div>
     </aside>
   </div>
@@ -184,92 +218,116 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-  const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
-  
-  const elements = stripe.elements();
-  const cn = elements.create('cardNumber'); cn.mount('#card-number');
-  const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
-  const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
+    const qs = new URLSearchParams(window.location.search);
+    const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
 
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  
-  document.getElementById('nextBtn').onclick = () => {
-    const email = document.getElementById('emailInput').value;
-    if(!email || !email.includes('@')) {
-        alert("Please enter a valid email address.");
-        return;
-    }
-    step1.setAttribute('aria-hidden', 'true');
-    step2.setAttribute('aria-hidden', 'false');
-  };
+    // --- Dynamic Content & Prefill ---
+    const hero = document.getElementById('hero');
+    const heroImg = document.getElementById('heroImg');
+    const heroTitle = document.getElementById('heroTitle');
+    const sidebarImg = document.getElementById('sidebarImg');
+    const summaryTitle = document.getElementById('summaryTitle');
 
-  document.getElementById('backBtn').onclick = () => {
-    step2.setAttribute('aria-hidden', 'true');
-    step1.setAttribute('aria-hidden', 'false');
-  };
-
-  document.getElementById('payNow').onclick = async () => {
-    const payBtn = document.getElementById('payNow');
-    const err = document.getElementById('err');
-    const overlay = document.getElementById("loading-overlay");
-    const emailValue = document.getElementById('emailInput').value;
-
-    payBtn.disabled = true;
-    err.setAttribute("aria-hidden", "true");
-    overlay.setAttribute("aria-hidden", "false");
-
-    try {
-      // 1. Create Payment Method (Localized for Australia)
-      const resultPM = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cn, 
-        billing_details: {
-          name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-          email: emailValue,
-          address: {
-            line1: document.getElementById('billingStreet').value,
-            city: document.getElementById('billingCity').value,
-            postal_code: document.getElementById('billingPostcode').value,
-            country: 'AU' 
-          }
+    if (qs.get('sub1') || qs.get('sub2')) {
+        hero.style.display = 'flex';
+        if (qs.get('sub1')) {
+            const t = decode(qs.get('sub1'));
+            heroTitle.innerText = t;
+            summaryTitle.innerText = t;
         }
-      });
-
-      if (resultPM.error) throw resultPM.error;
-
-     // 2. Send to your server endpoint
-      const response = await fetch("/api/create-landing-payment", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            paymentMethodId: resultPM.paymentMethod.id,
-            email: emailValue,
-            plan: '4995'
-        })
-      });
-
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-
-      // 3. Final Confirmation with PaymentMethod ID
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: resultPM.paymentMethod.id
-      });
-
-      if (result.error) throw result.error;
-
-      if (result.paymentIntent.status === 'succeeded') {
-        window.location.href = '/chat?status=success&email=' + encodeURIComponent(emailValue);
-      }
-
-    } catch(e) {
-      err.textContent = e.message;
-      err.setAttribute('aria-hidden', 'false');
-      payBtn.disabled = false;
-      overlay.setAttribute("aria-hidden", "true");
+        if (qs.get('sub2')) {
+            const imgUrl = decode(qs.get('sub2'));
+            heroImg.src = imgUrl;
+            sidebarImg.src = imgUrl;
+            sidebarImg.style.display = 'block';
+        }
     }
-  };
+
+    if (qs.get('sub3')) document.getElementById('firstName').value = decode(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decode(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decode(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decode(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decode(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
+
+    // --- Stripe Logic ---
+    const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
+    const elements = stripe.elements();
+    const cn = elements.create('cardNumber'); cn.mount('#card-number');
+    const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
+    const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
+
+    document.getElementById('nextBtn').onclick = () => {
+        if(!document.getElementById('emailInput').value.includes('@')) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+        document.getElementById('step1').setAttribute('aria-hidden', 'true');
+        document.getElementById('step2').setAttribute('aria-hidden', 'false');
+    };
+
+    document.getElementById('backBtn').onclick = () => {
+        document.getElementById('step2').setAttribute('aria-hidden', 'true');
+        document.getElementById('step1').setAttribute('aria-hidden', 'false');
+    };
+
+    document.getElementById('payNow').onclick = async () => {
+        const payBtn = document.getElementById('payNow');
+        const err = document.getElementById('err');
+        const overlay = document.getElementById("loading-overlay");
+        
+        payBtn.disabled = true;
+        err.setAttribute("aria-hidden", "true");
+        overlay.setAttribute("aria-hidden", "false");
+
+        try {
+            const pm = await stripe.createPaymentMethod({
+                type: "card",
+                card: cn,
+                billing_details: {
+                    name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+                    email: document.getElementById('emailInput').value,
+                    phone: document.getElementById('phoneNumber').value,
+                    address: {
+                        line1: document.getElementById('billingStreet').value,
+                        city: document.getElementById('billingCity').value,
+                        postal_code: document.getElementById('billingPostcode').value,
+                        country: 'AU'
+                    }
+                }
+            });
+            if (pm.error) throw pm.error;
+
+            // Using the requested $49.95 endpoint
+            const response = await fetch("/api/create-landing-payment", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    paymentMethodId: pm.paymentMethod.id,
+                    email: document.getElementById('emailInput').value,
+                    plan: '4995'
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+
+            const result = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: pm.paymentMethod.id
+            });
+
+            if (result.error) throw result.error;
+            if (result.paymentIntent.status === 'succeeded') {
+                window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
+            }
+        } catch(e) {
+            err.textContent = e.message;
+            err.setAttribute('aria-hidden', 'false');
+            payBtn.disabled = false;
+            overlay.setAttribute("aria-hidden", "true");
+        }
+    };
 });
 </script>
 </body>

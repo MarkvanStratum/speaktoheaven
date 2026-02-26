@@ -48,7 +48,21 @@
     .err[aria-hidden="false"]{display:block}
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
+    
+    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
     .tiny{font-size:12px;color:var(--muted)}
+
+    #hero {
+      display: none; margin-bottom: 24px; padding: 12px;
+      border: 1px solid var(--line); border-radius: 12px;
+      gap: 12px; align-items: center;
+    }
+    #heroImg {
+      width: 54px; height: 54px; border-radius: 10px;
+      border: 1px solid var(--line); object-fit: cover;
+    }
+    #heroTitle { font-weight: 900; font-size: 16px; line-height: 1.2; }
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -65,19 +79,31 @@
 </head>
 
 <body>
-<div class="safe">Zabezpečená platba cez SSL</div>
+
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+<div class="safe">Zabezpečená platba SSL</div>
 
 <div class="wrap">
   <div class="page-title">
-    Zabezpečená pokladňa 🔒
+    Zabezpečená platba 🔒
     <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 Recenzií)</span>
+    <span class="reviews">(2 777 recenzií)</span>
   </div>
 
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
-        <div class="h2">1. Vaše Údaje</div>
+        
+        <div id="hero">
+          <img id="heroImg" src="" alt="">
+          <div>
+            <div id="heroTitle"></div>
+            <div class="tiny">Produkt z vášho odkazu</div>
+          </div>
+        </div>
+
+        <div class="h2">1. Vaše údaje</div>
 
         <div class="form-grid">
           <div>
@@ -93,7 +119,7 @@
         <div class="form-grid">
           <div style="grid-column:1/-1">
             <div class="label">Adresa</div>
-            <input id="billingStreet" class="input" placeholder="Ulica a číslo domu">
+            <input id="billingStreet" class="input" placeholder="Ulica, číslo domu">
           </div>
           <div>
             <div class="label">PSČ</div>
@@ -107,8 +133,12 @@
 
         <div class="form-grid-1">
           <div>
-            <div class="label">E-mail (Dôležité pre váš prístup)</div>
-            <input id="emailInput" type="email" class="input" placeholder="priklad@mail.sk" required>
+            <div class="label">E-mailová adresa (nutná pre prístup)</div>
+            <input id="emailInput" type="email" class="input" placeholder="email@priklad.sk">
+          </div>
+          <div>
+            <div class="label">Telefónne číslo</div>
+            <input id="phoneNumber" class="input" placeholder="Telefón">
           </div>
         </div>
 
@@ -121,15 +151,13 @@
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Bezpečná Platba</div>
-
+        <div class="h2">2. Bezpečná platba</div>
         <div class="form-grid-1">
           <div class="label">Číslo karty</div>
           <div id="card-number" class="el"></div>
-          
           <div class="form-grid">
             <div>
-              <div class="label">Platnosť</div>
+              <div class="label">Platnosť do</div>
               <div id="card-expiry" class="el"></div>
             </div>
             <div>
@@ -138,33 +166,41 @@
             </div>
           </div>
         </div>
-
         <div id="err" class="err"></div>
-
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Späť</button>
-          <button id="payNow" class="btn" style="width:60%">Zaplatiť (2,00 €)</button>
+          <button id="payNow" class="btn" style="width:60%">Zaplatiť bezpečne (29,95 €)</button>
         </div>
       </section>
     </div>
 
     <aside>
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Súhrn objednávky</div>
-        <div style="display:flex;justify-content:space-between">
-          <span>Doživotný prístup</span><span>2,00 €</span>
+        <div style="text-align:center;font-weight:800;margin-bottom:5px">Čo hovoria naši zákazníci</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">Môj produkt dorazil včera. Rýchle dodanie a skvelý servis!</p>
+      </div>
+
+      <div class="widget">
+        <div style="font-weight:800;margin-bottom:10px">Zhrnutie objednávky</div>
+        <div style="display:flex;justify-content:space-between; align-items:center;">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;margin-right:10px;object-fit:cover">
+          <span id="summaryTitle">Doživotný prístup</span><span>29,95 €</span>
         </div>
-        <hr style="border:0; border-top:1px solid var(--line); margin:15px 0">
+        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Celkom</span><span>2,00 €</span>
+          <span>Celkom</span><span>29,95 €</span>
         </div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800; margin-bottom:10px">VAŠE VÝHODY</div>
-        <div class="tiny" style="margin-bottom:5px">✓ Jednorazová platba - Žiadne predplatné</div>
-        <div class="tiny" style="margin-bottom:5px">✓ Neobmedzené správy</div>
-        <div class="tiny">✓ Všetci proroci odomknutí</div>
+        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Dôveryhodný obchod</div>
+        <div class="trust">
+          <div class="box"><div>😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Spokojnosť</div></div>
+          <div class="box"><div>🔒</div><div style="font-weight:800;font-size:11px">Bezpečné</div><div class="tiny" style="font-size:9px">SSL</div></div>
+          <div class="box"><div>🛡️</div><div style="font-weight:800;font-size:11px">10k€</div><div class="tiny" style="font-size:9px">Ochrana</div></div>
+        </div>
       </div>
     </aside>
   </div>
@@ -172,7 +208,7 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div style="font-size:20px;font-weight:800">Spracovávam...</div>
+    <div style="font-size:20px;font-weight:800">Spracováva sa...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
     <p class="tiny">Prosím, nezatvárajte toto okno.</p>
   </div>
@@ -181,94 +217,111 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-  const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
-  
-  const elements = stripe.elements();
-  const cn = elements.create('cardNumber'); cn.mount('#card-number');
-  const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
-  const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
+    const qs = new URLSearchParams(window.location.search);
+    const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
 
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  
-  document.getElementById('nextBtn').onclick = () => {
-    const email = document.getElementById('emailInput').value;
-    if(!email || !email.includes('@')) {
-        alert("Prosím, zadajte platnú e-mailovú adresu.");
-        return;
-    }
-    step1.setAttribute('aria-hidden', 'true');
-    step2.setAttribute('aria-hidden', 'false');
-  };
+    const hero = document.getElementById('hero');
+    const heroImg = document.getElementById('heroImg');
+    const heroTitle = document.getElementById('heroTitle');
+    const sidebarImg = document.getElementById('sidebarImg');
+    const summaryTitle = document.getElementById('summaryTitle');
 
-  document.getElementById('backBtn').onclick = () => {
-    step2.setAttribute('aria-hidden', 'true');
-    step1.setAttribute('aria-hidden', 'false');
-  };
-
-  document.getElementById('payNow').onclick = async () => {
-    const payBtn = document.getElementById('payNow');
-    const err = document.getElementById('err');
-    const overlay = document.getElementById("loading-overlay");
-    const emailValue = document.getElementById('emailInput').value;
-
-    payBtn.disabled = true;
-    err.setAttribute("aria-hidden", "true");
-    overlay.setAttribute("aria-hidden", "false");
-
-    try {
-      // 1. Create Payment Method (Slovakia)
-      const resultPM = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cn, 
-        billing_details: {
-          name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-          email: emailValue,
-          address: {
-            line1: document.getElementById('billingStreet').value,
-            city: document.getElementById('billingCity').value,
-            postal_code: document.getElementById('billingPostcode').value,
-            country: 'SK' 
-          }
+    if (qs.get('sub1') || qs.get('sub2')) {
+        hero.style.display = 'flex';
+        if (qs.get('sub1')) {
+            const t = decode(qs.get('sub1'));
+            heroTitle.innerText = t;
+            summaryTitle.innerText = t;
         }
-      });
-
-      if (resultPM.error) throw resultPM.error;
-
-      // 2. Send to your 2995 endpoint
-      const response = await fetch("/api/create-payment-2995", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            paymentMethodId: resultPM.paymentMethod.id,
-            email: emailValue,
-            plan: '2995'
-        })
-      });
-
-      if (response.status === 404) throw new Error("Chyba: Serverový koncový bod nebol nájdený.");
-
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-
-      // 3. Confirm with ID
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: resultPM.paymentMethod.id
-      });
-
-      if (result.error) throw result.error;
-
-      if (result.paymentIntent.status === 'succeeded') {
-        window.location.href = '/chat?status=success&email=' + encodeURIComponent(emailValue);
-      }
-
-    } catch(e) {
-      err.textContent = e.message;
-      err.setAttribute('aria-hidden', 'false');
-      payBtn.disabled = false;
-      overlay.setAttribute("aria-hidden", "true");
+        if (qs.get('sub2')) {
+            const imgUrl = decode(qs.get('sub2'));
+            heroImg.src = imgUrl;
+            sidebarImg.src = imgUrl;
+            sidebarImg.style.display = 'block';
+        }
     }
-  };
+
+    if (qs.get('sub3')) document.getElementById('firstName').value = decode(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decode(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decode(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decode(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decode(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
+
+    const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
+    const elements = stripe.elements();
+    const cn = elements.create('cardNumber'); cn.mount('#card-number');
+    const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
+    const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
+
+    document.getElementById('nextBtn').onclick = () => {
+        if(!document.getElementById('emailInput').value.includes('@')) {
+            alert("Prosím, zadajte platnú e-mailovú adresu.");
+            return;
+        }
+        document.getElementById('step1').setAttribute('aria-hidden', 'true');
+        document.getElementById('step2').setAttribute('aria-hidden', 'false');
+    };
+
+    document.getElementById('backBtn').onclick = () => {
+        document.getElementById('step2').setAttribute('aria-hidden', 'true');
+        document.getElementById('step1').setAttribute('aria-hidden', 'false');
+    };
+
+    document.getElementById('payNow').onclick = async () => {
+        const payBtn = document.getElementById('payNow');
+        const err = document.getElementById('err');
+        const overlay = document.getElementById("loading-overlay");
+        
+        payBtn.disabled = true;
+        err.setAttribute("aria-hidden", "true");
+        overlay.setAttribute("aria-hidden", "false");
+
+        try {
+            const pm = await stripe.createPaymentMethod({
+                type: "card",
+                card: cn,
+                billing_details: {
+                    name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+                    email: document.getElementById('emailInput').value,
+                    phone: document.getElementById('phoneNumber').value,
+                    address: {
+                        line1: document.getElementById('billingStreet').value,
+                        city: document.getElementById('billingCity').value,
+                        postal_code: document.getElementById('billingPostcode').value,
+                        country: 'SK'
+                    }
+                }
+            });
+            if (pm.error) throw pm.error;
+
+            const response = await fetch("/api/create-payment-2995", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    paymentMethodId: pm.paymentMethod.id,
+                    email: document.getElementById('emailInput').value,
+                    plan: '2995'
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+
+            const result = await stripe.confirmCardPayment(data.clientSecret);
+            if (result.error) throw result.error;
+
+            if (result.paymentIntent.status === 'succeeded') {
+                window.location.href = "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
+            }
+        } catch(e) {
+            err.textContent = e.message;
+            err.setAttribute('aria-hidden', 'false');
+            payBtn.disabled = false;
+            overlay.setAttribute("aria-hidden", "true");
+        }
+    };
 });
 </script>
 </body>

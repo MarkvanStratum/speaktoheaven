@@ -46,10 +46,37 @@
     .step[aria-hidden="false"]{display:block}
     .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
     .err[aria-hidden="false"]{display:block}
+    
+    /* Hero Section */
+    #hero {
+      display: none;
+      margin-bottom: 24px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      gap: 12px;
+      align-items: center;
+    }
+    #heroImg {
+      width: 54px;
+      height: 54px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+    }
+    #heroTitle {
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    /* Sidebar Widgets */
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
-    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
     .tiny{font-size:12px;color:var(--muted)}
+    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
+    .delivery{display:flex;gap:12px;align-items:center}
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -67,8 +94,6 @@
 
 <body>
 
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
 <div class="safe">SSL-gesicherte Zahlung</div>
 
 <div class="wrap">
@@ -81,6 +106,15 @@
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
+        
+        <div id="hero">
+          <img id="heroImg" src="" alt="">
+          <div>
+            <div id="heroTitle"></div>
+            <div class="tiny">Produkt aus Ihrem Link</div>
+          </div>
+        </div>
+
         <div class="h2">1. Ihre Angaben</div>
 
         <div class="form-grid">
@@ -112,11 +146,28 @@
         <div class="form-grid-1">
           <div>
             <div class="label">E-Mail (Wichtig für Ihren Zugang)</div>
-            <input id="emailInput" type="email" class="input" placeholder="beispiel@mail.de" required>
+            <input id="emailInput" type="email" class="input" placeholder="beispiel@mail.de">
+          </div>
+          <div>
+            <div class="label">Land</div>
+            <input class="input" value="Deutschland" disabled>
           </div>
         </div>
 
-        <button id="nextBtn" class="btn" style="margin-top:15px">Weiter zur Zahlung</button>
+        <div class="form-grid">
+          <div>
+            <div class="label">Ländervorwahl</div>
+            <select id="phonePrefix" class="select">
+              <option value="+49">+49 — Deutschland</option>
+            </select>
+          </div>
+          <div>
+            <div class="label">Telefonnummer</div>
+            <input id="phoneNumber" class="input" placeholder="Telefonnummer">
+          </div>
+        </div>
+
+        <button id="nextBtn" class="btn" style="margin-top:15px">Weiter</button>
 
         <div class="logos">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
@@ -126,11 +177,9 @@
 
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Sicher bezahlen</div>
-
         <div class="form-grid-1">
           <div class="label">Kartennummer</div>
           <div id="card-number" class="el"></div>
-          
           <div class="form-grid">
             <div>
               <div class="label">Ablaufdatum</div>
@@ -142,9 +191,7 @@
             </div>
           </div>
         </div>
-
         <div id="err" class="err"></div>
-
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Zurück</button>
           <button id="payNow" class="btn" style="width:60%">Sicher bezahlen (€9,95)</button>
@@ -154,21 +201,38 @@
 
     <aside>
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Bestellübersicht</div>
-        <div style="display:flex;justify-content:space-between">
-          <span>Lebenslanger Zugang</span><span>€ 9,95</span>
+        <div style="text-align:center;font-weight:800;margin-bottom:5px">Das sagen unsere Kunden</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">Mein Produkt kam gestern an. Schneller Versand und super Service!</p>
+      </div>
+
+      <div class="widget">
+        <div class="delivery">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;object-fit:cover">
+          <div>
+            <div style="font-weight:800">Schnelle Lieferung</div>
+            <div class="tiny">3–5 Werktage</div>
+          </div>
+          <div style="margin-left:auto;font-weight:800">Kostenlos</div>
         </div>
-        <hr style="border:0; border-top:1px solid var(--line); margin:15px 0">
+        <div style="margin-top:14px;font-weight:800">Bestellübersicht</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0">
+          <span id="summaryTitle">Lebenslanger Zugang</span><span>€ 9,95</span>
+        </div>
+        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Gesamtbetrag</span><span>€ 9,95</span>
+          <span>Gesamt</span><span>€ 9,95</span>
         </div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800; margin-bottom:10px">IHRE VORTEILE</div>
-        <div class="tiny" style="margin-bottom:5px">✓ Einmalzahlung - Kein Abo</div>
-        <div class="tiny" style="margin-bottom:5px">✓ Unbegrenzte Nachrichten</div>
-        <div class="tiny">✓ Alle Propheten freigeschaltet</div>
+        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Vertrauenswürdiger Shop</div>
+        <div class="trust">
+          <div class="box"><div style="font-size:16px">😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Zufrieden</div></div>
+          <div class="box"><div style="font-size:16px">🔒</div><div style="font-weight:800;font-size:11px">Sicher</div><div class="tiny" style="font-size:9px">SSL</div></div>
+          <div class="box"><div style="font-size:16px">🛡️</div><div style="font-weight:800;font-size:11px">€10k</div><div class="tiny" style="font-size:9px">Schutz</div></div>
+        </div>
       </div>
     </aside>
   </div>
@@ -185,79 +249,102 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-  // Use your live key
-  const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
-  
-  const elements = stripe.elements();
-  const cn = elements.create('cardNumber'); cn.mount('#card-number');
-  const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
-  const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
+    const qs = new URLSearchParams(window.location.search);
+    const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
 
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  
-  document.getElementById('nextBtn').onclick = () => {
-    const email = document.getElementById('emailInput').value;
-    if(!email || !email.includes('@')) {
-        alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
-        return;
+    const hero = document.getElementById('hero');
+    const heroImg = document.getElementById('heroImg');
+    const heroTitle = document.getElementById('heroTitle');
+    const sidebarImg = document.getElementById('sidebarImg');
+    const summaryTitle = document.getElementById('summaryTitle');
+
+    if (qs.get('sub1') || qs.get('sub2')) {
+        hero.style.display = 'flex';
+        if (qs.get('sub1')) {
+            const t = decode(qs.get('sub1'));
+            heroTitle.innerText = t;
+            summaryTitle.innerText = t;
+        }
+        if (qs.get('sub2')) {
+            const imgUrl = decode(qs.get('sub2'));
+            heroImg.src = imgUrl;
+            sidebarImg.src = imgUrl;
+            sidebarImg.style.display = 'block';
+        }
     }
-    step1.setAttribute('aria-hidden', 'true');
-    step2.setAttribute('aria-hidden', 'false');
-  };
 
-  document.getElementById('backBtn').onclick = () => {
-    step2.setAttribute('aria-hidden', 'true');
-    step1.setAttribute('aria-hidden', 'false');
-  };
+    if (qs.get('sub3')) document.getElementById('firstName').value = decode(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decode(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decode(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decode(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decode(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
 
-  document.getElementById('payNow').onclick = async () => {
-    const payBtn = document.getElementById('payNow');
-    const err = document.getElementById('err');
-    const overlay = document.getElementById("loading-overlay");
-    const emailValue = document.getElementById('emailInput').value;
+    const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
+    const elements = stripe.elements();
+    const cn = elements.create('cardNumber'); cn.mount('#card-number');
+    const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
+    const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
 
-    payBtn.disabled = true;
-    err.setAttribute("aria-hidden", "true");
-    overlay.setAttribute("aria-hidden", "false");
+    document.getElementById('nextBtn').onclick = () => {
+        if(!document.getElementById('emailInput').value.includes('@')) {
+            alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+            return;
+        }
+        document.getElementById('step1').setAttribute('aria-hidden', 'true');
+        document.getElementById('step2').setAttribute('aria-hidden', 'false');
+    };
 
-    try {
-      
-      const response = await fetch("/api/create-landing-payment", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-    email: emailValue,
-    plan: '4995'
-})
-      });
+    document.getElementById('backBtn').onclick = () => {
+        document.getElementById('step2').setAttribute('aria-hidden', 'true');
+        document.getElementById('step1').setAttribute('aria-hidden', 'false');
+    };
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
+    document.getElementById('payNow').onclick = async () => {
+        const payBtn = document.getElementById('payNow');
+        const err = document.getElementById('err');
+        const overlay = document.getElementById("loading-overlay");
+        
+        payBtn.disabled = true;
+        err.setAttribute("aria-hidden", "true");
+        overlay.setAttribute("aria-hidden", "false");
 
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-  payment_method: {
-    card: cn,
-    billing_details: {
-      name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-      email: emailValue
-    }
-  }
-});
+        try {
+            const response = await fetch("/api/create-landing-payment", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email: document.getElementById('emailInput').value,
+                    plan: '4995' 
+                })
+            });
 
-      if (result.error) throw result.error;
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
 
-      if (result.paymentIntent.status === 'succeeded') {
-       window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
-      }
+            const result = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: {
+                    card: cn,
+                    billing_details: {
+                        name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+                        email: document.getElementById('emailInput').value,
+                        phone: document.getElementById('phoneNumber').value
+                    }
+                }
+            });
 
-    } catch(e) {
-      err.textContent = e.message;
-      err.setAttribute('aria-hidden', 'false');
-      payBtn.disabled = false;
-      overlay.setAttribute("aria-hidden", "true");
-    }
-  };
+            if (result.error) throw result.error;
+            if (result.paymentIntent.status === 'succeeded') {
+                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+            }
+        } catch(e) {
+            err.textContent = e.message;
+            err.setAttribute('aria-hidden', 'false');
+            payBtn.disabled = false;
+            overlay.setAttribute("aria-hidden", "true");
+        }
+    };
 });
 </script>
 </body>
