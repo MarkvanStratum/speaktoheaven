@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ապահով Վճարում</title>
+  <meta name="referrer" content="no-referrer">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    :root{
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
+    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
+
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+    .card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
+
+    .page-title{
+      font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px
+    }
+    .stars{color:#f6b80c}
+    .reviews{color:#5b6b82;font-size:13px}
+
+    .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
+    .sub{font-size:13px;color:#5b6b82}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+
+    .input,.select,.el{
+      width:100%;border:1px solid #cfd6e4;border-radius:10px;
+      padding:12px;font-size:15px;background:#fff
+    }
+
+    .btn{
+      width:100%;padding:12px;border:none;border-radius:12px;
+      background:#16a34a;color:#fff;font-weight:900;cursor:pointer
+    }
+
+    .logos{display:flex;gap:10px;margin-top:12px}
+    .logos img{height:20px}
+
+    .err{
+      display:none;background:#fff1f1;border:1px solid #f5bcbc;
+      padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a
+    }
+    .err[aria-hidden="false"]{display:block}
+
+    .widget{
+      background:#fff;border:1px solid var(--line);
+      padding:16px;border-radius:12px
+    }
+    .widget + .widget{margin-top:12px}
+
+    .order-row{
+      display:flex;justify-content:space-between;
+      padding:6px 0;border-top:1px dashed #e6eaf1
+    }
+
+    .delivery{
+      display:flex;gap:12px;padding:12px;
+      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff;
+      align-items:center;
+    }
+
+    .trust{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center
+    }
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
+
+    .step{display:none}
+    .step[aria-hidden="false"]{display:block}
+
+    .hero{
+      display:none;
+      margin-bottom:12px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      gap:10px;
+      align-items:center;
+    }
+    .hero img{
+      width:44px;height:44px;border-radius:10px;
+      border:1px solid var(--line);object-fit:cover
+    }
+
+    .loading-overlay{
+      position:fixed;inset:0;
+      background:rgba(246,249,252,.92);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{display:flex}
+
+    .loading-box{
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    .loading-title{
+      font-size:20px;font-weight:800;margin-bottom:18px
+    }
+    .progress-wrap{
+      width:100%;height:12px;background:#ecf1f8;
+      border-radius:999px;overflow:hidden
+    }
+    .progress-bar{
+      width:0%;height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite
+    }
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
+</script>
+
+<div class="safe">Անվտանգ SSL վճարում</div>
+
+<div class="wrap">
+  <div class="page-title">
+    Ապահով Վճարում 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 կարծիք)</span>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+
+      <section id="step1" class="step" aria-hidden="false">
+
+        <div id="hero" class="hero">
+          <img id="heroImg" alt="">
+          <div>
+            <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
+            <div class="sub">Ապրանքը ձեր հղումից</div>
+          </div>
+        </div>
+
+        <div class="h2">1. Տեղեկություն</div>
+
+        <div class="form-grid">
+          <input id="firstName" class="input" placeholder="Անուն">
+          <input id="lastName" class="input" placeholder="Ազգանուն">
+        </div>
+
+        <div class="form-grid">
+          <input id="billingStreet" class="input" placeholder="Հասցե" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="Փոստային դասիչ">
+          <input id="billingCity" class="input" placeholder="Քաղաք">
+        </div>
+
+        <div class="form-grid">
+          <input id="emailInput" class="input" type="email" placeholder="Էլ. փոստ">
+          <input class="input" value="Հայաստան" disabled>
+        </div>
+
+        <div class="form-grid">
+          <select id="phonePrefix" class="select">
+            <option value="+374">+374 — Հայաստան</option>
+          </select>
+          <input id="phoneNumber" class="input" placeholder="Հեռախոսահամար">
+        </div>
+
+        <input id="nameInput" type="hidden">
+        <button id="nextBtn" class="btn">Շարունակել</button>
+      </section>
+
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Վճարում</div>
+        <p class="sub">Քարտի տվյալները կոդավորված են և մշակվում են Stripe-ի կողմից:</p>
+
+        <div>
+          <div id="card-number" class="el"></div>
+          <div class="form-grid">
+            <div id="card-expiry" class="el"></div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div id="err" class="err" aria-hidden="true"></div>
+
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button id="backBtn" class="btn" style="width:40%">← Հետ</button>
+          <button id="payNow" class="btn" style="width:60%">Վճարել ապահով</button>
+        </div>
+      </section>
+
+    </div>
+
+    <aside>
+      <div class="widget">
+        <div style="text-align:center;font-weight:800">Ինչ են ասում մեր հաճախորդները</div>
+        <div style="text-align:center;font-weight:700;">Ֆենելլա Լարա</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center">Երեկ ստացա ապրանքը: Հիանալի փորձ էր:</p>
+      </div>
+
+      <div class="widget">
+        <div class="delivery">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
+          <div>
+            <div style="font-weight:800">Արագ առաքում</div>
+            <div class="sub">3–5 աշխատանքային օր</div>
+          </div>
+          <div style="margin-left:auto;font-weight:800">Անվճար</div>
+        </div>
+
+        <div style="margin-top:14px;font-weight:800">Պատվերի ամփոփում</div>
+        <div class="order-row"><span>Ընդամենը</span><span>800 Դր.</span></div>
+      </div>
+
+      <div class="widget">
+        <div style="font-weight:800;margin-bottom:10px">Ինչու վստահել մեզ</div>
+        <div class="trust">
+          <div class="box"><div>⭐</div><div>99% դրական</div></div>
+          <div class="box"><div>🔒</div><div>SSL պաշտպանված</div></div>
+          <div class="box"><div>🛡️</div><div>5,000,000 Դր.</div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+  <div class="loading-box">
+    <div class="loading-title">Վճարումը մշակվում է…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Խնդրում ենք սպասել, դա կարող է տևել մի քանի վայրկյան…</p>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+
+  const qs = new URLSearchParams(window.location.search);
+
+  try{
+    const sop1 = qs.get('sub1');
+    if (sop1){
+      const title = decodeURIComponent(sop1);
+
+      const pt = document.querySelector('.page-title');
+      if (pt){
+        for (const n of pt.childNodes){
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()){
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+
+      const d = document.querySelector('.delivery div div');
+      if (d) d.textContent = title;
+    }
+  }catch(e){}
+
+  const hero = document.getElementById('hero');
+  const heroImg = document.getElementById('heroImg');
+  const heroTitle = document.getElementById('heroTitle');
+  const sidebarImg = document.getElementById('sidebarImg');
+
+  const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
+
+  if (qs.get('sub1')) {
+    heroTitle.textContent = d(qs.get('sub1'));
+    hero.style.display = 'flex';
+  }
+
+  if (qs.get('sub2')) {
+    heroImg.src = d(qs.get('sub2'));
+    sidebarImg.src = d(qs.get('sub2'));
+    sidebarImg.style.display = 'block';
+    hero.style.display = 'flex';
+  }
+
+  const stripe = Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
+  const elements = stripe.elements();
+
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc = elements.create('cardCvc');
+
+  cardNumber.mount('#card-number');
+  cardExpiry.mount('#card-expiry');
+  cardCvc.mount('#card-cvc');
+
+  nextBtn.onclick = () => {
+    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
+  };
+
+  backBtn.onclick = () => {
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
+  };
+
+  payNow.onclick = async () => {
+    payNow.disabled = true;
+    err.setAttribute("aria-hidden","true");
+
+    const overlay = document.getElementById("loading-overlay");
+    overlay.setAttribute("aria-hidden","false");
+
+    const billingDetails = {
+      name: nameInput.value,
+      email: emailInput.value,
+      phone: phonePrefix.value + phoneNumber.value,
+      address: {
+        line1: billingStreet.value,
+        city: billingCity.value,
+        postal_code: billingPostcode.value,
+        country: "AM"
+      }
+    };
+
+    try {
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: billingDetails
+      });
+      if (pm.error) throw pm.error;
+
+      // Ensure your backend endpoint is configured to handle the AMD equivalent or the specific one-time price ID
+      const r = await fetch("/api/stripe/new/one-time-28-95",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          billingDetails
+        })
+      });
+
+      const d = await r.json();
+      const result = await stripe.confirmCardPayment(d.clientSecret, {
+        payment_method: pm.paymentMethod.id
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
+        throw new Error('Վճարումը չի ավարտվել');
+      }
+
+      window.location.href = "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
+
+    } catch(e){
+      err.textContent = e.message;
+      err.setAttribute("aria-hidden","false");
+      payNow.disabled = false;
+      overlay.setAttribute("aria-hidden","true");
+    }
+  };
+});
+</script>
+
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+</body>
+</html>
