@@ -272,17 +272,17 @@ window.addEventListener('DOMContentLoaded', () => {
     // Get affiliate ref (GoAffPro)
     let ref = qs.get("ref") || localStorage.getItem("gaf_ref");
 
-    // Get click ID (affiliate network / Bemob)
+    // Get click ID (affiliate network)
     let clickId =
         qs.get("sub_id") ||
         qs.get("click_id") ||
         qs.get("cid") ||
         localStorage.getItem("aff_sub_id");
 
-    // Make sure ref is in the URL
+    // Ensure ref exists
     if (ref) qs.set("ref", ref);
 
-    // Make sure click ID is in the URL
+    // Ensure click ID exists
     if (clickId) qs.set("sub_id", clickId);
 
     // Build final URL
@@ -290,11 +290,10 @@ window.addEventListener('DOMContentLoaded', () => {
         "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
         qs.toString();
 
-    // Redirect after short delay
+    // Redirect
     setTimeout(() => {
         window.location.href = finalUrl;
     }, 1500);
-}
 }
         } catch(e) {
             errDiv.textContent = e.message;
