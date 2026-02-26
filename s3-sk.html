@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Zabezpečená platba - Doživotný prístup</title>
+  <meta name="referrer" content="no-referrer">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    :root{
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
+      --green:#18a957;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
+    .page-title{font-size:28px;font-weight:900;display:flex;gap:8px;margin-bottom:14px}
+    .stars{color:#f6b80c;font-size:15px}
+    .reviews{color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
+    .h2{font-size:18px;font-weight:800;margin-bottom:14px}
+    .label{font-weight:700;font-size:13px;margin:4px 0}
+    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px;font-size:16px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-grid-1{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+    .btn{width:100%;border:none;border-radius:12px;padding:14px;font-weight:900;background:#16a34a;color:#fff;cursor:pointer;font-size:16px}
+    .btn.muted{background:#f1f4f8;color:#20324d;border:1px solid var(--line)}
+    .logos{display:flex;gap:10px;margin-top:12px}
+    .logos img{height:20px}
+    .step{display:none}
+    .step[aria-hidden="false"]{display:block}
+    .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
+    .err[aria-hidden="false"]{display:block}
+    .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+    .widget+.widget{margin-top:12px}
+    
+    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
+    .tiny{font-size:12px;color:var(--muted)}
+
+    #hero {
+      display: none; margin-bottom: 24px; padding: 12px;
+      border: 1px solid var(--line); border-radius: 12px;
+      gap: 12px; align-items: center;
+    }
+    #heroImg {
+      width: 54px; height: 54px; border-radius: 10px;
+      border: 1px solid var(--line); object-fit: cover;
+    }
+    #heroTitle { font-weight: 900; font-size: 16px; line-height: 1.2; }
+
+    .loading-overlay{
+      position:fixed;inset:0;
+      background:rgba(246,249,252,.92);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{display:flex}
+    .loading-box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;border-radius:14px;padding:24px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .progress-wrap{width:100%;height:12px;background:#ecf1f8;border-radius:999px;overflow:hidden;margin:15px 0}
+    .progress-bar{width:0%;height:100%;background:linear-gradient(90deg,#7aa3ff,#2dd4bf);animation:loadingBar 2.2s ease-in-out infinite}
+    @keyframes loadingBar{0%{width:0%} 60%{width:80%} 100%{width:100%}}
+  </style>
+</head>
+
+<body>
+
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+<div class="safe">Zabezpečená platba SSL</div>
+
+<div class="wrap">
+  <div class="page-title">
+    Zabezpečená platba 🔒
+    <span class="stars">★★★★★</span>
+    <span class="reviews">(2 777 recenzií)</span>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <section id="step1" class="step" aria-hidden="false">
+        
+        <div id="hero">
+          <img id="heroImg" src="" alt="">
+          <div>
+            <div id="heroTitle"></div>
+            <div class="tiny">Produkt z vášho odkazu</div>
+          </div>
+        </div>
+
+        <div class="h2">1. Vaše údaje</div>
+
+        <div class="form-grid">
+          <div>
+            <div class="label">Meno</div>
+            <input id="firstName" class="input" placeholder="Meno">
+          </div>
+          <div>
+            <div class="label">Priezvisko</div>
+            <input id="lastName" class="input" placeholder="Priezvisko">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div style="grid-column:1/-1">
+            <div class="label">Adresa</div>
+            <input id="billingStreet" class="input" placeholder="Ulica, číslo domu">
+          </div>
+          <div>
+            <div class="label">PSČ</div>
+            <input id="billingPostcode" class="input" placeholder="PSČ">
+          </div>
+          <div>
+            <div class="label">Mesto</div>
+            <input id="billingCity" class="input" placeholder="Mesto">
+          </div>
+        </div>
+
+        <div class="form-grid-1">
+          <div>
+            <div class="label">E-mailová adresa (nutná pre prístup)</div>
+            <input id="emailInput" type="email" class="input" placeholder="email@priklad.sk">
+          </div>
+          <div>
+            <div class="label">Telefónne číslo</div>
+            <input id="phoneNumber" class="input" placeholder="Telefón">
+          </div>
+        </div>
+
+        <button id="nextBtn" class="btn" style="margin-top:15px">Pokračovať k platbe</button>
+
+        <div class="logos">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+        </div>
+      </section>
+
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Bezpečná platba</div>
+        <div class="form-grid-1">
+          <div class="label">Číslo karty</div>
+          <div id="card-number" class="el"></div>
+          <div class="form-grid">
+            <div>
+              <div class="label">Platnosť do</div>
+              <div id="card-expiry" class="el"></div>
+            </div>
+            <div>
+              <div class="label">CVC</div>
+              <div id="card-cvc" class="el"></div>
+            </div>
+          </div>
+        </div>
+        <div id="err" class="err"></div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button id="backBtn" class="btn muted" style="width:40%">← Späť</button>
+          <button id="payNow" class="btn" style="width:60%">Zaplatiť bezpečne (29,95 €)</button>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <div class="widget">
+        <div style="text-align:center;font-weight:800;margin-bottom:5px">Čo hovoria naši zákazníci</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">Môj produkt dorazil včera. Rýchle dodanie a skvelý servis!</p>
+      </div>
+
+      <div class="widget">
+        <div style="font-weight:800;margin-bottom:10px">Zhrnutie objednávky</div>
+        <div style="display:flex;justify-content:space-between; align-items:center;">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;margin-right:10px;object-fit:cover">
+          <span id="summaryTitle">Doživotný prístup</span><span>29,95 €</span>
+        </div>
+        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
+        <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
+          <span>Celkom</span><span>29,95 €</span>
+        </div>
+      </div>
+
+      <div class="widget">
+        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Dôveryhodný obchod</div>
+        <div class="trust">
+          <div class="box"><div>😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Spokojnosť</div></div>
+          <div class="box"><div>🔒</div><div style="font-weight:800;font-size:11px">Bezpečné</div><div class="tiny" style="font-size:9px">SSL</div></div>
+          <div class="box"><div>🛡️</div><div style="font-weight:800;font-size:11px">10k€</div><div class="tiny" style="font-size:9px">Ochrana</div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+  <div class="loading-box">
+    <div style="font-size:20px;font-weight:800">Spracováva sa...</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="tiny">Prosím, nezatvárajte toto okno.</p>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    const qs = new URLSearchParams(window.location.search);
+    const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
+
+    const hero = document.getElementById('hero');
+    const heroImg = document.getElementById('heroImg');
+    const heroTitle = document.getElementById('heroTitle');
+    const sidebarImg = document.getElementById('sidebarImg');
+    const summaryTitle = document.getElementById('summaryTitle');
+
+    if (qs.get('sub1') || qs.get('sub2')) {
+        hero.style.display = 'flex';
+        if (qs.get('sub1')) {
+            const t = decode(qs.get('sub1'));
+            heroTitle.innerText = t;
+            summaryTitle.innerText = t;
+        }
+        if (qs.get('sub2')) {
+            const imgUrl = decode(qs.get('sub2'));
+            heroImg.src = imgUrl;
+            sidebarImg.src = imgUrl;
+            sidebarImg.style.display = 'block';
+        }
+    }
+
+    if (qs.get('sub3')) document.getElementById('firstName').value = decode(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decode(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decode(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decode(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decode(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
+
+    const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
+    const elements = stripe.elements();
+    const cn = elements.create('cardNumber'); cn.mount('#card-number');
+    const ce = elements.create('cardExpiry'); ce.mount('#card-expiry');
+    const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
+
+    document.getElementById('nextBtn').onclick = () => {
+        if(!document.getElementById('emailInput').value.includes('@')) {
+            alert("Prosím, zadajte platnú e-mailovú adresu.");
+            return;
+        }
+        document.getElementById('step1').setAttribute('aria-hidden', 'true');
+        document.getElementById('step2').setAttribute('aria-hidden', 'false');
+    };
+
+    document.getElementById('backBtn').onclick = () => {
+        document.getElementById('step2').setAttribute('aria-hidden', 'true');
+        document.getElementById('step1').setAttribute('aria-hidden', 'false');
+    };
+
+    document.getElementById('payNow').onclick = async () => {
+        const payBtn = document.getElementById('payNow');
+        const err = document.getElementById('err');
+        const overlay = document.getElementById("loading-overlay");
+        
+        payBtn.disabled = true;
+        err.setAttribute("aria-hidden", "true");
+        overlay.setAttribute("aria-hidden", "false");
+
+        try {
+            const pm = await stripe.createPaymentMethod({
+                type: "card",
+                card: cn,
+                billing_details: {
+                    name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+                    email: document.getElementById('emailInput').value,
+                    phone: document.getElementById('phoneNumber').value,
+                    address: {
+                        line1: document.getElementById('billingStreet').value,
+                        city: document.getElementById('billingCity').value,
+                        postal_code: document.getElementById('billingPostcode').value,
+                        country: 'SK'
+                    }
+                }
+            });
+            if (pm.error) throw pm.error;
+
+            const response = await fetch("/api/create-payment-2995", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    paymentMethodId: pm.paymentMethod.id,
+                    email: document.getElementById('emailInput').value,
+                    plan: '2995'
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+
+            const result = await stripe.confirmCardPayment(data.clientSecret);
+            if (result.error) throw result.error;
+
+            if (result.paymentIntent.status === 'succeeded') {
+                window.location.href = "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
+            }
+        } catch(e) {
+            err.textContent = e.message;
+            err.setAttribute('aria-hidden', 'false');
+            payBtn.disabled = false;
+            overlay.setAttribute("aria-hidden", "true");
+        }
+    };
+});
+</script>
+</body>
+</html>
