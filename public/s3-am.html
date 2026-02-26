@@ -296,7 +296,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (clickId) qs2.set("sub_id", clickId);
 
                 // Build final URL (Bemob thank you)
-                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+                const finalUrl = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" + qs2.toString();
+window.location.href = finalUrl;
             }
         } catch(e) {
             errDiv.textContent = e.message;
