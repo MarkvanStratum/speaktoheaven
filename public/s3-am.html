@@ -81,7 +81,7 @@
     const v = qs.get(k);
     if (v){
       localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/";
+      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
     }
   }
 })();
@@ -93,7 +93,7 @@
     (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
   if (ref){
     localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/";
+    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
   }
 })();
 </script>
