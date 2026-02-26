@@ -81,7 +81,7 @@
     const v = qs.get(k);
     if (v){
       localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/";
+      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
     }
   }
 })();
@@ -93,7 +93,7 @@
     (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
   if (ref){
     localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/";
+    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
   }
 })();
 </script>
@@ -281,29 +281,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 const qs2 = new URLSearchParams(window.location.search);
 
-                // Get affiliate ref (GoAffPro)
-                let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
+// Get affiliate ref (GoAffPro)
+let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
 
-                // Get click ID (affiliate network)
-                let clickId =
-                    qs2.get("sub_id") ||
-                    qs2.get("click_id") ||
-                    qs2.get("cid") ||
-                    localStorage.getItem("aff_sub_id");
+// Get click ID (affiliate network)
+let clickId =
+  qs2.get("sub_id") ||
+  qs2.get("click_id") ||
+  qs2.get("cid") ||
+  localStorage.getItem("aff_sub_id");
 
-                // Ensure ref exists
-                if (ref) qs2.set("ref", ref);
-                if (clickId) qs2.set("sub_id", clickId);
+// Ensure ref/clickId exist in query string
+if (ref) qs2.set("ref", ref);
+if (clickId) qs2.set("sub_id", clickId);
 
-                // Build final URL (Bemob thank you)
-                const finalUrl =
-                    "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
-                    qs2.toString();
+// Build final URL (Bemob thank you)
+const finalUrl =
+  "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+  qs2.toString();
 
-                // Redirect
-                setTimeout(() => {
-                    window.location.href = finalUrl;
-                }, 1500);
+setTimeout(() => {
+  window.location.href = finalUrl;
+}, 1500);
+
             }
         } catch(e) {
             errDiv.textContent = e.message;
