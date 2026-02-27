@@ -4,7 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Paiement Sécurisé - Accès à Vie</title>
+  
   <meta name="referrer" content="no-referrer-when-downgrade">
+
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
@@ -46,23 +49,12 @@
     .step[aria-hidden="false"]{display:block}
     .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
     .err[aria-hidden="false"]{display:block}
+    
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
-    
+    .tiny{font-size:12px;color:var(--muted)}
     .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
     .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
-    .tiny{font-size:12px;color:var(--muted)}
-
-    #hero {
-      display: none; margin-bottom: 24px; padding: 12px;
-      border: 1px solid var(--line); border-radius: 12px;
-      gap: 12px; align-items: center;
-    }
-    #heroImg {
-      width: 54px; height: 54px; border-radius: 10px;
-      border: 1px solid var(--line); object-fit: cover;
-    }
-    #heroTitle { font-weight: 900; font-size: 16px; line-height: 1.2; }
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -79,39 +71,7 @@
 </head>
 
 <body>
-
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
-<script>
-  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
-</script>
-
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
-  for (const k of keys){
-    const v = qs.get(k);
-    if (v){
-      localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
-    }
-  }
-})();
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const ref =
-    qs.get("ref") ||
-    localStorage.getItem("gaf_ref") ||
-    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
-  if (ref){
-    localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
-  }
-})();
-</script>
-
-<div class="safe">Paiement sécurisé par SSL</div>
+<div class="safe">Paiement Sécurisé SSL</div>
 
 <div class="wrap">
   <div class="page-title">
@@ -123,17 +83,7 @@
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
-        
-        <div id="hero">
-          <img id="heroImg" src="" alt="">
-          <div>
-            <div id="heroTitle"></div>
-            <div class="tiny">Produit de votre lien</div>
-          </div>
-        </div>
-
-        <div class="h2">1. Vos informations</div>
-
+        <div class="h2">1. Vos Coordonnées</div>
         <div class="form-grid">
           <div>
             <div class="label">Prénom</div>
@@ -144,11 +94,10 @@
             <input id="lastName" class="input" placeholder="Nom">
           </div>
         </div>
-
         <div class="form-grid">
           <div style="grid-column:1/-1">
             <div class="label">Adresse</div>
-            <input id="billingStreet" class="input" placeholder="Rue, Numéro">
+            <input id="billingStreet" class="input" placeholder="Adresse complète">
           </div>
           <div>
             <div class="label">Code Postal</div>
@@ -159,20 +108,13 @@
             <input id="billingCity" class="input" placeholder="Ville">
           </div>
         </div>
-
         <div class="form-grid-1">
           <div>
-            <div class="label">Adresse E-mail (Requis pour l'accès)</div>
-            <input id="emailInput" type="email" class="input" placeholder="email@exemple.com">
-          </div>
-          <div>
-            <div class="label">Numéro de Téléphone</div>
-            <input id="phoneNumber" class="input" placeholder="Téléphone">
+            <div class="label">E-mail (Important pour votre accès)</div>
+            <input id="emailInput" type="email" class="input" placeholder="exemple@mail.fr">
           </div>
         </div>
-
         <button id="nextBtn" class="btn" style="margin-top:15px">Continuer vers le paiement</button>
-
         <div class="logos">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
           <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
@@ -180,13 +122,13 @@
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Paiement sécurisé</div>
+        <div class="h2">2. Paiement Sécurisé</div>
         <div class="form-grid-1">
-          <div class="label">Numéro de carte</div>
+          <div class="label">Numéro de Carte</div>
           <div id="card-number" class="el"></div>
           <div class="form-grid">
             <div>
-              <div class="label">Date d'expiration</div>
+              <div class="label">Expiration</div>
               <div id="card-expiry" class="el"></div>
             </div>
             <div>
@@ -198,7 +140,7 @@
         <div id="err" class="err"></div>
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Retour</button>
-          <button id="payNow" class="btn" style="width:60%">Payer en toute sécurité (9,95 €)</button>
+          <button id="payNow" class="btn" style="width:60%">Payer Maintenant (49,95 €)</button>
         </div>
       </section>
     </div>
@@ -206,29 +148,28 @@
     <aside>
       <div class="widget">
         <div style="text-align:center;font-weight:800;margin-bottom:5px">Ce que disent nos clients</div>
-        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;font-weight:700;">Sarah M.</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center;font-size:13px;color:var(--muted)">Mon produit est arrivé hier. Expédition rapide et excellent service !</p>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">"Service exceptionnel et accès rapide. Je suis très satisfaite !"</p>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Récapitulatif de la commande</div>
-        <div style="display:flex;justify-content:space-between; align-items:center;">
-          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;margin-right:10px;object-fit:cover">
-          <span id="summaryTitle">Accès à Vie</span><span>9,95 €</span>
+        <div style="font-weight:800;margin-bottom:10px">Résumé de la commande</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span>Accès à Vie</span><span>49,95 €</span>
         </div>
-        <hr style="border:0; border-top:1px dashed var(--line); margin:15px 0">
+        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Total</span><span>9,95 €</span>
+          <span>Total</span><span>49,95 €</span>
         </div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Boutique de confiance</div>
+        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Boutique de Confiance</div>
         <div class="trust">
-          <div class="box"><div>😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Satisfait</div></div>
-          <div class="box"><div>🔒</div><div style="font-weight:800;font-size:11px">Sécurisé</div><div class="tiny" style="font-size:9px">SSL</div></div>
-          <div class="box"><div>🛡️</div><div style="font-weight:800;font-size:11px">10k€</div><div class="tiny" style="font-size:9px">Protection</div></div>
+          <div class="box"><div style="font-size:16px">😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Satisfait</div></div>
+          <div class="box"><div style="font-size:16px">🔒</div><div style="font-weight:800;font-size:11px">Sécurisé</div><div class="tiny" style="font-size:9px">SSL</div></div>
+          <div class="box"><div style="font-size:16px">🛡️</div><div style="font-weight:800;font-size:11px">10k€</div><div class="tiny" style="font-size:9px">Protection</div></div>
         </div>
       </div>
     </aside>
@@ -237,7 +178,7 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div style="font-size:20px;font-weight:800">Traitement en cours...</div>
+    <div style="font-size:20px;font-weight:800">Traitement...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
     <p class="tiny">Veuillez ne pas fermer cette fenêtre.</p>
   </div>
@@ -246,38 +187,6 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-    const qs = new URLSearchParams(window.location.search);
-    const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
-
-    const hero = document.getElementById('hero');
-    const heroImg = document.getElementById('heroImg');
-    const heroTitle = document.getElementById('heroTitle');
-    const sidebarImg = document.getElementById('sidebarImg');
-    const summaryTitle = document.getElementById('summaryTitle');
-
-    if (qs.get('sub1') || qs.get('sub2')) {
-        hero.style.display = 'flex';
-        if (qs.get('sub1')) {
-            const t = decode(qs.get('sub1'));
-            heroTitle.innerText = t;
-            summaryTitle.innerText = t;
-        }
-        if (qs.get('sub2')) {
-            const imgUrl = decode(qs.get('sub2'));
-            heroImg.src = imgUrl;
-            sidebarImg.src = imgUrl;
-            sidebarImg.style.display = 'block';
-        }
-    }
-
-    if (qs.get('sub3')) document.getElementById('firstName').value = decode(qs.get('sub3'));
-    if (qs.get('sub4')) document.getElementById('lastName').value = decode(qs.get('sub4'));
-    if (qs.get('sub5')) document.getElementById('billingStreet').value = decode(qs.get('sub5'));
-    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decode(qs.get('sub6'));
-    if (qs.get('sub7')) document.getElementById('billingCity').value = decode(qs.get('sub7'));
-    if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
-    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
-
     const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
     const elements = stripe.elements();
     const cn = elements.create('cardNumber'); cn.mount('#card-number');
@@ -302,36 +211,38 @@ window.addEventListener('DOMContentLoaded', () => {
         const payBtn = document.getElementById('payNow');
         const err = document.getElementById('err');
         const overlay = document.getElementById("loading-overlay");
+        const emailValue = document.getElementById('emailInput').value;
         
         payBtn.disabled = true;
         err.setAttribute("aria-hidden", "true");
         overlay.setAttribute("aria-hidden", "false");
 
         try {
+            // 1. Create Payment Method
             const pm = await stripe.createPaymentMethod({
-                type: "card",
+                type: 'card',
                 card: cn,
                 billing_details: {
                     name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-                    email: document.getElementById('emailInput').value,
-                    phone: document.getElementById('phoneNumber').value,
+                    email: emailValue,
                     address: {
-                        line1: document.getElementById('billingStreet').value,
-                        city: document.getElementById('billingCity').value,
-                        postal_code: document.getElementById('billingPostcode').value,
-                        country: 'FR'
+                      line1: document.getElementById('billingStreet').value,
+                      city: document.getElementById('billingCity').value,
+                      postal_code: document.getElementById('billingPostcode').value,
+                      country: 'FR'
                     }
                 }
             });
+
             if (pm.error) throw pm.error;
 
-            // Using the requested $49.95 endpoint logic
+            // 2. Call your backend
             const response = await fetch("/api/create-landing-payment", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     paymentMethodId: pm.paymentMethod.id,
-                    email: document.getElementById('emailInput').value,
+                    email: emailValue,
                     plan: '4995'
                 })
             });
@@ -339,23 +250,16 @@ window.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.error) throw new Error(data.error);
 
+            // 3. Confirm payment
             const result = await stripe.confirmCardPayment(data.clientSecret, {
                 payment_method: pm.paymentMethod.id
             });
 
             if (result.error) throw result.error;
+
+            // Rule C: The "Japanese Logic" - Simple direct redirect to allow tracking
             if (result.paymentIntent.status === 'succeeded') {
-                const qs2 = new URLSearchParams(window.location.search);
-
-                let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
-                let clickId = qs2.get("sub_id") || qs2.get("click_id") || localStorage.getItem("aff_sub_id");
-
-                // GLUE THE DATA
-                if (ref) qs2.set("ref", ref);
-                if (clickId) qs2.set("sub_id", clickId);
-
-                const finalUrl = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" + qs2.toString();
-                window.location.href = finalUrl;
+                window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
             }
 
         } catch(e) {
