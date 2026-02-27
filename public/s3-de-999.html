@@ -3,34 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Sicherer Checkout - Lifetime Access</title>
+  <title>Sicherer Checkout</title>
   
   <meta name="referrer" content="no-referrer-when-downgrade">
 
   <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-
-  // Save click id
-  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
-  for (const k of keys){
-    const v = qs.get(k);
-    if (v){
-      localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
-    }
-  }
-
-  // Save ref
-  const ref = qs.get("ref");
-  if (ref){
-    localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
-  }
-})();
-</script>
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
@@ -138,27 +115,14 @@
           </div>
         </div>
         <button id="nextBtn" class="btn" style="margin-top:15px">Weiter zur Zahlung</button>
-        <div class="logos">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-        </div>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Sicher bezahlen</div>
-        <div class="form-grid-1">
-          <div class="label">Kartennummer</div>
-          <div id="card-number" class="el"></div>
-          <div class="form-grid">
-            <div>
-              <div class="label">Ablaufdatum</div>
-              <div id="card-expiry" class="el"></div>
-            </div>
-            <div>
-              <div class="label">CVC</div>
-              <div id="card-cvc" class="el"></div>
-            </div>
-          </div>
+        <div id="card-number" class="el" style="margin-bottom:10px"></div>
+        <div class="form-grid">
+          <div id="card-expiry" class="el"></div>
+          <div id="card-cvc" class="el"></div>
         </div>
         <div id="err" class="err"></div>
         <div style="display:flex;gap:10px;margin-top:20px">
@@ -170,29 +134,13 @@
 
     <aside>
       <div class="widget">
-        <div style="text-align:center;font-weight:800;margin-bottom:5px">Das sagen unsere Kunden</div>
-        <div style="text-align:center;font-weight:700;">Sarah M.</div>
-        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center;font-size:13px;color:var(--muted)">"Hervorragender Service und schneller Zugang. Ich bin sehr zufrieden!"</p>
-      </div>
-
-      <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Bestellübersicht</div>
-        <div style="display:flex;justify-content:space-between;font-size:14px">
+        <div style="font-weight:800">Bestellübersicht</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:10px">
           <span>Lebenslanger Zugang</span><span>€9,95</span>
         </div>
-        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
+        <hr style="border:0; border-top:1px dashed var(--line); margin:15px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
           <span>Gesamt</span><span>€9,95</span>
-        </div>
-      </div>
-
-      <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Vertrauenswürdiger Shop</div>
-        <div class="trust">
-          <div class="box"><div style="font-size:16px">😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Zufrieden</div></div>
-          <div class="box"><div style="font-size:16px">🔒</div><div style="font-weight:800;font-size:11px">Sicher</div><div class="tiny" style="font-size:9px">SSL</div></div>
-          <div class="box"><div style="font-size:16px">🛡️</div><div style="font-weight:800;font-size:11px">€10k</div><div class="tiny" style="font-size:9px">Schutz</div></div>
         </div>
       </div>
     </aside>
@@ -203,13 +151,13 @@
   <div class="loading-box">
     <div style="font-size:20px;font-weight:800">Verarbeitung...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="tiny">Bitte schließen Sie dieses Fenster nicht.</p>
   </div>
 </div>
 
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+    // NEW STRIPE KEY
     const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
     const elements = stripe.elements();
     const cn = elements.create('cardNumber'); cn.mount('#card-number');
@@ -217,10 +165,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
 
     document.getElementById('nextBtn').onclick = () => {
-        if(!document.getElementById('emailInput').value.includes('@')) {
-            alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
-            return;
-        }
         document.getElementById('step1').setAttribute('aria-hidden', 'true');
         document.getElementById('step2').setAttribute('aria-hidden', 'false');
     };
@@ -237,11 +181,10 @@ window.addEventListener('DOMContentLoaded', () => {
         const emailValue = document.getElementById('emailInput').value;
         
         payBtn.disabled = true;
-        err.setAttribute("aria-hidden", "true");
         overlay.setAttribute("aria-hidden", "false");
 
         try {
-            // 1. Create Payment Method
+            // 1. Create Payment Method (Localized for DE)
             const pm = await stripe.createPaymentMethod({
                 type: 'card',
                 card: cn,
@@ -259,7 +202,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (pm.error) throw pm.error;
 
-            // 2. Call your backend
+            // 2. Call NEW backend endpoint
             const response = await fetch("/api/create-landing-payment", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -273,48 +216,16 @@ window.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.error) throw new Error(data.error);
 
-            // 3. Confirm payment
+            // 3. Confirm payment with new PaymentIntent
             const result = await stripe.confirmCardPayment(data.clientSecret, {
                 payment_method: pm.paymentMethod.id
             });
 
             if (result.error) throw result.error;
 
-            // Rule C: The "Japanese Logic" - Simple redirect to allow Referrer tracking
+            // 4. WORKING TRACKING LOGIC (Japanese Style)
             if (result.paymentIntent.status === 'succeeded') {
-                const qs2 = new URLSearchParams(window.location.search);
-
-// Get ref
-let ref =
-  qs2.get("ref") ||
-  localStorage.getItem("gaf_ref") ||
-  (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
-console.log("FINAL REF:", ref);
-
-if (!ref) {
-  console.log("NO REF FOUND - TRACKING WILL FAIL");
-}
-
-// Get click id
-let clickId =
-  qs2.get("sub_id") ||
-  localStorage.getItem("aff_sub_id") ||
-  (document.cookie.match(/aff_sub_id=([^;]+)/)||[])[1];
-
-console.log("FINAL CLICKID:", clickId);
-
-
-// Add them to URL
-if (ref) qs2.set("ref", ref);
-if (clickId) qs2.set("sub_id", clickId);
-
-// Build final URL
-const finalUrl =
-  "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
-  qs2.toString();
-
-// Redirect
-window.location.href = finalUrl;
+                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
             }
 
         } catch(e) {
