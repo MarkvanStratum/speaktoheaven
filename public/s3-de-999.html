@@ -367,21 +367,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (result.error) throw result.error;
             if (result.paymentIntent.status === 'succeeded') {
-                // 1. Start with the parameters currently in the URL
+                // 1. Grab current URL parameters
                 const qs2 = new URLSearchParams(window.location.search);
 
-                // 2. Get the tracking IDs from the URL OR the phone's memory
+                // 2. Pull tracking IDs from URL or Phone memory
                 let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
                 let clickId = qs2.get("sub_id") || localStorage.getItem("aff_sub_id");
 
-                // 3. IMPORTANT: Manually put them into the list so they are part of the link
+                // 3. GLUE: Put them back into the parameters
                 if (ref) qs2.set("ref", ref);
                 if (clickId) qs2.set("sub_id", clickId);
 
-                // 4. Build the final link with all the data included
+                // 4. JOIN: Build the link with the "?" divider
                 const finalUrl = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" + qs2.toString();
 
-                // 5. Go to the thank you page
+                // 5. REDIRECT: Send the user to the thank-you page
                 window.location.href = finalUrl;
             }
 
