@@ -282,6 +282,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             // Rule C: The "Japanese Logic" - Simple redirect to allow Referrer tracking
             if (result.paymentIntent.status === 'succeeded') {
+
                 const qs2 = new URLSearchParams(window.location.search);
 
 // Get ref
@@ -296,6 +297,10 @@ let clickId =
   localStorage.getItem("aff_sub_id") ||
   (document.cookie.match(/aff_sub_id=([^;]+)/)||[])[1];
 
+// DEBUG (correct position)
+
+console.log("FINAL CLICKID:", clickId);
+
 // Add them to URL
 if (ref) qs2.set("ref", ref);
 if (clickId) qs2.set("sub_id", clickId);
@@ -305,7 +310,6 @@ const finalUrl =
   "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" +
   qs2.toString();
 
-// Redirect
 window.location.href = finalUrl;
             }
 
