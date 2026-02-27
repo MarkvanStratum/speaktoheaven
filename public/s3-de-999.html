@@ -9,6 +9,29 @@
 
   <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+
+  // Save click id
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
+    }
+  }
+
+  // Save ref
+  const ref = qs.get("ref");
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
+  }
+})();
+</script>
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -259,7 +282,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
             // Rule C: The "Japanese Logic" - Simple redirect to allow Referrer tracking
             if (result.paymentIntent.status === 'succeeded') {
-                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+                const qs2 = new URLSearchParams(window.location.search);
+
+// Get ref
+let ref =
+  qs2.get("ref") ||
+  localStorage.getItem("gaf_ref") ||
+  (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+
+// Get click id
+let clickId =
+  qs2.get("sub_id") ||
+  localStorage.getItem("aff_sub_id") ||
+  (document.cookie.match(/aff_sub_id=([^;]+)/)||[])[1];
+
+// Add them to URL
+if (ref) qs2.set("ref", ref);
+if (clickId) qs2.set("sub_id", clickId);
+
+// Build final URL
+const finalUrl =
+  "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+  qs2.toString();
+
+// Redirect
+window.location.href = finalUrl;
             }
 
         } catch(e) {
