@@ -9,29 +9,6 @@
 
   <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-
-  // Save click id
-  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
-  for (const k of keys){
-    const v = qs.get(k);
-    if (v){
-      localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
-    }
-  }
-
-  // Save ref
-  const ref = qs.get("ref");
-  if (ref){
-    localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
-  }
-})();
-</script>
-
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -60,24 +37,16 @@
     .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
     .h2{font-size:18px;font-weight:800;margin-bottom:14px}
     .label{font-weight:700;font-size:13px;margin:4px 0}
-    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px;font-size:16px}
+    .input,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px;font-size:16px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .form-grid-1{display:grid;grid-template-columns:1fr;gap:10px}
-    @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
     .btn{width:100%;border:none;border-radius:12px;padding:14px;font-weight:900;background:#16a34a;color:#fff;cursor:pointer;font-size:16px}
     .btn.muted{background:#f1f4f8;color:#20324d;border:1px solid var(--line)}
-    .logos{display:flex;gap:10px;margin-top:12px}
-    .logos img{height:20px}
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
     .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
     .err[aria-hidden="false"]{display:block}
-    
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
-    .tiny{font-size:12px;color:var(--muted)}
-    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
-    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -86,10 +55,10 @@
       z-index:9999;
     }
     .loading-overlay[aria-hidden="false"]{display:flex}
-    .loading-box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;border-radius:14px;padding:24px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .loading-box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;border-radius:14px;padding:24px;text-align:center;}
     .progress-wrap{width:100%;height:12px;background:#ecf1f8;border-radius:999px;overflow:hidden;margin:15px 0}
     .progress-bar{width:0%;height:100%;background:linear-gradient(90deg,#7aa3ff,#2dd4bf);animation:loadingBar 2.2s ease-in-out infinite}
-    @keyframes loadingBar{0%{width:0%} 60%{width:80%} 100%{width:100%}}
+    @keyframes loadingBar{0%{width:0%} 100%{width:100%}}
   </style>
 </head>
 
@@ -97,102 +66,52 @@
 <div class="safe">SSL Secured Payment</div>
 
 <div class="wrap">
-  <div class="page-title">
-    Secure Checkout 🔒
-    <span class="stars">★★★★★</span>
-    <span class="reviews">(2,777 Reviews)</span>
-  </div>
+  <div class="page-title">Secure Checkout 🔒</div>
 
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
         <div class="h2">1. Your Details</div>
         <div class="form-grid">
-          <div>
-            <div class="label">First Name</div>
-            <input id="firstName" class="input" placeholder="First Name">
-          </div>
-          <div>
-            <div class="label">Last Name</div>
-            <input id="lastName" class="input" placeholder="Last Name">
-          </div>
+          <div><div class="label">First Name</div><input id="firstName" class="input"></div>
+          <div><div class="label">Last Name</div><input id="lastName" class="input"></div>
         </div>
-        <div class="form-grid">
-          <div style="grid-column:1/-1">
-            <div class="label">Address</div>
-            <input id="billingStreet" class="input" placeholder="Street Address">
-          </div>
-          <div>
-            <div class="label">Postcode</div>
-            <input id="billingPostcode" class="input" placeholder="Postcode">
-          </div>
-          <div>
-            <div class="label">City</div>
-            <input id="billingCity" class="input" placeholder="City">
-          </div>
+        <div class="form-grid" style="margin-top:10px">
+          <div style="grid-column:1/-1"><div class="label">Address</div><input id="billingStreet" class="input"></div>
+          <div><div class="label">Postcode</div><input id="billingPostcode" class="input"></div>
+          <div><div class="label">City</div><input id="billingCity" class="input"></div>
         </div>
-        <div class="form-grid-1">
-          <div>
-            <div class="label">Email (Important for your access)</div>
-            <input id="emailInput" type="email" class="input" placeholder="example@mail.com">
-          </div>
+        <div style="margin-top:10px">
+          <div class="label">Email</div>
+          <input id="emailInput" type="email" class="input">
         </div>
-        <button id="nextBtn" class="btn" style="margin-top:15px">Continue to Payment</button>
-        <div class="logos">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-        </div>
+        <button id="nextBtn" class="btn" style="margin-top:20px">Next</button>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Secure Payment</div>
-        <div class="form-grid-1">
-          <div class="label">Card Number</div>
-          <div id="card-number" class="el"></div>
-          <div class="form-grid">
-            <div>
-              <div class="label">Expiry</div>
-              <div id="card-expiry" class="el"></div>
-            </div>
-            <div>
-              <div class="label">CVC</div>
-              <div id="card-cvc" class="el"></div>
-            </div>
-          </div>
+        <div class="h2">2. Payment</div>
+        <div id="card-number" class="el" style="margin-bottom:10px"></div>
+        <div class="form-grid">
+          <div id="card-expiry" class="el"></div>
+          <div id="card-cvc" class="el"></div>
         </div>
         <div id="err" class="err"></div>
         <div style="display:flex;gap:10px;margin-top:20px">
-          <button id="backBtn" class="btn muted" style="width:40%">← Back</button>
-          <button id="payNow" class="btn" style="width:60%">Pay Now ($9.95)</button>
+          <button id="backBtn" class="btn muted" style="width:40%">Back</button>
+          <button id="payNow" class="btn" style="width:60%">Pay Now ($9,95)</button>
         </div>
       </section>
     </div>
 
     <aside>
       <div class="widget">
-        <div style="text-align:center;font-weight:800;margin-bottom:5px">What our customers say</div>
-        <div style="text-align:center;font-weight:700;">Sarah M.</div>
-        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center;font-size:13px;color:var(--muted)">"Amazing service and fast delivery. Very happy with my purchase!"</p>
-      </div>
-
-      <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Order Summary</div>
-        <div style="display:flex;justify-content:space-between;font-size:14px">
-          <span>Lifetime Access</span><span>$9.95</span>
+        <div style="font-weight:800">Order Summary</div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px">
+          <span>Lifetime Access</span><span>$9,95</span>
         </div>
-        <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
+        <hr style="border:0; border-top:1px dashed var(--line); margin:15px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Total</span><span>$9.95</span>
-        </div>
-      </div>
-
-      <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px;text-align:center;text-transform:uppercase;font-size:12px">Trusted Shop</div>
-        <div class="trust">
-          <div class="box"><div style="font-size:16px">😊</div><div style="font-weight:800;font-size:11px">99%</div><div class="tiny" style="font-size:9px">Happy</div></div>
-          <div class="box"><div style="font-size:16px">🔒</div><div style="font-weight:800;font-size:11px">Secure</div><div class="tiny" style="font-size:9px">SSL</div></div>
-          <div class="box"><div style="font-size:16px">🛡️</div><div style="font-weight:800;font-size:11px">$10k</div><div class="tiny" style="font-size:9px">Protection</div></div>
+          <span>Total</span><span>$9,95</span>
         </div>
       </div>
     </aside>
@@ -203,7 +122,6 @@
   <div class="loading-box">
     <div style="font-size:20px;font-weight:800">Processing...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="tiny">Please do not close this window.</p>
   </div>
 </div>
 
@@ -217,10 +135,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const cc = elements.create('cardCvc'); cc.mount('#card-cvc');
 
     document.getElementById('nextBtn').onclick = () => {
-        if(!document.getElementById('emailInput').value.includes('@')) {
-            alert("Please enter a valid email address.");
-            return;
-        }
         document.getElementById('step1').setAttribute('aria-hidden', 'true');
         document.getElementById('step2').setAttribute('aria-hidden', 'false');
     };
@@ -237,11 +151,9 @@ window.addEventListener('DOMContentLoaded', () => {
         const emailValue = document.getElementById('emailInput').value;
         
         payBtn.disabled = true;
-        err.setAttribute("aria-hidden", "true");
         overlay.setAttribute("aria-hidden", "false");
 
         try {
-            // 1. Create Payment Method
             const pm = await stripe.createPaymentMethod({
                 type: 'card',
                 card: cn,
@@ -259,7 +171,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (pm.error) throw pm.error;
 
-            // 2. Call your backend
             const response = await fetch("/api/create-landing-payment", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -273,44 +184,15 @@ window.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.error) throw new Error(data.error);
 
-            // 3. Confirm payment
             const result = await stripe.confirmCardPayment(data.clientSecret, {
                 payment_method: pm.paymentMethod.id
             });
 
             if (result.error) throw result.error;
 
-            // Rule C: The "Japanese Logic" - Simple redirect to allow Referrer tracking
+            // THIS IS THE EXACT LOGIC FROM THE WORKING ATLAS FILE
             if (result.paymentIntent.status === 'succeeded') {
-
-                const qs2 = new URLSearchParams(window.location.search);
-
-// Get ref
-let ref =
-  qs2.get("ref") ||
-  localStorage.getItem("gaf_ref") ||
-  (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
-
-// Get click id
-let clickId =
-  qs2.get("sub_id") ||
-  localStorage.getItem("aff_sub_id") ||
-  (document.cookie.match(/aff_sub_id=([^;]+)/)||[])[1];
-
-// DEBUG (correct position)
-
-console.log("FINAL CLICKID:", clickId);
-
-// Add them to URL
-if (ref) qs2.set("ref", ref);
-if (clickId) qs2.set("sub_id", clickId);
-
-// Build final URL
-const finalUrl =
-  "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" +
-  qs2.toString();
-
-window.location.href = finalUrl;
+                window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
             }
 
         } catch(e) {
