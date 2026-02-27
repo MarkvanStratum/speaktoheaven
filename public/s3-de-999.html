@@ -289,12 +289,20 @@ let ref =
   qs2.get("ref") ||
   localStorage.getItem("gaf_ref") ||
   (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+console.log("FINAL REF:", ref);
+
+if (!ref) {
+  console.log("NO REF FOUND - TRACKING WILL FAIL");
+}
 
 // Get click id
 let clickId =
   qs2.get("sub_id") ||
   localStorage.getItem("aff_sub_id") ||
   (document.cookie.match(/aff_sub_id=([^;]+)/)||[])[1];
+
+console.log("FINAL CLICKID:", clickId);
+
 
 // Add them to URL
 if (ref) qs2.set("ref", ref);
