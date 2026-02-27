@@ -90,15 +90,24 @@
 <script>
 (function(){
   const qs = new URLSearchParams(location.search);
-  const ref = qs.get("ref");
 
-  if (ref) {
-    console.log("Saving ref:", ref);
+  // Save click id
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
+    }
+  }
+
+  // Save affiliate ref
+  const ref = qs.get("ref");
+  if (ref){
     localStorage.setItem("gaf_ref", ref);
     document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
   }
-})();
-</script>
+})();</script>
 
 <div class="safe">SSL Secured Checkout</div>
 
@@ -337,8 +346,15 @@ window.addEventListener('DOMContentLoaded', () => {
             if (result.error) throw result.error;
             if (result.paymentIntent.status === 'succeeded') {
                 const qs2 = new URLSearchParams(window.location.search);
-                let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
-                let clickId = qs2.get("sub_id") || localStorage.getItem("aff_sub_id");
+                let ref =
+  qs2.get("ref") ||
+  localStorage.getItem("gaf_ref") ||
+  (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+
+let clickId =
+  qs2.get("sub_id") ||
+  localStorage.getItem("aff_sub_id") ||
+  (document.cookie.match(/aff_sub_id=([^;]+)/)||[])[1];
 
                 // ADD THESE TWO LINES (The Glue)
                 if (ref) qs2.set("ref", ref);
