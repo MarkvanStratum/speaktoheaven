@@ -4,7 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Sicherer Checkout - Lifetime Access</title>
+  
   <meta name="referrer" content="no-referrer-when-downgrade">
+
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
@@ -47,36 +50,11 @@
     .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;margin-top:10px}
     .err[aria-hidden="false"]{display:block}
     
-    /* Hero Section */
-    #hero {
-      display: none;
-      margin-bottom: 24px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      gap: 12px;
-      align-items: center;
-    }
-    #heroImg {
-      width: 54px;
-      height: 54px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      object-fit: cover;
-    }
-    #heroTitle {
-      font-weight: 900;
-      font-size: 16px;
-      line-height: 1.2;
-    }
-
-    /* Sidebar Widgets */
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget+.widget{margin-top:12px}
     .tiny{font-size:12px;color:var(--muted)}
     .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:10px}
     .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
-    .delivery{display:flex;gap:12px;align-items:center}
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -93,61 +71,19 @@
 </head>
 
 <body>
-
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
-<script>
-  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
-</script>
-
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
-  for (const k of keys){
-    const v = qs.get(k);
-    if (v){
-      localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/; max-age=2592000";
-    }
-  }
-})();
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const ref =
-    qs.get("ref") ||
-    localStorage.getItem("gaf_ref") ||
-    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
-  if (ref){
-    localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/; max-age=2592000";
-  }
-})();
-</script>
-
 <div class="safe">SSL-gesicherte Zahlung</div>
 
 <div class="wrap">
   <div class="page-title">
     Sicherer Checkout 🔒
     <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 Bewertungen)</span>
+    <span class="reviews">(2.777 Bewertungen)</span>
   </div>
 
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
-        
-        <div id="hero">
-          <img id="heroImg" src="" alt="">
-          <div>
-            <div id="heroTitle"></div>
-            <div class="tiny">Produkt aus Ihrem Link</div>
-          </div>
-        </div>
-
         <div class="h2">1. Ihre Angaben</div>
-
         <div class="form-grid">
           <div>
             <div class="label">Vorname</div>
@@ -158,7 +94,6 @@
             <input id="lastName" class="input" placeholder="Nachname">
           </div>
         </div>
-
         <div class="form-grid">
           <div style="grid-column:1/-1">
             <div class="label">Adresse</div>
@@ -173,33 +108,13 @@
             <input id="billingCity" class="input" placeholder="Stadt">
           </div>
         </div>
-
         <div class="form-grid-1">
           <div>
             <div class="label">E-Mail (Wichtig für Ihren Zugang)</div>
             <input id="emailInput" type="email" class="input" placeholder="beispiel@mail.de">
           </div>
-          <div>
-            <div class="label">Land</div>
-            <input class="input" value="Deutschland" disabled>
-          </div>
         </div>
-
-        <div class="form-grid">
-          <div>
-            <div class="label">Ländervorwahl</div>
-            <select id="phonePrefix" class="select">
-              <option value="+49">+49 — Deutschland</option>
-            </select>
-          </div>
-          <div>
-            <div class="label">Telefonnummer</div>
-            <input id="phoneNumber" class="input" placeholder="Telefonnummer">
-          </div>
-        </div>
-
-        <button id="nextBtn" class="btn" style="margin-top:15px">Weiter</button>
-
+        <button id="nextBtn" class="btn" style="margin-top:15px">Weiter zur Zahlung</button>
         <div class="logos">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
           <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
@@ -225,7 +140,7 @@
         <div id="err" class="err"></div>
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="backBtn" class="btn muted" style="width:40%">← Zurück</button>
-          <button id="payNow" class="btn" style="width:60%">Sicher bezahlen (€9,95)</button>
+          <button id="payNow" class="btn" style="width:60%">Jetzt bezahlen (€9,95)</button>
         </div>
       </section>
     </div>
@@ -233,27 +148,19 @@
     <aside>
       <div class="widget">
         <div style="text-align:center;font-weight:800;margin-bottom:5px">Das sagen unsere Kunden</div>
-        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;font-weight:700;">Sarah M.</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center;font-size:13px;color:var(--muted)">Mein Produkt kam gestern an. Schneller Versand und super Service!</p>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">"Hervorragender Service und schneller Zugang. Ich bin sehr zufrieden!"</p>
       </div>
 
       <div class="widget">
-        <div class="delivery">
-          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none;object-fit:cover">
-          <div>
-            <div style="font-weight:800">Schnelle Lieferung</div>
-            <div class="tiny">3–5 Werktage</div>
-          </div>
-          <div style="margin-left:auto;font-weight:800">Kostenlos</div>
-        </div>
-        <div style="margin-top:14px;font-weight:800">Bestellübersicht</div>
-        <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0">
-          <span id="summaryTitle">Lebenslanger Zugang</span><span>€ 9,95</span>
+        <div style="font-weight:800;margin-bottom:10px">Bestellübersicht</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span>Lebenslanger Zugang</span><span>€9,95</span>
         </div>
         <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0">
         <div style="display:flex;justify-content:space-between; font-weight:900; font-size:18px">
-          <span>Gesamt</span><span>€ 9,95</span>
+          <span>Gesamt</span><span>€9,95</span>
         </div>
       </div>
 
@@ -271,7 +178,7 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div style="font-size:20px;font-weight:800">Verarbeitung erfolgt...</div>
+    <div style="font-size:20px;font-weight:800">Verarbeitung...</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
     <p class="tiny">Bitte schließen Sie dieses Fenster nicht.</p>
   </div>
@@ -280,38 +187,6 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-    const qs = new URLSearchParams(window.location.search);
-    const decode = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
-
-    const hero = document.getElementById('hero');
-    const heroImg = document.getElementById('heroImg');
-    const heroTitle = document.getElementById('heroTitle');
-    const sidebarImg = document.getElementById('sidebarImg');
-    const summaryTitle = document.getElementById('summaryTitle');
-
-    if (qs.get('sub1') || qs.get('sub2')) {
-        hero.style.display = 'flex';
-        if (qs.get('sub1')) {
-            const t = decode(qs.get('sub1'));
-            heroTitle.innerText = t;
-            summaryTitle.innerText = t;
-        }
-        if (qs.get('sub2')) {
-            const imgUrl = decode(qs.get('sub2'));
-            heroImg.src = imgUrl;
-            sidebarImg.src = imgUrl;
-            sidebarImg.style.display = 'block';
-        }
-    }
-
-    if (qs.get('sub3')) document.getElementById('firstName').value = decode(qs.get('sub3'));
-    if (qs.get('sub4')) document.getElementById('lastName').value = decode(qs.get('sub4'));
-    if (qs.get('sub5')) document.getElementById('billingStreet').value = decode(qs.get('sub5'));
-    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decode(qs.get('sub6'));
-    if (qs.get('sub7')) document.getElementById('billingCity').value = decode(qs.get('sub7'));
-    if (qs.get('sub9')) document.getElementById('emailInput').value = decode(qs.get('sub9'));
-    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decode(qs.get('sub10'));
-
     const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
     const elements = stripe.elements();
     const cn = elements.create('cardNumber'); cn.mount('#card-number');
@@ -336,53 +211,55 @@ window.addEventListener('DOMContentLoaded', () => {
         const payBtn = document.getElementById('payNow');
         const err = document.getElementById('err');
         const overlay = document.getElementById("loading-overlay");
+        const emailValue = document.getElementById('emailInput').value;
         
         payBtn.disabled = true;
         err.setAttribute("aria-hidden", "true");
         overlay.setAttribute("aria-hidden", "false");
 
         try {
+            // 1. Create Payment Method
+            const pm = await stripe.createPaymentMethod({
+                type: 'card',
+                card: cn,
+                billing_details: {
+                    name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+                    email: emailValue,
+                    address: {
+                      line1: document.getElementById('billingStreet').value,
+                      city: document.getElementById('billingCity').value,
+                      postal_code: document.getElementById('billingPostcode').value,
+                      country: 'DE'
+                    }
+                }
+            });
+
+            if (pm.error) throw pm.error;
+
+            // 2. Call your backend
             const response = await fetch("/api/create-landing-payment", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    email: document.getElementById('emailInput').value,
-                    plan: '4995' 
+                    paymentMethodId: pm.paymentMethod.id,
+                    email: emailValue,
+                    plan: '4995'
                 })
             });
 
             const data = await response.json();
             if (data.error) throw new Error(data.error);
 
+            // 3. Confirm payment
             const result = await stripe.confirmCardPayment(data.clientSecret, {
-                payment_method: {
-                    card: cn,
-                    billing_details: {
-                        name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
-                        email: document.getElementById('emailInput').value,
-                        phone: document.getElementById('phoneNumber').value
-                    }
-                }
+                payment_method: pm.paymentMethod.id
             });
 
             if (result.error) throw result.error;
+
+            // Rule C: The "Japanese Logic" - Simple redirect to allow Referrer tracking
             if (result.paymentIntent.status === 'succeeded') {
-                // 1. Grab current URL parameters
-                const qs2 = new URLSearchParams(window.location.search);
-
-                // 2. Pull tracking IDs from URL or Phone memory
-                let ref = qs2.get("ref") || localStorage.getItem("gaf_ref");
-                let clickId = qs2.get("sub_id") || localStorage.getItem("aff_sub_id");
-
-                // 3. GLUE: Put them back into the parameters
-                if (ref) qs2.set("ref", ref);
-                if (clickId) qs2.set("sub_id", clickId);
-
-                // 4. JOIN: Build the link with the "?" divider
-                const finalUrl = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" + qs2.toString();
-
-                // 5. REDIRECT: Send the user to the thank-you page
-                window.location.href = finalUrl;
+                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
             }
 
         } catch(e) {
