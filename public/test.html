@@ -361,15 +361,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   payNow.onclick = async () => {
     payNow.disabled = true;
-    err.setAttribute("aria-hidden","true");
-
-    const overlay = document.getElementById("loading-overlay");
-    overlay.setAttribute("aria-hidden","false");
+    payNow.textContent = "Processing...";
 
     const billingDetails = {
-      name: nameInput.value,
+      name: billingName.value,
       email: emailInput.value,
-      phone: phonePrefix.value + phoneNumber.value,
       address: {
         line1: billingStreet.value,
         city: billingCity.value,
@@ -387,18 +383,17 @@ window.addEventListener('DOMContentLoaded', () => {
       if (pm.error) throw pm.error;
 
       const response = await fetch("/api/create-landing-payment", {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-        paymentMethodId: pm.paymentMethod.id,
-        // ✅ Correctly get the value from the input element
-        email: document.getElementById('emailInput').value, 
-        plan: '4995'
-    })
-});
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    paymentMethodId: pm.paymentMethod.id,
+                    email: emailValue,
+                    plan: '4995'
+                })
+            });
 
 
-      const data = await response.json(); // ✅ 'response' is the variable from the fetch
+      const d = await r.json();
       const result = await stripe.confirmCardPayment(d.clientSecret, {
   payment_method: pm.paymentMethod.id
 });
