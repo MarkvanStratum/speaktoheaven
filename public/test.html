@@ -387,17 +387,18 @@ window.addEventListener('DOMContentLoaded', () => {
       if (pm.error) throw pm.error;
 
       const response = await fetch("/api/create-landing-payment", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    paymentMethodId: pm.paymentMethod.id,
-                    email: emailValue,
-                    plan: '4995'
-                })
-            });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        paymentMethodId: pm.paymentMethod.id,
+        // ✅ Correctly get the value from the input element
+        email: document.getElementById('emailInput').value, 
+        plan: '4995'
+    })
+});
 
 
-      const d = await r.json();
+      const data = await response.json(); // ✅ 'response' is the variable from the fetch
       const result = await stripe.confirmCardPayment(d.clientSecret, {
   payment_method: pm.paymentMethod.id
 });
