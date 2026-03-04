@@ -60,9 +60,7 @@ const { Pool } = pkg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes("localhost") 
-       ? false 
-       : { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false }
 });
 
 // Add this to verify the connection in your terminal
