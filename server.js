@@ -351,14 +351,41 @@ const imageDir = path.resolve(__dirname, "public/img");
 app.use("/img", express.static(imageDir));
 
 //--------------------------------------------
-//	FRONTEND STATIC FILES
+// FRONTEND STATIC FILES
 //--------------------------------------------
 
 const frontendPath = path.join(__dirname, "public");
-if (fs.existsSync(frontendPath)) {
-	app.use(express.static(frontendPath));
-}
 
+app.use(express.static(frontendPath));
+
+// Inject footer links into every HTML page
+app.use((req, res, next) => {
+	const oldSend = res.send;
+
+	res.send = function (data) {
+		if (typeof data === "string" && data.includes("</body>")) {
+			data = data.replace(
+				"</body>",
+				`
+<footer style="
+margin-top:40px;
+padding:20px;
+text-align:center;
+font-size:14px;
+color:#aaa;
+border-top:1px solid rgba(0,0,0,0.1);
+">
+<a href="/privacy-policy.html">Privacy Policy</a> |
+<a href="/terms-and-conditions.html">Terms & Conditions</a>
+</footer>
+</body>`
+			);
+		}
+		return oldSend.call(this, data);
+	};
+
+	next();
+});
 //--------------------------------------------
 //	OPENAI/OPENROUTER CLIENT
 //--------------------------------------------
