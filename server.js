@@ -623,6 +623,17 @@ app.get("/", (req, res) => {
 });
 
 //--------------------------------------------
+// LEGAL PAGES
+//--------------------------------------------
+
+app.get("/privacy-policy", (req, res) => {
+	res.sendFile(path.join(__dirname, "public", "privacy-policy.html"));
+});
+
+app.get("/terms", (req, res) => {
+	res.sendFile(path.join(__dirname, "public", "terms-and-conditions.html"));
+});
+//--------------------------------------------
 //	404 HANDLER
 //--------------------------------------------
 
