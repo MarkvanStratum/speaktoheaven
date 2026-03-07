@@ -615,11 +615,50 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
 });
 
 app.get("/", (req, res) => {
-	const indexPath = path.join(__dirname, "public", "index.html");
-	if (fs.existsSync(indexPath)) {
-		return res.sendFile(indexPath);
-	}
-	res.status(200).send("Server is running, but public/index.html is missing.");
+	res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>Speak To Heaven</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+font-family: Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:60px;
+}
+
+footer{
+margin-top:60px;
+opacity:.7;
+font-size:14px;
+}
+
+a{
+color:#60a5fa;
+text-decoration:none;
+margin:0 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Speak To Heaven</h1>
+
+<p>Your AI biblical conversation platform.</p>
+
+<footer>
+<a href="/privacy-policy.html">Privacy Policy</a> |
+<a href="/terms-and-conditions.html">Terms & Conditions</a>
+</footer>
+
+</body>
+</html>
+`);
 });
 
 //--------------------------------------------
