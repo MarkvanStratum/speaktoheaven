@@ -118,7 +118,7 @@
 
         if (res.ok) {
           // Success: Save token and redirect to main chat
-          localStorage.setItem("jwt", data.token);
+          localStorage.setItem("token", data.token);
           window.location.href = "/"; 
         } else {
           // Failure: Show error from server
