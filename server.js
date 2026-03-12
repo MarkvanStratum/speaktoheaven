@@ -229,17 +229,13 @@ app.post("/api/login", async (req, res) => {
 });
 
 // 1. Remove 'authenticateToken' from this route to allow guests
-app.post("/api/create-payment-intent", async (req, res) => {
+app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
     try {
-        const { plan, email: guestEmail } = req.body; // Get email from the form
+        const { plan } = req.body;
         
-        // 2. Use the logged-in user's email, OR the guest email from the form
-        const email = req.user ? req.user.email : guestEmail;
-        const userId = req.user ? req.user.id : null;
-
-        if (!email) {
-            return res.status(400).json({ error: "Email is required" });
-        }
+        // This pulls the email from your login session automatically
+        const email = req.user.email;
+        const userId = req.user.id;
 
         const amounts = {
             'god': 2995,
@@ -249,21 +245,26 @@ app.post("/api/create-payment-intent", async (req, res) => {
 
         const amount = amounts[plan];
 
+        if (!amount) {
+            return res.status(400).json({ error: "Please select a valid plan." });
+        }
+
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency: "usd",
             metadata: { 
                 plan, 
-                email, // Essential for the webhook to find the user
+                email,
                 userId 
             },
         });
 
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(500).json({ error: "Payment Error: " + e.message });
     }
 });
+
 //--------------------------------------------
 // STRIPE CHECKOUT (ONE-TIME PAYMENTS)
 //--------------------------------------------
