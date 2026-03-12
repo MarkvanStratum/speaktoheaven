@@ -43,7 +43,7 @@
         
         const params = new URLSearchParams(window.location.search);
         const plan = params.get('plan') || 'god';
-        const token = localStorage.getItem("jwt");
+        const token = localStorage.getItem("token");
 
         // UI Updates based on plan
         const titles = { 'god': 'God Access', 'all': 'Full Access', 'lifetime': 'Lifetime Access' };
