@@ -221,6 +221,15 @@ app.post("/api/register", async (req, res) => {
 
 await sendEmail(
   email,
+  "Your Speak to Heaven Account",
+  "<h2>Welcome to Speak to Heaven</h2>" +
+  "<p>Your account has been created.</p>" +
+  "<p><strong>Email:</strong> " + email + "</p>" +
+  "<p>You can now log in on the website.</p>"
+);
+
+await sendEmail(
+  email,
   "Welcome to Speak to Heaven",
   `
   <h2>Welcome to Speak to Heaven</h2>
