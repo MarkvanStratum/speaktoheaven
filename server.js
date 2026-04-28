@@ -17,6 +17,7 @@ import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 import { handleCreateIntent } from "./payments.js";
+import fetch from "node-fetch";
 
 
 //--------------------------------------------
@@ -32,6 +33,30 @@ const SECRET_KEY = process.env.SECRET_KEY || "supersecret";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+async function sendEmail(to, subject, html) {
+  if (!to) return;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: "Speak to Heaven <onboarding@resend.dev>",
+      to,
+      subject,
+      html
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Email failed:", errorText);
+  }
+}
 
 app.use(cors());
 
@@ -190,11 +215,22 @@ app.post("/api/register", async (req, res) => {
 		const hashed = await bcrypt.hash(password, 10);
 
 		await pool.query(
-			`INSERT INTO users (email, password) VALUES ($1, $2)`,
-			[email, hashed]
-		);
+  `INSERT INTO users (email, password) VALUES ($1, $2)`,
+  [email, hashed]
+);
 
-		res.status(201).json({ ok: true, message: "Registered successfully" });
+await sendEmail(
+  email,
+  "Welcome to Speak to Heaven",
+  `
+  <h2>Welcome to Speak to Heaven</h2>
+  <p>Your account has been created.</p>
+  <p><strong>Login email:</strong> ${email}</p>
+  <p>You can now sign in using the password you chose.</p>
+  `
+);
+
+res.status(201).json({ ok: true, message: "Registered successfully" });
 	} catch (err) {
 		res.status(500).json({ error: "Server error" });
 	}
@@ -623,7 +659,16 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
         }
 
         await applyPlan(plan, userId, email);
-    }
+
+await sendEmail(
+  email,
+  "Your Speak to Heaven receipt",
+  "<h2>Payment received</h2>" +
+  "<p>Thank you for your offering.</p>" +
+  "<p><strong>Plan:</strong> " + plan + "</p>" +
+  "<p><strong>Email:</strong> " + email + "</p>"
+);
+}
 
     // Checkout flow (if you ever use /api/create-checkout)
     if (event.type === "checkout.session.completed") {
