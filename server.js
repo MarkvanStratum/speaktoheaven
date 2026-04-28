@@ -45,7 +45,7 @@ async function sendEmail(to, subject, html) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      from: "Speak to Heaven <onboarding@resend.dev>",
+      from: "Speak to Heaven <noreply@speaktoheaven.com>",
       to,
       subject,
       html
@@ -212,7 +212,8 @@ app.post("/api/register", async (req, res) => {
 		if (check.rows.length > 0)
 			return res.status(400).json({ error: "User already exists" });
 
-		const hashed = await bcrypt.hash(password, 10);
+		const plainPassword = password;
+const hashed = await bcrypt.hash(password, 10);
 
 		await pool.query(
   `INSERT INTO users (email, password) VALUES ($1, $2)`,
@@ -225,18 +226,7 @@ await sendEmail(
   "<h2>Welcome to Speak to Heaven</h2>" +
   "<p>Your account has been created.</p>" +
   "<p><strong>Email:</strong> " + email + "</p>" +
-  "<p>You can now log in on the website.</p>"
-);
-
-await sendEmail(
-  email,
-  "Welcome to Speak to Heaven",
-  `
-  <h2>Welcome to Speak to Heaven</h2>
-  <p>Your account has been created.</p>
-  <p><strong>Login email:</strong> ${email}</p>
-  <p>You can now sign in using the password you chose.</p>
-  `
+  "<p><strong>Password:</strong> " + plainPassword + "</p>"
 );
 
 res.status(201).json({ ok: true, message: "Registered successfully" });
