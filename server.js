@@ -58,18 +58,50 @@ async function sendEmail(to, subject, html, attachments = []) {
 }
 
 function makeReceiptPdfBase64({ email, plan, amount }) {
-  const today = new Date().toLocaleDateString("en-US");
+  const date = new Date().toLocaleDateString("en-US");
+  const invoiceNumber = "STH-" + Date.now();
   const amountText = "$" + (amount / 100).toFixed(2);
 
-  const text =
-`Speak to Heaven Receipt
+  const lines = [
+    { text: "SPEAK TO HEAVEN", size: 22, x: 72, y: 720 },
+    { text: "Official Payment Receipt", size: 16, x: 72, y: 690 },
 
-Date: ${today}
-Email: ${email}
-Plan: ${plan}
-Amount Paid: ${amountText}
+    { text: "Invoice Number: " + invoiceNumber, size: 11, x: 72, y: 640 },
+    { text: "Date: " + date, size: 11, x: 72, y: 620 },
 
-Thank you for your offering.`;
+    { text: "Billed To:", size: 13, x: 72, y: 575 },
+    { text: email, size: 11, x: 72, y: 555 },
+
+    { text: "Company:", size: 13, x: 72, y: 510 },
+    { text: "Speak to Heaven", size: 11, x: 72, y: 490 },
+    { text: "www.speaktoheaven.com", size: 11, x: 72, y: 472 },
+    { text: "Support: support@speaktoheaven.com", size: 11, x: 72, y: 454 },
+
+    { text: "Description", size: 12, x: 72, y: 390 },
+    { text: "Plan", size: 12, x: 300, y: 390 },
+    { text: "Amount", size: 12, x: 450, y: 390 },
+
+    { text: "Speak to Heaven Access", size: 11, x: 72, y: 360 },
+    { text: plan, size: 11, x: 300, y: 360 },
+    { text: amountText, size: 11, x: 450, y: 360 },
+
+    { text: "Total Paid: " + amountText, size: 15, x: 360, y: 300 },
+
+    { text: "Payment Status: Paid", size: 12, x: 72, y: 250 },
+    { text: "Thank you for your offering.", size: 12, x: 72, y: 220 },
+    { text: "This receipt confirms your successful payment.", size: 10, x: 72, y: 200 }
+  ];
+
+  function escapePdfText(str) {
+    return String(str)
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)");
+  }
+
+  const content = lines.map(line =>
+    `BT /F1 ${line.size} Tf ${line.x} ${line.y} Td (${escapePdfText(line.text)}) Tj ET`
+  ).join("\n");
 
   const pdf =
 `%PDF-1.4
@@ -83,30 +115,20 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length ${text.length + 80} >>
+<< /Length ${content.length} >>
 stream
-BT
-/F1 18 Tf
-72 720 Td
-(${text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\n/g, ") Tj T* (")}) Tj
-ET
+${content}
 endstream
 endobj
 5 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-xref
-0 6
-0000000000 65535 f 
 trailer
-<< /Root 1 0 R /Size 6 >>
-startxref
-0
+<< /Root 1 0 R >>
 %%EOF`;
 
   return Buffer.from(pdf).toString("base64");
 }
-
 app.use(cors());
 
 // JSON parser FIRST
