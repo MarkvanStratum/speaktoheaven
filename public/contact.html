@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Speak to Heaven</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --gold-divine: #c5a059;
+  --blue-saint: #2c3e50;
+  --bg-heaven: #fdfcfb;
+}
+
+body {
+  margin:0;
+  font-family:'EB Garamond', serif;
+  background:var(--bg-heaven);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.contact-box {
+  background:white;
+  padding:40px;
+  border-radius:15px;
+  width:100%;
+  max-width:500px;
+  box-shadow:0 15px 50px rgba(0,0,0,0.05);
+  border:1px solid rgba(197,160,89,0.2);
+}
+
+.logo {
+  text-align:center;
+  color:var(--gold-divine);
+  font-family:'Cinzel';
+  font-size:30px;
+  margin-bottom:20px;
+}
+
+h2 {
+  font-family:'Cinzel';
+  text-align:center;
+  color:var(--blue-saint);
+  margin-bottom:10px;
+}
+
+p {
+  text-align:center;
+  color:#8a8276;
+  margin-bottom:30px;
+}
+
+input, textarea {
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:15px;
+}
+
+textarea {
+  min-height:120px;
+  resize:vertical;
+}
+
+button {
+  width:100%;
+  padding:15px;
+  background:var(--gold-divine);
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-family:'Cinzel';
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover {
+  background:#b38f4d;
+}
+
+#status {
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="contact-box">
+  <div class="logo">†</div>
+
+  <h2>Contact Us</h2>
+  <p>Send us your message and we will respond shortly.</p>
+
+  <form id="contact-form">
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="email" id="email" placeholder="Your Email" required>
+    <textarea id="message" placeholder="Your Message" required></textarea>
+
+    <button type="submit">Send Message</button>
+  </form>
+
+  <div id="status"></div>
+</div>
+
+<script>
+document.getElementById("contact-form").addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const message = document.getElementById("message").value;
+
+  const res = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, message })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("status").innerText =
+    data.success ? "Message sent successfully." : "Failed to send message.";
+});
+</script>
+
+</body>
+</html>
