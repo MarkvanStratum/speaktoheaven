@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sacred Offering — Secure Checkout</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -22,6 +22,28 @@
         .pay-btn:hover { background: #b38f4d; transform: translateY(-1px); }
         .pay-btn:disabled { opacity: 0.5; cursor: default; }
         #error-message { color: #b03a2e; margin-top: 15px; text-align: center; font-size: 14px; }
+.fake-payment-fields label {
+  display: block;
+  margin-bottom: 6px;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.fake-payment-fields input,
+.fake-payment-fields select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
     </style>
 </head>
 <body>
@@ -31,74 +53,68 @@
         <p id="plan-desc">Prepare your heart for the journey ahead.</p>
         
         <form id="payment-form">
-            <div id="payment-element"></div>
-            <button id="submit" class="pay-btn">Complete Offering</button>
-            <div id="error-message"></div>
+            <div class="fake-payment-fields">
+  <label>Card Number</label>
+  <input type="text" placeholder="1234 1234 1234 1234" inputmode="numeric">
+
+  <div class="row">
+    <div>
+      <label>Expiry Date</label>
+      <input type="text" placeholder="MM / YY" inputmode="numeric">
+    </div>
+    <div>
+      <label>CVC</label>
+      <input type="text" placeholder="CVC" inputmode="numeric">
+    </div>
+  </div>
+
+  <label>Name on Card</label>
+  <input type="text" placeholder="Full name">
+
+  <label>Billing Country</label>
+  <select>
+    <option>United Kingdom</option>
+    <option>United States</option>
+    <option>Canada</option>
+    <option>Australia</option>
+    <option>European Union</option>
+  </select>
+
+  <div class="cards">
+    <span class="visa">VISA</span>
+    <span class="mastercard">Mastercard</span>
+  </div>
+</div>
+
+<button id="submit" class="pay-btn">Complete Offering</button>
+<div id="error-message"></div>
         </form>
     </div>
 
     <script>
-        // Use your Public Key here
-        const stripe = Stripe('pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT');
-        
-        const params = new URLSearchParams(window.location.search);
-        const plan = params.get('plan') || 'god';
-        const token = localStorage.getItem("jwt");
+const params = new URLSearchParams(window.location.search);
+const plan = params.get('plan') || 'god';
 
-        // UI Updates based on plan
-        const titles = { 'god': 'God Access', 'all': 'Full Access', 'lifetime': 'Lifetime Access' };
-        document.getElementById('plan-title').innerText = titles[plan] || 'Divine Offering';
+const titles = {
+  god: "God Access",
+  all: "Full Access",
+  lifetime: "Lifetime Access"
+};
 
-        let elements;
+const prices = {
+  god: "$29.95",
+  all: "$35.95",
+  lifetime: "$49.95"
+};
 
-        async function initialize() {
-            // We fetch the clientSecret from the new endpoint we added to server.js
-            const response = await fetch("/api/create-payment-intent", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token 
-                },
-                body: JSON.stringify({ plan }),
-            });
-            
-            const data = await response.json();
-            if (data.error) {
-                document.getElementById('error-message').innerText = data.error;
-                return;
-            }
+document.getElementById("plan-title").innerText = titles[plan];
+document.getElementById("plan-desc").innerText = titles[plan] + " — " + prices[plan];
 
-            const { clientSecret } = data;
-            elements = stripe.elements({ clientSecret });
-            const paymentElement = elements.create("payment");
-            paymentElement.mount("#payment-element");
-        }
-
-        document.querySelector("#payment-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const submitBtn = document.querySelector("#submit");
-            submitBtn.disabled = true;
-
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    // Redirect back to home with a success flag
-                    return_url: window.location.origin + "/?payment=success",
-                },
-            });
-
-            if (error) {
-                document.querySelector("#error-message").textContent = error.message;
-                submitBtn.disabled = false;
-            }
-        });
-
-        if (!token) {
-            alert("Please sign in first.");
-            window.location.href = "/";
-        } else {
-            initialize();
-        }
-    </script>
+document.querySelector("#payment-form").addEventListener("submit", function(e) {
+  e.preventDefault();
+  document.getElementById("error-message").innerText =
+    "Demo checkout only — payment processing coming soon.";
+});
+</script>
 </body>
 </html>
