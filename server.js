@@ -784,10 +784,11 @@ app.get("/test-receipt-email", async (req, res) => {
   await sendEmail(
     email,
     "TEST Receipt",
-    "<h2>Test payment received</h2>" +
-    "<p>This is a test receipt email.</p>" +
-    "<p><strong>Plan:</strong> lifetime</p>" +
-    "<p><strong>Amount:</strong> $49.95</p>",
+    "<h2>Thank you for your order with SpeakToHeaven.com</h2>" +
+"<p>We have received your payment successfully.</p>" +
+"<p>Your receipt is attached to this email as a PDF.</p>" +
+"<p><strong>Plan:</strong> Lifetime Access</p>" +
+"<p><strong>Amount paid:</strong> $49.95</p>",
     [
       {
         filename: "receipt.pdf",
