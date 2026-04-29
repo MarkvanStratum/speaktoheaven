@@ -73,9 +73,11 @@ function makeReceiptPdfBase64({ email, plan, amount }) {
     { text: email, size: 11, x: 72, y: 555 },
 
     { text: "Company:", size: 13, x: 72, y: 510 },
-    { text: "Speak to Heaven", size: 11, x: 72, y: 490 },
-    { text: "www.speaktoheaven.com", size: 11, x: 72, y: 472 },
-    { text: "Support: support@speaktoheaven.com", size: 11, x: 72, y: 454 },
+{ text: "RIDGWELL SERVICES LIMITED", size: 11, x: 72, y: 490 },
+{ text: "Company No: 16277582", size: 11, x: 72, y: 472 },
+{ text: "85 Great Portland Street", size: 11, x: 72, y: 454 },
+{ text: "First Floor", size: 11, x: 72, y: 436 },
+{ text: "London, W1W 7LT", size: 11, x: 72, y: 418 },
 
     { text: "Description", size: 12, x: 72, y: 390 },
     { text: "Plan", size: 12, x: 300, y: 390 },
