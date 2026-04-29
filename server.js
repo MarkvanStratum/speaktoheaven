@@ -35,7 +35,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-async function sendEmail(to, subject, html) {
+async function sendEmail(to, subject, html, attachments = []) {
   if (!to) return;
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -48,14 +48,63 @@ async function sendEmail(to, subject, html) {
       from: "Speak to Heaven <noreply@speaktoheaven.com>",
       to,
       subject,
-      html
+      html,
+      attachments
     })
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Email failed:", errorText);
-  }
+  const text = await response.text();
+  console.log("EMAIL RESPONSE:", text);
+}
+
+function makeReceiptPdfBase64({ email, plan, amount }) {
+  const today = new Date().toLocaleDateString("en-US");
+  const amountText = "$" + (amount / 100).toFixed(2);
+
+  const text =
+`Speak to Heaven Receipt
+
+Date: ${today}
+Email: ${email}
+Plan: ${plan}
+Amount Paid: ${amountText}
+
+Thank you for your offering.`;
+
+  const pdf =
+`%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length ${text.length + 80} >>
+stream
+BT
+/F1 18 Tf
+72 720 Td
+(${text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\n/g, ") Tj T* (")}) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+trailer
+<< /Root 1 0 R /Size 6 >>
+startxref
+0
+%%EOF`;
+
+  return Buffer.from(pdf).toString("base64");
 }
 
 app.use(cors());
@@ -659,13 +708,26 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
 
         await applyPlan(plan, userId, email);
 
+const receiptPdf = makeReceiptPdfBase64({
+  email,
+  plan,
+  amount: paymentIntent.amount
+});
+
 await sendEmail(
   email,
   "Your Speak to Heaven receipt",
   "<h2>Payment received</h2>" +
   "<p>Thank you for your offering.</p>" +
   "<p><strong>Plan:</strong> " + plan + "</p>" +
-  "<p><strong>Email:</strong> " + email + "</p>"
+  "<p><strong>Amount:</strong> $" + (paymentIntent.amount / 100).toFixed(2) + "</p>" +
+  "<p>Your PDF receipt is attached.</p>",
+  [
+    {
+      filename: "speak-to-heaven-receipt.pdf",
+      content: receiptPdf
+    }
+  ]
 );
 }
 
@@ -684,6 +746,33 @@ await sendEmail(
     }
 
     res.json({ received: true });
+});
+
+app.get("/test-receipt-email", async (req, res) => {
+  const email = "markvanstratum67@gmail.com";
+
+  const receiptPdf = makeReceiptPdfBase64({
+    email,
+    plan: "lifetime",
+    amount: 4995
+  });
+
+  await sendEmail(
+    email,
+    "TEST Receipt",
+    "<h2>Test payment received</h2>" +
+    "<p>This is a test receipt email.</p>" +
+    "<p><strong>Plan:</strong> lifetime</p>" +
+    "<p><strong>Amount:</strong> $49.95</p>",
+    [
+      {
+        filename: "receipt.pdf",
+        content: receiptPdf
+      }
+    ]
+  );
+
+  res.send("Test email sent");
 });
 
 app.get("/", (req, res) => {
