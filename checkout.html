@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Offering — Secure Checkout</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-divine: #c5a059;
+            --blue-saint: #2c3e50;
+            --bg-heaven: #fdfcfb;
+        }
+        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .checkout-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); width: 100%; max-width: 450px; border: 1px solid rgba(197,160,89,0.2); }
+        .logo { text-align: center; color: var(--gold-divine); font-family: 'Cinzel'; font-size: 30px; margin-bottom: 20px; }
+        h2 { font-family: 'Cinzel'; text-align: center; color: var(--blue-saint); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        p { text-align: center; color: #8a8276; font-style: italic; margin-bottom: 30px; }
+        #payment-element { margin-bottom: 24px; }
+        .pay-btn { background: var(--gold-divine); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; letter-spacing: 1px; }
+        .pay-btn:hover { background: #b38f4d; transform: translateY(-1px); }
+        .pay-btn:disabled { opacity: 0.5; cursor: default; }
+        #error-message { color: #b03a2e; margin-top: 15px; text-align: center; font-size: 14px; }
+.fake-payment-fields label {
+  display: block;
+  margin-bottom: 6px;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.fake-payment-fields input,
+.fake-payment-fields select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+    </style>
+</head>
+<body>
+    <div class="checkout-box">
+        <div class="logo">†</div>
+        <h2 id="plan-title">Divine Offering</h2>
+        <p id="plan-desc">Prepare your heart for the journey ahead.</p>
+        
+        <form id="payment-form">
+            <div class="fake-payment-fields">
+  <label>Card Number</label>
+  <input type="text" placeholder="1234 1234 1234 1234" inputmode="numeric">
+
+  <div class="row">
+    <div>
+      <label>Expiry Date</label>
+      <input type="text" placeholder="MM / YY" inputmode="numeric">
+    </div>
+    <div>
+      <label>CVC</label>
+      <input type="text" placeholder="CVC" inputmode="numeric">
+    </div>
+  </div>
+
+  <label>Name on Card</label>
+  <input type="text" placeholder="Full name">
+
+  <label>Billing Country</label>
+  <select>
+    <option>United Kingdom</option>
+    <option>United States</option>
+    <option>Canada</option>
+    <option>Australia</option>
+    <option>European Union</option>
+  </select>
+
+  <div style="margin-top:10px;">
+  <img src="https://static.vecteezy.com/system/resources/previews/020/975/572/original/visa-logo-visa-icon-transparent-free-png.png"
+       alt="Visa"
+       style="height:28px;margin-right:15px;vertical-align:middle;">
+
+  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+       alt="MasterCard"
+       style="height:28px;vertical-align:middle;">
+</div>
+</div>
+
+<button id="submit" class="pay-btn">Complete Offering</button>
+<div id="error-message"></div>
+        </form>
+    </div>
+
+    <script>
+const params = new URLSearchParams(window.location.search);
+const plan = params.get('plan') || 'god';
+
+const titles = {
+  god: "God Access",
+  all: "Full Access",
+  lifetime: "Lifetime Access"
+};
+
+const prices = {
+  god: "£29.95",
+  all: "£35.95",
+  lifetime: "£49.95"
+};
+
+document.getElementById("plan-title").innerText = titles[plan];
+document.getElementById("plan-desc").innerText = titles[plan] + " — " + prices[plan];
+
+document.querySelector("#payment-form").addEventListener("submit", function(e) {
+  e.preventDefault();
+  document.getElementById("error-message").innerText =
+    "Demo checkout only — payment processing coming soon.";
+});
+</script>
+</body>
+</html>

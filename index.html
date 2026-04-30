@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Speak to Heaven — Biblical AI Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    #limitModal {
+      pointer-events: none;
+    }
+
+    #limitModal[style*="flex"] {
+      pointer-events: auto;
+    }
+    :root {
+      --bg-heaven: #fdfcfb; 
+      --marble: #ffffff;
+      --gold-divine: #c5a059;
+      --blue-saint: #2c3e50;
+      --text-main: #33302c;
+      --text-muted: #8a8276;
+      --border-holy: rgba(197, 160, 89, 0.25);
+      --radius: 12px;
+      --divine-shadow: 0 15px 50px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--text-main); background-color: var(--bg-heaven);
+      background-image: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.12), transparent 30%);
+      font-family: "EB Garamond", serif; font-size: 19px; line-height: 1.7;
+    }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 80px; }
+
+body.logged-in .wrap {
+  max-width: none;
+  width: 100%;
+  padding: 0 10px 40px;
+}
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-holy);
+      margin-bottom: 1px;
+    }
+    .brand { display: flex; align-items: center; gap: 15px; }
+    .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
+    
+    .proclamation { text-align: center; padding: 0px 0; max-width: 800px; margin: 0 auto; }
+    .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
+    
+   .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
+
+body.logged-in #mainGrid {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+body.logged-in #chatCard {
+  width: 100%;
+}
+
+    @media (max-width: 950px) { .grid { grid-template-columns: 1fr !important; } }
+
+    .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: visible; }
+
+
+    
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0ddd5; font-family: inherit; font-size: 16px; }
+    .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
+    .btn.primary { background: var(--gold-divine); color: white; }
+
+    .chat-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 650px; }
+
+body.logged-in .chat-shell {
+  height: calc(100vh - 120px);
+}
+    .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 20px; overflow-y: auto; }
+    .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; transition: 0.2s; }
+    .pitem.active { border-color: var(--gold-divine); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .chat-log { padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex: 1; min-height: 0; min-width: 0; background: #fff; border-bottom: 1px solid var(--border-holy); }
+    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; flex-shrink: 0; word-break: break-word; }
+    .bubble.them { background: #f8f6f2; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+    .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+    .tabs { display: flex; background: #f8f8f8; cursor: pointer; }
+    .tab { flex: 1; padding: 15px; text-align: center; font-family: "Cinzel", serif; color: var(--text-muted); font-size: 13px; }
+    .tab.active { background: white; color: var(--gold-divine); border-top: 2px solid var(--gold-divine); }
+    .hide { display: none !important; }
+
+    #chatCard { overflow: hidden; }
+    #chatCard .chat-log { overflow-y: auto; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">†</div>
+        <h1>Speak to Heaven</h1>
+      </div>
+      <div>
+        <button class="btn" id="logoutBtn" style="display:none; width: auto;">Leave Sanctuary</button>
+      </div>
+    </header>
+
+    <section class="proclamation" id="heroText">
+      <h2>Divine Advice for Your Life</h2>
+      <p>Speak with the Heavens. Seek guidance from God, Jesus, and the Prophets to illuminate your path.</p>
+    </section>
+
+    <div class="grid" id="mainGrid">
+      <div class="stack" id="authSection">
+        <div class="card" style="margin-bottom: 30px;">
+          <div class="tabs">
+            <div class="tab active" id="tabLogin">Sign In</div>
+            <div class="tab" id="tabRegister">New Account</div>
+          </div>
+          <div style="padding: 30px;">
+            <div id="loginPane">
+              <input id="loginEmail" type="email" placeholder="Email Address" />
+              <input id="loginPassword" type="password" placeholder="Password" />
+              <button class="btn primary" id="loginBtn">Enter the Sanctuary</button>
+            </div>
+            <div id="registerPane" class="hide">
+              <input id="regEmail" type="email" placeholder="Email Address" />
+              <input id="regPassword" type="password" placeholder="Choose Password" />
+              <button class="btn primary" id="registerBtn">Begin Pilgrimage</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 25px;">
+          <h4 style="font-family: Cinzel; color: var(--gold-divine); margin: 0 0 15px;">Offerings</h4>
+          <button class="btn" id="buyGodBtn" style="margin-bottom: 10px;">God Access (£29.95)</button>
+          <button class="btn" id="buyAllBtn" style="margin-bottom: 10px;">Full Access (£35.95)</button>
+          <button class="btn primary" id="buyLifeBtn">Lifetime Access (£49.95)</button>
+        </div>
+      </div>
+
+      <div class="card" id="chatCard">
+        <div class="chat-shell">
+          <div class="sidebar" id="profiles"></div>
+          <div style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); display: flex; align-items: center; gap: 15px;">
+              <img id="chatAvatar" src="" alt="" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--gold-divine); object-fit: cover; display: none;">
+              <div id="chatTitle" style="font-family: Cinzel; color: var(--blue-saint);">Select a Prophet</div>
+            </div>
+            <div class="chat-log" id="chatLog">
+              <div id="welcomeMessage" style="text-align: center; color: var(--text-muted); font-style: italic; margin-top: 100px;">Please sign in and select a figure.</div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid var(--border-holy); display: flex; gap: 12px; background: white;">
+              <textarea id="chatInput" placeholder="Your question..." disabled style="flex:1; border: 1px solid #e0ddd5; border-radius: 8px; padding: 10px; resize: none;"></textarea>
+              <button class="btn primary" id="sendBtn" disabled style="width: auto;">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let selectedId = null;
+    let guestTeaserUsed = false;
+
+    // Use empty string to make requests relative to the current host/port
+    const API_BASE = "";
+// If your frontend is NOT served by the same Express server as /api/*, set this to your backend base URL, e.g.
+// const API_BASE = "http://localhost:10000";
+// const API_BASE = "https://your-backend-domain.com";
+
+    const profileImages = {
+  "God": "god.jpg",
+  "Jesus Christ": "jesus.jpg",
+  "Holy Spirit": "holyspirit.jpg",
+  "Mary": "mary.jpg",
+  "Moses": "moses.jpg",
+  "Eve": "eve.jpg",
+  "King David": "david.jpg",
+  "Isaiah": "isaiah.jpg",
+  "Daniel": "daniel.jpg",
+  "John": "john.jpg",
+  "Paul": "paul.jpg",
+  "Peter": "peter.jpg"
+};
+
+    function getToken() { return localStorage.getItem("jwt") || ""; }
+    function setToken(t) { localStorage.setItem("jwt", t); }
+
+    function authHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${getToken()}`
+      };
+    }
+
+    $("tabLogin").onclick = () => {
+      $("tabLogin").classList.add("active");
+      $("tabRegister").classList.remove("active");
+      $("loginPane").classList.remove("hide");
+      $("registerPane").classList.add("hide");
+    };
+    $("tabRegister").onclick = () => {
+      $("tabRegister").classList.add("active");
+      $("tabLogin").classList.remove("active");
+      $("registerPane").classList.remove("hide");
+      $("loginPane").classList.add("hide");
+    };
+
+    async function loadProfiles() {
+      try {
+        const res = await fetch(`${API_BASE}/api/profiles`);
+        if (!res.ok) throw new Error("Connection failed");
+        const profiles = await res.json();
+        const container = $("profiles");
+        container.innerHTML = "";
+        profiles.forEach(p => {
+          const div = document.createElement("div");
+          div.className = "pitem";
+          div.innerHTML = `<strong>${p.name}</strong>`;
+          div.onclick = () => selectProfile(p, div);
+          container.appendChild(div);
+        });
+      } catch (e) {
+        console.error("Failed to load profiles", e);
+      }
+    }
+
+    function selectProfile(p, el) {
+      document.querySelectorAll(".pitem").forEach(i => i.classList.remove("active"));
+      el.classList.add("active");
+      selectedId = p.id;
+      $("chatTitle").innerText = p.name;
+      const wm = $("welcomeMessage");
+if (wm) wm.style.display = "none";
+$("chatLog").innerHTML = "";
+      const avatar = $("chatAvatar");
+
+avatar.src = p.image + "?t=" + Date.now();
+avatar.style.display = "block";
+      
+      if (getToken() || !guestTeaserUsed) {
+        $("chatInput").disabled = false;
+        $("sendBtn").disabled = false;
+      }
+      if (getToken()) {
+  loadHistory(p.id);
+} else {
+  appendMessage("them", `I am ${p.name}. What seeks your heart?`);
+}
+    }
+
+    async function loadHistory(characterId) {
+      if (!characterId) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/chat/history?characterId=${characterId}`, {
+  headers: getToken() ? authHeaders() : {}
+        });
+        if (!res.ok) {
+  alert("Error loading chat history (" + res.status + ")");
+  return;
+}
+        const history = await res.json();
+$("chatLog").innerHTML = "";
+        history.forEach(m => {
+          appendMessage(m.from_user ? "me" : "them", m.text);
+        });
+      } catch(e) {}
+    }
+
+    function appendMessage(side, text) {
+      const div = document.createElement("div");
+      div.className = `bubble ${side}`;
+      div.innerText = text;
+      $("chatLog").appendChild(div);
+      $("chatLog").scrollTo({ top: $("chatLog").scrollHeight, behavior: 'smooth' });
+    }
+
+    $("registerBtn").onclick = async () => {
+      const email = $("regEmail").value;
+      const password = $("regPassword").value;
+      if(!email || !password) return alert("Please fill all fields.");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("Pilgrimage account created. Please Sign In.");
+          $("tabLogin").click();
+        } else {
+          alert(data.error || "Registration failed.");
+        }
+      } catch (e) {
+        alert("Server connection failed.");
+      }
+    };
+
+    $("loginBtn").onclick = async () => {
+  const email = $("loginEmail").value.trim().toLowerCase();
+  const password = $("loginPassword").value;
+
+  if (!email || !password) {
+    alert("Please enter email and password.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const raw = await res.text();        // READ RAW TEXT FIRST
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
+
+    if (!res.ok) {
+      alert(data.error || `Login failed (${res.status}). Response: ${raw.slice(0, 140)}`);
+      return;
+    }
+
+    if (!data.token) {
+      alert(`Login failed: no token returned. Response: ${raw.slice(0, 140)}`);
+      return;
+    }
+
+    setToken(data.token);
+    setLoggedInUI(true);
+    window.location.reload();
+
+  } catch (err) {
+    console.error(err);
+    alert("Server connection failed.");
+  }
+};
+   
+
+    $("logoutBtn").onclick = () => {
+      localStorage.removeItem("jwt");
+      location.reload();
+    };
+
+    function setLoggedInUI(isLoggedIn) {
+      if (isLoggedIn) {
+document.body.classList.add("logged-in");
+        $("authSection").classList.add("hide");
+        $("logoutBtn").style.display = "block";
+        $("heroText").innerHTML = "<h2>Welcome Back, Seeker</h2><p>Continue your sacred dialogue below.</p>";
+        if (selectedId) {
+          $("chatInput").disabled = false;
+          $("sendBtn").disabled = false;
+        }
+      }
+    }
+
+    $("sendBtn").onclick = async () => {
+      const text = $("chatInput").value;
+      if (!text || !selectedId) return;
+
+      appendMessage("me", text);
+// 🔴 FREE MODE (NOT LOGGED IN)
+if (!getToken()) {
+
+  let name = $("chatTitle").innerText;
+
+  let reply = "";
+
+  if (name.includes("God")) {
+    reply = "I am the Alpha and the Omega, the beginning and the end. I know your heart before you speak.";
+  } 
+  else if (name.includes("Jesus")) {
+    reply = "Peace be with you. Come to me with your burdens, and I will give you rest.";
+  } 
+  else if (name.includes("Holy Spirit")) {
+    reply = "I am the Comforter, the Spirit of truth. I guide those who listen.";
+  } 
+  else if (name.includes("Mary")) {
+    reply = "My child, walk in humility and trust in the Lord with all your heart.";
+  } 
+  else if (name.includes("Moses")) {
+    reply = "I have walked through the wilderness with God. Trust Him, even when the path is unclear.";
+  } 
+  else if (name.includes("David")) {
+    reply = "The Lord is my shepherd; I shall not want. Seek Him, and He will guide you.";
+  } 
+  else {
+    reply = "Seek wisdom and you shall find it.";
+  }
+
+  appendMessage("them",
+    reply +
+    "\n\nTo continue this sacred conversation, you must create an account and enter the sanctuary."
+  );
+
+  $("chatInput").disabled = true;
+  $("sendBtn").disabled = true;
+
+  return; // 🔴 IMPORTANT
+}
+
+      $("chatInput").value = "";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ characterId: selectedId, message: text })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          appendMessage("them", data.reply);
+          if (!getToken()) guestTeaserUsed = true;
+        } else if (res.status === 403 && data.error === "LIMIT_REACHED") {
+            const modal = $("limitModal");
+            modal.style.display = "flex";
+            modal.style.pointerEvents = "auto";
+        } else {
+          alert(data.error || "Message failed.");
+        }
+      } catch(e) {
+        alert("The connection to the heavens was interrupted.");
+      }
+    };
+
+    window.onload = () => { 
+$("buyGodBtn").onclick = () => { window.location.href = "/register.html"; };
+$("buyAllBtn").onclick = () => { window.location.href = "/register.html"; };
+$("buyLifeBtn").onclick = () => { window.location.href = "/register.html"; };
+      loadProfiles(); 
+      if (getToken()) setLoggedInUI(true); 
+    };
+  </script>
+
+  <div id="limitModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px);">
+    <div class="card" style="max-width: 450px; width: 90%; padding: 40px; text-align: center; border: 2px solid var(--gold-divine); background: white;">
+      <div class="logo" style="margin: 0 auto 20px;">†</div>
+      <h3 style="font-family: Cinzel; color: var(--blue-saint); font-size: 24px; margin-bottom: 15px;">A Moment of Reflection</h3>
+      <p style="color: var(--text-muted); font-style: italic; margin-bottom: 30px;">Your free consultations have reached their limit. To continue your spiritual journey, please consider a sacred offering.</p>
+      <button class="btn primary" onclick="window.location.href='/pricing.html'">View Sacred Offerings</button>
+      <button class="btn" style="border:none; margin-top:15px;" onclick="$('limitModal').style.display='none'; $('limitModal').style.pointerEvents='none';">Dismiss</button>
+    </div>
+  </div>
+<footer style="
+margin-top:40px;
+padding:25px;
+text-align:center;
+font-size:14px;
+color:#8a8276;
+border-top:1px solid rgba(197,160,89,0.25);
+">
+
+<!-- Links -->
+<div style="margin-bottom:15px;">
+  <a href="/privacy-policy.html" style="color:#8a8276;margin-right:20px;">
+    Privacy Policy
+  </a>
+
+  <a href="/terms-and-conditions.html" style="color:#8a8276;margin-right:20px;">
+    Terms & Conditions
+  </a>
+
+  <a href="/contact.html" style="color:#8a8276;">
+    Contact
+  </a>
+
+  <a href="/refund-policy.html" style="color:#8a8276;margin-left:20px;">
+    Cancellation & Refund Policy
+  </a>
+</div>
+
+<!-- Customer Service -->
+<div style="margin-bottom:15px;">
+  <strong>Customer Service:</strong> +44 7414 218798
+</div>
+
+<!-- Payment Logos -->
+<div style="margin-bottom:15px;">
+  <img src="https://static.vecteezy.com/system/resources/previews/020/975/572/original/visa-logo-visa-icon-transparent-free-png.png" 
+       alt="Visa" 
+       style="height:28px;margin-right:15px;vertical-align:middle;">
+
+  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+       alt="MasterCard" 
+       style="height:28px;vertical-align:middle;">
+</div>
+
+<!-- Company Details (THIS is what they want) -->
+<div style="font-size:13px; line-height:1.6;">
+  <strong>RIDGWELL SERVICES LIMITED</strong><br>
+  Company No. 16277582<br>
+  85 Great Portland Street, First Floor, London, England, W1W 7LT
+</div>
+
+</footer></body>
+</html>
