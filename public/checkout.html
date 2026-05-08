@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,115 +12,119 @@
             --gold-divine: #c5a059;
             --blue-saint: #2c3e50;
             --bg-heaven: #fdfcfb;
+            --text-muted: #8a8276;
+            --text-main: #33302c;
         }
-        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .checkout-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); width: 100%; max-width: 450px; border: 1px solid rgba(197,160,89,0.2); }
-        .logo { text-align: center; color: var(--gold-divine); font-family: 'Cinzel'; font-size: 30px; margin-bottom: 20px; }
-        h2 { font-family: 'Cinzel'; text-align: center; color: var(--blue-saint); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        p { text-align: center; color: #8a8276; font-style: italic; margin-bottom: 30px; }
-        #payment-element { margin-bottom: 24px; }
-        .pay-btn { background: var(--gold-divine); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; letter-spacing: 1px; }
-        .pay-btn:hover { background: #b38f4d; transform: translateY(-1px); }
-        .pay-btn:disabled { opacity: 0.5; cursor: default; }
-        #error-message { color: #b03a2e; margin-top: 15px; text-align: center; font-size: 14px; }
-.fake-payment-fields label {
-  display: block;
-  margin-bottom: 6px;
-  color: #2c3e50;
-  font-size: 14px;
-}
+        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .checkout-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); width: 100%; max-width: 500px; border: 1px solid rgba(197,160,89,0.2); }
+        .logo { text-align: center; color: var(--gold-divine); font-family: 'Cinzel'; font-size: 30px; margin-bottom: 10px; }
+        
+        .plan-summary { background: #fdfaf5; padding: 20px; border-radius: 10px; margin-bottom: 25px; text-align: center; border: 1px dashed var(--gold-divine); }
+        .plan-name { font-family: 'Cinzel'; color: var(--blue-saint); font-size: 20px; margin-bottom: 5px; }
+        .plan-price { font-size: 28px; font-weight: bold; color: var(--gold-divine); }
+        
+        .disclosure-box { font-size: 13px; color: var(--text-muted); background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; line-height: 1.5; border: 1px solid #eee; }
+        .disclosure-box strong { color: var(--blue-saint); }
 
-.fake-payment-fields input,
-.fake-payment-fields select {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: 15px;
-}
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--blue-saint); font-size: 14px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        
+        .checkbox-group { margin: 25px 0; }
+        .checkbox-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px; cursor: pointer; }
+        .checkbox-item input { width: auto; margin-top: 4px; cursor: pointer; flex-shrink: 0; }
+        .checkbox-text { font-size: 13px; color: var(--text-main); line-height: 1.4; }
+        .checkbox-text a { color: var(--gold-divine); text-decoration: underline; font-weight: bold; }
 
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+        .pay-btn { background: var(--blue-saint); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-family: 'Cinzel'; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 10px; font-weight: bold; }
+        .pay-btn:hover { background: #1a2530; transform: translateY(-2px); }
+        
+        .secure-badge { text-align: center; font-size: 12px; color: #4caf50; margin-top: 10px; font-weight: bold; text-transform: uppercase; }
+
+        .footer-links { text-align: center; margin-top: 30px; font-size: 13px; color: var(--text-muted); border-top: 1px solid #eee; padding-top: 20px; }
+        .footer-links a { color: var(--gold-divine); margin: 0 10px; text-decoration: none; font-weight: bold; }
+        .footer-links a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="checkout-box">
-        <div class="logo">†</div>
-        <h2 id="plan-title">Divine Offering</h2>
-        <p id="plan-desc">Prepare your heart for the journey ahead.</p>
+        <div class="logo">† Speak to Heaven</div>
         
+        <div class="plan-summary">
+            <div class="plan-name" id="display-plan">Access Plan</div>
+            <div class="plan-price" id="display-price">£--.--</div>
+        </div>
+
+        <div class="disclosure-box">
+            <strong>Payment Disclosure:</strong> We only accept <b>one-time payments</b> verified by 3D Secure. We have <b>no subscriptions</b> and you will not be charged again.<br><br>
+            <strong>Billing Descriptor:</strong> This charge will appear on your bank statement as: <strong>SPEAKTOHEAVEN</strong>.
+        </div>
+
         <form id="payment-form">
-            <div class="fake-payment-fields">
-  <label>Card Number</label>
-  <input type="text" placeholder="1234 1234 1234 1234" inputmode="numeric">
+            <label>Cardholder Name</label>
+            <input type="text" placeholder="Full name as it appears on card" required>
+            
+            <label>Card Information</label>
+            <div id="card-element" style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; background: white;">
+                <!-- Payment Processor Placeholder -->
+                <input type="text" placeholder="Card Number    MM/YY    CVC" style="border:none; margin:0; padding:0;">
+            </div>
 
-  <div class="row">
-    <div>
-      <label>Expiry Date</label>
-      <input type="text" placeholder="MM / YY" inputmode="numeric">
-    </div>
-    <div>
-      <label>CVC</label>
-      <input type="text" placeholder="CVC" inputmode="numeric">
-    </div>
-  </div>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" required>
+                    <span class="checkbox-text">
+                        I acknowledge that Speak to Heaven is an AI-generated digital service for personal reflection and does not facilitate real communication with God, Jesus, prophets, or deceased persons.
+                    </span>
+                </label>
 
-  <label>Name on Card</label>
-  <input type="text" placeholder="Full name">
+                <label class="checkbox-item">
+                    <input type="checkbox" required>
+                    <span class="checkbox-text">
+                        I agree to the <a href="/terms-and-conditions.html" target="_blank">Terms & Conditions</a> and <a href="/privacy-policy.html" target="_blank">Privacy Policy</a>.
+                    </span>
+                </label>
 
-  <label>Billing Country</label>
-  <select>
-    <option>United Kingdom</option>
-    <option>United States</option>
-    <option>Canada</option>
-    <option>Australia</option>
-    <option>European Union</option>
-  </select>
+                <label class="checkbox-item">
+                    <input type="checkbox" required>
+                    <span class="checkbox-text">
+                        I consent to immediate digital access and acknowledge that I waive my 14-day cancellation period once the service has commenced.
+                    </span>
+                </label>
+            </div>
 
-  <div style="margin-top:10px;">
-  <img src="https://static.vecteezy.com/system/resources/previews/020/975/572/original/visa-logo-visa-icon-transparent-free-png.png"
-       alt="Visa"
-       style="height:28px;margin-right:15px;vertical-align:middle;">
-
-  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-       alt="MasterCard"
-       style="height:28px;vertical-align:middle;">
-</div>
-</div>
-
-<button id="submit" class="pay-btn">Complete Offering</button>
-<div id="error-message"></div>
+            <button id="submit" class="pay-btn">Complete One-Time Payment</button>
+            <div class="secure-badge">🛡️ Secured by 3D Secure Authentication</div>
         </form>
+
+        <div class="footer-links">
+            <a href="/contact.html">Refund Request</a> | 
+            <a href="/contact.html">Support Contact</a>
+        </div>
+        
+        <div style="text-align:center; margin-top: 20px; opacity: 0.7;">
+            <img src="https://static.vecteezy.com/system/resources/previews/020/975/572/original/visa-logo-visa-icon-transparent-free-png.png" alt="Visa" style="height:22px; margin-right:15px; vertical-align: middle;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" style="height:22px; vertical-align: middle;">
+        </div>
     </div>
 
     <script>
-const params = new URLSearchParams(window.location.search);
-const plan = params.get('plan') || 'god';
+        const params = new URLSearchParams(window.location.search);
+        const plan = params.get('plan') || 'god';
 
-const titles = {
-  god: "God Access",
-  all: "Full Access",
-  lifetime: "Lifetime Access"
-};
+        const titles = {
+            god: "God Access",
+            all: "Full Access",
+            lifetime: "Lifetime Access"
+        };
 
-const prices = {
-  god: "£29.95",
-  all: "£35.95",
-  lifetime: "£49.95"
-};
+        const prices = {
+            god: "£29.95",
+            all: "£35.95",
+            lifetime: "£49.95"
+        };
 
-document.getElementById("plan-title").innerText = titles[plan];
-document.getElementById("plan-desc").innerText = titles[plan] + " — " + prices[plan];
-
-document.querySelector("#payment-form").addEventListener("submit", function(e) {
-  e.preventDefault();
-  document.getElementById("error-message").innerText =
-    "Demo checkout only — payment processing coming soon.";
-});
-</script>
+        document.getElementById('display-plan').innerText = titles[plan] || "Access Plan";
+        document.getElementById('display-price').innerText = prices[plan] || "£--.--";
+    </script>
 </body>
 </html>

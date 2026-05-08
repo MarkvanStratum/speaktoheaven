@@ -139,7 +139,12 @@ body.logged-in .chat-shell {
         </div>
 
         <div class="card" style="padding: 25px;">
-          <h4 style="font-family: Cinzel; color: var(--gold-divine); margin: 0 0 15px;">Offerings</h4>
+          <h4 style="font-family: Cinzel; color: var(--gold-divine); margin: 0 0 10px;">Offerings</h4>
+          
+          <div style="font-size: 12px; line-height: 1.4; color: var(--text-muted); margin-bottom: 20px; font-style: italic; border-left: 2px solid var(--gold-divine); padding-left: 10px;">
+            Speak to Heaven is an AI-generated spiritual-themed digital chat service for personal reflection. It does not provide real communication with God, Jesus, prophets, angels, deceased persons, or spiritual beings. It is not religious authority, counselling, therapy, or professional advice.
+          </div>
+
           <button class="btn" id="buyGodBtn" style="margin-bottom: 10px;">God Access (£29.95)</button>
           <button class="btn" id="buyAllBtn" style="margin-bottom: 10px;">Full Access (£35.95)</button>
           <button class="btn primary" id="buyLifeBtn">Lifetime Access (£49.95)</button>
@@ -172,11 +177,7 @@ body.logged-in .chat-shell {
     let selectedId = null;
     let guestTeaserUsed = false;
 
-    // Use empty string to make requests relative to the current host/port
     const API_BASE = "";
-// If your frontend is NOT served by the same Express server as /api/*, set this to your backend base URL, e.g.
-// const API_BASE = "http://localhost:10000";
-// const API_BASE = "https://your-backend-domain.com";
 
     const profileImages = {
   "God": "god.jpg",
@@ -324,7 +325,7 @@ $("chatLog").innerHTML = "";
       body: JSON.stringify({ email, password })
     });
 
-    const raw = await res.text();        // READ RAW TEXT FIRST
+    const raw = await res.text();
     let data = {};
     try { data = JSON.parse(raw); } catch {}
 
@@ -372,7 +373,6 @@ document.body.classList.add("logged-in");
       if (!text || !selectedId) return;
 
       appendMessage("me", text);
-// 🔴 FREE MODE (NOT LOGGED IN)
 if (!getToken()) {
 
   let name = $("chatTitle").innerText;
@@ -409,7 +409,7 @@ if (!getToken()) {
   $("chatInput").disabled = true;
   $("sendBtn").disabled = true;
 
-  return; // 🔴 IMPORTANT
+  return;
 }
 
       $("chatInput").value = "";
@@ -455,6 +455,7 @@ $("buyLifeBtn").onclick = () => { window.location.href = "/register.html"; };
       <button class="btn" style="border:none; margin-top:15px;" onclick="$('limitModal').style.display='none'; $('limitModal').style.pointerEvents='none';">Dismiss</button>
     </div>
   </div>
+
 <footer style="
 margin-top:40px;
 padding:25px;
@@ -464,7 +465,6 @@ color:#8a8276;
 border-top:1px solid rgba(197,160,89,0.25);
 ">
 
-<!-- Links -->
 <div style="margin-bottom:15px;">
   <a href="/privacy-policy.html" style="color:#8a8276;margin-right:20px;">
     Privacy Policy
@@ -483,12 +483,10 @@ border-top:1px solid rgba(197,160,89,0.25);
   </a>
 </div>
 
-<!-- Customer Service -->
 <div style="margin-bottom:15px;">
   <strong>Customer Service:</strong> +44 7414 218798
 </div>
 
-<!-- Payment Logos -->
 <div style="margin-bottom:15px;">
   <img src="https://static.vecteezy.com/system/resources/previews/020/975/572/original/visa-logo-visa-icon-transparent-free-png.png" 
        alt="Visa" 
@@ -499,7 +497,6 @@ border-top:1px solid rgba(197,160,89,0.25);
        style="height:28px;vertical-align:middle;">
 </div>
 
-<!-- Company Details (THIS is what they want) -->
 <div style="font-size:13px; line-height:1.6;">
   <strong>RIDGWELL SERVICES LIMITED</strong><br>
   Company No. 16277582<br>
