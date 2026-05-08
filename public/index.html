@@ -9,13 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
   <style>
-    #limitModal {
-      pointer-events: none;
-    }
-
-    #limitModal[style*="flex"] {
-      pointer-events: auto;
-    }
     :root {
       --bg-heaven: #fdfcfb; 
       --marble: #ffffff;
@@ -36,6 +29,7 @@
     }
 
     .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 80px; }
+    body.logged-in .wrap { max-width: none; width: 100%; padding: 0 10px 40px; }
 
     header {
       display: flex;
@@ -43,63 +37,48 @@
       justify-content: space-between;
       padding: 20px 0;
       border-bottom: 1px solid var(--border-holy);
-      margin-bottom: 1px;
+      margin-bottom: 40px;
     }
     .brand { display: flex; align-items: center; gap: 15px; }
     .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
     
-    .proclamation { text-align: center; padding: 0px 0; max-width: 800px; margin: 0 auto; }
+    .proclamation { text-align: center; max-width: 800px; margin: 0 auto 40px; }
     .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
     
     .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
+    body.logged-in .grid { grid-template-columns: 1fr; gap: 0; }
     @media (max-width: 950px) { .grid { grid-template-columns: 1fr !important; } }
 
-    .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: visible; }
-    input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0ddd5; font-family: inherit; font-size: 16px; }
+    .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: hidden; }
+    
+    .tabs { display: flex; background: #f8f8f8; cursor: pointer; border-bottom: 1px solid var(--border-holy); }
+    .tab { flex: 1; padding: 15px; text-align: center; font-family: "Cinzel", serif; color: var(--text-muted); font-size: 14px; }
+    .tab.active { background: white; color: var(--gold-divine); border-top: 2px solid var(--gold-divine); }
+
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 16px; }
     .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     .btn.primary { background: var(--gold-divine); color: white; border: none; }
 
-    .disclaimer-text {
-      font-size: 12px; line-height: 1.4; color: var(--text-muted); margin-bottom: 20px; font-style: italic; border-left: 2px solid var(--gold-divine); padding-left: 10px;
+    .disclaimer-box {
+      font-size: 13px; line-height: 1.4; color: var(--text-muted); margin-bottom: 20px; font-style: italic; border-left: 2px solid var(--gold-divine); padding-left: 10px;
     }
 
-    /* GDPR COOKIE BANNER STYLES */
-    #cookieBanner {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #ffffff;
-      border-top: 2px solid var(--gold-divine);
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
-      padding: 20px;
-      display: none; 
-      z-index: 10000;
-    }
-    .cookie-content {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-    .cookie-text { font-size: 15px; color: var(--text-main); }
-    .cookie-text a { color: var(--gold-divine); text-decoration: underline; }
-    .cookie-btns { display: flex; gap: 10px; }
-    .c-btn { padding: 10px 20px; font-family: "Cinzel", serif; font-size: 12px; cursor: pointer; border-radius: 4px; border: 1px solid var(--gold-divine); }
-    .c-accept { background: var(--gold-divine); color: white; border: none; }
-    .c-decline { background: transparent; color: var(--gold-divine); }
+    .chat-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 650px; }
+    body.logged-in .chat-shell { height: calc(100vh - 120px); }
+    .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 20px; overflow-y: auto; }
+    .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; transition: 0.2s; }
+    .pitem.active { border-color: var(--gold-divine); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .chat-log { padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex: 1; background: #fff; }
+    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; word-break: break-word; }
+    .bubble.them { background: #f8f6f2; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+    .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .hide { display: none !important; }
 
-    footer {
-      margin-top: 40px;
-      padding: 25px;
-      text-align: center;
-      font-size: 14px;
-      color: #8a8276;
-      border-top: 1px solid rgba(197,160,89,0.25);
-    }
-    footer a { color:#8a8276; margin:0 10px; text-decoration: none; }
+    #cookieBanner { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--gold-divine); padding: 20px; z-index: 10000; display: none; }
+    .cookie-content { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+
+    footer { margin-top: 60px; padding: 40px 20px; text-align: center; font-size: 14px; color: var(--text-muted); border-top: 1px solid var(--border-holy); }
+    footer a { color: var(--text-muted); text-decoration: none; margin: 0 10px; }
   </style>
 </head>
 
@@ -108,38 +87,63 @@
     <header>
       <div class="brand">
         <div class="logo">†</div>
-        <h1>Speak to Heaven</h1>
+        <h1 style="font-family: Cinzel; font-size: 24px; margin: 0;">Speak to Heaven</h1>
       </div>
+      <button class="btn" id="logoutBtn" style="display:none; width: auto;">Leave Sanctuary</button>
     </header>
 
-    <section class="proclamation">
+    <section class="proclamation" id="heroText">
       <h2>Divine Advice for Your Life</h2>
-      <p>Speak with the Heavens. Seek guidance from God, Jesus, and the Prophets.</p>
+      <p>Speak with the Heavens. Seek guidance from God, Jesus, and the Prophets to illuminate your path.</p>
     </section>
 
-    <div class="grid">
-      <div class="stack">
-        <div class="card" style="padding: 30px; margin-bottom: 30px;">
-          <h3 style="font-family: Cinzel; margin-top: 0;">Sign In</h3>
-          <input type="email" placeholder="Email Address" />
-          <input type="password" placeholder="Password" />
-          <button class="btn primary">Enter Sanctuary</button>
+    <div class="grid" id="mainGrid">
+      <div class="stack" id="authSection">
+        <div class="card" style="margin-bottom: 30px;">
+          <div class="tabs">
+            <div class="tab active" id="tabLogin">Sign In</div>
+            <div class="tab" id="tabRegister">New Account</div>
+          </div>
+          <div style="padding: 30px;">
+            <div id="loginPane">
+              <input id="loginEmail" type="email" placeholder="Email Address" />
+              <input id="loginPassword" type="password" placeholder="Password" />
+              <button class="btn primary" id="loginBtn">Enter Sanctuary</button>
+            </div>
+            <div id="registerPane" class="hide">
+              <input id="regEmail" type="email" placeholder="Email Address" />
+              <input id="regPassword" type="password" placeholder="Choose Password" />
+              <button class="btn primary" id="registerBtn">Create Account</button>
+            </div>
+          </div>
         </div>
 
         <div class="card" style="padding: 30px;">
-          <h4 style="font-family: Cinzel; color: var(--gold-divine); margin: 0 0 15px;">Offerings</h4>
-          <div class="disclaimer-text">
-            Speak to Heaven is an AI-generated spiritual-themed digital chat service for personal reflection. It does not provide real communication with God, Jesus, prophets, angels, deceased persons, or spiritual beings.
+          <h4 style="font-family: Cinzel; color: var(--gold-divine); margin: 0 0 15px;">Sacred Offerings</h4>
+          <div class="disclaimer-box">
+            Speak to Heaven is an AI-generated spiritual-themed digital chat service for personal reflection. It does not provide real communication with spiritual beings or deceased persons.
           </div>
-          <button class="btn" style="margin-bottom: 10px;">God Access (£29.95)</button>
-          <button class="btn" style="margin-bottom: 10px;">Full Access (£35.95)</button>
-          <button class="btn primary">Lifetime Access (£49.95)</button>
+          <button class="btn" onclick="buyPlan('god')" style="margin-bottom: 10px;">God Access (£29.95)</button>
+          <button class="btn" onclick="buyPlan('all')" style="margin-bottom: 10px;">Full Access (£35.95)</button>
+          <button class="btn primary" onclick="buyPlan('lifetime')">Lifetime Access (£49.95)</button>
         </div>
       </div>
 
-      <div class="card">
-        <div style="height: 500px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
-          Please select a prophet to begin your dialogue...
+      <div class="card" id="chatCard">
+        <div class="chat-shell">
+          <div class="sidebar" id="profiles"></div>
+          <div style="display: flex; flex-direction: column; height: 100%;">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); display: flex; align-items: center; gap: 15px;">
+              <div id="chatTitle" style="font-family: Cinzel; color: var(--blue-saint);">Select a Prophet</div>
+            </div>
+            <div class="chat-log" id="chatLog">
+              <div id="welcomeMessage" style="text-align: center; color: var(--text-muted); font-style: italic; margin-top: 100px;">Please sign in to begin your dialogue.</div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid var(--border-holy); display: flex; gap: 12px; background: white;">
+              <textarea id="chatInput" placeholder="Your question..." disabled style="flex:1; border: 1px solid #ddd; border-radius: 8px; padding: 10px; resize: none;"></textarea>
+              <button class="btn primary" id="sendBtn" disabled style="width: auto;">Send</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -157,33 +161,110 @@
 
   <div id="cookieBanner">
     <div class="cookie-content">
-      <div class="cookie-text">
-        We use cookies to ensure the sanctuary functions securely and to understand how seekers interact with the site. 
-        By continuing, you agree to our <a href="/terms-and-conditions.html">Terms & Cookie Policy</a>.
-      </div>
+      <div class="cookie-text">We use cookies for security and to enhance your experience. By continuing, you agree to our <a href="/terms-and-conditions.html">Terms & Cookie Policy</a>.</div>
       <div class="cookie-btns">
-        <button class="c-btn c-decline" onclick="closeBanner()">Decline</button>
-        <button class="c-btn c-accept" onclick="acceptCookies()">Accept</button>
+        <button class="btn" onclick="acceptCookies()" style="width:auto; padding:8px 20px;">Accept</button>
       </div>
     </div>
   </div>
 
   <script>
-    window.onload = () => {
-      // Show banner if not already accepted
-      if (!localStorage.getItem('heaven_cookies')) {
-        document.getElementById('cookieBanner').style.display = 'block';
+    const $ = (id) => document.getElementById(id);
+    const API_BASE = "";
+
+    function getToken() { return localStorage.getItem("jwt"); }
+
+    $("tabLogin").onclick = () => {
+      $("tabLogin").classList.add("active");
+      $("tabRegister").classList.remove("active");
+      $("loginPane").classList.remove("hide");
+      $("registerPane").classList.add("hide");
+    };
+    $("tabRegister").onclick = () => {
+      $("tabRegister").classList.add("active");
+      $("tabLogin").classList.remove("active");
+      $("registerPane").classList.remove("hide");
+      $("loginPane").classList.add("hide");
+    };
+
+    function buyPlan(plan) {
+      if (!getToken()) {
+        alert("Please create an account first to secure your offering.");
+        $("tabRegister").click();
+        window.scrollTo({ top: $("authSection").offsetTop, behavior: 'smooth' });
+      } else {
+        window.location.href = `/checkout.html?plan=${plan}`;
+      }
+    }
+
+    async function loadProfiles() {
+      const res = await fetch(`${API_BASE}/api/profiles`);
+      const profiles = await res.json();
+      const container = $("profiles");
+      profiles.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "pitem";
+        div.innerText = p.name;
+        div.onclick = () => {
+          document.querySelectorAll(".pitem").forEach(i => i.classList.remove("active"));
+          div.classList.add("active");
+          $("chatTitle").innerText = p.name;
+          $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. What seeks your heart?</div>`;
+          if (getToken()) {
+            $("chatInput").disabled = false;
+            $("sendBtn").disabled = false;
+          }
+        };
+        container.appendChild(div);
+      });
+    }
+
+    $("loginBtn").onclick = async () => {
+      const email = $("loginEmail").value;
+      const password = $("loginPassword").value;
+      const res = await fetch(`${API_BASE}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("jwt", data.token);
+        location.reload();
+      } else { alert(data.error); }
+    };
+
+    $("registerBtn").onclick = async () => {
+      const email = $("regEmail").value;
+      const password = $("regPassword").value;
+      const res = await fetch(`${API_BASE}/api/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      if (res.ok) {
+        alert("Account created. Please sign in.");
+        $("tabLogin").click();
+      } else {
+        const data = await res.json();
+        alert(data.error);
       }
     };
 
-    function acceptCookies() {
-      localStorage.setItem('heaven_cookies', 'true');
-      closeBanner();
+    $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
+
+    if (getToken()) {
+      document.body.classList.add("logged-in");
+      $("authSection").classList.add("hide");
+      $("logoutBtn").style.display = "block";
+      $("heroText").innerHTML = "<h2>Welcome Back</h2><p>Continue your dialogue with the heavens below.</p>";
     }
 
-    function closeBanner() {
-      document.getElementById('cookieBanner').style.display = 'none';
-    }
+    function acceptCookies() { localStorage.setItem("heaven_cookies", "true"); $("cookieBanner").style.display="none"; }
+    window.onload = () => {
+      loadProfiles();
+      if (!localStorage.getItem("heaven_cookies")) $("cookieBanner").style.display="block";
+    };
   </script>
 </body>
 </html>
