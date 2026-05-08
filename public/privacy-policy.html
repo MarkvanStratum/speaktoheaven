@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Privacy Policy — Heaven's Voices</title>
+  <title>Privacy Policy — Speak To Heaven</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -25,44 +25,70 @@
     body {
       margin: 0; color: var(--text-main); background-color: var(--bg-heaven);
       background-image: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.12), transparent 30%);
-      font-family: "EB Garamond", serif; font-size: 18px; line-height: 1.7;
+      font-family: "EB Garamond", serif; font-size: 16px; line-height: 1.6;
     }
 
-    .wrap { max-width: 900px; margin: 0 auto; padding: 0px 20px 80px; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px 80px; }
 
     header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 0; border-bottom: 1px solid var(--border-holy); margin-bottom: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-holy);
+      margin-bottom: 40px;
     }
     
     .brand { display: flex; align-items: center; gap: 15px; text-decoration: none; color: inherit; }
-    .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
+    .logo { width: 40px; height: 40px; background: white; border: 1.2px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 18px; }
     
     .content-card { 
-      background: var(--marble); border: 1px solid var(--border-holy); 
-      border-radius: var(--radius); box-shadow: var(--divine-shadow); padding: 60px;
+      background: var(--marble); 
+      border: 1px solid var(--border-holy); 
+      border-radius: var(--radius); 
+      box-shadow: var(--divine-shadow); 
+      padding: 50px;
     }
 
-    h1, h2, h3 { font-family: "Cinzel", serif; color: var(--blue-saint); }
-    h1 { font-size: 36px; text-align: center; margin-bottom: 40px; }
-    h2 { font-size: 22px; border-bottom: 1px solid var(--border-holy); padding-bottom: 10px; margin-top: 40px; color: var(--gold-divine); }
+    h1, h2, h3, h4 { font-family: "Cinzel", serif; color: var(--blue-saint); text-transform: uppercase; margin-top: 30px; }
+    h1 { font-size: 28px; text-align: center; margin-bottom: 10px; border-bottom: 2px solid var(--gold-divine); padding-bottom: 15px; }
+    h2 { font-size: 18px; border-bottom: 1px solid var(--border-holy); padding-bottom: 8px; color: var(--gold-divine); }
+    h3 { font-size: 16px; color: var(--blue-saint); margin-top: 20px; }
     
-    p, li { margin-bottom: 20px; }
-    .last-updated { font-style: italic; color: var(--text-muted); text-align: center; margin-bottom: 40px; }
-
-    .btn { 
-      display: inline-block; padding: 10px 20px; border-radius: 6px; 
-      font-family: "Cinzel", serif; border: 1px solid var(--gold-divine); 
-      background: transparent; color: var(--gold-divine); text-transform: uppercase; 
-      letter-spacing: 1px; text-decoration: none; font-size: 14px;
+    p, li { margin-bottom: 15px; text-align: justify; }
+    .last-updated { font-style: italic; color: var(--text-muted); text-align: center; margin-bottom: 30px; }
+    
+    .legal-notice {
+        font-weight: bold;
+        text-transform: uppercase;
+        border: 2px solid #000;
+        padding: 20px;
+        margin-bottom: 30px;
+        font-size: 13px;
+        background-color: #fff;
     }
+
+    .toc {
+        background: #fdfaf5;
+        border: 1px solid var(--border-holy);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    .toc ul { list-style: none; padding-left: 0; columns: 2; }
+    .toc li { font-size: 14px; margin-bottom: 5px; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+    th, td { border: 1px solid var(--border-holy); padding: 10px; text-align: left; }
+    th { background: #fdfaf5; }
 
     footer {
-      margin-top: 40px; padding: 20px; text-align: center;
-      font-size: 14px; color: #8a8276; border-top: 1px solid rgba(197, 160, 89, 0.25);
+      margin-top: 40px;
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #8a8276;
+      border-top: 1px solid rgba(197, 160, 89, 0.25);
     }
-
-    @media (max-width: 600px) { .content-card { padding: 30px; } h1 { font-size: 28px; } }
   </style>
 </head>
 
@@ -71,58 +97,160 @@
     <header>
       <a href="/" class="brand">
         <div class="logo">†</div>
-        <h1 style="margin:0; font-size: 24px;">Heaven's Voices</h1>
+        <h1 style="margin:0; font-size: 20px; border: none; padding: 0;">Speak To Heaven</h1>
       </a>
-      <a href="/" class="btn">Return Home</a>
     </header>
 
     <main class="content-card">
-      <h1>Privacy Policy</h1>
-      <p class="last-updated">Last Updated: April 2026</p>
+      <h1>Comprehensive Privacy & Data Protection Policy</h1>
+      <p class="last-updated">Last Updated: May 8, 2026</p>
 
-      <p>Your privacy is of the utmost importance to us. This policy describes how <strong>RIDGWELL SERVICES LIMITED</strong> ("we," "us," or "our") handles your personal information within the Heaven's Voices sanctuary.</p>
+      <div class="legal-notice">
+        PRIVACY NOTICE: THIS DOCUMENT OUTLINES HOW RIDGWELL SERVICES LIMITED COLLECTS, PROCESSES, AND PROTECTS YOUR PERSONAL DATA. BY USING THIS SITE, YOU ACKNOWLEDGE THE PRACTICES DESCRIBED HEREIN. THIS POLICY IS DESIGNED TO MEET THE REQUIREMENTS OF THE UK GDPR, EU GDPR, AND THE DATA PROTECTION ACT 2018.
+      </div>
 
-      <h2>1. Information We Collect</h2>
-      <p>We collect only the information necessary to provide our spiritual AI experience:
+      <div class="toc">
+        <h3>Table of Contents</h3>
         <ul>
-          <li><strong>Account Information:</strong> Your email address and name when you register.</li>
-          <li><strong>Interaction Data:</strong> The content of your chats with the AI figures to maintain conversation continuity.</li>
-          <li><strong>Payment Data:</strong> Transaction details processed by our secure third-party partners (we do not store full card numbers).</li>
+            <li>1. Introduction & Controller</li>
+            <li>2. Data We Collect</li>
+            <li>3. How We Use Data</li>
+            <li>4. Lawful Bases</li>
+            <li>5. Data Retention</li>
+            <li>6. International Transfers</li>
+            <li>7. Payment Processing</li>
+            <li>8. AI Safety & Processing</li>
+            <li>9. Cookies & Tracking</li>
+            <li>10. Third-Party Sharing</li>
+            <li>11. Your Statutory Rights</li>
+            <li>12. Security Measures</li>
+            <li>13. Contact & Complaints</li>
         </ul>
-      </p>
+      </div>
 
-      <h2>2. Lawful Basis for Processing</h2>
-      <p>Under the UK GDPR, we process your data based on <strong>Contractual Necessity</strong> (to provide the service you signed up for) and our <strong>Legitimate Interests</strong> (improving the AI and preventing platform abuse).</p>
+      <h2>1. Introduction and Data Controller</h2>
+      <p>This Privacy Policy applies to the website <strong>speaktoheaven.com</strong> ("the Site") and all services provided by <strong>RIDGWELL SERVICES LIMITED</strong> ("the Company", "we", "us", or "our"). 
+      <br><br>
+      The Company is the Data Controller responsible for your personal data. Our registered office is 85 Great Portland Street, First Floor, London, England, W1W 7LT. We have appointed a Data Privacy Liaison who can be reached at <strong>help@speaktoheaven.com</strong>.</p>
 
-      <h2>3. How We Use Your Data</h2>
-      <p>Your data is used solely to facilitate your interactions with the AI, manage your account, and process offerings. We do not sell your personal data to third parties.</p>
+      <h2>2. The Data We Collect</h2>
+      <p>We may collect, use, store, and transfer different kinds of personal data about you which we have grouped together as follows:</p>
+      <ul>
+          <li><strong>Identity Data:</strong> Includes first name, last name, and username or similar identifier.</li>
+          <li><strong>Contact Data:</strong> Includes email address and billing address.</li>
+          <li><strong>Financial Data:</strong> Includes payment card details (processed solely by our PCI-DSS compliant third-party payment processors) and transaction history.</li>
+          <li><strong>Technical Data:</strong> Includes internet protocol (IP) address, login data, browser type and version, time zone setting, browser plug-in types and versions, operating system and platform, and other technology on the devices you use to access this Site.</li>
+          <li><strong>Interaction Data:</strong> Includes the full transcript of your inputs and dialogues with our AI Simulation Personas.</li>
+          <li><strong>Marketing and Communications Data:</strong> Includes your preferences in receiving marketing from us and your communication preferences.</li>
+      </ul>
 
-      <h2>4. Data Storage and Transfers</h2>
-      <p><strong>RIDGWELL SERVICES LIMITED</strong> is a UK-based company. While our servers may be located globally, all data transfers are protected by standard contractual clauses or adequacy findings to ensure a level of protection equivalent to the UK.</p>
+      <h2>3. Lawful Bases for Processing</h2>
+      <table>
+        <tr>
+            <th>Purpose/Activity</th>
+            <th>Type of Data</th>
+            <th>Lawful Basis for Processing</th>
+        </tr>
+        <tr>
+            <td>To register you as a new user</td>
+            <td>Identity, Contact</td>
+            <td>Performance of a contract with you</td>
+        </tr>
+        <tr>
+            <td>To process and deliver your order</td>
+            <td>Identity, Contact, Financial, Transaction</td>
+            <td>(a) Performance of a contract; (b) Necessary for our legitimate interests (to recover debts due to us)</td>
+        </tr>
+        <tr>
+            <td>To provide AI simulations</td>
+            <td>Interaction, Identity</td>
+            <td>Performance of a contract</td>
+        </tr>
+        <tr>
+            <td>To improve our AI and safety filters</td>
+            <td>Interaction, Technical</td>
+            <td>Necessary for our legitimate interests (to keep our site updated and secure)</td>
+        </tr>
+        <tr>
+            <td>To manage our relationship with you</td>
+            <td>Identity, Contact, Marketing</td>
+            <td>(a) Performance of a contract; (b) Necessary to comply with a legal obligation</td>
+        </tr>
+      </table>
 
-      <h2>5. AI and Automated Processing</h2>
-      <p>Heaven's Voices uses Artificial Intelligence to simulate religious figures. While the AI generates responses based on your input, we do not use your personal data for "automated decision-making" that has legal or significant effects on you.</p>
+      <h2>4. Payment Processing and Security</h2>
+      <p>Payments on Speak To Heaven are processed by secure third-party payment gateways (e.g., Stripe, PayPal). 
+      <br><br>
+      <strong>Important:</strong> We do not store or capture your full credit or debit card information on our servers. All financial data is encrypted and handled directly by the processor. These processors are required to comply with the Payment Card Industry Data Security Standard (PCI-DSS). We receive only limited information such as the last four digits of the card and the transaction status to verify your access.</p>
 
-      <h2>6. Your Rights</h2>
-      <p>As a resident of the UK or EEA, you have the right to:
-        <ul>
-          <li>Access, correct, or erase your personal data.</li>
-          <li>Object to or restrict our processing of your data.</li>
-          <li><strong>Right to Complain:</strong> If you have concerns, you have the right to complain directly to us. We will acknowledge your complaint within 30 days and work to resolve it promptly. You also retain the right to contact the Information Commissioner’s Office (ICO).</li>
-        </ul>
-      </p>
+      <h2>5. AI Simulation and Safety Monitoring</h2>
+      <p>Our service involves the processing of your inputs by Large Language Models (LLMs).
+      <br><br>
+      <strong>Safety Filtering:</strong> We utilize automated and manual moderation tools to ensure interactions comply with our safety guidelines. This may involve the processing of your interaction data by third-party AI safety providers. 
+      <br><br>
+      <strong>Model Improvement:</strong> We may use de-identified or pseudonymized interaction data to train and improve the performance and "spiritual accuracy" of our AI models, unless you explicitly opt-out where such a feature is available.</p>
 
-      <h2>7. Contact Us</h2>
-      <p>For any privacy-related inquiries, please contact our Data Protection representative at:
-        <br><strong>RIDGWELL SERVICES LIMITED (No. 16277582)</strong>
-        <br>85 Great Portland Street, First Floor, London, England, W1W 7LT
-      </p>
+      <h2>6. Data Retention</h2>
+      <p>We will only retain your personal data for as long as reasonably necessary to fulfill the purposes we collected it for, including for the purposes of satisfying any legal, regulatory, tax, accounting, or reporting requirements.
+      <br><br>
+      Interaction logs are generally retained for a period of up to 2 years to ensure conversation continuity and for safety auditing, after which they are anonymized or deleted, unless a longer period is required by law.</p>
+
+      <h2>7. International Data Transfers</h2>
+      <p>We may share your personal data within our group or with third-party service providers located outside the UK or the European Economic Area (EEA). Whenever we transfer your personal data out of the UK, we ensure a similar degree of protection is afforded to it by ensuring at least one of the following safeguards is implemented:
+      <ul>
+          <li>We will only transfer your personal data to countries that have been deemed to provide an adequate level of protection for personal data.</li>
+          <li>Where we use certain service providers, we may use specific contracts approved by the UK Information Commissioner's Office (ICO) which give personal data the same protection it has in the UK (Standard Contractual Clauses).</li>
+      </ul></p>
+
+      <h2>8. Cookies and Tracking Technologies</h2>
+      <p>The Site uses cookies to distinguish you from other users. This helps us to provide you with a good experience and allows us to improve our Site.
+      <br><br>
+      <strong>Strictly Necessary Cookies:</strong> Required for the operation of our Site (e.g., login).
+      <br><strong>Analytical/Performance Cookies:</strong> Allow us to recognize and count the number of visitors.
+      <br><strong>Functionality Cookies:</strong> Used to recognize you when you return to our Site.</p>
+
+      <h2>9. Disclosure of Your Personal Data</h2>
+      <p>We may share your personal data with:
+      <ul>
+          <li>Service providers acting as processors who provide IT and system administration services.</li>
+          <li>Professional advisers including lawyers, bankers, auditors, and insurers.</li>
+          <li>HM Revenue & Customs, regulators, and other authorities based in the UK.</li>
+          <li>Third parties to whom we may choose to sell, transfer, or merge parts of our business or our assets.</li>
+      </ul></p>
+
+      <h2>10. Your Statutory Rights</h2>
+      <p>Under certain circumstances, you have rights under data protection laws in relation to your personal data:
+      <ul>
+          <li><strong>Request access</strong> to your personal data (commonly known as a "data subject access request").</li>
+          <li><strong>Request correction</strong> of the personal data that we hold about you.</li>
+          <li><strong>Request erasure</strong> of your personal data ("right to be forgotten").</li>
+          <li><strong>Object to processing</strong> of your personal data where we are relying on a legitimate interest.</li>
+          <li><strong>Request restriction</strong> of processing of your personal data.</li>
+          <li><strong>Request the transfer</strong> of your personal data to you or to a third party.</li>
+          <li><strong>Withdraw consent</strong> at any time where we are relying on consent to process your personal data.</li>
+      </ul></p>
+
+      <h2>11. Data Security</h2>
+      <p>We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way, altered, or disclosed. In addition, we limit access to your personal data to those employees, agents, contractors, and other third parties who have a business need to know.</p>
+
+      <h2>12. Contact and Complaints</h2>
+      <p>If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
+      <br><br>
+      <strong>RIDGWELL SERVICES LIMITED</strong><br>
+      85 Great Portland Street, First Floor<br>
+      London, England, W1W 7LT<br>
+      Email: <strong>help@speaktoheaven.com</strong>
+      <br><br>
+      You have the right to make a complaint at any time to the Information Commissioner's Office (ICO), the UK regulator for data protection issues (www.ico.org.uk). We would, however, appreciate the chance to deal with your concerns before you approach the ICO, so please contact us in the first instance.</p>
     </main>
 
     <footer>
-      <a href="/privacy-policy.html" style="color:#8a8276;margin-right:20px;">Privacy Policy</a>
-      <a href="/terms-and-conditions.html" style="color:#8a8276;">Terms & Conditions</a>
-      <div style="margin-top: 10px;">&copy; 2026 RIDGWELL SERVICES LIMITED. Registered in England and Wales.</div>
+      <div style="margin-bottom: 10px;">
+          <a href="/privacy-policy.html" style="color:#8a8276;margin-right:15px;text-decoration:none;">Privacy Policy</a>
+          <a href="/terms-and-conditions.html" style="color:#8a8276;margin-right:15px;text-decoration:none;">Terms & Conditions</a>
+          <a href="/refund-policy.html" style="color:#8a8276;text-decoration:none;">Refund Policy</a>
+      </div>
+      <div>&copy; 2026 RIDGWELL SERVICES LIMITED. Registered in England and Wales No. 16277582. All Rights Reserved.</div>
     </footer>
   </div>
 </body>
