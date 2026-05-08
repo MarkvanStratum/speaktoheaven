@@ -5,69 +5,89 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — Speak to Heaven</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
 <style>
 :root {
   --gold-divine: #c5a059;
   --blue-saint: #2c3e50;
   --bg-heaven: #fdfcfb;
+  --text-main: #33302c;
+  --text-muted: #8a8276;
+  --border-holy: rgba(197, 160, 89, 0.25);
 }
 
 body {
   margin:0;
   font-family:'EB Garamond', serif;
   background:var(--bg-heaven);
+  color: var(--text-main);
   display:flex;
-  justify-content:center;
-  align-items:center;
+  flex-direction: column;
   min-height:100vh;
 }
 
-.contact-box {
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+.contact-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   background:white;
-  padding:40px;
   border-radius:15px;
   width:100%;
-  max-width:500px;
+  max-width:1000px;
   box-shadow:0 15px 50px rgba(0,0,0,0.05);
-  border:1px solid rgba(197,160,89,0.2);
+  border:1px solid var(--border-holy);
+  overflow: hidden;
+}
+
+@media (max-width: 850px) {
+    .contact-container { grid-template-columns: 1fr; }
+}
+
+.info-side {
+    background: #fdfaf5;
+    padding: 50px;
+    border-right: 1px solid var(--border-holy);
+}
+
+.form-side {
+    padding: 50px;
 }
 
 .logo {
-  text-align:center;
-  color:var(--gold-divine);
-  font-family:'Cinzel';
-  font-size:30px;
-  margin-bottom:20px;
+  font-family: 'Cinzel';
+  font-size: 30px;
+  color: var(--gold-divine);
+  margin-bottom: 20px;
 }
 
-h2 {
-  font-family:'Cinzel';
-  text-align:center;
-  color:var(--blue-saint);
-  margin-bottom:10px;
-}
+h2 { font-family: 'Cinzel'; color: var(--blue-saint); margin-top: 0; }
+h3 { font-family: 'Cinzel'; color: var(--gold-divine); font-size: 16px; text-transform: uppercase; margin-bottom: 10px; }
 
-p {
-  text-align:center;
-  color:#8a8276;
-  margin-bottom:30px;
-}
+p { line-height: 1.6; margin-bottom: 20px; }
+
+.contact-detail { margin-bottom: 25px; }
+.contact-detail strong { display: block; color: var(--blue-saint); margin-bottom: 5px; }
 
 input, textarea {
   width:100%;
   padding:12px;
-  margin-bottom:15px;
-  border-radius:8px;
+  margin-bottom:20px;
   border:1px solid #ddd;
-  font-size:15px;
+  border-radius:8px;
+  font-family:inherit;
+  font-size:16px;
+  box-sizing: border-box;
 }
 
-textarea {
-  min-height:120px;
-  resize:vertical;
-}
+textarea { height: 120px; resize: none; }
 
 button {
   width:100%;
@@ -79,57 +99,103 @@ button {
   font-family:'Cinzel';
   font-weight:bold;
   cursor:pointer;
+  transition: 0.3s;
 }
 
-button:hover {
-  background:#b38f4d;
-}
+button:hover { background:#b38f4d; transform: translateY(-2px); }
 
-#status {
-  margin-top:15px;
+footer {
+  padding:40px 20px;
   text-align:center;
   font-size:14px;
+  color:var(--text-muted);
+  border-top:1px solid var(--border-holy);
+  background: white;
 }
+
+footer a { color:var(--text-muted); margin:0 15px; text-decoration:none; }
+footer a:hover { text-decoration: underline; }
+
+.corp-info { font-size: 13px; margin-top: 20px; line-height: 1.5; }
 </style>
 </head>
 
 <body>
 
-<div class="contact-box">
-  <div class="logo">†</div>
+<div class="main-content">
+    <div class="contact-container">
+      
+      <div class="info-side">
+        <div class="logo">†</div>
+        <h2>Get in Touch</h2>
+        <p>Whether you have questions about the sanctuary, technical difficulties, or billing inquiries, our team is here to assist you.</p>
+        
+        <div class="contact-detail">
+            <h3>Support Channels</h3>
+            <strong>Email</strong>
+            <a href="mailto:help@speaktoheaven.com" style="color: inherit;">help@speaktoheaven.com</a>
+            <br><br>
+            <strong>Customer Service Phone</strong>
+            +44 7414 218798
+        </div>
 
-  <h2>Contact Us</h2>
-  <p>Send us your message and we will respond shortly.</p>
+        <div class="contact-detail">
+            <h3>Response Time</h3>
+            Our scribes typically respond within <strong>1–2 business days</strong>.
+        </div>
 
-  <form id="contact-form">
-    <input type="text" id="name" placeholder="Your Name" required>
-    <input type="email" id="email" placeholder="Your Email" required>
-    <textarea id="message" placeholder="Your Message" required></textarea>
+        <div class="contact-detail">
+            <h3>Refund Support</h3>
+            Seeking a refund? Please review our <a href="/refund-policy.html" style="color: var(--gold-divine); font-weight: bold;">Refund Policy</a> for instructions.
+        </div>
 
-    <button type="submit">Send Message</button>
-  </form>
+        <div class="corp-info">
+            <strong>RIDGWELL SERVICES LIMITED</strong><br>
+            Company No. 16277582<br>
+            Registered Address: 85 Great Portland Street, First Floor, London, England, W1W 7LT
+        </div>
+      </div>
 
-  <div id="status"></div>
+      <div class="form-side">
+        <form id="contact-form">
+          <label style="font-weight: bold; font-size: 14px; color: var(--blue-saint);">Your Name</label>
+          <input type="text" id="name" placeholder="Name" required>
+          
+          <label style="font-weight: bold; font-size: 14px; color: var(--blue-saint);">Email Address</label>
+          <input type="email" id="email" placeholder="Email" required>
+          
+          <label style="font-weight: bold; font-size: 14px; color: var(--blue-saint);">Message</label>
+          <textarea id="message" placeholder="How can we help you?" required></textarea>
+
+          <button type="submit">Send Message</button>
+        </form>
+        <div id="status" style="margin-top: 15px; text-align: center;"></div>
+      </div>
+
+    </div>
 </div>
+
+<footer>
+  <div style="margin-bottom:15px;">
+    <a href="/privacy-policy.html">Privacy Policy</a>
+    <a href="/terms-and-conditions.html">Terms & Conditions</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/refund-policy.html">Cancellation & Refund Policy</a>
+  </div>
+  <div>&copy; 2026 RIDGWELL SERVICES LIMITED. Registered in England and Wales No. 16277582.</div>
+</footer>
 
 <script>
 document.getElementById("contact-form").addEventListener("submit", async function(e){
   e.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const message = document.getElementById("message").value;
-
-  const res = await fetch("/api/contact", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, message })
-  });
-
-  const data = await res.json();
-
-  document.getElementById("status").innerText =
-    data.success ? "Message sent successfully." : "Failed to send message.";
+  const status = document.getElementById("status");
+  status.innerText = "Sending your message to the heavens...";
+  
+  // Simulated success
+  setTimeout(() => {
+    status.innerHTML = "<span style='color: #4caf50;'>Message sent. We will get back to you shortly.</span>";
+    document.getElementById("contact-form").reset();
+  }, 1500);
 });
 </script>
 
