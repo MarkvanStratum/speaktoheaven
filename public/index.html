@@ -37,6 +37,9 @@
     .brand { display: flex; align-items: center; gap: 15px; }
     .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
     
+    .proclamation { text-align: center; max-width: 800px; margin: 0 auto 40px; }
+    .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
+    
     .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
     body.logged-in .grid { grid-template-columns: 1fr; gap: 0; }
 
@@ -68,7 +71,7 @@
     .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
     .hide { display: none !important; }
 
-    footer { margin-top: 40px; padding: 20px; text-align: center; font-size: 14px; border-top: 1px solid var(--border-holy); }
+    footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 14px; border-top: 1px solid var(--border-holy); }
   </style>
 </head>
 
@@ -91,9 +94,9 @@
 
         <div class="card" style="padding: 30px;">
           <h4 style="font-family: Cinzel; color: var(--gold-divine);">Offerings</h4>
-          <button class="btn" onclick="buyPlan('god')" style="margin-bottom: 10px;">God Access (£29.95)</button>
-          <button class="btn" onclick="buyPlan('all')" style="margin-bottom: 10px;">Full Access (£35.95)</button>
-          <button class="btn primary" onclick="buyPlan('lifetime')">Lifetime Access (£49.95)</button>
+          <button class="btn" onclick="buyPlan()" style="margin-bottom: 10px;">God Access (£29.95)</button>
+          <button class="btn" onclick="buyPlan()" style="margin-bottom: 10px;">Full Access (£35.95)</button>
+          <button class="btn primary" onclick="buyPlan()">Lifetime Access (£49.95)</button>
         </div>
       </div>
 
@@ -113,11 +116,12 @@
     </div>
   </div>
 
+  <!-- LIMIT MODAL -->
   <div id="limitModal">
     <div class="modal-content">
       <h2 style="font-family: Cinzel; color: var(--blue-saint);">Limit Reached</h2>
-      <p>You have used your 3 free historical consultations. Please choose an offering to continue your dialogue.</p>
-      <button class="btn primary" onclick="buyPlan('god')" style="margin-bottom:10px;">Unlock Full Access</button>
+      <p>You have used your 3 free biblical consultations. Please choose an offering to continue your dialogue.</p>
+      <button class="btn primary" onclick="buyPlan()" style="margin-bottom:10px;">Unlock Full Access</button>
       <button class="btn" onclick="$('limitModal').style.display='none'">Dismiss</button>
     </div>
   </div>
@@ -128,12 +132,13 @@
 
     function getToken() { return localStorage.getItem("jwt"); }
 
-    function buyPlan(plan) {
+    function buyPlan() {
       if (!getToken()) {
         alert("Please register first.");
         $("tabRegister").click();
       } else {
-        window.location.href = `/checkout.html?plan=${plan}`;
+        // Redirect to pricing page
+        window.location.href = `/pricing.html`;
       }
     }
 
