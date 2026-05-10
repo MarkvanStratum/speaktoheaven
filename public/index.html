@@ -37,9 +37,6 @@
     .brand { display: flex; align-items: center; gap: 15px; }
     .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
     
-    .proclamation { text-align: center; max-width: 800px; margin: 0 auto 40px; }
-    .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
-    
     .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
     body.logged-in .grid { grid-template-columns: 1fr; gap: 0; }
 
@@ -53,19 +50,25 @@
     .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     .btn.primary { background: var(--gold-divine); color: white; border: none; }
 
+    /* Modal Styling */
+    #limitModal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(44, 62, 80, 0.8); display: none; align-items: center; justify-content: center; z-index: 20000;
+    }
+    .modal-content { background: white; padding: 40px; border-radius: 15px; max-width: 450px; text-align: center; border: 2px solid var(--gold-divine); }
+
     .chat-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 650px; }
     body.logged-in .chat-shell { height: calc(100vh - 120px); }
     .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 20px; overflow-y: auto; }
-    .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; transition: 0.2s; }
+    .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; }
     .pitem.active { border-color: var(--gold-divine); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .chat-log { padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex: 1; background: #fff; }
-    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; word-break: break-word; }
-    .bubble.them { background: #f8f6f2; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; }
+    .bubble.them { background: #f8f6f2; align-self: flex-start; border-bottom-left-radius: 4px; }
     .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
     .hide { display: none !important; }
 
-    footer { margin-top: 60px; padding: 40px 20px; text-align: center; font-size: 14px; color: var(--text-muted); border-top: 1px solid var(--border-holy); }
-    footer a { color: var(--text-muted); text-decoration: none; margin: 0 10px; }
+    footer { margin-top: 40px; padding: 20px; text-align: center; font-size: 14px; border-top: 1px solid var(--border-holy); }
   </style>
 </head>
 
@@ -76,27 +79,21 @@
       <button class="btn" id="logoutBtn" style="display:none; width: auto;">Leave Sanctuary</button>
     </header>
 
-    <section class="proclamation" id="heroText">
-      <h2>Divine Advice for Your Life</h2>
-      <p>Seek guidance from the Heavens to illuminate your path.</p>
-    </section>
-
-    <div class="grid" id="mainGrid">
+    <div class="grid">
       <div class="stack" id="authSection">
         <div class="card" style="margin-bottom: 30px;">
           <div class="tabs"><div class="tab active" id="tabLogin">Sign In</div><div class="tab" id="tabRegister">New Account</div></div>
           <div style="padding: 30px;">
-            <div id="loginPane">
-              <input id="loginEmail" type="email" placeholder="Email Address" />
-              <input id="loginPassword" type="password" placeholder="Password" />
-              <button class="btn primary" id="loginBtn">Enter Sanctuary</button>
-            </div>
-            <div id="registerPane" class="hide">
-              <input id="regEmail" type="email" placeholder="Email Address" />
-              <input id="regPassword" type="password" placeholder="Choose Password" />
-              <button class="btn primary" id="registerBtn">Create Account</button>
-            </div>
+            <div id="loginPane"><input id="loginEmail" type="email" placeholder="Email"><input id="loginPassword" type="password" placeholder="Password"><button class="btn primary" id="loginBtn">Enter Sanctuary</button></div>
+            <div id="registerPane" class="hide"><input id="regEmail" type="email" placeholder="Email"><input id="regPassword" type="password" placeholder="Password"><button class="btn primary" id="registerBtn">Create Account</button></div>
           </div>
+        </div>
+
+        <div class="card" style="padding: 30px;">
+          <h4 style="font-family: Cinzel; color: var(--gold-divine);">Offerings</h4>
+          <button class="btn" onclick="buyPlan('god')" style="margin-bottom: 10px;">God Access (£29.95)</button>
+          <button class="btn" onclick="buyPlan('all')" style="margin-bottom: 10px;">Full Access (£35.95)</button>
+          <button class="btn primary" onclick="buyPlan('lifetime')">Lifetime Access (£49.95)</button>
         </div>
       </div>
 
@@ -114,10 +111,15 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <footer>
-        <a href="/privacy-policy.html">Privacy</a> | <a href="/terms-and-conditions.html">Terms</a> | <a href="/contact.html">Contact</a>
-    </footer>
+  <div id="limitModal">
+    <div class="modal-content">
+      <h2 style="font-family: Cinzel; color: var(--blue-saint);">Limit Reached</h2>
+      <p>You have used your 3 free historical consultations. Please choose an offering to continue your dialogue.</p>
+      <button class="btn primary" onclick="buyPlan('god')" style="margin-bottom:10px;">Unlock Full Access</button>
+      <button class="btn" onclick="$('limitModal').style.display='none'">Dismiss</button>
+    </div>
   </div>
 
   <script>
@@ -126,27 +128,13 @@
 
     function getToken() { return localStorage.getItem("jwt"); }
 
-    // Tab Logic
-    $("tabLogin").onclick = () => { $("tabLogin").className="tab active"; $("tabRegister").className="tab"; $("loginPane").classList.remove("hide"); $("registerPane").classList.add("hide"); };
-    $("tabRegister").onclick = () => { $("tabRegister").className="tab active"; $("tabLogin").className="tab"; $("registerPane").classList.remove("hide"); $("loginPane").classList.add("hide"); };
-
-    async function loadProfiles() {
-      const res = await fetch("/api/profiles");
-      const profiles = await res.json();
-      profiles.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "pitem";
-        div.innerText = p.name;
-        div.onclick = () => {
-          document.querySelectorAll(".pitem").forEach(i => i.classList.remove("active"));
-          div.classList.add("active");
-          selectedId = p.id;
-          $("chatTitle").innerText = p.name;
-          $("chatLog").innerHTML = `<div class="bubble them">Peace be with you. I am ${p.name}. What is on your heart?</div>`;
-          if (getToken()) { $("chatInput").disabled = false; $("sendBtn").disabled = false; }
-        };
-        $("profiles").appendChild(div);
-      });
+    function buyPlan(plan) {
+      if (!getToken()) {
+        alert("Please register first.");
+        $("tabRegister").click();
+      } else {
+        window.location.href = `/checkout.html?plan=${plan}`;
+      }
     }
 
     async function sendMessage() {
@@ -156,16 +144,17 @@
       appendMessage("me", text);
       $("chatInput").value = "";
       
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` },
-          body: JSON.stringify({ characterId: selectedId, message: text })
-        });
-        const data = await res.json();
-        if (data.reply) appendMessage("them", data.reply);
-        else if (data.error === "LIMIT_REACHED") alert(data.message);
-      } catch (err) { alert("The connection to heaven was interrupted."); }
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` },
+        body: JSON.stringify({ characterId: selectedId, message: text })
+      });
+      const data = await res.json();
+      
+      if (data.reply) appendMessage("them", data.reply);
+      else if (data.error === "LIMIT_REACHED") {
+        $("limitModal").style.display = "flex";
+      }
     }
 
     function appendMessage(side, text) {
@@ -176,13 +165,26 @@
       $("chatLog").scrollTop = $("chatLog").scrollHeight;
     }
 
-    $("sendBtn").onclick = sendMessage;
-    $("chatInput").onkeypress = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+    async function loadProfiles() {
+      const res = await fetch("/api/profiles");
+      const profiles = await res.json();
+      profiles.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "pitem"; div.innerText = p.name;
+        div.onclick = () => {
+          selectedId = p.id;
+          $("chatTitle").innerText = p.name;
+          $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. How can I guide you?</div>`;
+          if (getToken()) { $("chatInput").disabled = false; $("sendBtn").disabled = false; }
+        };
+        $("profiles").appendChild(div);
+      });
+    }
 
+    $("sendBtn").onclick = sendMessage;
     $("loginBtn").onclick = async () => {
       const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: $("loginEmail").value, password: $("loginPassword").value })
       });
       const data = await res.json();
@@ -194,17 +196,10 @@
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: $("regEmail").value, password: $("regPassword").value })
       });
-      if (res.ok) { alert("Account created. Please sign in."); $("tabLogin").click(); } else alert("Error creating account.");
+      if (res.ok) { alert("Created. Sign in now."); $("tabLogin").click(); }
     };
 
-    $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
-
-    if (getToken()) {
-      document.body.classList.add("logged-in");
-      $("authSection").classList.add("hide");
-      $("logoutBtn").style.display = "block";
-    }
-
+    if (getToken()) { document.body.classList.add("logged-in"); $("authSection").classList.add("hide"); $("logoutBtn").style.display = "block"; }
     loadProfiles();
   </script>
 </body>
