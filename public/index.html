@@ -300,9 +300,13 @@ function closeLimitModal() {
     $("tabRegister").onclick = () => { $("tabRegister").className="tab active"; $("tabLogin").className="tab"; $("registerPane").classList.remove("hide"); $("loginPane").classList.add("hide"); };
 
 function goToPricing() {
+  if (!getToken()) {
+    alert("Please create an account or sign in before selecting a plan.");
+    return;
+  }
+
   window.location.href = "/pricing.html";
 }
-
     if (getToken()) { document.body.classList.add("logged-in"); $("authSection").classList.add("hide"); $("logoutBtn").style.display = "block"; }
     loadProfiles();
   </script>
