@@ -42,14 +42,43 @@
     .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     .btn.primary { background: var(--gold-divine); color: white; border: none; }
 
-    .chat-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); height: 600px; }
-    body.logged-in .chat-shell { height: calc(100vh - 200px); }
+    .chat-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  height: 600px;
+  min-height: 0;
+}
+
+body.logged-in .chat-shell {
+  height: calc(100vh - 140px);
+  min-height: 0;
+}
+
+.chat-shell > div:last-child {
+  min-height: 0;
+}
+
+.chat-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
     .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 15px; overflow-y: auto; }
     
     .pitem { display: flex; align-items: center; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; font-family: "Cinzel", serif; font-size: 16px; }
     .pitem.active { border-color: var(--gold-divine); background: #fffdf9; color: var(--gold-divine); }
     
-    .chat-log { padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: scroll; height: 100%; background: #fff; scroll-behavior: smooth; }
+    .chat-log {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  background: #fff;
+  scroll-behavior: smooth;
+}
     .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; word-wrap: break-word; }
     .bubble.them { background: #f8f6f2; align-self: flex-start; }
     .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; }
