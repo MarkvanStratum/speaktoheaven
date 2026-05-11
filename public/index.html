@@ -138,7 +138,7 @@
       div.innerText = text;
       const log = $("chatLog");
       log.appendChild(div);
-      setTimeout(() => { log.scrollTop = log.scrollHeight; }, 50);
+      log.scrollTop = log.scrollHeight;
     }
 
     async function loadProfiles() {
