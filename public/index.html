@@ -61,6 +61,41 @@
     .footer-links a:hover { color: var(--gold-divine); }
     .payment-icons { display: flex; justify-content: center; gap: 15px; align-items: center; opacity: 0.7; }
     .payment-icons img { height: 24px; filter: grayscale(1); }
+
+.limit-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.limit-modal.show { display: flex; }
+
+.limit-box {
+  background: white;
+  max-width: 460px;
+  width: 100%;
+  padding: 35px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid var(--border-holy);
+  box-shadow: 0 20px 70px rgba(0,0,0,.2);
+}
+
+.limit-box h2 {
+  font-family: "Cinzel", serif;
+  color: var(--blue-saint);
+  margin-top: 0;
+}
+
+.limit-box p {
+  color: var(--text-muted);
+  font-size: 18px;
+}
   </style>
 </head>
 
@@ -111,7 +146,33 @@
     </footer>
   </div>
 
+<div class="limit-modal" id="limitModal">
+  <div class="limit-box">
+    <h2>Your Free Messages Are Complete</h2>
+    <p>
+      You have used your 3 free messages. Please select a plan to continue
+      your conversations with Speak to Heaven.
+    </p>
+    <button class="btn primary" onclick="window.location.href='/pricing.html'">
+      Select Your Plan
+    </button>
+    <button class="btn" style="margin-top:12px;" onclick="closeLimitModal()">
+      Not Now
+    </button>
+  </div>
+</div>
+
   <script>
+
+function showLimitModal() {
+  $("limitModal").classList.add("show");
+  $("chatInput").disabled = true;
+  $("sendBtn").disabled = true;
+}
+
+function closeLimitModal() {
+  $("limitModal").classList.remove("show");
+}
     const $ = (id) => document.getElementById(id);
     let selectedId = null;
 
@@ -127,7 +188,17 @@
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` },
         body: JSON.stringify({ characterId: selectedId, message: text })
       });
-      if (res.status === 403) { alert("Limit Reached."); return; }
+      if (res.status === 403) {
+  const data = await res.json().catch(() => ({}));
+
+  if (data.error === "LIMIT_REACHED") {
+    showLimitModal();
+    return;
+  }
+
+  alert(data.message || "Access denied.");
+  return;
+}
       const data = await res.json();
       if (data.reply) appendMessage("them", data.reply);
     }
