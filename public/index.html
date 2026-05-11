@@ -143,6 +143,28 @@ body.logged-in .chat-shell {
             <div id="loginPane"><input id="loginEmail" type="email" placeholder="Email"><input id="loginPassword" type="password" placeholder="Password"><button class="btn primary" id="loginBtn">Enter</button></div>
             <div id="registerPane" class="hide"><input id="regEmail" type="email" placeholder="Email"><input id="regPassword" type="password" placeholder="Password"><button class="btn primary" id="registerBtn">Create Account</button></div>
           </div>
+                </div>
+
+        <div class="card" style="padding: 30px;">
+          <h4 style="font-family: Cinzel; color: var(--gold-divine);">
+            Divine Offerings
+          </h4>
+
+          <p style="font-size:15px; line-height:1.5; color:var(--text-muted); margin-top:0;">
+            SpeakToHeaven.com is an AI chat website. Conversations are simulated and are not real communications with God, biblical figures, living people, or deceased persons.
+          </p>
+
+          <button class="btn" onclick="goToPricing()">
+            God Access (£29.95)
+          </button>
+
+          <button class="btn" onclick="goToPricing()" style="margin-top:10px;">
+            Full Divine Access (£35.95)
+          </button>
+
+          <button class="btn primary" onclick="goToPricing()" style="margin-top:10px;">
+            Eternal Access (£49.95)
+          </button>
         </div>
       </div>
 
@@ -276,6 +298,10 @@ function closeLimitModal() {
 
     $("tabLogin").onclick = () => { $("tabLogin").className="tab active"; $("tabRegister").className="tab"; $("loginPane").classList.remove("hide"); $("registerPane").classList.add("hide"); };
     $("tabRegister").onclick = () => { $("tabRegister").className="tab active"; $("tabLogin").className="tab"; $("registerPane").classList.remove("hide"); $("loginPane").classList.add("hide"); };
+
+function goToPricing() {
+  window.location.href = "/pricing.html";
+}
 
     if (getToken()) { document.body.classList.add("logged-in"); $("authSection").classList.add("hide"); $("logoutBtn").style.display = "block"; }
     loadProfiles();
