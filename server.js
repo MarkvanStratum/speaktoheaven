@@ -202,6 +202,28 @@ pool.connect((err) => {
 		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP;`);
 		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS lifetime BOOLEAN DEFAULT false;`);
 		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS messages_sent INT DEFAULT 0;`);
+// 👇 TEST LOGIN — FULL LIFETIME ACCESS
+const testEmail = "test@test.com";
+const testPassword = "12345";
+
+const hashed = await bcrypt.hash(testPassword, 10);
+
+await pool.query(
+  `
+  INSERT INTO users (email, password, plan, lifetime, expires_at, messages_sent)
+  VALUES ($1, $2, '4995', true, NULL, 0)
+  ON CONFLICT (email)
+  DO UPDATE SET
+    password = EXCLUDED.password,
+    plan = '4995',
+    lifetime = true,
+    expires_at = NULL,
+    messages_sent = 0;
+  `,
+  [testEmail, hashed]
+);
+
+console.log(`✅ Test lifetime login ready: ${testEmail}`);
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -550,6 +572,12 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 			[userId]
 		);
 		const userData = userResult.rows[0];
+if (!canAccessCharacter(userData, Number(characterId))) {
+  return res.status(403).json({
+    error: "NO_ACCESS",
+    message: "You do not have access to this character."
+  });
+}
 
 		const isPaid = userData.lifetime || (userData.expires_at && new Date(userData.expires_at) > new Date());
 
