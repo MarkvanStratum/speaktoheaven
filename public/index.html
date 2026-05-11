@@ -22,29 +22,18 @@
     }
 
     * { box-sizing: border-box; }
-    body {
-      margin: 0; color: var(--text-main); background-color: var(--bg-heaven);
-      font-family: "EB Garamond", serif; font-size: 19px; line-height: 1.7;
-    }
+    body { margin: 0; color: var(--text-main); background-color: var(--bg-heaven); font-family: "EB Garamond", serif; font-size: 19px; line-height: 1.7; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 40px; }
+    body.logged-in .wrap { max-width: none; width: 100%; padding: 0 10px 20px; }
 
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 80px; }
-    body.logged-in .wrap { max-width: none; width: 100%; padding: 0 10px 40px; }
-
-    header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 0; border-bottom: 1px solid var(--border-holy); margin-bottom: 40px;
-    }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--border-holy); margin-bottom: 40px; }
     .brand { display: flex; align-items: center; gap: 15px; }
     .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
-    
-    .proclamation { text-align: center; max-width: 800px; margin: 0 auto 40px; }
-    .proclamation h2 { font-family: "Cinzel", serif; font-size: 42px; color: var(--blue-saint); margin-bottom: 15px; }
     
     .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
     body.logged-in .grid { grid-template-columns: 1fr; gap: 0; }
 
     .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: hidden; }
-    
     .tabs { display: flex; background: #f8f8f8; cursor: pointer; border-bottom: 1px solid var(--border-holy); }
     .tab { flex: 1; padding: 15px; text-align: center; font-family: "Cinzel", serif; color: var(--text-muted); font-size: 14px; }
     .tab.active { background: white; color: var(--gold-divine); border-top: 2px solid var(--gold-divine); }
@@ -53,33 +42,33 @@
     .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     .btn.primary { background: var(--gold-divine); color: white; border: none; }
 
-    /* Modal Styling */
-    #limitModal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(44, 62, 80, 0.8); display: none; align-items: center; justify-content: center; z-index: 20000;
-    }
-    .modal-content { background: white; padding: 40px; border-radius: 15px; max-width: 450px; text-align: center; border: 2px solid var(--gold-divine); }
-
-    .chat-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 650px; }
-    body.logged-in .chat-shell { height: calc(100vh - 120px); }
-    .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 20px; overflow-y: auto; }
-    .pitem { padding: 15px; margin-bottom: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; }
-    .pitem.active { border-color: var(--gold-divine); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .chat-log { padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex: 1; background: #fff; }
-    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; }
-    .bubble.them { background: #f8f6f2; align-self: flex-start; border-bottom-left-radius: 4px; }
-    .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); height: 600px; }
+    body.logged-in .chat-shell { height: calc(100vh - 200px); }
+    .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 15px; overflow-y: auto; }
+    
+    .pitem { display: flex; align-items: center; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; font-family: "Cinzel", serif; font-size: 16px; }
+    .pitem.active { border-color: var(--gold-divine); background: #fffdf9; color: var(--gold-divine); }
+    
+    .chat-log { padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: scroll; height: 100%; background: #fff; scroll-behavior: smooth; }
+    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; word-wrap: break-word; }
+    .bubble.them { background: #f8f6f2; align-self: flex-start; }
+    .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; }
     .hide { display: none !important; }
 
-    footer { margin-top: 60px; padding: 20px; text-align: center; font-size: 14px; border-top: 1px solid var(--border-holy); }
+    footer { margin-top: 40px; padding: 30px 20px; border-top: 1px solid var(--border-holy); text-align: center; }
+    .footer-links { margin-bottom: 20px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-size: 15px; font-family: "EB Garamond", serif; }
+    .footer-links a:hover { color: var(--gold-divine); }
+    .payment-icons { display: flex; justify-content: center; gap: 15px; align-items: center; opacity: 0.7; }
+    .payment-icons img { height: 24px; filter: grayscale(1); }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <header>
-      <div class="brand"><div class="logo">†</div><h1>Speak to Heaven</h1></div>
-      <button class="btn" id="logoutBtn" style="display:none; width: auto;">Leave Sanctuary</button>
+      <div class="brand"><div class="logo">S</div><h1>Speak to Heaven</h1></div>
+      <button class="btn" id="logoutBtn" style="display:none; width: auto;">Exit</button>
     </header>
 
     <div class="grid">
@@ -87,16 +76,9 @@
         <div class="card" style="margin-bottom: 30px;">
           <div class="tabs"><div class="tab active" id="tabLogin">Sign In</div><div class="tab" id="tabRegister">New Account</div></div>
           <div style="padding: 30px;">
-            <div id="loginPane"><input id="loginEmail" type="email" placeholder="Email"><input id="loginPassword" type="password" placeholder="Password"><button class="btn primary" id="loginBtn">Enter Sanctuary</button></div>
+            <div id="loginPane"><input id="loginEmail" type="email" placeholder="Email"><input id="loginPassword" type="password" placeholder="Password"><button class="btn primary" id="loginBtn">Enter</button></div>
             <div id="registerPane" class="hide"><input id="regEmail" type="email" placeholder="Email"><input id="regPassword" type="password" placeholder="Password"><button class="btn primary" id="registerBtn">Create Account</button></div>
           </div>
-        </div>
-
-        <div class="card" style="padding: 30px;">
-          <h4 style="font-family: Cinzel; color: var(--gold-divine);">Offerings</h4>
-          <button class="btn" onclick="buyPlan()" style="margin-bottom: 10px;">God Access (£29.95)</button>
-          <button class="btn" onclick="buyPlan()" style="margin-bottom: 10px;">Full Access (£35.95)</button>
-          <button class="btn primary" onclick="buyPlan()">Lifetime Access (£49.95)</button>
         </div>
       </div>
 
@@ -104,26 +86,29 @@
         <div class="chat-shell">
           <div class="sidebar" id="profiles"></div>
           <div style="display: flex; flex-direction: column; height: 100%;">
-            <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); font-family: Cinzel;" id="chatTitle">Select a Prophet</div>
+            <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); font-family: Cinzel;" id="chatTitle">Select a Character</div>
             <div class="chat-log" id="chatLog"></div>
             <div style="padding: 20px; border-top: 1px solid var(--border-holy); display: flex; gap: 12px; background: white;">
-              <textarea id="chatInput" placeholder="Your question..." disabled style="flex:1; height: 50px;"></textarea>
+              <textarea id="chatInput" placeholder="Write your message..." disabled style="flex:1; height: 60px; resize: none;"></textarea>
               <button class="btn primary" id="sendBtn" disabled style="width: auto;">Send</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- LIMIT MODAL -->
-  <div id="limitModal">
-    <div class="modal-content">
-      <h2 style="font-family: Cinzel; color: var(--blue-saint);">Limit Reached</h2>
-      <p>You have used your 3 free biblical consultations. Please choose an offering to continue your dialogue.</p>
-      <button class="btn primary" onclick="buyPlan()" style="margin-bottom:10px;">Unlock Full Access</button>
-      <button class="btn" onclick="$('limitModal').style.display='none'">Dismiss</button>
-    </div>
+    <footer>
+      <div class="footer-links">
+        <a href="/contact">Contact</a>
+        <a href="/terms">Terms & Conditions</a>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/refund-policy">Refund Policy</a>
+      </div>
+      <div class="payment-icons">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+      </div>
+    </footer>
   </div>
 
   <script>
@@ -132,42 +117,28 @@
 
     function getToken() { return localStorage.getItem("jwt"); }
 
-    function buyPlan() {
-      if (!getToken()) {
-        alert("Please register first.");
-        $("tabRegister").click();
-      } else {
-        // Redirect to pricing page
-        window.location.href = `/pricing.html`;
-      }
-    }
-
     async function sendMessage() {
       const text = $("chatInput").value.trim();
       if (!text || !selectedId) return;
-
       appendMessage("me", text);
       $("chatInput").value = "";
-      
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` },
         body: JSON.stringify({ characterId: selectedId, message: text })
       });
+      if (res.status === 403) { alert("Limit Reached."); return; }
       const data = await res.json();
-      
       if (data.reply) appendMessage("them", data.reply);
-      else if (data.error === "LIMIT_REACHED") {
-        $("limitModal").style.display = "flex";
-      }
     }
 
     function appendMessage(side, text) {
       const div = document.createElement("div");
       div.className = `bubble ${side}`;
       div.innerText = text;
-      $("chatLog").appendChild(div);
-      $("chatLog").scrollTop = $("chatLog").scrollHeight;
+      const log = $("chatLog");
+      log.appendChild(div);
+      setTimeout(() => { log.scrollTop = log.scrollHeight; }, 50);
     }
 
     async function loadProfiles() {
@@ -175,34 +146,36 @@
       const profiles = await res.json();
       profiles.forEach(p => {
         const div = document.createElement("div");
-        div.className = "pitem"; div.innerText = p.name;
+        div.className = "pitem"; 
+        div.innerHTML = `<span>${p.name}</span>`;
         div.onclick = () => {
+          document.querySelectorAll(".pitem").forEach(i => i.classList.remove("active"));
+          div.classList.add("active");
           selectedId = p.id;
           $("chatTitle").innerText = p.name;
           $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. How can I guide you?</div>`;
-          if (getToken()) { $("chatInput").disabled = false; $("sendBtn").disabled = false; }
+          if (getToken()) { $("chatInput").disabled = false; $("sendBtn").disabled = false; $("chatInput").focus(); }
         };
         $("profiles").appendChild(div);
       });
     }
 
+    $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
     $("sendBtn").onclick = sendMessage;
+    $("chatInput").onkeypress = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+
     $("loginBtn").onclick = async () => {
-      const res = await fetch("/api/login", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: $("loginEmail").value, password: $("loginPassword").value })
-      });
-      const data = await res.json();
-      if (res.ok) { localStorage.setItem("jwt", data.token); location.reload(); } else alert(data.error);
+      const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: $("loginEmail").value, password: $("loginPassword").value }) });
+      if (res.ok) { const d = await res.json(); localStorage.setItem("jwt", d.token); location.reload(); } else { alert("Login failed."); }
     };
 
     $("registerBtn").onclick = async () => {
-      const res = await fetch("/api/register", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: $("regEmail").value, password: $("regPassword").value })
-      });
-      if (res.ok) { alert("Created. Sign in now."); $("tabLogin").click(); }
+      const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: $("regEmail").value, password: $("regPassword").value }) });
+      if (res.ok) { alert("Success. Please sign in."); $("tabLogin").click(); }
     };
+
+    $("tabLogin").onclick = () => { $("tabLogin").className="tab active"; $("tabRegister").className="tab"; $("loginPane").classList.remove("hide"); $("registerPane").classList.add("hide"); };
+    $("tabRegister").onclick = () => { $("tabRegister").className="tab active"; $("tabLogin").className="tab"; $("registerPane").classList.remove("hide"); $("loginPane").classList.add("hide"); };
 
     if (getToken()) { document.body.classList.add("logged-in"); $("authSection").classList.add("hide"); $("logoutBtn").style.display = "block"; }
     loadProfiles();
