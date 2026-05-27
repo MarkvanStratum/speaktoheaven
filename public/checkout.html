@@ -61,9 +61,7 @@
         </div>
 
         <form id="payment-form">
-            <label for="email">Email address</label>
-            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required>
-
+            
             <label for="cardholder-name">Cardholder Name</label>
             <input id="cardholder-name" type="text" placeholder="Full name as it appears on card" autocomplete="cc-name" required>
 
@@ -147,13 +145,16 @@
         }
 
         async function initialiseFinby() {
-            const email = document.getElementById('email').value.trim();
+            
             const endpoint = endpoints[plan] || endpoints.god;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+},
+                body: JSON.stringify({})
             });
 
             const data = await response.json();
@@ -183,20 +184,18 @@
             cardComponent.mount('#card-element');
         }
 
-        document.getElementById('email').addEventListener('change', async () => {
-            messageBox.className = 'message';
-            if (document.getElementById('email').checkValidity()) {
-                try {
-                    setLoading(true);
-                    await initialiseFinby();
-                } catch (error) {
-                    showMessage('error', error.message);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        });
-
+window.addEventListener('load', async () => {
+    try {
+        setLoading(true);
+        await initialiseFinby();
+    } catch (error) {
+        console.error(error);
+        showMessage('error', error.message || 'Could not load payment form.');
+    } finally {
+        setLoading(false);
+    }
+});
+        
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             messageBox.className = 'message';
