@@ -156,8 +156,11 @@ async function createFinbyIntent(req, res, fixedPlan = null) {
         "X-API-KEY": process.env.FINBY_SECRET_KEY
       },
       body: JSON.stringify({
-        paymentType: "Purchase",
-        amount,
+  merchantIdentification: {
+    projectId: process.env.FINBY_PROJECT_ID
+  },
+  paymentType: "Purchase",
+  amount,
         currency: "GBP",
         reference: `speaktoheaven-${selectedPlan}-${Date.now()}`,
         notificationUrl: process.env.FINBY_WEBHOOK_URL,
@@ -165,7 +168,16 @@ async function createFinbyIntent(req, res, fixedPlan = null) {
       })
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+
+console.log("FINBY RAW RESPONSE:", rawText);
+
+let data = {};
+try {
+  data = rawText ? JSON.parse(rawText) : {};
+} catch (e) {
+  data = { raw: rawText };
+}
 
     console.log("FINBY INTENT RESPONSE:", data);
 
