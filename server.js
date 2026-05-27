@@ -152,16 +152,17 @@ const email = req.user.email;
 
     const formData = new URLSearchParams();
 
-formData.append("projectId", process.env.FINBY_PROJECT_ID);
-formData.append("paymentType", "DB");
-formData.append("paymentAction", "SALE");
-formData.append("amount", amount);
+formData.append("paymentAction", "0");
+formData.append("paymentType", "plain");
+formData.append("amount", amount.toFixed(2));
 formData.append("currency", "GBP");
 formData.append("reference", `speaktoheaven-${selectedPlan}-${Date.now()}`);
 formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
-formData.append("customerEmail", email);
+formData.append("customer.email", email);
+formData.append("customer.ipAddress", req.ip || "127.0.0.1");
+formData.append("cardholder", email);
 
-const response = await fetch(`${process.env.FINBY_API_URL}/intent`, {
+const response = await fetch("https://gw.finby.eu/api/v1/intent", {
   method: "POST",
   headers: {
     "Content-Type": "application/x-www-form-urlencoded",
