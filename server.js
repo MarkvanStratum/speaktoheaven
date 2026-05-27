@@ -150,24 +150,25 @@ const email = req.user.email;
     if (!email) return res.status(400).json({ error: "Email is required" });
     if (!amount) return res.status(400).json({ error: "Invalid plan" });
 
-    const response = await fetch(`${process.env.FINBY_API_URL}/intent`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-KEY": process.env.FINBY_SECRET_KEY
-      },
-      body: JSON.stringify({
-  merchantIdentification: {
-    projectId: process.env.FINBY_PROJECT_ID
+    const formData = new URLSearchParams();
+
+formData.append("projectId", process.env.FINBY_PROJECT_ID);
+formData.append("paymentType", "DB");
+formData.append("paymentAction", "SALE");
+formData.append("amount", amount);
+formData.append("currency", "GBP");
+formData.append("reference", `speaktoheaven-${selectedPlan}-${Date.now()}`);
+formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
+formData.append("customerEmail", email);
+
+const response = await fetch(`${process.env.FINBY_API_URL}/intent`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "X-API-KEY": process.env.FINBY_SECRET_KEY
   },
-  paymentType: "Purchase",
-  amount,
-        currency: "GBP",
-        reference: `speaktoheaven-${selectedPlan}-${Date.now()}`,
-        notificationUrl: process.env.FINBY_WEBHOOK_URL,
-        customer: { email }
-      })
-    });
+  body: formData.toString()
+});
 
     const rawText = await response.text();
 
