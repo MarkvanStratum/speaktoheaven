@@ -170,6 +170,8 @@ async function createFinbyIntent(req, res, fixedPlan = null) {
 
     const rawText = await response.text();
 
+console.log("FINBY STATUS:", response.status);
+console.log("FINBY STATUS TEXT:", response.statusText);
 console.log("FINBY RAW RESPONSE:", rawText);
 
 let data = {};
