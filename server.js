@@ -514,29 +514,34 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 		const userId = req.user.id;
 
 // 🔒 Check user access and free message limit
-		const userResult = await pool.query(
-			"SELECT plan, lifetime, expires_at, messages_sent FROM users WHERE id = $1",
-			[userId]
-		);
-		const userData = userResult.rows[0];
-if (!canAccessCharacter(userData, Number(characterId))) {
+const userResult = await pool.query(
+  "SELECT plan, lifetime, expires_at, messages_sent FROM users WHERE id = $1",
+  [userId]
+);
+
+const userData = userResult.rows[0];
+
+const isPaid =
+  userData.lifetime ||
+  (userData.expires_at &&
+    new Date(userData.expires_at) > new Date());
+
+// Free users get 3 messages before paywall
+if (!isPaid && parseInt(userData.messages_sent) >= 3) {
+  return res.status(403).json({
+    error: "LIMIT_REACHED",
+    message:
+      "You have used your 3 free divine consultations. Please choose an offering to continue."
+  });
+}
+
+// Paid users still respect plan restrictions
+if (isPaid && !canAccessCharacter(userData, Number(characterId))) {
   return res.status(403).json({
     error: "NO_ACCESS",
     message: "You do not have access to this character."
   });
 }
-
-		const isPaid = userData.lifetime || (userData.expires_at && new Date(userData.expires_at) > new Date());
-
-		// Only block if they are NOT paid AND their specific message counter is 3 or more.
-		// When they pay, the Webhook sets messages_sent back to 0, which unlocks this.
-		if (!isPaid && parseInt(userData.messages_sent) >= 3) {
-			return res.status(403).json({ 
-				error: "LIMIT_REACHED", 
-				message: "You have used your 3 free divine consultations. Please choose an offering to continue." 
-			});
-		}
-
 		// Save user message
 		await pool.query(
 			`INSERT INTO messages (user_id, character_id, from_user, text)
