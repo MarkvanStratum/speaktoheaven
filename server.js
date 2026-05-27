@@ -16,6 +16,7 @@ import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 import fetch from "node-fetch";
+import FormData from "form-data";
 
 
 //--------------------------------------------
@@ -150,7 +151,7 @@ const email = req.user.email;
     if (!email) return res.status(400).json({ error: "Email is required" });
     if (!amount) return res.status(400).json({ error: "Invalid plan" });
 
-    const formData = new URLSearchParams();
+   const formData = new FormData();
 
 formData.append("paymentAction", "0");
 formData.append("paymentType", "plain");
@@ -165,12 +166,10 @@ formData.append("cardholder", email);
 const response = await fetch("https://gw.finby.eu/api/v1/intent", {
   method: "POST",
   headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
     "X-API-KEY": process.env.FINBY_SECRET_KEY
   },
-  body: formData.toString()
+  body: formData
 });
-
     const rawText = await response.text();
 
 console.log("FINBY STATUS:", response.status);
