@@ -10,13 +10,11 @@ import OpenAI from "openai";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pkg from "pg";
-import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
-import { handleCreateIntent } from "./payments.js";
 import fetch from "node-fetch";
 
 
@@ -31,8 +29,6 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const SECRET_KEY = process.env.SECRET_KEY || "supersecret";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 async function sendEmail(to, subject, html, attachments = []) {
@@ -60,7 +56,7 @@ async function sendEmail(to, subject, html, attachments = []) {
 function makeReceiptPdfBase64({ email, plan, amount }) {
   const date = new Date().toLocaleDateString("en-US");
   const invoiceNumber = "STH-" + Date.now();
-  const amountText = "$" + (amount / 100).toFixed(2);
+  const amountText = "£" + Number(amount).toFixed(2);
 
   const lines = [
     { text: "SPEAK TO HEAVEN", size: 22, x: 72, y: 720 },
@@ -136,19 +132,57 @@ app.use(cors());
 // JSON parser FIRST
 app.use(express.json());
 
-// Only special-case webhook AFTER
-app.use((req, res, next) => {
-	if (req.originalUrl === "/webhook") {
-		express.raw({ type: "application/json" })(req, res, next);
-	} else {
-		next();
-	}
-});
+async function createFinbyIntent(req, res, fixedPlan = null) {
+  try {
+    const { email, plan } = req.body;
 
-// THEN routes
-app.post("/api/create-landing-payment", handleCreateIntent);
-app.post("/api/create-au-payment-3595", handleCreateIntent);
-app.post("/api/create-payment-2995", handleCreateIntent);
+    const selectedPlan = fixedPlan || plan;
+
+    const amounts = {
+  "2995": 29.95,
+  "3595": 35.95,
+  "4995": 49.95
+};
+
+    const amount = amounts[selectedPlan];
+
+    if (!email) return res.status(400).json({ error: "Email is required" });
+    if (!amount) return res.status(400).json({ error: "Invalid plan" });
+
+    const response = await fetch(`${process.env.FINBY_API_URL}/intent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": process.env.FINBY_SECRET_KEY
+      },
+      body: JSON.stringify({
+        paymentType: "Purchase",
+        amount,
+        currency: "GBP",
+        reference: `speaktoheaven-${selectedPlan}-${Date.now()}`,
+        notificationUrl: process.env.FINBY_WEBHOOK_URL,
+        customer: { email }
+      })
+    });
+
+    const data = await response.json();
+
+    console.log("FINBY INTENT RESPONSE:", data);
+
+    if (!response.ok) {
+      return res.status(500).json({ error: "Finby error", details: data });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error("Finby intent error:", err);
+    res.status(500).json({ error: "Could not create Finby payment" });
+  }
+}
+
+app.post("/api/create-landing-payment", (req, res) => createFinbyIntent(req, res, "4995"));
+app.post("/api/create-au-payment-3595", (req, res) => createFinbyIntent(req, res, "3595"));
+app.post("/api/create-payment-2995", (req, res) => createFinbyIntent(req, res, "2995"));
 
 //--------------------------------------------
 //	DATABASE
@@ -355,93 +389,6 @@ app.post("/api/login", async (req, res) => {
 		res.json({ token });
 	} catch (err) {
 		res.status(500).json({ error: "Server error" });
-	}
-});
-
-// 1. Remove 'authenticateToken' from this route to allow guests
-app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
-    try {
-        const { plan } = req.body;
-        
-        // This pulls the email from your login session automatically
-        const email = req.user.email;
-        const userId = req.user.id;
-
-        const amounts = {
-            'god': 2995,
-            'all': 3595,
-            'lifetime': 4995
-        };
-
-        const amount = amounts[plan];
-
-        if (!amount) {
-            return res.status(400).json({ error: "Please select a valid plan." });
-        }
-
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency: "usd",
-            metadata: { 
-                plan, 
-                email,
-                userId 
-            },
-        });
-
-        res.json({ clientSecret: paymentIntent.client_secret });
-    } catch (e) {
-        res.status(500).json({ error: "Payment Error: " + e.message });
-    }
-});
-
-//--------------------------------------------
-// STRIPE CHECKOUT (ONE-TIME PAYMENTS)
-//--------------------------------------------
-
-app.post("/api/create-checkout", authenticateToken, async (req, res) => {
-	try {
-		const { plan } = req.body;
-
-		let amount;
-		let name;
-
-		if (plan === "god") {
-			amount = 2995;
-			name = "God Access (30 days)";
-		} else if (plan === "all") {
-			amount = 3595;
-			name = "Full Access (30 days)";
-		} else if (plan === "lifetime") {
-			amount = 4995;
-			name = "Lifetime Access";
-		} else {
-			return res.status(400).json({ error: "Invalid plan" });
-		}
-
-		const session = await stripe.checkout.sessions.create({
-			payment_method_types: ["card"],
-			mode: "payment",
-			customer_email: req.user.email,
-			line_items: [
-				{
-					price_data: {
-						currency: "usd",
-						product_data: { name },
-						unit_amount: amount
-					},
-					quantity: 1
-				}
-			],
-			metadata: { plan },
-			success_url: "https://your-site.com/success",
-			cancel_url: "https://your-site.com/cancel"
-		});
-
-		res.json({ url: session.url });
-	} catch (err) {
-		console.error("Checkout error:", err);
-		res.status(500).json({ error: "Stripe error" });
 	}
 });
 
@@ -686,118 +633,78 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 	}
 });
 
-//--------------------------------------------
-// STRIPE WEBHOOK
-//--------------------------------------------
+app.post("/finby-webhook", async (req, res) => {
+  try {
+    const data = req.body;
 
-// UPDATED: Webhook to handle PaymentIntents and Plan persistence
-app.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    let event;
+    console.log("FINBY WEBHOOK:", JSON.stringify(data, null, 2));
 
-    try {
-        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-    } catch (err) {
-        console.error("Webhook Signature Error:", err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+    const status =
+      data?.PaymentInformation?.Status ||
+      data?.paymentInformation?.status;
+
+    const email =
+      data?.PaymentInformation?.Debtor?.Email ||
+      data?.paymentInformation?.debtor?.email;
+
+    const reference =
+      data?.PaymentInformation?.References?.MerchantReference ||
+      data?.paymentInformation?.references?.merchantReference;
+
+    if (!email) {
+      return res.status(400).json({ error: "Missing email" });
     }
 
-    async function applyPlan(plan, userId, email) {
-    let expiresAt = null;
-    let isLifetime = false;
+    let plan = "2995";
+let amount = 29.95;
 
-    if (plan === '2995' || plan === '3595') {
+if (reference?.includes("3595")) {
+  plan = "3595";
+  amount = 35.95;
+}
+
+if (reference?.includes("4995")) {
+  plan = "4995";
+  amount = 49.95;
+}
+
+    if (status === "Paid" || status === "Authorized") {
+      let expiresAt = null;
+      let isLifetime = false;
+
+      if (plan === "2995" || plan === "3595") {
         const date = new Date();
         date.setDate(date.getDate() + 30);
         expiresAt = date;
-        isLifetime = false;
-    } else if (plan === '4995') {
-        expiresAt = null;
+      }
+
+      if (plan === "4995") {
         isLifetime = true;
+      }
+
+      await pool.query(
+        "UPDATE users SET plan = $1, expires_at = $2, lifetime = $3, messages_sent = 0 WHERE email = $4",
+        [plan, expiresAt, isLifetime, email]
+      );
+
+      const receiptPdf = makeReceiptPdfBase64({ email, plan, amount });
+
+      await sendEmail(
+        email,
+        "Your Speak to Heaven receipt",
+        "<h2>Payment received</h2>" +
+        "<p>Thank you for your offering.</p>" +
+        "<p><strong>Plan:</strong> " + plan + "</p>" +
+        "<p><strong>Amount:</strong> £" + Number(amount).toFixed(2) + "</p>",
+        [{ filename: "speak-to-heaven-receipt.pdf", content: receiptPdf }]
+      );
     }
 
-    try {
-        if (userId) {
-            await pool.query(
-                "UPDATE users SET plan = $1, expires_at = $2, lifetime = $3, messages_sent = 0 WHERE id = $4",
-                [plan, expiresAt, isLifetime, userId]
-            );
-        } else if (email) {
-            // Fix for the database query: using email to find user
-            await pool.query(
-                "UPDATE users SET plan = $1, expires_at = $2, lifetime = $3, messages_sent = 0 WHERE email = $4",
-                [plan, expiresAt, isLifetime, email]
-            );
-        }
-        console.log(`✅ Plan ${plan} applied to ${email || userId}`);
-    } catch (err) {
-        console.error("❌ Error applying plan:", err);
-    }
-}
-
-    // PaymentIntent flow (THIS is what checkout.html uses)
-    if (event.type === "payment_intent.succeeded") {
-        const paymentIntent = event.data.object;
-        const plan = paymentIntent.metadata && paymentIntent.metadata.plan;
-        const email = paymentIntent.metadata && paymentIntent.metadata.email;
-        const userId = paymentIntent.metadata && paymentIntent.metadata.userId;
-
-        console.log("💳 payment_intent.succeeded", { plan, email, userId });
-
-        // Check if user exists. If not, create them.
-        const userCheck = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-        
-        if (userCheck.rows.length === 0 && email) {
-            const tempPassword = crypto.randomBytes(8).toString('hex');
-            const hashed = await bcrypt.hash(tempPassword, 10);
-            
-            await pool.query(
-                "INSERT INTO users (email, password, plan, lifetime, messages_sent) VALUES ($1, $2, $3, $4, 0)",
-                [email, hashed, plan, plan === '4995']
-            );
-            console.log(`👤 Guest User Created: ${email}`);
-        }
-
-        await applyPlan(plan, userId, email);
-
-const receiptPdf = makeReceiptPdfBase64({
-  email,
-  plan,
-  amount: paymentIntent.amount
-});
-
-await sendEmail(
-  email,
-  "Your Speak to Heaven receipt",
-  "<h2>Payment received</h2>" +
-  "<p>Thank you for your offering.</p>" +
-  "<p><strong>Plan:</strong> " + plan + "</p>" +
-  "<p><strong>Amount:</strong> $" + (paymentIntent.amount / 100).toFixed(2) + "</p>" +
-  "<p>Your PDF receipt is attached.</p>",
-  [
-    {
-      filename: "speak-to-heaven-receipt.pdf",
-      content: receiptPdf
-    }
-  ]
-);
-}
-
-    // Checkout flow (if you ever use /api/create-checkout)
-    if (event.type === "checkout.session.completed") {
-        const session = event.data.object;
-        const plan = session.metadata && session.metadata.plan;
-        const email =
-            (session.metadata && session.metadata.email) ||
-            (session.customer_details && session.customer_details.email);
-        const userId = session.metadata && session.metadata.userId;
-
-        console.log("🔥 checkout.session.completed", { plan, email, userId });
-
-        await applyPlan(plan, userId, email);
-    }
-
-    res.json({ received: true });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Finby webhook error:", err);
+    res.status(500).json({ error: "Finby webhook error" });
+  }
 });
 
 app.get("/test-receipt-email", async (req, res) => {
@@ -806,7 +713,7 @@ app.get("/test-receipt-email", async (req, res) => {
   const receiptPdf = makeReceiptPdfBase64({
     email,
     plan: "lifetime",
-    amount: 4995
+    amount: 49.95
   });
 
   await sendEmail(
@@ -816,8 +723,8 @@ app.get("/test-receipt-email", async (req, res) => {
 "<p>We have received your payment successfully.</p>" +
 "<p>Your receipt is attached to this email as a PDF.</p>" +
 "<p><strong>Plan:</strong> Lifetime Access</p>" +
-"<p><strong>Amount paid:</strong> $49.95</p>",
-    [
+"<p><strong>Amount paid:</strong> £49.95</p>",
+[
       {
         filename: "receipt.pdf",
         content: receiptPdf
