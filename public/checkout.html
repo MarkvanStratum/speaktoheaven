@@ -61,6 +61,9 @@
         </div>
 
         <form id="payment-form">
+
+<label for="customer-email">Email Address</label>
+<input id="customer-email" type="email" placeholder="Your email address" autocomplete="email" required>
             
             <label for="cardholder-name">Cardholder Name</label>
             <input id="cardholder-name" type="text" placeholder="Full name as it appears on card" autocomplete="cc-name" required>
@@ -153,7 +156,9 @@
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + localStorage.getItem('jwt')
 },
-                body: JSON.stringify({})
+                body: JSON.stringify({
+    email: document.getElementById('customer-email').value
+})
             });
 
             const data = await response.json();
