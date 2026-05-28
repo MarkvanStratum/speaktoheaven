@@ -222,9 +222,9 @@ try {
   }
 }
 
-app.post("/api/create-landing-payment", (req, res) => createFinbyIntent(req, res, "4995"));
-app.post("/api/create-au-payment-3595", (req, res) => createFinbyIntent(req, res, "3595"));
-app.post("/api/create-payment-2995", (req, res) => createFinbyIntent(req, res, "2995"));
+app.post("/api/create-landing-payment", authenticateToken, (req, res) => createFinbyIntent(req, res, "4995"));
+app.post("/api/create-au-payment-3595", authenticateToken, (req, res) => createFinbyIntent(req, res, "3595"));
+app.post("/api/create-payment-2995", authenticateToken, (req, res) => createFinbyIntent(req, res, "2995"));
 
 //--------------------------------------------
 //	DATABASE
