@@ -7,9 +7,9 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self' https: 'unsafe-inline' 'unsafe-eval';
-  script-src 'self' https://www.googletagmanager.com https://checkout.finby.eu https://api.goaffpro.com 'unsafe-inline' 'unsafe-eval';
-  connect-src 'self' https://checkout.finby.eu https://aapi.finby.eu;
-  frame-src 'self' https://checkout.finby.eu;
+  script-src 'self' https://www.googletagmanager.com https://gw.finby.eu https://api.goaffpro.com 'unsafe-inline' 'unsafe-eval';
+  connect-src 'self' https://gw.finby.eu;
+  frame-src 'self' https://gw.finby.eu;
 ">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -106,18 +106,18 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 <div class="h2">1. Information</div>
 
 <div class="form-grid">
-<input id="firstName" class="input" placeholder="First Name">
-<input id="lastName" class="input" placeholder="Last Name">
+<input id="firstName" class="input" placeholder="First Name" required>
+<input id="lastName" class="input" placeholder="Last Name" required>
 </div>
 
 <div class="form-grid">
-<input id="billingStreet" class="input" placeholder="Address" style="grid-column:1/-1">
-<input id="billingPostcode" class="input" placeholder="Postcode">
-<input id="billingCity" class="input" placeholder="City">
+<input id="billingStreet" class="input" placeholder="Address" style="grid-column:1/-1" required>
+<input id="billingPostcode" class="input" placeholder="Postcode" required>
+<input id="billingCity" class="input" placeholder="City" required>
 </div>
 
 <div class="form-grid">
-<input id="emailInput" class="input" type="email" placeholder="Email">
+<input id="emailInput" class="input" type="email" placeholder="Email" required>
 <input class="input" value="United Kingdom" disabled>
 </div>
 
@@ -125,7 +125,7 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 <select id="phonePrefix" class="select">
 <option value="+44">+44 — United Kingdom</option>
 </select>
-<input id="phoneNumber" class="input" placeholder="Phone Number">
+<input id="phoneNumber" class="input" placeholder="Phone Number" required>
 </div>
 
 <input id="nameInput" type="hidden">
@@ -139,11 +139,7 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 <p class="sub">Card information is encrypted and securely processed.</p>
 
 <div>
-<div id="card-number" class="el"></div>
-<div class="form-grid">
-<div id="card-expiry" class="el"></div>
-<div id="card-cvc" class="el"></div>
-</div>
+<div id="card-element" class="el" style="min-height: 46px;"></div>
 </div>
 
 <div id="err" class="err" aria-hidden="true"></div>
@@ -202,12 +198,10 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 </div>
 </div>
 
-<script src="https://checkout.finby.eu/js/v1/finbyApi.js"></script>
+<script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
 
 <script>
-
 const params = new URLSearchParams(window.location.search);
-
 const affiliateRef = params.get('ref');
 
 if (!affiliateRef) {
@@ -265,7 +259,6 @@ if(qs.get('sub2')){
   }
 }
 
-
 // PREFILL
 if(qs.get('sub3')) firstName.value=d(qs.get('sub3'));
 if(qs.get('sub4')) lastName.value=d(qs.get('sub4'));
@@ -275,93 +268,105 @@ if(qs.get('sub7')) billingCity.value=d(qs.get('sub7'));
 if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
-// FINBY
-// FINBY
-let trustPayApi;
-let cardComponent;
-let finbyMounted = false;
+// FINBY INTEGRATION VARIABLES
+let trustPayApi = null;
+let cardComponent = null;
+let paymentSecrets = null;
 
-nextBtn.onclick=()=>{
-nameInput.value=`${firstName.value} ${lastName.value}`.trim();
-step1.setAttribute('aria-hidden','true');
-step2.setAttribute('aria-hidden','false');
+// CONTINUE TO STEP 2
+nextBtn.onclick = async () => {
+    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+    
+    // Simple basic check to ensure info fields aren't completely blank
+    if(!firstName.value || !lastName.value || !emailInput.value) {
+        alert("Please complete the required information fields.");
+        return;
+    }
 
-if (!finbyMounted) {
-  trustPayApi = new finbyApi({ language: "en" });
+    // Move layout visibility over to Step 2
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
 
-cardComponent = trustPayApi.createComponent("card", {});
-cardComponent.mount("#card-number");
+    // Connect to backend server and initialize the exact layout structure from checkout_2.html
+    if (!trustPayApi) {
+        try {
+            const r = await fetch("/api/create-landing-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    name: nameInput.value
+                })
+            });
 
-  finbyMounted = true;
-}};
+            const data = await r.json();
+            console.log("SERVER INTENT RESPONSE:", data);
 
-backBtn.onclick=()=>{
-step2.setAttribute('aria-hidden','true');
-step1.setAttribute('aria-hidden','false');
+            // Access correct nested properties matching checkout_2.html sequence
+            if (!data.secrets || !data.secrets.payment) {
+                throw new Error(data.error || "Payment setup failed. No secrets returned.");
+            }
+
+            paymentSecrets = data.secrets;
+            trustPayApi = new TrustPayApi(paymentSecrets);
+
+            cardComponent = trustPayApi.createComponent('card', {
+                style: {
+                    fontFamily: 'Arial, Helvetica, sans-serif',
+                    fontSize: '16px',
+                    color: '#33302c'
+                }
+            });
+
+            document.getElementById('card-element').innerHTML = '';
+            cardComponent.mount('#card-element');
+
+        } catch (e) {
+            console.error(e);
+            err.textContent = e.message || "Could not load the secure payment form.";
+            err.setAttribute("aria-hidden", "false");
+        }
+    }
 };
 
-payNow.onclick=async()=>{
-payNow.disabled=true;
-err.setAttribute("aria-hidden","true");
-const overlay=document.getElementById("loading-overlay");
-overlay.setAttribute("aria-hidden","false");
-
-try{
-
-const billingDetails={
-name:nameInput.value,
-email:emailInput.value,
-phone:phonePrefix.value+phoneNumber.value,
-address:{
-line1:billingStreet.value,
-city:billingCity.value,
-postal_code:billingPostcode.value,
-country:"GB"
-}
+// GO BACK TO STEP 1
+backBtn.onclick = () => {
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
 };
 
-const r = await fetch("/api/create-landing-payment", {
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-email: emailInput.value,
-name: nameInput.value
-})
-});
+// PROCESS FINAL PAYMENT ACTION
+payNow.onclick = async () => {
+    payNow.disabled = true;
+    err.setAttribute("aria-hidden","true");
+    const overlay = document.getElementById("loading-overlay");
+    overlay.setAttribute("aria-hidden","false");
 
-const data = await r.json();
+    try {
+        if (!trustPayApi || !cardComponent || !paymentSecrets) {
+            throw new Error("Payment window was not initialized correctly.");
+        }
 
-console.log("SERVER RESPONSE:", data);
+        // Complete card charging processing routine using saved target context variables
+        const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
+            card: cardComponent
+        });
 
-if (!data.paymentSecrets || !data.paymentSecrets.payment) {
-  throw new Error(data.error || "No payment secret returned");
-}
+        console.log("FINBY PAYMENT RESULT:", result);
 
-const result = await trustPayApi.finishCardPayment(
-  data.paymentSecrets.payment,
-  {
-    card: cardComponent
-  }
-);
+        if (result && (result.status === "succeeded" || Number(result?.status) >= 0)) {
+            window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+            return;
+        } else {
+            throw new Error("Payment was rejected or not completed. Please try again.");
+        }
 
-if(result.error){
-  throw new Error(result.error.message || "Payment failed");
-}
-
-if(result.status === "succeeded"){
-window.location.href="https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
-return;
-}
-
-throw new Error("Payment not completed");
-
-}catch(e){
-err.textContent=e.message;
-err.setAttribute("aria-hidden","false");
-overlay.setAttribute("aria-hidden","true");
-payNow.disabled=false;
-}
-
+    } catch(e) {
+        err.textContent = e.message;
+        err.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        payNow.disabled = false;
+    }
 };
 
 });
