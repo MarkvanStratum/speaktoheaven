@@ -347,16 +347,18 @@ payNow.onclick = async () => {
     const overlay = document.getElementById("loading-overlay");
     overlay.setAttribute("aria-hidden","false");
 
-const removeOverlayWhenFinbyLoaderAppears = setInterval(() => {
+const removeOverlayWhen3DSAppears = setInterval(() => {
 
     const bodyText = document.body.innerText || "";
 
     if (
-        bodyText.includes("Processing payment") ||
-        bodyText.includes("processing payment")
+        bodyText.includes("Cancel payment") ||
+        bodyText.includes("3D-Secure") ||
+        bodyText.includes("3DS") ||
+        bodyText.includes("Statrys")
     ) {
         overlay.setAttribute("aria-hidden","true");
-        clearInterval(removeOverlayWhenFinbyLoaderAppears);
+        clearInterval(removeOverlayWhen3DSAppears);
     }
 
 }, 200);
