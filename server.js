@@ -130,6 +130,30 @@ trailer
 }
 app.use(cors());
 
+// --------------------------------------------
+// PROTECTED CHECKOUT HELPERS
+// --------------------------------------------
+
+function createToken(bytes = 24) {
+  return crypto.randomBytes(bytes).toString("base64url");
+}
+
+function hashSecret(secret) {
+  return crypto
+    .createHmac("sha256", SECRET_KEY)
+    .update(secret)
+    .digest("hex");
+}
+
+function getCookie(req, name) {
+  const cookies = req.headers.cookie || "";
+  const match = cookies.match(
+    new RegExp("(^| )" + name + "=([^;]+)")
+  );
+
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
 // JSON parser FIRST
 app.use(express.json());
 
@@ -276,6 +300,26 @@ await pool.query(
 );
 
 console.log(`✅ Test lifetime login ready: ${testEmail}`);
+// --------------------------------------------
+// PROTECTED CHECKOUT LINKS TABLE
+// --------------------------------------------
+
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS checkout_links (
+    id SERIAL PRIMARY KEY,
+    token TEXT UNIQUE NOT NULL,
+    secret_hash TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    source_page TEXT,
+    ip TEXT,
+    user_agent TEXT,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+
+console.log("✅ Protected checkout links table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -449,6 +493,175 @@ app.use("/img", express.static(imageDir));
 //--------------------------------------------
 // FRONTEND STATIC FILES
 //--------------------------------------------
+
+// --------------------------------------------
+// CREATE PROTECTED CHECKOUT LINK
+// --------------------------------------------
+
+app.post("/api/create-checkout-link", async (req, res) => {
+  try {
+
+    const { plan, sourcePage } = req.body || {};
+
+    const allowedPlans = ["god", "all", "lifetime"];
+
+    if (!allowedPlans.includes(plan)) {
+      return res.status(400).json({
+        error: "Invalid plan"
+      });
+    }
+
+    const token = createToken(18);
+    const secret = createToken(32);
+
+    const secretHash = hashSecret(secret);
+
+    const expiresAt = new Date(
+      Date.now() + 15 * 60 * 1000
+    );
+
+    await pool.query(
+      `
+      INSERT INTO checkout_links
+      (
+        token,
+        secret_hash,
+        plan,
+        source_page,
+        ip,
+        user_agent,
+        expires_at
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      `,
+      [
+        token,
+        secretHash,
+        plan,
+        sourcePage || null,
+        req.ip,
+        req.headers["user-agent"] || "",
+        expiresAt
+      ]
+    );
+
+    res.setHeader(
+      "Set-Cookie",
+      `checkout_flow=${token}.${secret}; HttpOnly; Path=/; Max-Age=900; SameSite=Lax`
+    );
+
+    res.json({
+      url: `/c/${token}`
+    });
+
+  } catch (err) {
+
+    console.error(
+      "Create checkout link error:",
+      err
+    );
+
+    res.status(500).json({
+      error: "Could not create checkout link"
+    });
+  }
+});
+
+// --------------------------------------------
+// BLOCK DIRECT CHECKOUT ACCESS
+// --------------------------------------------
+
+app.get("/checkout.html", (req, res) => {
+  return res.status(404).send("Not found");
+});
+
+// --------------------------------------------
+// PROTECTED CHECKOUT PAGE
+// --------------------------------------------
+
+app.get("/c/:token", async (req, res) => {
+
+  try {
+
+    const { token } = req.params;
+
+    const flowCookie = getCookie(
+      req,
+      "checkout_flow"
+    );
+
+    if (!flowCookie) {
+      return res.status(404).send("Not found");
+    }
+
+    const parts = flowCookie.split(".");
+
+    if (parts.length !== 2) {
+      return res.status(404).send("Not found");
+    }
+
+    const cookieToken = parts[0];
+    const secret = parts[1];
+
+    if (cookieToken !== token) {
+      return res.status(404).send("Not found");
+    }
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM checkout_links
+      WHERE token = $1
+      AND secret_hash = $2
+      AND expires_at > NOW()
+      AND used_at IS NULL
+      `,
+      [
+        token,
+        hashSecret(secret)
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Not found");
+    }
+
+    const checkout = result.rows[0];
+
+    const checkoutPath = path.join(
+      __dirname,
+      "public",
+      "checkout.html"
+    );
+
+    let html = fs.readFileSync(
+      checkoutPath,
+      "utf8"
+    );
+
+    html = html.replace(
+      "</head>",
+      `
+      <script>
+        window.CHECKOUT_PLAN =
+          ${JSON.stringify(checkout.plan)};
+      </script>
+      </head>
+      `
+    );
+
+    res.send(html);
+
+  } catch (err) {
+
+    console.error(
+      "Protected checkout error:",
+      err
+    );
+
+    res.status(500).send("Server error");
+  }
+});
 
 const frontendPath = path.join(__dirname, "public");
 
