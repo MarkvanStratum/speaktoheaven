@@ -308,13 +308,12 @@ nextBtn.onclick = async () => {
             console.log("SERVER INTENT RESPONSE:", data);
 
             // Match exact property keys exposed in createFinbyIntent in server.js
-            if (!data.payment || !data.token) {
-                throw new Error(data.error || "Payment setup failed. No secrets returned.");
-            }
+            if (!data.secrets || !data.secrets.payment) {
+    throw new Error(data.error || "Payment setup failed. No secrets returned.");
+}
 
-            // Map response variables to initialize TrustPayApi cleanly
-            paymentSecrets = { payment: data.payment };
-            trustPayApi = new TrustPayApi(data);
+paymentSecrets = data.secrets;
+trustPayApi = new TrustPayApi(paymentSecrets);
 
             cardComponent = trustPayApi.createComponent('card', {
                 style: {
