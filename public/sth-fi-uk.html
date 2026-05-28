@@ -346,18 +346,10 @@ payNow.onclick = async () => {
     err.setAttribute("aria-hidden","true");
     const overlay = document.getElementById("loading-overlay");
     overlay.setAttribute("aria-hidden","false");
+setTimeout(() => {
+    overlay.setAttribute("aria-hidden","true");
+}, 2500);
 
-const existingIframes = new Set(document.querySelectorAll("iframe"));
-
-const removeOverlayWhen3DSAppears = setInterval(() => {
-    const newIframe = Array.from(document.querySelectorAll("iframe"))
-        .find(frame => !existingIframes.has(frame));
-
-    if (newIframe) {
-        overlay.setAttribute("aria-hidden","true");
-        clearInterval(removeOverlayWhen3DSAppears);
-    }
-}, 100);
 
 try {
         if (!trustPayApi || !cardComponent || !paymentSecrets) {
