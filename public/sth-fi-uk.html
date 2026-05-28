@@ -277,17 +277,16 @@ let paymentSecrets = null;
 nextBtn.onclick = async () => {
     nameInput.value = `${firstName.value} ${lastName.value}`.trim();
     
-    // Simple basic check to ensure info fields aren't completely blank
     if(!firstName.value || !lastName.value || !emailInput.value) {
-        alert("Please complete the required information fields.");
+        alert("Please complete the required fields.");
         return;
     }
 
-    // Move layout visibility over to Step 2
+    // Move to Step 2
     step1.setAttribute('aria-hidden','true');
     step2.setAttribute('aria-hidden','false');
 
-    // Connect to backend server and initialize the exact layout structure from checkout_2.html
+    // Dynamically query your server using the functional endpoint matching checkout.html
     if (!trustPayApi) {
         try {
             const r = await fetch("/api/create-landing-payment", {
@@ -299,16 +298,23 @@ nextBtn.onclick = async () => {
                 })
             });
 
+            // If the server returns an HTML file due to missing authentication token, catch it nicely
+            const contentType = r.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                throw new Error("Authentication Required: Please make sure you are logged in or your session token is active.");
+            }
+
             const data = await r.json();
             console.log("SERVER INTENT RESPONSE:", data);
 
-            // Access correct nested properties matching checkout_2.html sequence
-            if (!data.secrets || !data.secrets.payment) {
+            // Match exact property keys exposed in createFinbyIntent in server.js
+            if (!data.payment || !data.token) {
                 throw new Error(data.error || "Payment setup failed. No secrets returned.");
             }
 
-            paymentSecrets = data.secrets;
-            trustPayApi = new TrustPayApi(paymentSecrets);
+            // Map response variables to initialize TrustPayApi cleanly
+            paymentSecrets = { payment: data.payment };
+            trustPayApi = new TrustPayApi(data);
 
             cardComponent = trustPayApi.createComponent('card', {
                 style: {
@@ -344,10 +350,10 @@ payNow.onclick = async () => {
 
     try {
         if (!trustPayApi || !cardComponent || !paymentSecrets) {
-            throw new Error("Payment window was not initialized correctly.");
+            throw new Error("Payment form not loaded correctly. Please go back and try again.");
         }
 
-        // Complete card charging processing routine using saved target context variables
+        // Finish the checkout transaction
         const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
             card: cardComponent
         });
@@ -358,7 +364,7 @@ payNow.onclick = async () => {
             window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
             return;
         } else {
-            throw new Error("Payment was rejected or not completed. Please try again.");
+            throw new Error("Payment was rejected. Please verify your details.");
         }
 
     } catch(e) {
