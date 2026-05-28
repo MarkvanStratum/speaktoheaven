@@ -61,7 +61,7 @@ border-radius:12px;gap:10px;align-items:center;}
 .hero img{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);object-fit:cover}
 
 .loading-overlay{position:fixed;inset:0;background:rgba(246,249,252,.92);
-display:none;align-items:center;justify-content:center;z-index:100}
+display:none;align-items:center;justify-content:center;z-index:9999}
 .loading-overlay[aria-hidden="false"]{display:flex}
 .loading-box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;
 border-radius:14px;padding:24px;text-align:center}
@@ -346,9 +346,12 @@ payNow.onclick = async () => {
     err.setAttribute("aria-hidden","true");
     const overlay = document.getElementById("loading-overlay");
     overlay.setAttribute("aria-hidden","false");
+
 setTimeout(() => {
-  overlay.setAttribute("aria-hidden","true");
-}, 1500);
+    overlay.setAttribute("aria-hidden","true");
+}, 2500);
+
+try {
 
     try {
         if (!trustPayApi || !cardComponent || !paymentSecrets) {
