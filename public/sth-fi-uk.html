@@ -196,7 +196,7 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 </div>
 </div>
 
-<script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
+<script src="https://checkout.finby.eu/js/v1/finbyApi.js"></script>
 
 <script>
 
@@ -281,7 +281,7 @@ step1.setAttribute('aria-hidden','true');
 step2.setAttribute('aria-hidden','false');
 
 if (!finbyMounted) {
-  trustPayApi = new TrustPayApi();
+  trustPayApi = new finbyApi({ language: "en" });
 
 cardComponent = trustPayApi.createComponent("card", {});
 cardComponent.mount("#card-number");
