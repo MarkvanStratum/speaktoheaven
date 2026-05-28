@@ -130,12 +130,28 @@
 
   <a href="/" class="back-link">Return to the Sanctuary</a>
 
-  <script>
-    function checkout(planName) {
-      // This sends the user to your new checkout page with the plan as a URL parameter
-      window.location.href = `/checkout.html?plan=${planName}`;
+ <script>
+  async function checkout(planName) {
+    const response = await fetch("/api/create-checkout-link", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        plan: planName,
+        sourcePage: window.location.pathname
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Could not open checkout. Please try again.");
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
