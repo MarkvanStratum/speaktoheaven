@@ -347,23 +347,40 @@ payNow.onclick = async () => {
     const overlay = document.getElementById("loading-overlay");
     overlay.setAttribute("aria-hidden","false");
 
-const watchFor3DS = new MutationObserver(() => {
-    const threeDSFrame = Array.from(document.querySelectorAll("iframe")).find(frame => {
-        const src = frame.src || "";
-        return src.includes("acs") || src.includes("3ds") || src.includes("challenge") || src.includes("apata");
+const hideOverlayWhen3DSAppears = () => {
+    const iframes = Array.from(document.querySelectorAll("iframe"));
+
+    const visible3DS = iframes.find(frame => {
+        const rect = frame.getBoundingClientRect();
+        return rect.width > 250 && rect.height > 250;
     });
 
-    if (threeDSFrame) {
+    if (visible3DS) {
         overlay.setAttribute("aria-hidden","true");
+        return true;
+    }
+
+    return false;
+};
+
+const watchFor3DS = new MutationObserver(() => {
+    if (hideOverlayWhen3DSAppears()) {
         watchFor3DS.disconnect();
     }
 });
 
 watchFor3DS.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
+    attributes: true
 });
 
+const threeDSCheckInterval = setInterval(() => {
+    if (hideOverlayWhen3DSAppears()) {
+        clearInterval(threeDSCheckInterval);
+        watchFor3DS.disconnect();
+    }
+}, 300);
 try {
         if (!trustPayApi || !cardComponent || !paymentSecrets) {
             throw new Error("Payment form not loaded correctly. Please go back and try again.");
