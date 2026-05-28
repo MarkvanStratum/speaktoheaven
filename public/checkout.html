@@ -101,8 +101,7 @@
     </div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const plan = params.get('plan') || 'god';
+        const plan = window.CHECKOUT_PLAN || 'god';
 
         const titles = {
             god: 'God Access',
