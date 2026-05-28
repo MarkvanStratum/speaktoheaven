@@ -38,7 +38,7 @@
         label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--blue-saint); font-size: 14px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         
-        /* FIX: Element remains standard sizing initially so users can type naturally */
+        /* Elements maintain clean default height constraints for text input styling */
         #card-element {
             padding: 12px;
             border: 1px solid #ddd;
@@ -50,7 +50,6 @@
             overflow: visible !important;
         }
 
-        /* FIX: Automatically matches height and sets sizing when 3DS modal components mount */
         #card-element iframe {
             width: 100% !important;
             display: block;
@@ -201,7 +200,6 @@
 
             paymentSecrets = data.secrets;
 
-            // FIX: Use the correct window.TrustPay constructor loaded by the gateway SDK script
             if (typeof window.TrustPay === 'function') {
                 trustPayApi = window.TrustPay(paymentSecrets.public_key || 'pk_live_placeholder');
             } else if (typeof window.TrustPayApi === 'function') {
@@ -210,13 +208,12 @@
                 throw new Error('Payment Gateway SDK missing. Please check your connection.');
             }
 
+            // FIX: Flatten style argument configurations to ensure native multi-attribute rendering loads smoothly
             cardComponent = trustPayApi.components.create('card', {
                 style: {
-                    base: {
-                        fontFamily: 'Arial, Helvetica, sans-serif',
-                        fontSize: '16px',
-                        color: '#33302c'
-                    }
+                    fontFamily: 'Arial, Helvetica, sans-serif',
+                    fontSize: '16px',
+                    color: '#33302c'
                 }
             });
 
@@ -252,11 +249,10 @@
                     await initialiseFinby();
                 }
 
-                // FIX: Expand the container size right here to comfortably hold the 3DS verification frame if triggered
+                // Adjust container canvas boundaries to contain the active authentication flow frame securely
                 const container = document.getElementById('card-element');
                 container.style.minHeight = '450px';
                 
-                // Ensure nested iframes scale along with the container expansion
                 const iframes = container.getElementsByTagName('iframe');
                 for (let i = 0; i < iframes.length; i++) {
                     iframes[i].style.height = '450px';
@@ -275,7 +271,6 @@
                         window.location.href = '/login.html';
                     }, 1800);
                 } else {
-                    // Reset height back to standard input field configuration if verification drops or fails
                     document.getElementById('card-element').style.minHeight = '46px';
                     showMessage('error', 'Payment was not completed. Please check your card details or try another card.');
                 }
