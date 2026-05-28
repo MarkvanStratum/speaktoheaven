@@ -208,7 +208,7 @@ if (!affiliateRef) {
     window.location.replace('https://www.speaktoheaven.com');
 }
 
-window.addEventListener('DOMContentLoaded', async ()=>{
+window.addEventListener('DOMContentLoaded', ()=>{
 
 const qs=new URLSearchParams(location.search);
 const d=v=>{try{return decodeURIComponent(v||'')}catch{return v||''}};
@@ -248,10 +248,9 @@ if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
 // FINBY
-const trustPayApi = await TrustPay({
+const trustPayApi = TP({
   language: "en"
 });
-
 const cardComponent = trustPayApi.cardComponent();
 
 cardComponent.mount("#card-number");
