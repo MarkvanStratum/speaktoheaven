@@ -260,107 +260,139 @@ to{transform:rotate(360deg)}
 </div>
 </div>
 
-<script src="https://gw.finby.eu/sdk/js/integrated-card.js"></script>
+<script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
 
 <script>
+const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+
 const overlay = document.getElementById("overlay");
 const payBtn = document.getElementById("payBtn");
 
 let trustPayApi = null;
 let cardComponent = null;
-let currentIntent = null;
+let paymentSecrets = null;
 
-async function initPayment() {
+async function safeJson(response) {
+    const text = await response.text();
 
-  overlay.setAttribute("aria-hidden", "false");
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        throw new Error(text || "Server returned an invalid response.");
+    }
+}
 
-  setTimeout(() => {
-    overlay.setAttribute("aria-hidden", "true");
-  }, 4000);
+async function initialiseFinby() {
 
-  try {
-
-    const response = await fetch("/api/create-promo-payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        checkoutToken: window.PROMO_CHECKOUT_TOKEN
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data?.details?.errors?.[0]?.description ||
-        data?.error ||
-        "Payment initialization failed"
-      );
+    if (!tokenFromServer) {
+        throw new Error("קישור תשלום לא תקין");
     }
 
-    currentIntent = data;
-
-    trustPayApi = await TrustPay.CardComponent({
-      apiKey: data.publicKey,
-      clientKey: data.clientKey
+    const response = await fetch("/api/create-promo-payment", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            checkoutToken: tokenFromServer
+        })
     });
+
+    const data = await safeJson(response);
+
+    if (!response.ok) {
+        throw new Error(data.error || "Could not create payment.");
+    }
+
+    if (!data.secrets || !data.secrets.payment) {
+        throw new Error("Payment setup failed.");
+    }
+
+    paymentSecrets = data.secrets;
+
+    trustPayApi = new TrustPayApi(paymentSecrets);
 
     cardComponent = trustPayApi.createComponent("card", {
-      style: {
-        fontFamily: "Arial, Helvetica, sans-serif",
-        fontSize: "18px",
-        color: "#0a2540",
-        padding: "18px",
-        backgroundColor: "#ffffff"
-      }
+        style: {
+            fontFamily: "Arial, Helvetica, sans-serif",
+            fontSize: "18px",
+            color: "#0a2540"
+        }
     });
 
-    cardComponent.mount("#card-element");
+    document.getElementById("card-element").innerHTML = "";
 
-  } catch (err) {
-    alert(err.message || "Could not initialize payment.");
-  }
+    cardComponent.mount("#card-element");
 }
+
+window.addEventListener("load", async () => {
+
+    try {
+
+        payBtn.disabled = true;
+
+        await initialiseFinby();
+
+        payBtn.disabled = false;
+
+    } catch (e) {
+
+        console.error(e);
+
+        alert(e.message || "Could not initialize payment.");
+
+        payBtn.disabled = true;
+    }
+});
 
 payBtn.onclick = async () => {
 
-  if (!cardComponent || !currentIntent) {
-    alert("Payment form not ready.");
+    try {
+
+        if (!trustPayApi || !cardComponent || !paymentSecrets) {
+            throw new Error("Payment form not loaded.");
+        }
+
+        payBtn.disabled = true;
+
+        payBtn.textContent = "מעבד...";
+
+        overlay.setAttribute("aria-hidden", "false");
+
+        setTimeout(() => {
+            overlay.setAttribute("aria-hidden", "true");
+        }, 4000);
+
+        const result = await trustPayApi.finishCardPayment(
+            paymentSecrets.payment,
+            {
+                card: cardComponent
+            }
+        );
+
+        console.log(result);
+
+if (result && (result.status === "succeeded" || Number(result?.status) >= 0)) {
+
+    window.location.href =
+    "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?";
+
     return;
-  }
+}
 
-  try {
+    } catch (e) {
 
-    payBtn.disabled = true;
-    payBtn.textContent = "מעבד…";
+        console.error(e);
 
-    overlay.setAttribute("aria-hidden", "false");
+        overlay.setAttribute("aria-hidden", "true");
 
-    setTimeout(() => {
-      overlay.setAttribute("aria-hidden", "true");
-    }, 4000);
+        alert(e.message || "התשלום נכשל");
 
-    await cardComponent.pay({
-      intentId: currentIntent.id
-    });
+        payBtn.disabled = false;
 
-  } catch (err) {
-
-    alert(
-      err?.message ||
-      "התשלום נכשל. נסה שוב."
-    );
-
-  } finally {
-
-    payBtn.disabled = false;
-    payBtn.textContent = "שלם עכשיו";
-  }
+        payBtn.textContent = "שלם עכשיו";
+    }
 };
-
-initPayment();
 </script>
 
 </body>
