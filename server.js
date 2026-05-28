@@ -779,7 +779,7 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
     );
 
     res.json({
-      url: `/promo-pay/${token}`
+      url: `/c/${token}`
     });
 
   } catch (err) {
@@ -795,7 +795,7 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
 // PROMO PAYMENT PAGE WITH RANDOM URL
 // --------------------------------------------
 
-app.get("/promo-pay/:token", async (req, res) => {
+app.get("/c/:token", async (req, res) => {
   try {
     const { token } = req.params;
 
