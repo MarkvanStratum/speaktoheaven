@@ -783,12 +783,13 @@ if (!flowCookie) {
 app.post("/api/create-promo-checkout-link", async (req, res) => {
   try {
     const {
-      plan,
-      sourcePage,
-      firstName,
-      lastName,
-      name,
-      email,
+  plan,
+  step2File,
+  sourcePage,
+  firstName,
+  lastName,
+  name,
+  email,
       phonePrefix,
       phone,
       address,
@@ -839,7 +840,7 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
       `,
       [
         token,
-        "sth-fi-uk2.html",
+        step2File || "sth-fi-uk2.html",
         plan || "lifetime",
         firstName || null,
         lastName || null,
@@ -907,8 +908,22 @@ app.post("/api/create-promo-payment", async (req, res) => {
     const checkout = result.rows[0];
 
     const email = checkout.email;
-    const amount = 49.95;
-    const selectedPlan = "4995";
+    const selectedPlan = checkout.plan || "4995";
+
+const amounts = {
+  "2995": 29.95,
+  "3595": 35.95,
+  "4995": 49.95,
+  "lifetime": 49.95
+};
+
+const amount = amounts[selectedPlan];
+
+if (!amount) {
+  return res.status(400).json({
+    error: "Invalid promo plan"
+  });
+}
 
     const formData = new FormData();
 
