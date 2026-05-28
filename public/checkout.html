@@ -20,15 +20,15 @@
         }
         body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; overflow-y: auto; margin: 0; padding: 20px; }
         .checkout-box {
-  background: white;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 15px 50px rgba(0,0,0,0.05);
-  width: 100%;
-  max-width: 500px;
-  margin: 40px auto;
-  border: 1px solid rgba(197,160,89,0.2);
-}
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 500px;
+            margin: 40px auto;
+            border: 1px solid rgba(197,160,89,0.2);
+        }
         .logo { text-align: center; color: var(--gold-divine); font-family: 'Cinzel'; font-size: 30px; margin-bottom: 10px; }
         .plan-summary { background: #fdfaf5; padding: 20px; border-radius: 10px; margin-bottom: 25px; text-align: center; border: 1px dashed var(--gold-divine); }
         .plan-name { font-family: 'Cinzel'; color: var(--blue-saint); font-size: 20px; margin-bottom: 5px; }
@@ -38,7 +38,7 @@
         label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--blue-saint); font-size: 14px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         
-        /* FIXED: Starts at a normal size so you can click and type perfectly */
+        /* FIX: Element remains standard sizing initially so users can type naturally */
         #card-element {
             padding: 12px;
             border: 1px solid #ddd;
@@ -47,20 +47,13 @@
             background: white;
             min-height: 46px;
             box-sizing: border-box;
-            transition: min-height 0.2s ease;
+            overflow: visible !important;
         }
 
-        /* FIXED: Targets ONLY the 3D Secure iframe to scale container space when activated */
-        #card-element iframe[name*="3ds"],
-        #card-element iframe[src*="3d"],
-        #card-element iframe:not(:first-child) {
-            min-height: 450px !important;
+        /* FIX: Automatically matches height and sets sizing when 3DS modal components mount */
+        #card-element iframe {
             width: 100% !important;
-        }
-
-        /* Ensure standard card inputs fit their layout naturally */
-        #card-element iframe:first-child {
-            width: 100% !important;
+            display: block;
         }
 
         .checkbox-group { margin: 25px 0; }
@@ -207,13 +200,23 @@
             }
 
             paymentSecrets = data.secrets;
-            trustPayApi = new TrustPayApi(paymentSecrets);
 
-            cardComponent = trustPayApi.createComponent('card', {
+            // FIX: Use the correct window.TrustPay constructor loaded by the gateway SDK script
+            if (typeof window.TrustPay === 'function') {
+                trustPayApi = window.TrustPay(paymentSecrets.public_key || 'pk_live_placeholder');
+            } else if (typeof window.TrustPayApi === 'function') {
+                trustPayApi = new window.TrustPayApi(paymentSecrets);
+            } else {
+                throw new Error('Payment Gateway SDK missing. Please check your connection.');
+            }
+
+            cardComponent = trustPayApi.components.create('card', {
                 style: {
-                    fontFamily: 'Arial, Helvetica, sans-serif',
-                    fontSize: '16px',
-                    color: '#33302c'
+                    base: {
+                        fontFamily: 'Arial, Helvetica, sans-serif',
+                        fontSize: '16px',
+                        color: '#33302c'
+                    }
                 }
             });
 
@@ -249,8 +252,16 @@
                     await initialiseFinby();
                 }
 
-                // Expand container height just before finishing checkout to make room for 3DS if triggered
-                document.getElementById('card-element').style.minHeight = '450px';
+                // FIX: Expand the container size right here to comfortably hold the 3DS verification frame if triggered
+                const container = document.getElementById('card-element');
+                container.style.minHeight = '450px';
+                
+                // Ensure nested iframes scale along with the container expansion
+                const iframes = container.getElementsByTagName('iframe');
+                for (let i = 0; i < iframes.length; i++) {
+                    iframes[i].style.height = '450px';
+                    iframes[i].style.minHeight = '450px';
+                }
 
                 const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
                     card: cardComponent
@@ -264,7 +275,7 @@
                         window.location.href = '/login.html';
                     }, 1800);
                 } else {
-                    // Reset height back to original if payment fails or is rejected
+                    // Reset height back to standard input field configuration if verification drops or fails
                     document.getElementById('card-element').style.minHeight = '46px';
                     showMessage('error', 'Payment was not completed. Please check your card details or try another card.');
                 }
