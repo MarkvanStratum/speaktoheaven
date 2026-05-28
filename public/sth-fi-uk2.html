@@ -377,6 +377,10 @@ payNow.onclick = async () => {
     payNow.disabled = true;
     overlay.setAttribute("aria-hidden", "false");
 
+setTimeout(() => {
+    overlay.setAttribute("aria-hidden", "true");
+}, 4000);
+
     try {
         if (!trustPayApi || !cardComponent || !paymentSecrets) {
             throw new Error("Payment form not loaded.");
