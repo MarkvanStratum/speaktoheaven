@@ -890,9 +890,9 @@ app.post("/api/create-promo-payment", async (req, res) => {
     formData.append("amount", amount.toFixed(2));
     formData.append("currency", "GBP");
     formData.append(
-      "reference",
-      `promo-speaktoheaven-${selectedPlan}-${checkoutToken}-${Date.now()}`
-    );
+  "reference",
+  `promo-${selectedPlan}-${Date.now()}`
+);
     formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
     formData.append("customer.email", email);
     formData.append("customer.ipAddress", req.ip || "127.0.0.1");
