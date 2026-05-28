@@ -281,12 +281,10 @@ step1.setAttribute('aria-hidden','true');
 step2.setAttribute('aria-hidden','false');
 
 if (!finbyMounted) {
-  trustPayApi = TP({
-    language: "en"
-  });
+  trustPayApi = new TrustPayApi();
 
-  cardComponent = trustPayApi.cardComponent();
-  cardComponent.mount("#card-number");
+cardComponent = trustPayApi.createComponent("card", {});
+cardComponent.mount("#card-number");
 
   finbyMounted = true;
 }};
