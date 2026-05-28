@@ -166,7 +166,7 @@ formData.append("cardholder", email);
 const response = await fetch("https://gw.finby.eu/api/v1/intent", {
   method: "POST",
   headers: {
-  "X-API-KEY": process.env.FINBY_SECRET_KEY
+  "X-API-KEY": process.env.FINBY_API_KEY
 },
   body: formData
 });
