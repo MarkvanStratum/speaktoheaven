@@ -320,6 +320,38 @@ await pool.query(`
 `);
 
 console.log("✅ Protected checkout links table ready");
+
+// --------------------------------------------
+// PROMO CHECKOUT LINKS TABLE
+// --------------------------------------------
+
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS promo_checkout_links (
+    id SERIAL PRIMARY KEY,
+    token TEXT UNIQUE NOT NULL,
+    step2_file TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    first_name TEXT,
+    last_name TEXT,
+    full_name TEXT,
+    email TEXT NOT NULL,
+    phone TEXT,
+    address TEXT,
+    postcode TEXT,
+    city TEXT,
+    country TEXT,
+    affiliate_ref TEXT,
+    source_page TEXT,
+    original_query_string TEXT,
+    ip TEXT,
+    user_agent TEXT,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+
+console.log("✅ Promo checkout links table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -660,6 +692,248 @@ app.get("/c/:token", async (req, res) => {
     );
 
     res.status(500).send("Server error");
+  }
+});
+
+// --------------------------------------------
+// CREATE PROMO CHECKOUT LINK
+// --------------------------------------------
+
+app.post("/api/create-promo-checkout-link", async (req, res) => {
+  try {
+    const {
+      plan,
+      sourcePage,
+      firstName,
+      lastName,
+      name,
+      email,
+      phonePrefix,
+      phone,
+      address,
+      postcode,
+      city,
+      country,
+      ref,
+      originalQueryString
+    } = req.body || {};
+
+    if (!email) {
+      return res.status(400).json({
+        error: "Email is required"
+      });
+    }
+
+    const token = createToken(18);
+
+    const expiresAt = new Date(
+      Date.now() + 30 * 60 * 1000
+    );
+
+    await pool.query(
+      `
+      INSERT INTO promo_checkout_links
+      (
+        token,
+        step2_file,
+        plan,
+        first_name,
+        last_name,
+        full_name,
+        email,
+        phone,
+        address,
+        postcode,
+        city,
+        country,
+        affiliate_ref,
+        source_page,
+        original_query_string,
+        ip,
+        user_agent,
+        expires_at
+      )
+      VALUES
+      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+      `,
+      [
+        token,
+        "sth-fi-uk2.html",
+        plan || "lifetime",
+        firstName || null,
+        lastName || null,
+        name || null,
+        email,
+        `${phonePrefix || ""}${phone || ""}`,
+        address || null,
+        postcode || null,
+        city || null,
+        country || "United Kingdom",
+        ref || null,
+        sourcePage || null,
+        originalQueryString || null,
+        req.ip,
+        req.headers["user-agent"] || "",
+        expiresAt
+      ]
+    );
+
+    res.json({
+      url: `/promo-pay/${token}`
+    });
+
+  } catch (err) {
+    console.error("Create promo checkout link error:", err);
+
+    res.status(500).json({
+      error: "Could not create promo checkout link"
+    });
+  }
+});
+
+// --------------------------------------------
+// PROMO PAYMENT PAGE WITH RANDOM URL
+// --------------------------------------------
+
+app.get("/promo-pay/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM promo_checkout_links
+      WHERE token = $1
+      AND expires_at > NOW()
+      AND used_at IS NULL
+      `,
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Not found");
+    }
+
+    const checkout = result.rows[0];
+
+    const step2Path = path.join(
+      __dirname,
+      "public",
+      checkout.step2_file
+    );
+
+    let html = fs.readFileSync(
+      step2Path,
+      "utf8"
+    );
+
+    html = html.replace(
+      "</head>",
+      `
+      <script>
+        window.PROMO_CHECKOUT_TOKEN =
+          ${JSON.stringify(token)};
+      </script>
+      </head>
+      `
+    );
+
+    res.send(html);
+
+  } catch (err) {
+    console.error("Promo payment page error:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+// --------------------------------------------
+// CREATE PROMO FINBY PAYMENT
+// --------------------------------------------
+
+app.post("/api/create-promo-payment", async (req, res) => {
+  try {
+    const { checkoutToken } = req.body || {};
+
+    if (!checkoutToken) {
+      return res.status(400).json({
+        error: "Missing checkout token"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM promo_checkout_links
+      WHERE token = $1
+      AND expires_at > NOW()
+      AND used_at IS NULL
+      `,
+      [checkoutToken]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Invalid or expired checkout link"
+      });
+    }
+
+    const checkout = result.rows[0];
+
+    const email = checkout.email;
+    const amount = 49.95;
+    const selectedPlan = "4995";
+
+    const formData = new FormData();
+
+    formData.append("paymentAction", "0");
+    formData.append("paymentType", "plain");
+    formData.append("amount", amount.toFixed(2));
+    formData.append("currency", "GBP");
+    formData.append(
+      "reference",
+      `promo-speaktoheaven-${selectedPlan}-${checkoutToken}-${Date.now()}`
+    );
+    formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
+    formData.append("customer.email", email);
+    formData.append("customer.ipAddress", req.ip || "127.0.0.1");
+    formData.append("cardholder", email);
+
+    const response = await fetch("https://gw.finby.eu/api/v1/intent", {
+      method: "POST",
+      headers: {
+        "X-API-KEY": process.env.FINBY_API_KEY
+      },
+      body: formData
+    });
+
+    const rawText = await response.text();
+
+    console.log("PROMO FINBY STATUS:", response.status);
+    console.log("PROMO FINBY RAW RESPONSE:", rawText);
+
+    let data = {};
+
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (e) {
+      data = { raw: rawText };
+    }
+
+    if (!response.ok) {
+      return res.status(500).json({
+        error: "Finby error",
+        details: data
+      });
+    }
+
+    res.json(data);
+
+  } catch (err) {
+    console.error("Promo Finby payment error:", err);
+
+    res.status(500).json({
+      error: "Could not create promo payment"
+    });
   }
 });
 
