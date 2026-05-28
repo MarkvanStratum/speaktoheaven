@@ -232,7 +232,14 @@ window.addEventListener('load', async () => {
                     await initialiseFinby();
                 }
 
-                const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
+                document.getElementById('card-element').scrollIntoView({
+    behavior: 'auto',
+    block: 'start'
+});
+
+await new Promise(resolve => setTimeout(resolve, 300));
+
+const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
     card: cardComponent
 });
 
