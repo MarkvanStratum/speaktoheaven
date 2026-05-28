@@ -43,8 +43,18 @@
     border-radius: 8px;
     margin-bottom: 15px;
     background: white;
-    min-height: 520px;
-    overflow: visible;
+    min-height: 46px;
+}
+
+.finby-3ds-active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    background: white !important;
+    overflow: auto !important;
 }
         .checkbox-group { margin: 25px 0; }
         .checkbox-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px; cursor: pointer; }
@@ -232,6 +242,13 @@ window.addEventListener('load', async () => {
                 if (!trustPayApi || !cardComponent || !paymentSecrets) {
                     await initialiseFinby();
                 }
+
+document
+    .getElementById('card-element')
+    .classList
+    .add('finby-3ds-active');
+
+window.scrollTo(0, 0);
 
                 const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
     card: cardComponent
