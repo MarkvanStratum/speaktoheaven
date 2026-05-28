@@ -38,23 +38,29 @@
         label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--blue-saint); font-size: 14px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         
-        /* FIXED: Stretches the frame container dynamically when the 3DS verification window loads */
+        /* FIXED: Starts at a normal size so you can click and type perfectly */
         #card-element {
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             margin-bottom: 15px;
             background: white;
-            min-height: 450px !important; 
-            overflow: visible !important;
+            min-height: 46px;
+            box-sizing: border-box;
+            transition: min-height 0.2s ease;
         }
 
-        /* FIXED: Ensures that Finby/TrustPay iframes take up all allocated container height */
-        #card-element iframe {
+        /* FIXED: Targets ONLY the 3D Secure iframe to scale container space when activated */
+        #card-element iframe[name*="3ds"],
+        #card-element iframe[src*="3d"],
+        #card-element iframe:not(:first-child) {
             min-height: 450px !important;
             width: 100% !important;
-            height: 100% !important;
-            display: block;
+        }
+
+        /* Ensure standard card inputs fit their layout naturally */
+        #card-element iframe:first-child {
+            width: 100% !important;
         }
 
         .checkbox-group { margin: 25px 0; }
@@ -175,7 +181,6 @@
         }
 
         async function initialiseFinby() {
-            
             const endpoint = endpoints[plan] || endpoints.god;
 
             const response = await fetch(endpoint, {
@@ -244,6 +249,9 @@
                     await initialiseFinby();
                 }
 
+                // Expand container height just before finishing checkout to make room for 3DS if triggered
+                document.getElementById('card-element').style.minHeight = '450px';
+
                 const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
                     card: cardComponent
                 });
@@ -256,10 +264,13 @@
                         window.location.href = '/login.html';
                     }, 1800);
                 } else {
+                    // Reset height back to original if payment fails or is rejected
+                    document.getElementById('card-element').style.minHeight = '46px';
                     showMessage('error', 'Payment was not completed. Please check your card details or try another card.');
                 }
             } catch (error) {
                 console.error('Payment failed:', error);
+                document.getElementById('card-element').style.minHeight = '46px';
                 showMessage('error', error?.message || 'Payment failed. Please try again.');
             } finally {
                 setLoading(false);
