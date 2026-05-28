@@ -218,6 +218,28 @@ const heroImg=document.getElementById('heroImg');
 const heroTitle=document.getElementById('heroTitle');
 const sidebarImg=document.getElementById('sidebarImg');
 
+const nextBtn = document.getElementById('nextBtn');
+const backBtn = document.getElementById('backBtn');
+const payNow = document.getElementById('payNow');
+
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+
+const err = document.getElementById('err');
+
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const nameInput = document.getElementById('nameInput');
+
+const billingStreet = document.getElementById('billingStreet');
+const billingCity = document.getElementById('billingCity');
+const billingPostcode = document.getElementById('billingPostcode');
+
+const emailInput = document.getElementById('emailInput');
+
+const phonePrefix = document.getElementById('phonePrefix');
+const phoneNumber = document.getElementById('phoneNumber');
+
 // HERO (SAFE)
 if(qs.get('sub1') && heroTitle && hero){
   heroTitle.textContent = d(qs.get('sub1'));
@@ -248,17 +270,26 @@ if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
 // FINBY
-const trustPayApi = TP({
-  language: "en"
-});
-const cardComponent = trustPayApi.cardComponent();
+// FINBY
+let trustPayApi;
+let cardComponent;
+let finbyMounted = false;
 
-cardComponent.mount("#card-number");
 nextBtn.onclick=()=>{
 nameInput.value=`${firstName.value} ${lastName.value}`.trim();
 step1.setAttribute('aria-hidden','true');
 step2.setAttribute('aria-hidden','false');
-};
+
+if (!finbyMounted) {
+  trustPayApi = TP({
+    language: "en"
+  });
+
+  cardComponent = trustPayApi.cardComponent();
+  cardComponent.mount("#card-number");
+
+  finbyMounted = true;
+}};
 
 backBtn.onclick=()=>{
 step2.setAttribute('aria-hidden','true');
