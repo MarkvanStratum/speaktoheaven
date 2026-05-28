@@ -37,14 +37,26 @@
         .disclosure-box strong { color: var(--blue-saint); }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--blue-saint); font-size: 14px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        
+        /* FIXED: Stretches the frame container dynamically when the 3DS verification window loads */
         #card-element {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    background: white;
-    min-height: 46px;
-}
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: white;
+            min-height: 450px !important; 
+            overflow: visible !important;
+        }
+
+        /* FIXED: Ensures that Finby/TrustPay iframes take up all allocated container height */
+        #card-element iframe {
+            min-height: 450px !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
         .checkbox-group { margin: 25px 0; }
         .checkbox-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px; cursor: pointer; }
         .checkbox-item input { width: auto; margin-top: 4px; cursor: pointer; flex-shrink: 0; }
@@ -78,8 +90,8 @@
 
         <form id="payment-form">
 
-<label for="customer-email">Email Address</label>
-<input id="customer-email" type="email" placeholder="Your email address" autocomplete="email" required>
+            <label for="customer-email">Email Address</label>
+            <input id="customer-email" type="email" placeholder="Your email address" autocomplete="email" required>
             
             <label for="cardholder-name">Cardholder Name</label>
             <input id="cardholder-name" type="text" placeholder="Full name as it appears on card" autocomplete="cc-name" required>
@@ -169,12 +181,12 @@
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
-},
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                },
                 body: JSON.stringify({
-    email: document.getElementById('customer-email').value
-})
+                    email: document.getElementById('customer-email').value
+                })
             });
 
             const data = await response.json();
@@ -204,17 +216,17 @@
             cardComponent.mount('#card-element');
         }
 
-window.addEventListener('load', async () => {
-    try {
-        setLoading(true);
-        await initialiseFinby();
-    } catch (error) {
-        console.error(error);
-        showMessage('error', error.message || 'Could not load payment form.');
-    } finally {
-        setLoading(false);
-    }
-});
+        window.addEventListener('load', async () => {
+            try {
+                setLoading(true);
+                await initialiseFinby();
+            } catch (error) {
+                console.error(error);
+                showMessage('error', error.message || 'Could not load payment form.');
+            } finally {
+                setLoading(false);
+            }
+        });
         
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -232,16 +244,9 @@ window.addEventListener('load', async () => {
                     await initialiseFinby();
                 }
 
-                document.getElementById('card-element').scrollIntoView({
-    behavior: 'auto',
-    block: 'start'
-});
-
-await new Promise(resolve => setTimeout(resolve, 300));
-
-const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
-    card: cardComponent
-});
+                const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
+                    card: cardComponent
+                });
 
                 console.log('FINBY PAYMENT RESULT:', result);
 
