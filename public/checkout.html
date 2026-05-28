@@ -18,8 +18,17 @@
             --error: #b00020;
             --success: #1b7f3a;
         }
-        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
-        .checkout-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); width: 100%; max-width: 500px; border: 1px solid rgba(197,160,89,0.2); }
+        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; overflow-y: auto; margin: 0; padding: 20px; }
+        .checkout-box {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 500px;
+  margin: 40px auto;
+  border: 1px solid rgba(197,160,89,0.2);
+}
         .logo { text-align: center; color: var(--gold-divine); font-family: 'Cinzel'; font-size: 30px; margin-bottom: 10px; }
         .plan-summary { background: #fdfaf5; padding: 20px; border-radius: 10px; margin-bottom: 25px; text-align: center; border: 1px dashed var(--gold-divine); }
         .plan-name { font-family: 'Cinzel'; color: var(--blue-saint); font-size: 20px; margin-bottom: 5px; }
