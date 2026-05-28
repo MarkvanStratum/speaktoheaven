@@ -618,13 +618,53 @@ app.get("/c/:token", async (req, res) => {
     const { token } = req.params;
 
     const flowCookie = getCookie(
-      req,
-      "checkout_flow"
-    );
+  req,
+  "checkout_flow"
+);
 
-    if (!flowCookie) {
-      return res.status(404).send("Not found");
-    }
+if (!flowCookie) {
+
+  const promoResult = await pool.query(
+    `
+    SELECT *
+    FROM promo_checkout_links
+    WHERE token = $1
+    AND expires_at > NOW()
+    AND used_at IS NULL
+    `,
+    [token]
+  );
+
+  if (promoResult.rows.length === 0) {
+    return res.status(404).send("Not found");
+  }
+
+  const promoCheckout = promoResult.rows[0];
+
+  const promoPath = path.join(
+    __dirname,
+    "public",
+    promoCheckout.step2_file
+  );
+
+  let promoHtml = fs.readFileSync(
+    promoPath,
+    "utf8"
+  );
+
+  promoHtml = promoHtml.replace(
+    "</head>",
+    `
+    <script>
+      window.PROMO_CHECKOUT_TOKEN =
+        ${JSON.stringify(token)};
+    </script>
+    </head>
+    `
+  );
+
+  return res.send(promoHtml);
+}
 
     const parts = flowCookie.split(".");
 
@@ -655,8 +695,49 @@ app.get("/c/:token", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).send("Not found");
-    }
+
+  // CHECK PROMO TOKENS
+  const promoResult = await pool.query(
+    `
+    SELECT *
+    FROM promo_checkout_links
+    WHERE token = $1
+    AND expires_at > NOW()
+    AND used_at IS NULL
+    `,
+    [token]
+  );
+
+  if (promoResult.rows.length === 0) {
+    return res.status(404).send("Not found");
+  }
+
+  const promoCheckout = promoResult.rows[0];
+
+  const promoPath = path.join(
+    __dirname,
+    "public",
+    promoCheckout.step2_file
+  );
+
+  let promoHtml = fs.readFileSync(
+    promoPath,
+    "utf8"
+  );
+
+  promoHtml = promoHtml.replace(
+    "</head>",
+    `
+    <script>
+      window.PROMO_CHECKOUT_TOKEN =
+        ${JSON.stringify(token)};
+    </script>
+    </head>
+    `
+  );
+
+  return res.send(promoHtml);
+}
 
     const checkout = result.rows[0];
 
@@ -791,60 +872,6 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
   }
 });
 
-// --------------------------------------------
-// PROMO PAYMENT PAGE WITH RANDOM URL
-// --------------------------------------------
-
-app.get("/c/:token", async (req, res) => {
-  try {
-    const { token } = req.params;
-
-    const result = await pool.query(
-      `
-      SELECT *
-      FROM promo_checkout_links
-      WHERE token = $1
-      AND expires_at > NOW()
-      AND used_at IS NULL
-      `,
-      [token]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).send("Not found");
-    }
-
-    const checkout = result.rows[0];
-
-    const step2Path = path.join(
-      __dirname,
-      "public",
-      checkout.step2_file
-    );
-
-    let html = fs.readFileSync(
-      step2Path,
-      "utf8"
-    );
-
-    html = html.replace(
-      "</head>",
-      `
-      <script>
-        window.PROMO_CHECKOUT_TOKEN =
-          ${JSON.stringify(token)};
-      </script>
-      </head>
-      `
-    );
-
-    res.send(html);
-
-  } catch (err) {
-    console.error("Promo payment page error:", err);
-    res.status(500).send("Server error");
-  }
-});
 
 // --------------------------------------------
 // CREATE PROMO FINBY PAYMENT
