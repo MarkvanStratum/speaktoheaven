@@ -6,7 +6,7 @@
     <title>Sacred Offering — Secure Checkout</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
-    <script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
+    <script type="text/javascript" src="https://mapi.finby.eu/map15/Scripts/finby/popup.js"></script>
 
     <style>
         :root {
@@ -38,20 +38,23 @@
         label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--blue-saint); font-size: 14px; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         
-        /* Elements maintain clean default height constraints for text input styling */
-        #card-element {
-            padding: 12px;
+        /* Container styling for the payment frame */
+        #card-container {
             border: 1px solid #ddd;
             border-radius: 8px;
             margin-bottom: 15px;
             background: white;
-            min-height: 46px;
+            min-height: 450px; /* Locked to 450px so both card data entries AND 3DS frames render beautifully */
+            width: 100%;
+            overflow: hidden;
             box-sizing: border-box;
-            overflow: visible !important;
         }
 
-        #card-element iframe {
+        /* Fixed frame properties matching page 1 specifications */
+        #TrustPayFrame {
             width: 100% !important;
+            height: 450px !important;
+            border: none !important;
             display: block;
         }
 
@@ -95,7 +98,9 @@
             <input id="cardholder-name" type="text" placeholder="Full name as it appears on card" autocomplete="cc-name" required>
 
             <label>Card Information</label>
-            <div id="card-element"></div>
+            <div id="card-container">
+                <iframe id="TrustPayFrame" name="TrustPayFrame" src="about:blank"></iframe>
+            </div>
 
             <div class="checkbox-group">
                 <label class="checkbox-item">
@@ -154,10 +159,6 @@
         document.getElementById('display-price').innerText = prices[plan] || '£--.--';
         document.getElementById('submit').innerText = 'Pay ' + (prices[plan] || 'now');
 
-        let trustPayApi = null;
-        let cardComponent = null;
-        let paymentSecrets = null;
-
         const form = document.getElementById('payment-form');
         const submitButton = document.getElementById('submit');
         const messageBox = document.getElementById('payment-message');
@@ -172,66 +173,47 @@
             submitButton.textContent = isLoading ? 'Processing...' : 'Pay ' + (prices[plan] || 'now');
         }
 
-        async function initialiseFinby() {
-            const endpoint = endpoints[plan] || endpoints.god;
+        async function loadPaymentGateway() {
+            const emailValue = document.getElementById('customer-email').value;
+            if (!emailValue) return; // Wait until an email is entered to fetch intent context
 
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
-                },
-                body: JSON.stringify({
-                    email: document.getElementById('customer-email').value
-                })
-            });
+            try {
+                const endpoint = endpoints[plan] || endpoints.god;
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                    },
+                    body: JSON.stringify({ email: emailValue })
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (!response.ok) {
-                console.error('Finby intent error:', data);
-                throw new Error(data?.error || 'Could not create payment. Please try again.');
-            }
-
-            if (!data.secrets || !data.secrets.payment) {
-                console.error('Unexpected Finby response:', data);
-                throw new Error('Payment setup failed. Please contact support.');
-            }
-
-            paymentSecrets = data.secrets;
-
-            if (typeof window.TrustPay === 'function') {
-                trustPayApi = window.TrustPay(paymentSecrets.public_key || 'pk_live_placeholder');
-            } else if (typeof window.TrustPayApi === 'function') {
-                trustPayApi = new window.TrustPayApi(paymentSecrets);
-            } else {
-                throw new Error('Payment Gateway SDK missing. Please check your connection.');
-            }
-
-            // FIX: Flatten style argument configurations to ensure native multi-attribute rendering loads smoothly
-            cardComponent = trustPayApi.components.create('card', {
-                style: {
-                    fontFamily: 'Arial, Helvetica, sans-serif',
-                    fontSize: '16px',
-                    color: '#33302c'
+                // If your backend returns the raw gateway payment link directly, extract it.
+                // Based on your terminal logs, your backend structure organizes the secrets fields.
+                // If it passes a full window URL, use data.url or format the string cleanly here:
+                let gatewayUrl = data.url || data.gatewayUrl || data.secrets?.url;
+                
+                if (!gatewayUrl && data.secrets?.payment) {
+                    // Fallback reconstruction if your backend sends tokens instead of complete URLs
+                    gatewayUrl = `https://aapi.finby.eu/mapi5/Card/Pay?Secret=${data.secrets.payment}`;
                 }
-            });
 
-            document.getElementById('card-element').innerHTML = '';
-            cardComponent.mount('#card-element');
+                if (!gatewayUrl) {
+                    throw new Error('Payment configuration URL not provided by server.');
+                }
+
+                // Map url into the frame element as specified on page 1 of the integration manual
+                document.getElementById('TrustPayFrame').src = gatewayUrl;
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showMessage('error', 'Could not sync securely with payment server.');
+            }
         }
 
-        window.addEventListener('load', async () => {
-            try {
-                setLoading(true);
-                await initialiseFinby();
-            } catch (error) {
-                console.error(error);
-                showMessage('error', error.message || 'Could not load payment form.');
-            } finally {
-                setLoading(false);
-            }
-        });
+        // Fetch intent and mount source when the customer completes typing their email address
+        document.getElementById('customer-email').addEventListener('change', loadPaymentGateway);
         
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -242,43 +224,19 @@
                 return;
             }
 
+            // Since Finby processes the submission internally inside the iframe frame directly,
+            // the main submit button triggers the standard popup submission or tracking completion check.
             try {
                 setLoading(true);
-
-                if (!trustPayApi || !cardComponent || !paymentSecrets) {
-                    await initialiseFinby();
-                }
-
-                // Adjust container canvas boundaries to contain the active authentication flow frame securely
-                const container = document.getElementById('card-element');
-                container.style.minHeight = '450px';
+                showMessage('success', 'Processing security verification checks...');
                 
-                const iframes = container.getElementsByTagName('iframe');
-                for (let i = 0; i < iframes.length; i++) {
-                    iframes[i].style.height = '450px';
-                    iframes[i].style.minHeight = '450px';
-                }
-
-                const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
-                    card: cardComponent
-                });
-
-                console.log('FINBY PAYMENT RESULT:', result);
-
-                if (Number(result?.status) >= 0) {
-                    showMessage('success', 'Payment completed successfully. Your access will be activated shortly.');
-                    setTimeout(() => {
-                        window.location.href = '/login.html';
-                    }, 1800);
-                } else {
-                    document.getElementById('card-element').style.minHeight = '46px';
-                    showMessage('error', 'Payment was not completed. Please check your card details or try another card.');
+                // If using standard popup helper tools bundled in popup.js:
+                if (typeof window.openPopup === 'function') {
+                    window.openPopup();
                 }
             } catch (error) {
-                console.error('Payment failed:', error);
-                document.getElementById('card-element').style.minHeight = '46px';
-                showMessage('error', error?.message || 'Payment failed. Please try again.');
-            } finally {
+                console.error(error);
+                showMessage('error', 'Transaction handling failed. Please re-verify your card fields.');
                 setLoading(false);
             }
         });
