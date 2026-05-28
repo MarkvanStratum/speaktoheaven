@@ -225,6 +225,8 @@ window.addEventListener('load', async () => {
                     await initialiseFinby();
                 }
 
+document.body.style.pointerEvents = 'none';
+
                 const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
     card: cardComponent
 });
@@ -232,11 +234,19 @@ window.addEventListener('load', async () => {
                 console.log('FINBY PAYMENT RESULT:', result);
 
                 if (Number(result?.status) >= 0) {
-                    showMessage('success', 'Payment completed successfully. Your access will be activated shortly.');
-                    setTimeout(() => {
-                        window.location.href = '/login.html';
-                    }, 1800);
-                } else {
+
+    showMessage(
+        'success',
+        'Payment completed successfully. Redirecting...'
+    );
+
+    setTimeout(() => {
+
+        window.top.location.href = '/login.html';
+
+    }, 2500);
+
+} else {
                     showMessage('error', 'Payment was not completed. Please check your card details or try another card.');
                 }
             } catch (error) {
