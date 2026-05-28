@@ -347,9 +347,22 @@ payNow.onclick = async () => {
     const overlay = document.getElementById("loading-overlay");
     overlay.setAttribute("aria-hidden","false");
 
-setTimeout(() => {
-    overlay.setAttribute("aria-hidden","true");
-}, 2500);
+const watchFor3DS = new MutationObserver(() => {
+    const threeDSFrame = Array.from(document.querySelectorAll("iframe")).find(frame => {
+        const src = frame.src || "";
+        return src.includes("acs") || src.includes("3ds") || src.includes("challenge") || src.includes("apata");
+    });
+
+    if (threeDSFrame) {
+        overlay.setAttribute("aria-hidden","true");
+        watchFor3DS.disconnect();
+    }
+});
+
+watchFor3DS.observe(document.body, {
+    childList: true,
+    subtree: true
+});
 
 try {
         if (!trustPayApi || !cardComponent || !paymentSecrets) {
