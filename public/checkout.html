@@ -212,9 +212,9 @@ window.addEventListener('load', async () => {
                     await initialiseFinby();
                 }
 
-                const result = await trustPayApi.confirmCardPayment(paymentSecrets.payment, {
-                    card: cardComponent
-                });
+                const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
+    card: cardComponent
+});
 
                 console.log('FINBY PAYMENT RESULT:', result);
 
