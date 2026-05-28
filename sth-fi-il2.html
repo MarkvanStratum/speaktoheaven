@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>תשלום מאובטח</title>
+
+<meta http-equiv="Content-Security-Policy" content="
+default-src 'self' https: 'unsafe-inline' 'unsafe-eval';
+script-src 'self' https://gw.finby.eu https://cdn.jsdelivr.net 'unsafe-inline' 'unsafe-eval';
+connect-src 'self' https://gw.finby.eu https://www.speaktoheaven.com;
+frame-src *;
+style-src 'self' 'unsafe-inline' https:;
+img-src * data:;
+">
+
+<style>
+:root{
+--bg:#f6f9fc;
+--card:#ffffff;
+--text:#0a2540;
+--muted:#5b6b82;
+--line:#e6edf5;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+margin:0;
+padding:0;
+background:var(--bg);
+font-family:Inter,system-ui,Arial,sans-serif;
+color:var(--text);
+min-height:100%;
+direction:rtl;
+overflow-x:hidden;
+}
+
+body{
+padding-top:32px;
+padding-bottom:40px;
+}
+
+.wrap{
+max-width:1100px;
+margin:0 auto;
+padding:18px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:minmax(0,1fr) 360px;
+gap:20px;
+align-items:start;
+}
+
+@media(max-width:980px){
+.grid{
+grid-template-columns:1fr;
+}
+}
+
+.card{
+background:#fff;
+border:1px solid var(--line);
+border-radius:16px;
+padding:24px;
+overflow:visible;
+}
+
+.title{
+font-size:30px;
+font-weight:900;
+margin-bottom:12px;
+}
+
+.subtitle{
+font-size:14px;
+color:var(--muted);
+margin-bottom:18px;
+}
+
+.secure{
+display:inline-flex;
+align-items:center;
+gap:8px;
+background:#ecfdf3;
+color:#166534;
+padding:10px 14px;
+border-radius:999px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+#card-element{
+width:100%;
+border:1px solid #cfd6e4;
+border-radius:14px;
+background:#fff;
+min-height:92px;
+margin-top:16px;
+overflow:hidden;
+}
+
+.pay-btn{
+width:100%;
+margin-top:18px;
+border:none;
+border-radius:14px;
+padding:16px;
+background:#16a34a;
+color:#fff;
+font-size:18px;
+font-weight:900;
+cursor:pointer;
+}
+
+.pay-btn:disabled{
+opacity:.7;
+cursor:not-allowed;
+}
+
+.widget{
+background:#fff;
+border:1px solid var(--line);
+border-radius:14px;
+padding:18px;
+}
+
+.widget + .widget{
+margin-top:16px;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-top:1px dashed #e5e7eb;
+}
+
+.small{
+font-size:14px;
+color:var(--muted);
+}
+
+.overlay{
+position:fixed;
+inset:0;
+background:rgba(246,249,252,.92);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.overlay[aria-hidden="false"]{
+display:flex;
+}
+
+.overlay-box{
+width:min(92vw,460px);
+background:#fff;
+border:1px solid #e6edf5;
+border-radius:18px;
+padding:28px;
+text-align:center;
+}
+
+.spinner{
+width:48px;
+height:48px;
+border:4px solid #dbe7f3;
+border-top:4px solid #2563eb;
+border-radius:50%;
+margin:0 auto 16px;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="grid">
+
+<div class="card">
+
+<div class="secure">
+🔒 תשלום מאובטח SSL
+</div>
+
+<div class="title">
+השלם את התשלום שלך
+</div>
+
+<div class="subtitle">
+כל התשלומים מוצפנים ומאובטחים באמצעות Finby.
+</div>
+
+<div id="card-element"></div>
+
+<button id="payBtn" class="pay-btn">
+שלם עכשיו
+</button>
+
+</div>
+
+<aside>
+
+<div class="widget">
+<div style="font-weight:800;margin-bottom:12px">
+סיכום הזמנה
+</div>
+
+<div class="row">
+<span>גישה מלאה ל‑Speak To Heaven</span>
+<span>₪7.60</span>
+</div>
+
+<div class="row">
+<span>משלוח</span>
+<span>חינם</span>
+</div>
+
+<div class="row" style="font-weight:900">
+<span>סה״כ</span>
+<span>₪7.60</span>
+</div>
+</div>
+
+<div class="widget">
+<div style="font-weight:800;margin-bottom:12px">
+למה לבחור בנו
+</div>
+
+<div class="small">✔ תשלום מאובטח</div>
+<div class="small">✔ תמיכה 24/7</div>
+<div class="small">✔ גישה מיידית לאחר התשלום</div>
+</div>
+
+</aside>
+
+</div>
+</div>
+
+<div id="overlay" class="overlay" aria-hidden="true">
+<div class="overlay-box">
+<div class="spinner"></div>
+<div style="font-size:22px;font-weight:800;margin-bottom:10px">
+מעבד את התשלום שלך…
+</div>
+<div class="small">
+נא להמתין מספר שניות
+</div>
+</div>
+</div>
+
+<script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
+
+<script>
+const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+
+const overlay = document.getElementById("overlay");
+const payBtn = document.getElementById("payBtn");
+
+let trustPayApi = null;
+let cardComponent = null;
+let paymentSecrets = null;
+
+async function safeJson(response) {
+    const text = await response.text();
+
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        throw new Error(text || "Server returned an invalid response.");
+    }
+}
+
+async function initialiseFinby() {
+
+    if (!tokenFromServer) {
+        throw new Error("קישור תשלום לא תקין");
+    }
+
+    const response = await fetch("/api/create-promo-payment", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            checkoutToken: tokenFromServer
+        })
+    });
+
+    const data = await safeJson(response);
+
+    if (!response.ok) {
+        throw new Error(data.error || "Could not create payment.");
+    }
+
+    if (!data.secrets || !data.secrets.payment) {
+        throw new Error("Payment setup failed.");
+    }
+
+    paymentSecrets = data.secrets;
+
+    trustPayApi = new TrustPayApi(paymentSecrets);
+
+    cardComponent = trustPayApi.createComponent("card", {
+        style: {
+            fontFamily: "Arial, Helvetica, sans-serif",
+            fontSize: "18px",
+            color: "#0a2540"
+        }
+    });
+
+    document.getElementById("card-element").innerHTML = "";
+
+    cardComponent.mount("#card-element");
+}
+
+window.addEventListener("load", async () => {
+
+    try {
+
+        payBtn.disabled = true;
+
+        await initialiseFinby();
+
+        payBtn.disabled = false;
+
+    } catch (e) {
+
+        console.error(e);
+
+        alert(e.message || "Could not initialize payment.");
+
+        payBtn.disabled = true;
+    }
+});
+
+payBtn.onclick = async () => {
+
+    try {
+
+        if (!trustPayApi || !cardComponent || !paymentSecrets) {
+            throw new Error("Payment form not loaded.");
+        }
+
+        payBtn.disabled = true;
+
+        payBtn.textContent = "מעבד...";
+
+        overlay.setAttribute("aria-hidden", "false");
+
+        setTimeout(() => {
+            overlay.setAttribute("aria-hidden", "true");
+        }, 4000);
+
+        const result = await trustPayApi.finishCardPayment(
+            paymentSecrets.payment,
+            {
+                card: cardComponent
+            }
+        );
+
+        console.log(result);
+
+    } catch (e) {
+
+        console.error(e);
+
+        overlay.setAttribute("aria-hidden", "true");
+
+        alert(e.message || "התשלום נכשל");
+
+        payBtn.disabled = false;
+
+        payBtn.textContent = "שלם עכשיו";
+    }
+};
+</script>
+
+</body>
+</html>
