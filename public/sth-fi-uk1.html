@@ -21,32 +21,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
 </script>
-<script>
-(function loadGoAffPro() {
-  function addScript() {
-    var s = document.createElement("script");
-    s.src = "https://api.goaffpro.com/loader.js?shop=nzyvwvfbde&t=" + Date.now();
-    s.async = true;
-    s.onload = function () {
-      console.log("GoAffPro loaded");
-    };
-    s.onerror = function () {
-      console.warn("GoAffPro failed, retrying...");
-      setTimeout(addScript, 1000);
-    };
-    document.head.appendChild(s);
-  }
-
-  addScript();
-
-  setTimeout(function () {
-    if (typeof window.goaffpro === "undefined") {
-      console.warn("GoAffPro not ready, loading again...");
-      addScript();
-    }
-  }, 1500);
-})();
-</script>
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript" async></script>
 <style>
 :root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
 *{box-sizing:border-box}
