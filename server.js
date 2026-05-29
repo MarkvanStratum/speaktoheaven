@@ -676,8 +676,48 @@ if (!flowCookie) {
     const secret = parts[1];
 
     if (cookieToken !== token) {
-      return res.status(404).send("Not found");
-    }
+
+  const promoResult = await pool.query(
+    `
+    SELECT *
+    FROM promo_checkout_links
+    WHERE token = $1
+    AND expires_at > NOW()
+    AND used_at IS NULL
+    `,
+    [token]
+  );
+
+  if (promoResult.rows.length === 0) {
+    return res.status(404).send("Not found");
+  }
+
+  const promoCheckout = promoResult.rows[0];
+
+  const promoPath = path.join(
+    __dirname,
+    "public",
+    promoCheckout.step2_file
+  );
+
+  let promoHtml = fs.readFileSync(
+    promoPath,
+    "utf8"
+  );
+
+  promoHtml = promoHtml.replace(
+    "</head>",
+    `
+    <script>
+      window.PROMO_CHECKOUT_TOKEN =
+        ${JSON.stringify(token)};
+    </script>
+    </head>
+    `
+  );
+
+  return res.send(promoHtml);
+}
 
     const result = await pool.query(
       `
