@@ -440,7 +440,23 @@ setTimeout(() => {
 
         console.log("FINBY PAYMENT RESULT:", result);
 
-        const qs = new URLSearchParams(location.search);
+        const isFinbySuccess =
+    result &&
+    (
+        result.status === "paid" ||
+        result.status === "success" ||
+        result.status === "succeeded" ||
+        Number(result.status) === 0 ||
+        Number(result.status) > 0 ||
+        String(result.resultCode || result.ResultCode || "") === "100000" ||
+        String(result.reasonCode || result.ReasonCode || "") === "000.000.000"
+    );
+
+if (!isFinbySuccess) {
+    throw new Error("Payment was not completed.");
+}
+
+const qs = new URLSearchParams(location.search);
 
 const affiliateRef = qs.get("ref") || "";
 const sub1 = qs.get("sub1") || "";
@@ -451,8 +467,6 @@ window.location.href =
 "ref=" + encodeURIComponent(affiliateRef) +
 "&sub1=" + encodeURIComponent(sub1) +
 "&sub2=" + encodeURIComponent(sub2);
-
-return;
 
 return;
 
