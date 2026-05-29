@@ -395,10 +395,11 @@ setTimeout(() => {
 
         console.log("FINBY PAYMENT RESULT:", result);
 
-        if (result && (result.status === "succeeded" || Number(result?.status) >= 0)) {
-            window.location.href = "/login.html";
-            return;
-        }
+        window.location.href =
+"https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+"&ref=" + encodeURIComponent(new URLSearchParams(location.search).get("ref") || "");
+
+return;
 
         throw new Error("Payment was not completed. Please check your card details.");
 

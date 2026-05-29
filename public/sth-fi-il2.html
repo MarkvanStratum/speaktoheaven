@@ -374,8 +374,13 @@ payBtn.onclick = async () => {
 
         console.log("FINBY PAYMENT RESULT:", result);
 
+const affiliateRef =
+    new URLSearchParams(location.search).get("ref") || "";
+
 window.location.href =
-"https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?";
+"https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" +
+"ref=" +
+encodeURIComponent(affiliateRef);
 
 return;
 
