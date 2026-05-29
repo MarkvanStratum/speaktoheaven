@@ -6,12 +6,12 @@
 <title>תשלום מאובטח</title>
 
 <meta http-equiv="Content-Security-Policy" content="
-default-src 'self' https: 'unsafe-inline' 'unsafe-eval';
-script-src 'self' https://gw.finby.eu https://cdn.jsdelivr.net 'unsafe-inline' 'unsafe-eval';
-connect-src 'self' https://gw.finby.eu https://www.speaktoheaven.com;
+default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';
+script-src 'self' https: 'unsafe-inline' 'unsafe-eval';
+connect-src 'self' https:;
 frame-src *;
-style-src 'self' 'unsafe-inline' https:;
-img-src * data:;
+style-src 'self' https: 'unsafe-inline';
+img-src * data: blob:;
 ">
 
 <style>
