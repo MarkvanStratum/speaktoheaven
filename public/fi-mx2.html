@@ -30,7 +30,6 @@ body{
 margin:0;background:var(--bg);color:var(--text);
 font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 }
-
 .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
 .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
@@ -41,10 +40,6 @@ font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 .reviews{color:#5b6b82;font-size:13px}
 .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
 .sub{font-size:13px;color:#5b6b82}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:620px){.form-grid{grid-template-columns:1fr}}
-.input,.select{width:100%;border:1px solid #cfd6e4;border-radius:10px;
-padding:12px;font-size:15px;background:#fff}
 .btn{width:100%;padding:14px;border:none;border-radius:12px;
 background:#16a34a;color:#fff;font-weight:900;cursor:pointer;font-size:16px}
 .btn:disabled{opacity:0.6;cursor:not-allowed}
@@ -52,14 +47,6 @@ background:#16a34a;color:#fff;font-weight:900;cursor:pointer;font-size:16px}
 .widget + .widget{margin-top:12px}
 .order-row{display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6eaf1}
 .order-row.total{font-weight:900;font-size:18px;border-top:1px solid #000;padding-top:12px;margin-top:6px}
-.delivery{display:flex;gap:12px;padding:12px;border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff;align-items:center;}
-.trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
-.trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
-.step{display:none}
-.step[aria-hidden="false"]{display:block}
-.hero{display:none;margin-bottom:12px;padding:10px;border:1px solid var(--line);
-border-radius:12px;gap:10px;align-items:center;}
-.hero img{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);object-fit:cover}
 .payment-box{border:1px solid #cfd6e4;border-radius:12px;padding:16px;background:#fcfdfe;margin-bottom:20px}
 
 .loading-overlay{position:fixed;inset:0;background:rgba(246,249,252,.92);
@@ -69,267 +56,118 @@ display:none;align-items:center;justify-content:center;z-index:9999}
 border-radius:14px;padding:24px;text-align:center}
 .loading-title{font-size:20px;font-weight:800;margin-bottom:18px}
 .progress-wrap{width:100%;height:12px;background:#ecf1f8;border-radius:999px;overflow:hidden}
-.progress-bar{width:0%;height:100%;
-background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
-animation:loadingBar 2.2s ease-in-out infinite}
+.progress-bar{width:0%;height:100%;background:linear-gradient(90deg,#7aa3ff,#2dd4bf);animation:loadingBar 2.2s ease-in-out infinite}
 @keyframes loadingBar{0%{width:0%}60%{width:80%}100%{width:100%}}
 </style>
 </head>
 
 <body>
 
-<script>
-sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
-</script>
-
-<div class="safe">Pago Seguro SSL</div>
+<div class="safe">Pago Seguro SSL — Paso 2 de 2</div>
 
 <div class="wrap">
-
 <div class="page-title">
-Pago Seguro 🔒 <span class="stars">★★★★★</span>
-<span class="reviews">(2,777 reseñas)</span>
+Finalizar Compra 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <div class="grid">
-
 <div class="card">
+<section id="step2">
+<div class="h2">2. Método de Pago</div>
+<p class="sub" style="margin-bottom:16px;">Por favor, confirme su pedido completando los detalles de su tarjeta a continuación de forma segura.</p>
 
-  <section id="step1" class="step" aria-hidden="false">
-    <div id="hero" class="hero">
-      <img id="heroImg">
-      <div>
-        <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
-        <div class="sub">Producto de tu enlace</div>
-      </div>
-    </div>
+<div class="payment-box">
+<div style="font-weight:800;font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;">
+<span>Pago con Tarjeta de Crédito / Débito</span>
+<span>🔒 SSL</span>
+</div>
 
-    <div class="h2">1. Información de Envío</div>
-
-    <div class="form-grid">
-      <input id="firstName" class="input" placeholder="Nombre" required>
-      <input id="lastName" class="input" placeholder="Apellidos" required>
-    </div>
-
-    <div class="form-grid">
-      <input id="billingStreet" class="input" placeholder="Dirección (Calle y Número)" style="grid-column:1/-1" required>
-      <input id="billingPostcode" class="input" placeholder="Código Postal" required>
-      <input id="billingCity" class="input" placeholder="Ciudad / Municipio" required>
-    </div>
-
-    <div class="form-grid">
-      <input id="emailInput" class="input" type="email" placeholder="Correo Electrónico" required>
-      <input class="input" value="México" disabled>
-    </div>
-
-    <div class="form-grid">
-      <select id="phonePrefix" class="select">
-        <option value="+52">+52 — México</option>
-      </select>
-      <input id="phoneNumber" class="input" placeholder="Número de Teléfono" required>
-    </div>
-
-    <input id="nameInput" type="hidden">
-    <button id="nextBtn" class="btn">Continuar</button>
-  </section>
-
-  <section id="step2" class="step" aria-hidden="true">
-    <div class="h2">2. Método de Pago</div>
-    <p class="sub" style="margin-bottom:16px;">Por favor, confirme su pedido completando los detalles de su tarjeta a continuación de forma segura.</p>
-
-    <div class="payment-box">
-      <div style="font-weight:800;font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;">
-        <span>Pago con Tarjeta de Crédito / Débito</span>
-        <span>🔒 SSL</span>
-      </div>
-
-      <div id="finby-injection-point">
-        <button id="payBtn" class="btn">Completar Pago Seguro de $39.95 MXN</button>
-      </div>
-    </div>
-  </section>
-
+<div id="finby-injection-point">
+<button id="payBtn" class="btn">Completar Pago Seguro de $39.95 MXN</button>
+</div>
+</div>
+</section>
 </div>
 
 <aside>
-  <div class="widget">
-    <div style="text-align:center;font-weight:800">Reseñas de Clientes</div>
-    <div style="text-align:center;font-weight:700;">Sofía Lara</div>
-    <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-    <p style="text-align:center">¡Recibí mi producto ayer. Excelente experiencia!</p>
-  </div>
-
-  <div class="widget">
-    <div class="delivery">
-      <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
-      <div>
-        <div style="font-weight:800">Envío Rápido</div>
-        <div class="sub">3–5 días hábiles</div>
-      </div>
-      <div style="margin-left:auto;font-weight:800">Gratis</div>
-    </div>
-
-    <div style="margin-top:14px;font-weight:800">Resumen del Pedido</div>
-    <div class="order-row"><span>Acceso Speak to Heaven</span><span>$39.95 MXN</span></div>
-    <div class="order-row"><span>Envío Global Express</span><span>Gratis</span></div>
-    <div class="order-row total"><span>Total General:</span><span>$39.95 MXN</span></div>
-  </div>
-
-  <div class="widget">
-    <div style="font-weight:800;margin-bottom:10px">Por qué confiar en nosotros</div>
-    <div class="trust">
-      <div class="box"><div>⭐</div><div>99% opiniones positivas</div></div>
-      <div class="box"><div>🔒</div><div>Conexión SSL</div></div>
-      <div class="box"><div>🛡️</div><div>Garantía Protegida</div></div>
-    </div>
-  </div>
+<div class="widget">
+<div style="margin-top:4px;font-weight:800">Resumen del Pedido</div>
+<div class="order-row"><span>Acceso Speak to Heaven</span><span>$39.95 MXN</span></div>
+<div class="order-row"><span>Envío Global Express</span><span>Gratis</span></div>
+<div class="order-row total"><span>Total General:</span><span>$39.95 MXN</span></div>
+</div>
 </aside>
-
 </div>
 </div>
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
 <div class="loading-box">
-<div class="loading-title" id="overlay-title">Procesando pago…</div>
+<div class="loading-title" id="overlay-title">Inicializando portal seguro…</div>
 <div class="progress-wrap"><div class="progress-bar"></div></div>
-<p class="sub" style="margin-top:10px" id="overlay-sub">Por favor, espere unos segundos…</p>
+<p class="sub" style="margin-top:10px" id="overlay-sub">Espere un momento por favor…</p>
 </div>
 </div>
 
 <script src="https://gw.finby.eu/assets/js/merchant.js"></script>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const affiliateRef = params.get('ref');
-
-if (!affiliateRef) {
-    window.location.replace('https://www.speaktoheaven.com');
-}
-
 window.addEventListener('DOMContentLoaded', () => {
+  const payBtn = document.getElementById('payBtn');
+  const overlay = document.getElementById('loading-overlay');
+  const overlayTitle = document.getElementById('overlay-title');
+  const overlaySub = document.getElementById('overlay-sub');
 
-const qs = new URLSearchParams(location.search);
-const d = v => {
-  try { return decodeURIComponent(v || '') }
-  catch { return v || '' }
-};
+  // Removed the ?ref= redirect check block that was breaking the page transition
 
-const hero = document.getElementById('hero');
-const heroImg = document.getElementById('heroImg');
-const heroTitle = document.getElementById('heroTitle');
-const sidebarImg = document.getElementById('sidebarImg');
-
-const step1 = document.getElementById('step1');
-const step2 = document.getElementById('step2');
-const nextBtn = document.getElementById('nextBtn');
-const payBtn = document.getElementById('payBtn');
-
-const firstName = document.getElementById('firstName');
-const lastName = document.getElementById('lastName');
-const nameInput = document.getElementById('nameInput');
-
-const billingStreet = document.getElementById('billingStreet');
-const billingCity = document.getElementById('billingCity');
-const billingPostcode = document.getElementById('billingPostcode');
-
-const emailInput = document.getElementById('emailInput');
-const phonePrefix = document.getElementById('phonePrefix');
-const phoneNumber = document.getElementById('phoneNumber');
-
-const overlay = document.getElementById("loading-overlay");
-const overlayTitle = document.getElementById('overlay-title');
-const overlaySub = document.getElementById('overlay-sub');
-
-// HERO CONTROLS
-if (qs.get('sub1') && heroTitle && hero) {
-  heroTitle.textContent = d(qs.get('sub1'));
-  hero.style.display = 'flex';
-}
-
-if (qs.get('sub2')) {
-  if (heroImg) heroImg.src = d(qs.get('sub2'));
-  if (sidebarImg) {
-    sidebarImg.src = d(qs.get('sub2'));
-    sidebarImg.style.display = 'block';
-  }
-  if (hero) hero.style.display = 'flex';
-}
-
-// PARAMETERS PREFILL
-if (qs.get('sub3')) firstName.value = d(qs.get('sub3'));
-if (qs.get('sub4')) lastName.value = d(qs.get('sub4'));
-if (qs.get('sub5')) billingStreet.value = d(qs.get('sub5'));
-if (qs.get('sub6')) billingPostcode.value = d(qs.get('sub6'));
-if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
-if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
-if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10')).replace(/[^\d]/g, '');
-
-// LOCAL TRANSITION: STEP 1 TO STEP 2
-nextBtn.onclick = () => {
-  nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-
-  if (!firstName.value || !lastName.value || !billingStreet.value || !billingPostcode.value || !billingCity.value || !emailInput.value || !phoneNumber.value) {
-    alert("Por favor complete todos los campos requeridos.");
-    return;
-  }
-
-  step1.setAttribute("aria-hidden", "true");
-  step2.setAttribute("aria-hidden", "false");
-};
-
-// TRANSACTION ACTION: STEP 2 PAYMENT HUB
-payBtn.onclick = async () => {
   const checkoutToken = window.PROMO_CHECKOUT_TOKEN || location.pathname.split('/').pop();
 
-  try {
-    payBtn.disabled = true;
-    overlayTitle.textContent = "Cargando pasarela de pago…";
-    overlay.setAttribute("aria-hidden", "false");
+  payBtn.onclick = async () => {
+    try {
+      payBtn.disabled = true;
+      overlayTitle.textContent = "Cargando pasarela de pago…";
+      overlay.setAttribute("aria-hidden", "false");
 
-    const response = await fetch("/api/create-promo-payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        checkoutToken: checkoutToken
-      })
-    });
+      const response = await fetch("/api/create-promo-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          checkoutToken: checkoutToken
+        })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok || !data.redirectUrl) {
-      throw new Error(data.error || "No se pudo iniciar la transacción segura.");
+      if (!response.ok || !data.redirectUrl) {
+        throw new Error(data.error || "No se pudo iniciar la transacción segura.");
+      }
+
+      overlayTitle.textContent = "Procesando autenticación…";
+      overlaySub.textContent = "Conectando directamente con el banco…";
+
+      executeBeMobPostback();
+
+      window.location.href = data.redirectUrl;
+
+    } catch (error) {
+      overlay.setAttribute("aria-hidden", "true");
+      payBtn.disabled = false;
+      alert(error.message || "Error al procesar el pago. Por favor, inténtelo de nuevo.");
     }
+  };
 
-    overlayTitle.textContent = "Procesando autenticación…";
-    overlaySub.textContent = "Conectando directamente con el banco…";
+  function executeBeMobPostback() {
+    const originalQs = sessionStorage.getItem("orig_qs") || "";
+    const localParams = new URLSearchParams(originalQs);
+    const clickId = localParams.get("cid") || localParams.get("clickid") || "";
 
-    // BeMob reporting triggered prior to banking platform frame route handshake
-    executeBeMobPostback();
+    const bemobUrl = `https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83?cid=${encodeURIComponent(clickId)}&payout=2.00&currency=USD`;
 
-    window.location.href = data.redirectUrl;
-
-  } catch (error) {
-    overlay.setAttribute("aria-hidden", "true");
-    payBtn.disabled = false;
-    alert(error.message || "Error al procesar el pago. Por favor, inténtelo de nuevo.");
+    fetch(bemobUrl, { mode: 'no-cors' })
+      .then(() => console.log("BeMob tracking successfully notified."))
+      .catch((e) => console.error("Tracking registration update skipped:", e));
   }
-};
-
-function executeBeMobPostback() {
-  const originalQs = sessionStorage.getItem("orig_qs") || "";
-  const localParams = new URLSearchParams(originalQs);
-  const clickId = localParams.get("cid") || localParams.get("clickid") || "";
-
-  // BeMob validation call tracking sequence
-  const bemobUrl = `https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83?cid=${encodeURIComponent(clickId)}&payout=2.00&currency=USD`;
-
-  fetch(bemobUrl, { mode: 'no-cors' })
-    .then(() => console.log("BeMob tracking successfully notified."))
-    .catch((e) => console.error("Tracking registration update skipped:", e));
-}
-
 });
 </script>
 
