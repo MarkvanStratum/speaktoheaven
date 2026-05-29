@@ -22,6 +22,18 @@ gtag('js', new Date());
 gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
 </script>
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript" async></script>
+
+<script>
+window.addEventListener("load", function () {
+    setTimeout(function () {
+        if (typeof goaffpro === "undefined") {
+            console.warn("GoAffPro failed to initialize");
+        } else {
+            console.log("GoAffPro loaded correctly");
+        }
+    }, 2000);
+});
+</script>
 <style>
 :root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
 *{box-sizing:border-box}
