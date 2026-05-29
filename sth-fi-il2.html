@@ -6,12 +6,12 @@
 <title>תשלום מאובטח</title>
 
 <meta http-equiv="Content-Security-Policy" content="
-default-src 'self' https: 'unsafe-inline' 'unsafe-eval';
-script-src 'self' https://gw.finby.eu https://cdn.jsdelivr.net 'unsafe-inline' 'unsafe-eval';
-connect-src 'self' https://gw.finby.eu https://www.speaktoheaven.com;
+default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';
+script-src 'self' https: 'unsafe-inline' 'unsafe-eval';
+connect-src 'self' https:;
 frame-src *;
-style-src 'self' 'unsafe-inline' https:;
-img-src * data:;
+style-src 'self' https: 'unsafe-inline';
+img-src * data: blob:;
 ">
 
 <style>
@@ -212,14 +212,19 @@ to{transform:rotate(360deg)}
 
 <aside>
 
+<div id="productBox" class="widget" style="display:none">
+<img id="productImg" style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
+<div id="productTitle" style="font-weight:900;font-size:18px"></div>
+</div>
+
 <div class="widget">
 <div style="font-weight:800;margin-bottom:12px">
 סיכום הזמנה
 </div>
 
 <div class="row">
-<span>גישה מלאה ל‑Speak To Heaven</span>
-<span>₪7.60</span>
+<span>גישה מלאה למוצר</span>
+<span>₪32.00</span>
 </div>
 
 <div class="row">
@@ -229,7 +234,7 @@ to{transform:rotate(360deg)}
 
 <div class="row" style="font-weight:900">
 <span>סה״כ</span>
-<span>₪7.60</span>
+<span>₪32.00</span>
 </div>
 </div>
 
@@ -260,10 +265,33 @@ to{transform:rotate(360deg)}
 </div>
 </div>
 
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
 <script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
 
 <script>
 const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+
+const pageParams = new URLSearchParams(location.search);
+const productTitleFromUrl = pageParams.get("sub1") || "";
+const productImageFromUrl = pageParams.get("sub2") || "";
+
+window.addEventListener("DOMContentLoaded", () => {
+    const productBox = document.getElementById("productBox");
+    const productTitle = document.getElementById("productTitle");
+    const productImg = document.getElementById("productImg");
+
+    if (productTitleFromUrl) {
+        productTitle.textContent = productTitleFromUrl;
+        productBox.style.display = "block";
+    }
+
+    if (productImageFromUrl) {
+        productImg.src = productImageFromUrl;
+        productImg.style.display = "block";
+        productBox.style.display = "block";
+    }
+});
 
 const overlay = document.getElementById("overlay");
 const payBtn = document.getElementById("payBtn");
@@ -370,7 +398,21 @@ payBtn.onclick = async () => {
             }
         );
 
-        console.log(result);
+        console.log("FINBY PAYMENT RESULT:", result);
+
+const qs = new URLSearchParams(location.search);
+
+const affiliateRef = qs.get("ref") || "";
+const sub1 = qs.get("sub1") || "";
+const sub2 = qs.get("sub2") || "";
+
+window.location.href =
+"https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" +
+"ref=" + encodeURIComponent(affiliateRef) +
+"&sub1=" + encodeURIComponent(sub1) +
+"&sub2=" + encodeURIComponent(sub2);
+
+return;
 
     } catch (e) {
 
@@ -386,6 +428,5 @@ payBtn.onclick = async () => {
     }
 };
 </script>
-
 </body>
 </html>
