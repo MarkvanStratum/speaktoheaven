@@ -300,7 +300,12 @@ nextBtn.onclick = async () => {
       throw new Error(data.error || "Kon geen veilige checkout-link aanmaken.");
     }
 
-    window.location.href = "https://www.speaktoheaven.com" + data.url;
+    window.location.href =
+  "https://www.speaktoheaven.com" +
+  data.url +
+  "?ref=" + encodeURIComponent(affiliateRef) +
+  "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+  "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
 
   } catch (error) {
     overlay.setAttribute("aria-hidden", "true");

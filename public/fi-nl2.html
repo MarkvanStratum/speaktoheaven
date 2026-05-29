@@ -245,6 +245,14 @@ Veilige Betaling 🔒 <span class="stars">★★★★★</span>
 
 <aside>
 
+<div id="productBox" class="widget" style="display:none">
+<img id="productImg"
+style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
+
+<div id="productTitle"
+style="font-weight:900;font-size:18px"></div>
+</div>
+
 <div class="widget">
 <div style="text-align:center;font-weight:800">Klantbeoordelingen</div>
 <div style="text-align:center;font-weight:700;">Fenella Lara</div>
@@ -289,6 +297,43 @@ Veilige Betaling 🔒 <span class="stars">★★★★★</span>
 
 <script>
 const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+
+const pageParams = new URLSearchParams(location.search);
+
+const productTitleFromUrl =
+pageParams.get("sub1") || "";
+
+const productImageFromUrl =
+pageParams.get("sub2") || "";
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    const productBox =
+    document.getElementById("productBox");
+
+    const productTitle =
+    document.getElementById("productTitle");
+
+    const productImg =
+    document.getElementById("productImg");
+
+    if (productTitleFromUrl) {
+        productTitle.textContent =
+        productTitleFromUrl;
+
+        productBox.style.display = "block";
+    }
+
+    if (productImageFromUrl) {
+
+        productImg.src =
+        productImageFromUrl;
+
+        productImg.style.display = "block";
+
+        productBox.style.display = "block";
+    }
+});
 
 const err = document.getElementById("err");
 const payNow = document.getElementById("payNow");
@@ -395,9 +440,17 @@ setTimeout(() => {
 
         console.log("FINBY PAYMENT RESULT:", result);
 
-        window.location.href =
+        const qs = new URLSearchParams(location.search);
+
+const affiliateRef = qs.get("ref") || "";
+const sub1 = qs.get("sub1") || "";
+const sub2 = qs.get("sub2") || "";
+
+window.location.href =
 "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
-"&ref=" + encodeURIComponent(new URLSearchParams(location.search).get("ref") || "");
+"ref=" + encodeURIComponent(affiliateRef) +
+"&sub1=" + encodeURIComponent(sub1) +
+"&sub2=" + encodeURIComponent(sub2);
 
 return;
 

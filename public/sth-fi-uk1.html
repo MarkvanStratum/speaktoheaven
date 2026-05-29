@@ -276,7 +276,7 @@ nextBtn.onclick = async () => {
         plan: "lifetime",
         step2File: "sth-fi-uk2.html",
         currency: "GBP",
-        amount: 2.00,
+        amount: 49.95,
         sourcePage: window.location.href,
 
         firstName: firstName.value.trim(),
@@ -303,7 +303,12 @@ nextBtn.onclick = async () => {
       throw new Error(data.error || "Could not create secure checkout link.");
     }
 
-    window.location.href = "https://www.speaktoheaven.com" + data.url;
+    window.location.href =
+  "https://www.speaktoheaven.com" +
+  data.url +
+  "?ref=" + encodeURIComponent(affiliateRef) +
+  "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+  "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
 
   } catch (error) {
     overlay.setAttribute("aria-hidden", "true");
