@@ -277,8 +277,8 @@ nextBtn.onclick = async () => {
       body: JSON.stringify({
         plan: "lifetime",
         step2File: "sth-fi-il2.html",
-        currency: "ILS",
-        amount: 7.60,
+        currency: "GBP",
+        amount: 49.95,
         sourcePage: window.location.href,
 
         firstName: firstName.value.trim(),
@@ -305,7 +305,12 @@ nextBtn.onclick = async () => {
       throw new Error(data.error || "לא ניתן ליצור קישור תשלום מאובטח.");
     }
 
-    window.location.href = "https://www.speaktoheaven.com" + data.url;
+    window.location.href =
+  "https://www.speaktoheaven.com" +
+  data.url +
+  "?ref=" + encodeURIComponent(affiliateRef) +
+  "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+  "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
 
   } catch (error) {
     overlay.setAttribute("aria-hidden", "true");

@@ -374,13 +374,17 @@ payBtn.onclick = async () => {
 
         console.log("FINBY PAYMENT RESULT:", result);
 
-const affiliateRef =
-    new URLSearchParams(location.search).get("ref") || "";
+const qs = new URLSearchParams(location.search);
+
+const affiliateRef = qs.get("ref") || "";
+const sub1 = qs.get("sub1") || "";
+const sub2 = qs.get("sub2") || "";
 
 window.location.href =
 "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?" +
-"ref=" +
-encodeURIComponent(affiliateRef);
+"ref=" + encodeURIComponent(affiliateRef) +
+"&sub1=" + encodeURIComponent(sub1) +
+"&sub2=" + encodeURIComponent(sub2);
 
 return;
 
