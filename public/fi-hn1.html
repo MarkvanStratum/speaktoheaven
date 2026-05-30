@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pago Seguro</title>
+
+<meta http-equiv="Content-Security-Policy" content="
+default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';
+script-src 'self' https: 'unsafe-inline' 'unsafe-eval';
+connect-src 'self' https:;
+frame-src *;
+style-src 'self' https: 'unsafe-inline';
+img-src * data: blob:;
+">
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+</script>
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript" async></script>
+
+<script>
+window.addEventListener("load", function () {
+    setTimeout(function () {
+        if (typeof goaffpro === "undefined") {
+            console.warn("GoAffPro failed to initialize");
+        } else {
+            console.log("GoAffPro loaded correctly");
+        }
+    }, 6000);
+});
+</script>
+<style>
+:root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+
+.wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
+.safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
+.page-title{font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px}
+.stars{color:#f6b80c}
+.reviews{color:#5b6b82;font-size:13px}
+.h2{font-size:18px;font-weight:800;margin:10px 0 14px}
+.sub{font-size:13px;color:#5b6b82}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+.input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;
+padding:12px;font-size:15px;background:#fff}
+.btn{width:100%;padding:12px;border:none;border-radius:12px;
+background:#16a34a;color:#fff;font-weight:900;cursor:pointer}
+.err{display:none;background:#fff1f1;border:1px solid #f5bcbc;
+padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a}
+.err[aria-hidden="false"]{display:block}
+.widget{background:#fff;border:1px solid var(--line);padding:16px;border-radius:12px}
+.widget + .widget{margin-top:12px}
+.order-row{display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6eaf1}
+.delivery{display:flex;gap:12px;padding:12px;border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff;align-items:center;}
+.trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
+.trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
+.step{display:none}
+.step[aria-hidden="false"]{display:block}
+.hero{display:none;margin-bottom:12px;padding:10px;border:1px solid var(--line);
+border-radius:12px;gap:10px;align-items:center;}
+.hero img{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);object-fit:cover}
+
+.loading-overlay{position:fixed;inset:0;background:rgba(246,249,252,.92);
+display:none;align-items:center;justify-content:center;z-index:9999}
+.loading-overlay[aria-hidden="false"]{display:flex}
+.loading-box{width:min(92vw,460px);background:#fff;border:1px solid #e6edf5;
+border-radius:14px;padding:24px;text-align:center}
+.loading-title{font-size:20px;font-weight:800;margin-bottom:18px}
+.progress-wrap{width:100%;height:12px;background:#ecf1f8;border-radius:999px;overflow:hidden}
+.progress-bar{width:0%;height:100%;
+background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+animation:loadingBar 2.2s ease-in-out infinite}
+@keyframes loadingBar{0%{width:0%}60%{width:80%}100%{width:100%}}
+</style>
+</head>
+
+<body>
+
+<script>
+sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<div class="safe">Pago Seguro SSL</div>
+
+<div class="wrap">
+
+<div class="page-title">
+Pago Seguro 🔒 <span class="stars">★★★★★</span>
+<span class="reviews">(2,777 opiniones)</span>
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<section id="step1" class="step" aria-hidden="false">
+
+<div id="hero" class="hero">
+<img id="heroImg">
+<div>
+<div id="heroTitle" style="font-weight:900;font-size:14px"></div>
+<div class="sub">Producto de tu enlace</div>
+</div>
+</div>
+
+<div class="h2">1. Información</div>
+
+<div class="form-grid">
+<input id="firstName" class="input" placeholder="Nombre" required>
+<input id="lastName" class="input" placeholder="Apellido" required>
+</div>
+
+<div class="form-grid">
+<input id="billingStreet" class="input" placeholder="Dirección (Calle y Número)" style="grid-column:1/-1" required>
+<input id="billingPostcode" class="input" placeholder="Código Postal" required>
+<input id="billingCity" class="input" placeholder="Ciudad / Departamento" required>
+</div>
+
+<div class="form-grid">
+<input id="emailInput" class="input" type="email" placeholder="Correo electrónico" required>
+<input class="input" value="Honduras" disabled>
+</div>
+
+<div class="form-grid">
+<select id="phonePrefix" class="select">
+<option value="+504">+504 — Honduras</option>
+</select>
+<input id="phoneNumber" class="input" placeholder="Número de teléfono" required>
+</div>
+
+<input id="nameInput" type="hidden">
+<button id="nextBtn" class="btn">Continuar</button>
+
+</section>
+
+
+
+</div>
+
+<aside>
+
+<div class="widget">
+<div style="text-align:center;font-weight:800">Opiniones de Clientes</div>
+<div style="text-align:center;font-weight:700;">Fenella Lara</div>
+<div style="text-align:center;color:#f6b80c;">★★★★★</div>
+<p style="text-align:center">Recibí mi producto ayer. ¡Excelente experiencia!</p>
+</div>
+
+<div class="widget">
+<div class="delivery">
+<img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
+<div>
+<div style="font-weight:800">Entrega Rápida</div>
+<div class="sub">3 a 5 días hábiles</div>
+</div>
+<div style="margin-left:auto;font-weight:800">Gratis</div>
+</div>
+
+<div style="margin-top:14px;font-weight:800">Resumen del Pedido</div>
+<div class="order-row"><span>Total</span><span>L50.00 HNL</span></div>
+</div>
+
+<div class="widget">
+<div style="font-weight:800;margin-bottom:10px">Por Qué Confiar en Nosotros</div>
+<div class="trust">
+<div class="box"><div>⭐</div><div>99% opiniones positivas</div></div>
+<div class="box"><div>🔒</div><div>Seguridad SSL</div></div>
+<div class="box"><div>🛡️</div><div>Seguro de $250,000</div></div>
+</div>
+</div>
+
+</aside>
+
+</div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+<div class="loading-box">
+<div class="loading-title">Procesando pago…</div>
+<div class="progress-wrap"><div class="progress-bar"></div></div>
+<p class="sub" style="margin-top:10px">Por favor, espera unos segundos…</p>
+</div>
+</div>
+
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const affiliateRef = params.get('ref');
+
+if (!affiliateRef) {
+    window.location.replace('https://www.speaktoheaven.com');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+
+const qs = new URLSearchParams(location.search);
+const d = v => {
+  try { return decodeURIComponent(v || '') }
+  catch { return v || '' }
+};
+
+const hero = document.getElementById('hero');
+const heroImg = document.getElementById('heroImg');
+const heroTitle = document.getElementById('heroTitle');
+const sidebarImg = document.getElementById('sidebarImg');
+
+const nextBtn = document.getElementById('nextBtn');
+
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const nameInput = document.getElementById('nameInput');
+
+const billingStreet = document.getElementById('billingStreet');
+const billingCity = document.getElementById('billingCity');
+const billingPostcode = document.getElementById('billingPostcode');
+
+const emailInput = document.getElementById('emailInput');
+
+const phonePrefix = document.getElementById('phonePrefix');
+const phoneNumber = document.getElementById('phoneNumber');
+
+const overlay = document.getElementById("loading-overlay");
+
+// HERO (SAFE)
+if (qs.get('sub1') && heroTitle && hero) {
+  heroTitle.textContent = d(qs.get('sub1'));
+  hero.style.display = 'flex';
+}
+
+if (qs.get('sub2')) {
+  if (heroImg) {
+    heroImg.src = d(qs.get('sub2'));
+  }
+
+  if (sidebarImg) {
+    sidebarImg.src = d(qs.get('sub2'));
+    sidebarImg.style.display = 'block';
+  }
+
+  if (hero) {
+    hero.style.display = 'flex';
+  }
+}
+
+// PREFILL
+if (qs.get('sub3')) firstName.value = d(qs.get('sub3'));
+if (qs.get('sub4')) lastName.value = d(qs.get('sub4'));
+if (qs.get('sub5')) billingStreet.value = d(qs.get('sub5'));
+if (qs.get('sub6')) billingPostcode.value = d(qs.get('sub6'));
+if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
+if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
+if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10')).replace(/[^\d]/g, '');
+
+// CONTINUE TO RANDOM PAYMENT URL
+nextBtn.onclick = async () => {
+  nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+
+  if (!firstName.value || !lastName.value || !billingStreet.value || !billingPostcode.value || !billingCity.value || !emailInput.value || !phoneNumber.value) {
+    alert("Por favor, completa todos los campos obligatorios.");
+    return;
+  }
+
+  try {
+    nextBtn.disabled = true;
+    nextBtn.textContent = "Creando pago seguro…";
+    overlay.setAttribute("aria-hidden", "false");
+
+    const response = await fetch("https://www.speaktoheaven.com/api/create-promo-checkout-link", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        plan: "2995", 
+        step2File: "fi-hn2.html",
+        currency: "GBP",
+        amount: 29.95,
+        sourcePage: window.location.href,
+
+        firstName: firstName.value.trim(),
+        lastName: lastName.value.trim(),
+        name: nameInput.value.trim(),
+
+        email: emailInput.value.trim(),
+        phonePrefix: phonePrefix.value,
+        phone: phoneNumber.value.trim(),
+
+        address: billingStreet.value.trim(),
+        postcode: billingPostcode.value.trim(),
+        city: billingCity.value.trim(),
+        country: "Honduras",
+
+        ref: affiliateRef,
+        originalQueryString: sessionStorage.getItem("orig_qs") || ""
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.url) {
+      throw new Error(data.error || "No se pudo crear el enlace de pago seguro.");
+    }
+
+    window.location.href =
+  "https://www.speaktoheaven.com" +
+  data.url +
+  "?ref=" + encodeURIComponent(affiliateRef) +
+  "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+  "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
+
+  } catch (error) {
+    overlay.setAttribute("aria-hidden", "true");
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Continuar";
+    alert(error.message || "No se pudo abrir el pago seguro. Por favor, inténtalo de nuevo.");
+  }
+};
+
+});
+</script>
+
+</body>
+</html>

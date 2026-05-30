@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pago Seguro</title>
+
+<meta name="referrer" content="no-referrer">
+
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+<script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
+
+<style>
+:root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+
+.safe{
+background:#0a0a0a;
+color:#fff;
+font-size:12px;
+padding:6px 10px;
+}
+
+.wrap{
+max-width:1100px;
+margin:0 auto;
+padding:18px 14px 60px;
+}
+
+.page-title{
+font-size:28px;
+font-weight:900;
+display:flex;
+align-items:center;
+gap:8px;
+margin:6px 0 14px;
+}
+
+.stars{color:#f6b80c}
+.reviews{color:#5b6b82;font-size:13px}
+
+.grid{
+display:grid;
+grid-template-columns:minmax(0,1fr) 360px;
+gap:18px;
+}
+
+@media(max-width:980px){
+.grid{grid-template-columns:1fr}
+}
+
+.card{
+background:#fff;
+border:1px solid var(--line);
+padding:22px;
+border-radius:12px;
+min-height:430px;
+}
+
+.h2{
+font-size:18px;
+font-weight:800;
+margin:10px 0 14px;
+}
+
+.sub{
+font-size:13px;
+color:#5b6b82;
+}
+
+.el{
+width:100%;
+border:1px solid #cfd6e4;
+border-radius:10px;
+padding:12px;
+font-size:15px;
+background:#fff;
+}
+
+#card-element{
+width:100%;
+border:1px solid #cfd6e4;
+border-radius:10px;
+padding:0;
+background:#fff;
+min-height:90px;
+margin-top:14px;
+overflow:hidden;
+}
+
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:#16a34a;
+color:#fff;
+font-weight:900;
+cursor:pointer;
+font-size:15px;
+}
+
+.btn:disabled{
+opacity:.65;
+cursor:not-allowed;
+}
+
+.err{
+display:none;
+background:#fff1f1;
+border:1px solid #f5bcbc;
+padding:10px;
+border-radius:10px;
+margin-top:12px;
+color:#9a1a1a;
+}
+
+.err[aria-hidden="false"]{display:block}
+
+.widget{
+background:#fff;
+border:1px solid var(--line);
+padding:16px;
+border-radius:12px;
+}
+
+.widget + .widget{margin-top:12px}
+
+.order-row{
+display:flex;
+justify-content:space-between;
+padding:6px 0;
+border-top:1px dashed #e6eaf1;
+}
+
+.delivery{
+display:flex;
+gap:12px;
+padding:12px;
+border:1px dashed #d9e2ef;
+border-radius:10px;
+background:#f7fbff;
+align-items:center;
+}
+
+.trust{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:12px;
+text-align:center;
+}
+
+.trust .box{
+border:1px solid var(--line);
+padding:8px;
+border-radius:10px;
+}
+
+.loading-overlay{
+position:fixed;
+inset:0;
+background:rgba(246,249,252,.92);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.loading-overlay[aria-hidden="false"]{display:flex}
+
+.loading-box{
+width:min(92vw,460px);
+background:#fff;
+border:1px solid #e6edf5;
+border-radius:14px;
+padding:24px;
+text-align:center;
+}
+
+.loading-title{
+font-size:20px;
+font-weight:800;
+margin-bottom:18px;
+}
+
+.progress-wrap{
+width:100%;
+height:12px;
+background:#ecf1f8;
+border-radius:999px;
+overflow:hidden;
+}
+
+.progress-bar{
+width:0%;
+height:100%;
+background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+animation:loadingBar 2.2s ease-in-out infinite;
+}
+
+@keyframes loadingBar{
+0%{width:0%}
+60%{width:80%}
+100%{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<div class="safe">Pago Seguro SSL</div>
+
+<div class="wrap">
+
+<div class="page-title">
+Pago Seguro 🔒 <span class="stars">★★★★★</span>
+<span class="reviews">(2,777 opiniones)</span>
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="h2">2. Pago</div>
+<p class="sub">La información de tu tarjeta está encriptada y se procesa de forma segura.</p>
+
+<div id="card-element"></div>
+
+<div id="err" class="err" aria-hidden="true"></div>
+
+<div style="display:flex;gap:10px;margin-top:12px">
+<button id="backBtn" class="btn" style="width:40%">Atrás</button>
+<button id="payNow" class="btn" style="width:60%">Pagar de forma segura</button>
+</div>
+
+</div>
+
+<aside>
+
+<div id="productBox" class="widget" style="display:none">
+<img id="productImg"
+style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
+
+<div id="productTitle"
+style="font-weight:900;font-size:18px"></div>
+</div>
+
+<div class="widget">
+<div style="text-align:center;font-weight:800">Opiniones de Clientes</div>
+<div style="text-align:center;font-weight:700;">Fenella Lara</div>
+<div style="text-align:center;color:#f6b80c;">★★★★★</div>
+<p style="text-align:center">Recibí mi producto ayer. ¡Excelente experiencia!</p>
+</div>
+
+<div class="widget">
+<div class="delivery">
+<div>
+<div style="font-weight:800">Entrega Rápida</div>
+<div class="sub">3 a 5 días hábiles</div>
+</div>
+<div style="margin-left:auto;font-weight:800">Gratis</div>
+</div>
+
+<div style="margin-top:14px;font-weight:800">Resumen del Pedido</div>
+<div class="order-row"><span>Total</span><span>L50.00 HNL</span></div>
+</div>
+
+<div class="widget">
+<div style="font-weight:800;margin-bottom:10px">Por Qué Confiar en Nosotros</div>
+<div class="trust">
+<div class="box"><div>⭐</div><div>99% opiniones positivas</div></div>
+<div class="box"><div>🔒</div><div>Seguridad SSL</div></div>
+<div class="box"><div>🛡️</div><div>Seguro de $250,000</div></div>
+</div>
+</div>
+
+</aside>
+
+</div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+<div class="loading-box">
+<div class="loading-title">Procesando pago…</div>
+<div class="progress-wrap"><div class="progress-bar"></div></div>
+<p class="sub" style="margin-top:10px">Por favor, espera unos segundos…</p>
+</div>
+</div>
+
+<script>
+const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+
+const pageParams = new URLSearchParams(location.search);
+
+const productTitleFromUrl =
+pageParams.get("sub1") || "";
+
+const productImageFromUrl =
+pageParams.get("sub2") || "";
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    const productBox =
+    document.getElementById("productBox");
+
+    const productTitle =
+    document.getElementById("productTitle");
+
+    const productImg =
+    document.getElementById("productImg");
+
+    if (productTitleFromUrl) {
+        productTitle.textContent =
+        productTitleFromUrl;
+
+        productBox.style.display = "block";
+    }
+
+    if (productImageFromUrl) {
+
+        productImg.src =
+        productImageFromUrl;
+
+        productImg.style.display = "block";
+
+        productBox.style.display = "block";
+    }
+});
+
+const err = document.getElementById("err");
+const payNow = document.getElementById("payNow");
+const backBtn = document.getElementById("backBtn");
+const overlay = document.getElementById("loading-overlay");
+
+let trustPayApi = null;
+let cardComponent = null;
+let paymentSecrets = null;
+
+function showError(message) {
+    err.textContent = message;
+    err.setAttribute("aria-hidden", "false");
+}
+
+function clearError() {
+    err.textContent = "";
+    err.setAttribute("aria-hidden", "true");
+}
+
+async function safeJson(response) {
+    const text = await response.text();
+
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        throw new Error(text || "El servidor devolvió una respuesta inválida.");
+    }
+}
+
+async function initialiseFinby() {
+    if (!tokenFromServer) {
+        throw new Error("Enlace de pago inválido o vencido.");
+    }
+
+    const response = await fetch("/api/create-promo-payment", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            checkoutToken: tokenFromServer
+        })
+    });
+
+    const data = await safeJson(response);
+
+    if (!response.ok) {
+        throw new Error(data.error || "No se pudo crear el pago.");
+    }
+
+    if (!data.secrets || !data.secrets.payment) {
+        throw new Error("Error en la configuración del pago. No se devolvió ningún secreto de pago.");
+    }
+
+    paymentSecrets = data.secrets;
+    trustPayApi = new TrustPayApi(paymentSecrets);
+
+    cardComponent = trustPayApi.createComponent("card", {
+        style: {
+            fontFamily: "Arial, Helvetica, sans-serif",
+            fontSize: "16px",
+            color: "#33302c"
+        }
+    });
+
+    document.getElementById("card-element").innerHTML = "";
+    cardComponent.mount("#card-element");
+}
+
+window.addEventListener("load", async () => {
+    try {
+        payNow.disabled = true;
+        await initialiseFinby();
+        payNow.disabled = false;
+    } catch (e) {
+        console.error(e);
+        showError(e.message || "No se pudo cargar el formulario de pago.");
+        payNow.disabled = true;
+    }
+});
+
+backBtn.onclick = () => {
+    window.history.back();
+};
+
+payNow.onclick = async () => {
+    clearError();
+    payNow.disabled = true;
+    overlay.setAttribute("aria-hidden", "false");
+
+setTimeout(() => {
+    overlay.setAttribute("aria-hidden", "true");
+}, 4000);
+
+    try {
+        if (!trustPayApi || !cardComponent || !paymentSecrets) {
+            throw new Error("Formulario de pago no cargado.");
+        }
+
+        const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
+            card: cardComponent
+        });
+
+        console.log("FINBY PAYMENT RESULT:", result);
+
+        // SECURE VALIDATION CONTROLLER BLOCK
+        const isFinbySuccess =
+    result &&
+    (
+        result.status === "paid" ||
+        result.status === "success" ||
+        result.status === "succeeded" ||
+        Number(result.status) === 0 ||
+        Number(result.status) > 0 ||
+        String(result.resultCode || result.ResultCode || "") === "100000" ||
+        String(result.reasonCode || result.ReasonCode || "") === "000.000.000"
+    );
+
+if (!isFinbySuccess) {
+    throw new Error("El pago no fue completado.");
+}
+
+const qs = new URLSearchParams(location.search);
+
+const affiliateRef = qs.get("ref") || "";
+const sub1 = qs.get("sub1") || "";
+const sub2 = qs.get("sub2") || "";
+
+window.location.href =
+"https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+"ref=" + encodeURIComponent(affiliateRef) +
+"&sub1=" + encodeURIComponent(sub1) +
+"&sub2=" + encodeURIComponent(sub2);
+
+return;
+
+        throw new Error("El pago no fue completado. Por favor, verifica los detalles de tu tarjeta.");
+
+    } catch (e) {
+        console.error(e);
+        overlay.setAttribute("aria-hidden", "true");
+        showError(e.message || "Pago fallido.");
+        payNow.disabled = false;
+    }
+};
+</script>
+</body>
+</html>
