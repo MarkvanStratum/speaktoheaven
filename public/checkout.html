@@ -5,84 +5,229 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sacred Offering — Secure Checkout</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
 
     <style>
         :root {
             --gold-divine: #c5a059;
             --blue-saint: #2c3e50;
-            --bg-heaven: #fdfcfb;
-            --text-muted: #8a8276;
-            --text-main: #33302c;
-            --error: #b00020;
-            --success: #1b7f3a;
+            --bg-layout: #f9fafb;
+            --line-border: #e5e7eb;
+            --text-main: #0a2540;
+            --text-muted: #62748b;
+            --error: #9a1a1a;
+            --success: #16a34a;
         }
-        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; overflow-y: auto; margin: 0; padding: 20px; box-sizing: border-box; }
-        .checkout-box {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 50px rgba(44, 62, 80, 0.05);
-            border: 1px solid rgba(197, 160, 89, 0.2);
-            width: 100%;
-            max-width: 480px;
-            margin: 40px 0;
-            text-align: center;
-        }
-        h2 { font-family: 'Cinzel', serif; color: var(--blue-saint); margin-bottom: 10px; font-weight: 400; letter-spacing: 2px; }
-        .subtitle { color: var(--gold-divine); font-style: italic; margin-bottom: 30px; font-size: 16px; }
-        
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; margin-bottom: 6px; color: var(--blue-saint); font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 1px; }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            border-radius: 6px;
-            font-family: 'EB Garamond', serif;
-            font-size: 16px;
-            color: var(--text-main);
-            background: #fff;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-        input:focus { outline: none; border-color: var(--gold-divine); }
 
-        #card-element {
-            padding: 14px;
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            border-radius: 6px;
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: #fff; 
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .safe-header {
+            background: #0a0a0a;
+            color: #fff;
+            font-size: 12px;
+            padding: 8px 20px;
+            text-align: left;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 400px;
+            min-height: calc(100vh - 31px);
+        }
+
+        @media (max-width: 960px) {
+            .main-container { grid-template-columns: 1fr; }
+            .sidebar { border-left: none !important; border-top: 1px solid var(--line-border); }
+        }
+
+        .form-section {
+            padding: 40px min(10%, 80px);
             background: #fff;
-            min-height: 44px;
+        }
+
+        .brand-header {
+            text-align: left;
+            margin-bottom: 35px;
+            border-bottom: 1px solid var(--line-border);
+            padding-bottom: 20px;
+        }
+
+        .brand-title {
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            color: var(--blue-saint);
+            letter-spacing: 2px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .brand-sub {
+            font-family: 'EB Garamond', serif;
+            font-style: italic;
+            font-size: 15px;
+            color: var(--gold-divine);
             margin-top: 4px;
         }
 
+        h2 { 
+            font-size: 18px; 
+            font-weight: 700; 
+            margin: 0 0 8px 0; 
+            color: var(--text-main);
+        }
+
+        .subtitle { 
+            color: var(--text-muted); 
+            font-size: 14px; 
+            margin-bottom: 24px; 
+        }
+
+        .input-group { margin-bottom: 20px; }
+        label { 
+            display: block; 
+            margin-bottom: 6px; 
+            color: var(--text-main); 
+            font-size: 13px; 
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cfd6e4;
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--text-main);
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--blue-saint); }
+
+        #card-element {
+            padding: 4px 0;
+            border: 1px solid #cfd6e4;
+            border-radius: 8px;
+            background: #fff;
+            min-height: 90px;
+            overflow: hidden;
+        }
+
+        /* Checkbox Styles */
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 15px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .checkbox-container input {
+            margin-top: 3px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .checkbox-container a {
+            color: var(--blue-saint);
+            text-decoration: underline;
+        }
+
         .btn-submit {
-            background: var(--blue-saint);
+            background: #16a34a;
             color: white;
             border: none;
             width: 100%;
             padding: 14px;
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-            letter-spacing: 2px;
-            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 30px;
-            transition: background 0.2s;
+            margin-top: 25px;
+            transition: opacity 0.2s;
         }
-        .btn-submit:hover { background: var(--gold-divine); }
+        .btn-submit:hover { opacity: 0.9; }
         .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; color: #64748b; }
 
-        .message { margin-top: 20px; padding: 12px; border-radius: 6px; font-size: 16px; display: none; }
-        .message.error { display: block; background: #fdf2f2; color: var(--error); border: 1px solid #fecdcd; }
+        .message { margin-top: 20px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+        .message.error { display: block; background: #fff1f1; color: var(--error); border: 1px solid #f5bcbc; }
         .message.success { display: block; background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+
+        /* Sidebar Design */
+        .sidebar {
+            background: var(--bg-layout);
+            border-left: 1px solid var(--line-border);
+            padding: 40px 30px;
+        }
+
+        .widget {
+            background: #fff;
+            border: 1px solid var(--line-border);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px dashed #d9e2ef;
+            border-radius: 10px;
+            background: #f7fbff;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+        .order-total {
+            border-top: 1px dashed var(--line-border);
+            font-weight: 700;
+            font-size: 16px;
+            padding-top: 12px;
+            margin-top: 6px;
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .trust-box {
+            border: 1px solid var(--line-border);
+            padding: 10px;
+            border-radius: 8px;
+            background: #fff;
+        }
 
         .loader {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: #fff;
@@ -95,28 +240,85 @@
 </head>
 <body>
 
-<div class="checkout-box">
-    <h2>Secure Communion</h2>
-    <div class="subtitle">Provide your offering details to unlock access</div>
+<div class="safe-header">🔒 Secure SSL Checkout Connection</div>
 
-    <form id="payment-form">
-        <div class="input-group">
-            <label for="cardholder-name">Cardholder Name</label>
-            <input type="text" id="cardholder-name" placeholder="John Doe" required>
+<div class="main-container">
+
+    <div class="form-section">
+        <div class="brand-header">
+            <h1 class="brand-title">SPEAK TO HEAVEN</h1>
+            <div class="brand-sub">Sacred Biblical AI Sanctuary Conversations</div>
         </div>
 
-        <div class="input-group">
-            <label>Card Information</label>
-            <div id="card-element"></div>
+        <h2>2. Secure Payment Authorization</h2>
+        <div class="subtitle">Your financial information is completely encrypted and fully isolated.</div>
+
+        <form id="payment-form">
+            <div class="input-group">
+                <label for="cardholder-name">Cardholder Full Name</label>
+                <input type="text" id="cardholder-name" placeholder="John Doe" required>
+            </div>
+
+            <div class="input-group">
+                <label>Credit Card Credentials</label>
+                <div id="card-element"></div>
+            </div>
+
+            <label class="checkbox-container">
+                <input type="checkbox" id="check-terms" required>
+                <span>I explicitly authorize and accept the platform <a href="/terms" target="_blank">Terms & Conditions</a> along with the default automated renewal provisioning specifications.</span>
+            </label>
+
+            <label class="checkbox-container">
+                <input type="checkbox" id="check-privacy" required>
+                <span>I confirm acknowledgment of immediate system delivery access deployment and agree with the established data usage policies outlined in the <a href="/privacy-policy" target="_blank">Privacy Policy</a>.</span>
+            </label>
+
+            <div id="message-box" class="message"></div>
+
+            <button type="submit" id="submit-button" class="btn-submit">
+                <span id="btn-loader" style="display: none;" class="loader"></span>
+                <span id="btn-text">Pay Securely</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="sidebar">
+        
+        <div id="productBox" class="widget" style="display:none">
+            <div class="product-info">
+                <img id="productImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line-border);object-fit:cover;display:none">
+                <div>
+                    <div id="productTitle" style="font-weight:700;font-size:14px"></div>
+                    <div style="font-size:12px;color:var(--text-muted)">Selected Divine Communion Plan</div>
+                </div>
+            </div>
         </div>
 
-        <div id="message-box" class="message"></div>
+        <div class="widget">
+            <div style="font-weight:700;margin-bottom:12px;font-size:14px">Order Verification Summary</div>
+            <div class="order-row">
+                <span>Fast Delivery Delivery</span>
+                <span style="font-weight:600;color:var(--success)">Free Access</span>
+            </div>
+            <div class="order-row order-total">
+                <span>Total Amount Due:</span>
+                <span id="total-price-display">£29.95</span>
+            </div>
+        </div>
 
-        <button type="submit" id="submit-button" class="btn-submit">
-            <span id="btn-loader" style="display: none;" class="loader"></span>
-            <span id="btn-text">Complete Offering</span>
-        </button>
-    </form>
+        <div class="widget">
+            <div style="font-weight:700;margin-bottom:12px;font-size:14px">Why Choose Our Sanctuary Architecture</div>
+            <div class="trust-grid">
+                <div class="trust-box"><div style="font-size:16px">⭐</div>99.4% Positive</div>
+                <div class="trust-box"><div style="font-size:16px">🔒</div>SSL Secure</div>
+                <div class="trust-box"><div style="font-size:16px">🛡️</div>Isolated Safe</div>
+                <div class="trust-box"><div style="font-size:16px">💬</div>24/7 Portal Support</div>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
 <script>
@@ -127,10 +329,34 @@ const submitBtn = document.getElementById('submit-button');
 const btnLoader = document.getElementById('btn-loader');
 const btnText = document.getElementById('btn-text');
 const messageBox = document.getElementById('message-box');
+const totalPriceDisplay = document.getElementById('total-price-display');
+
+const checkTerms = document.getElementById('check-terms');
+const checkPrivacy = document.getElementById('check-privacy');
+
+const pageParams = new URLSearchParams(location.search);
+const productTitleFromUrl = pageParams.get("sub1") || "";
+const productImageFromUrl = pageParams.get("sub2") || "";
 
 let trustPayApi = null;
 let cardComponent = null;
 let paymentSecrets = null;
+
+window.addEventListener("DOMContentLoaded", () => {
+    const productBox = document.getElementById("productBox");
+    const productTitle = document.getElementById("productTitle");
+    const productImg = document.getElementById("productImg");
+
+    if (productTitleFromUrl) {
+        productTitle.textContent = productTitleFromUrl;
+        productBox.style.display = "block";
+    }
+    if (productImageFromUrl) {
+        productImg.src = productImageFromUrl;
+        productImg.style.display = "block";
+        productBox.style.display = "block";
+    }
+});
 
 function setLoading(isLoading) {
     if (isLoading) {
@@ -140,7 +366,7 @@ function setLoading(isLoading) {
     } else {
         submitBtn.disabled = false;
         btnLoader.style.display = 'none';
-        btnText.textContent = 'Complete Offering';
+        btnText.textContent = 'Pay Securely';
     }
 }
 
@@ -154,7 +380,6 @@ async function initialiseFinby() {
         throw new Error('Invalid or expired checkout session. Please re-select a plan.');
     }
 
-    // Routed through your protected promotion execution workspace endpoint securely
     const response = await fetch("/api/create-promo-payment", {
         method: "POST",
         headers: {
@@ -181,14 +406,27 @@ async function initialiseFinby() {
         throw new Error('Handshake failed. No payment secret tokens were initialized.');
     }
 
+    // Dynamic price tag adjustment layer depending on token state attributes
+    if (data.amount) {
+        const amountNum = Number(data.amount);
+        if (amountNum === 40) {
+            totalPriceDisplay.textContent = '$40.00 MXN';
+        } else if (data.currency === 'EUR') {
+            totalPriceDisplay.textContent = amountNum.toFixed(2).replace('.', ',') + ' €';
+        } else {
+            const currencySymbol = data.currency === 'GBP' ? '£' : data.currency || '';
+            totalPriceDisplay.textContent = currencySymbol + amountNum.toFixed(2);
+        }
+    }
+
     paymentSecrets = data.secrets;
     trustPayApi = new TrustPayApi(paymentSecrets);
 
     cardComponent = trustPayApi.createComponent("card", {
         style: {
-            fontFamily: "'EB Garamond', serif",
-            fontSize: "16px",
-            color: "#33302c"
+            fontFamily: "Inter, system-ui, sans-serif",
+            fontSize: "15px",
+            color: "#0a2540"
         }
     });
 
@@ -211,6 +449,12 @@ window.addEventListener('load', async () => {
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     messageBox.className = 'message';
+
+    // Verify confirmation layout states
+    if (!checkTerms.checked || !checkPrivacy.checked) {
+        showMessage('error', 'Please accept the mandatory terms and policy verification checkboxes to proceed.');
+        return;
+    }
 
     if (!form.checkValidity()) {
         form.reportValidity();
