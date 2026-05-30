@@ -1008,7 +1008,12 @@ if (!amount) {
       });
     }
 
-    res.json(data);
+    res.json({
+  ...data,
+  amount: amount.toFixed(2),
+  currency: "GBP",
+  plan: selectedPlan
+});
 
   } catch (err) {
     console.error("Promo Finby payment error:", err);
