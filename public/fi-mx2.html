@@ -369,8 +369,8 @@ async function initialiseFinby() {
         throw new Error("Enlace de pago inválido o vencido.");
     }
 
-    // FIXED HARDCODED ENDPOINT PER YOUR INSTRUCTION
-    const response = await fetch("/api/create-payment-2995", {
+    // SWITCHED BACK TO PUBLIC PROMO HANDLER
+    const response = await fetch("/api/create-promo-payment", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -464,7 +464,7 @@ const sub1 = qs.get("sub1") || "";
 const sub2 = qs.get("sub2") || "";
 
 window.location.href =
-"https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83" +
+"https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
 "ref=" + encodeURIComponent(affiliateRef) +
 "&sub1=" + encodeURIComponent(sub1) +
 "&sub2=" + encodeURIComponent(sub2);

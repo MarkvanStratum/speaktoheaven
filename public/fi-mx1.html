@@ -285,10 +285,10 @@ nextBtn.onclick = async () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        plan: "lifetime",
+        plan: "2995", // UPDATED: Securely tells the server promo system to charge $29.95
         step2File: "fi-mx2.html",
-        currency: "MXN",
-        amount: 40.00,
+        currency: "GBP",
+        amount: 29.95,
         sourcePage: window.location.href,
 
         firstName: firstName.value.trim(),
