@@ -405,7 +405,7 @@ async function initialiseFinby() {
     }
 
     // FIX: Completely dynamic price parser pulled from active transaction authorization data
-    if (data.amount) {
+    
         // FIX: Extracting the price properly from the actual server response payload
     const finalAmount = data.amount || (data.checkoutLink && data.checkoutLink.amount);
     const finalCurrency = data.currency || (data.checkoutLink && data.checkoutLink.currency) || 'GBP';
@@ -436,7 +436,7 @@ async function initialiseFinby() {
     });
 
     document.getElementById("card-element").innerHTML = "";
-    cardComponent.mount("#card-element");
+cardComponent.mount("#card-element");
 }
 
 window.addEventListener('load', async () => {
