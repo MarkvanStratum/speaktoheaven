@@ -123,7 +123,7 @@
             overflow: hidden;
         }
 
-        /* Checkbox Styles */
+        /* Checkbox Layout Styles from Screenshot */
         .checkbox-container {
             display: flex;
             align-items: flex-start;
@@ -169,7 +169,7 @@
         .message.error { display: block; background: #fff1f1; color: var(--error); border: 1px solid #f5bcbc; }
         .message.success { display: block; background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
 
-        /* Sidebar Design */
+        /* Sidebar Elements Layout */
         .sidebar {
             background: var(--bg-layout);
             border-left: 1px solid var(--line-border);
@@ -406,7 +406,7 @@ async function initialiseFinby() {
         throw new Error('Handshake failed. No payment secret tokens were initialized.');
     }
 
-    // Dynamic price tag adjustment layer depending on token state attributes
+    // Dynamic price formatting layer that syncs the exact selected plan value automatically
     if (data.amount) {
         const amountNum = Number(data.amount);
         if (amountNum === 40) {
@@ -450,7 +450,7 @@ form.addEventListener('submit', async (event) => {
     event.preventDefault();
     messageBox.className = 'message';
 
-    // Verify confirmation layout states
+    // Mandatory checkbox condition safety check gates
     if (!checkTerms.checked || !checkPrivacy.checked) {
         showMessage('error', 'Please accept the mandatory terms and policy verification checkboxes to proceed.');
         return;
