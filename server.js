@@ -975,10 +975,38 @@ if (!amount) {
   "reference",
   `promo-${selectedPlan}-${Date.now()}`
 );
-    formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
-    formData.append("customer.email", email);
-    formData.append("customer.ipAddress", req.ip || "127.0.0.1");
-    formData.append("cardholder", email);
+    const fullName =
+  checkout.full_name ||
+  `${checkout.first_name || ""} ${checkout.last_name || ""}`.trim() ||
+  email;
+
+const countryCodes = {
+  "United Kingdom": "GB",
+  "Denmark": "DK",
+  "Netherlands": "NL",
+  "Spain": "ES",
+  "Israel": "IL",
+  "Mexico": "MX"
+};
+
+const countryCode = countryCodes[checkout.country] || "GB";
+
+formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
+
+formData.append("customer.email", email);
+formData.append("customer.ipAddress", req.ip || "127.0.0.1");
+
+formData.append("customer.name", fullName);
+formData.append("customer.firstName", checkout.first_name || "");
+formData.append("customer.lastName", checkout.last_name || "");
+formData.append("customer.phone", checkout.phone || "");
+
+formData.append("customer.address", checkout.address || "");
+formData.append("customer.postcode", checkout.postcode || "");
+formData.append("customer.city", checkout.city || "");
+formData.append("customer.country", countryCode);
+
+formData.append("cardholder", fullName);
 
     const response = await fetch("https://gw.finby.eu/api/v1/intent", {
       method: "POST",
