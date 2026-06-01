@@ -1001,6 +1001,8 @@ formData.append("billing.country", countryCode);
 formData.append("billing.street1", checkout.address || "");
 formData.append("billing.postcode", checkout.postcode || "");
 
+formData.append("threeDSecureChallengeIndicator", "04");
+
 formData.append("cardholder", fullName);
 
     const response = await fetch("https://gw.finby.eu/api/v1/intent", {
