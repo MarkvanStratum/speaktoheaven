@@ -996,15 +996,10 @@ formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
 formData.append("customer.email", email);
 formData.append("customer.ipAddress", req.ip || "127.0.0.1");
 
-formData.append("customer.name", fullName);
-formData.append("customer.firstName", checkout.first_name || "");
-formData.append("customer.lastName", checkout.last_name || "");
-formData.append("customer.phone", checkout.phone || "");
-
-formData.append("customer.address", checkout.address || "");
-formData.append("customer.postcode", checkout.postcode || "");
-formData.append("customer.city", checkout.city || "");
-formData.append("customer.country", countryCode);
+formData.append("billing.city", checkout.city || "");
+formData.append("billing.country", countryCode);
+formData.append("billing.street1", checkout.address || "");
+formData.append("billing.postcode", checkout.postcode || "");
 
 formData.append("cardholder", fullName);
 
