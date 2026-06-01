@@ -439,6 +439,7 @@ setTimeout(() => {
         });
 
         console.log("FINBY PAYMENT RESULT:", result);
+console.log("FULL FINBY PAYMENT RESULT:", JSON.stringify(result, null, 2));
 
         const isFinbySuccess =
     result &&
@@ -473,11 +474,17 @@ return;
         throw new Error("Payment was not completed. Please check your card details.");
 
     } catch (e) {
-        console.error(e);
-        overlay.setAttribute("aria-hidden", "true");
-        showError(e.message || "Payment failed.");
-        payNow.disabled = false;
-    }
+    console.error("FINBY PAYMENT ERROR:", e);
+
+    console.log(
+        "FULL FINBY PAYMENT ERROR JSON:",
+        JSON.stringify(e, Object.getOwnPropertyNames(e), 2)
+    );
+
+    overlay.setAttribute("aria-hidden", "true");
+    showError(e.message || "Payment failed.");
+    payNow.disabled = false;
+}
 };
 </script>
 </body>
