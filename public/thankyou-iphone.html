@@ -1,0 +1,208 @@
+<!doctype html> 
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thank you</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fff; color: #111;
+    }
+    main { text-align: center; max-width: 60ch; padding: 2rem; }
+    h1 { margin: 0 0 .5rem; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    p  { margin: 0; font-size: 1.1rem; opacity: .9; }
+  </style>
+
+  <!-- ✅ TikTok Pixel (Purchase-only) -->
+  <script>
+  !function (w, d, t) {
+    w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];
+    ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","setUserProperties","setVisitorProperties","reset"];
+    ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat([].slice.call(arguments,0)))}};
+    for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
+    ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";
+      ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e]=+new Date;
+      ttq._o=ttq._o||{};ttq._o[e]=n||{};
+      var s=d.createElement("script");s.type="text/javascript";s.async=!0;s.src=i+"?sdkid="+e+"&lib="+t;
+      var c=d.getElementsByTagName("script")[0];c.parentNode.insertBefore(s,c);
+    };
+    ttq.load('D2ROS1RC77UCDUAMLEEG');
+    ttq.page();
+  }(window, document, 'ttq');
+  </script>
+</head>
+<body>
+  <main>
+    <h1>Thank you for your order.</h1>
+    <p>We will contact you shortly with delivery details.</p>
+  </main>
+
+  <!-- Ensure sub_id is present in URL before GoAffPro loads -->
+  <script>
+    (function ensureSubIdInURL(){
+      var url = new URL(location.href);
+      if (!url.searchParams.get("sub_id")) {
+        function getStored(){
+          try{
+            var m = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+            if (m) return decodeURIComponent(m[1]);
+            var ls = localStorage.getItem("aff_sub_id");
+            if (ls) return ls;
+          }catch(e){}
+          return null;
+        }
+        var sub = getStored();
+        if (!sub && document.referrer) {
+          try{
+            var ref = new URL(document.referrer);
+            sub = ref.searchParams.get("sub_id") || ref.searchParams.get("subid") ||
+                  ref.searchParams.get("aff_sub") || ref.searchParams.get("click_id") ||
+                  ref.searchParams.get("cid")    || ref.searchParams.get("tid");
+          }catch(e){}
+        }
+        if (sub) {
+          url.searchParams.set("sub_id", sub);
+          history.replaceState(null, "", url.toString());
+        }
+      }
+    })();
+  </script>
+
+  <!-- GoAffPro loader -->
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+  <!-- Idempotent GoAffPro conversion fire -->
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const orderId =
+      qs.get('v') || qs.get('order_id') || qs.get('oid') || qs.get('t') || ('TEST-' + Date.now());
+
+    function alreadyFired(id){
+      try { return JSON.parse(localStorage.getItem('goaffpro_fired')||'{}')[id]; } catch { return false; }
+    }
+    function markFired(id){
+      try {
+        const m = JSON.parse(localStorage.getItem('goaffpro_fired')||'{}');
+        m[id] = Date.now();
+        localStorage.setItem('goaffpro_fired', JSON.stringify(m));
+      } catch {}
+    }
+
+    var goaffproOrder = {
+      id: orderId,
+      number: orderId,
+      total: 300,
+      currency: "USD",
+      forceSDK: true
+    };
+
+    (function wait(i){
+      if (alreadyFired(orderId)) {
+        console.log('[GoAffPro] Skipping duplicate for', orderId);
+        return;
+      }
+      if (typeof window.goaffproTrackConversion === "function") {
+        window.goaffproTrackConversion(goaffproOrder);
+        markFired(orderId);
+        console.log("[GoAffPro] Sent once for", orderId);
+      } else if (i < 50) {
+        setTimeout(() => wait(i+1), 200);
+      } else {
+        console.error("[GoAffPro] goaffproTrackConversion not found.");
+      }
+    })(0);
+  </script>
+
+  <!-- Meta Pixel for affiliates -->
+  <script>
+    (function(){
+      var qs = new URLSearchParams(location.search);
+      var pixelParam = qs.get('pixel') || qs.get('fb_pixel') || qs.get('fbp') || "";
+      if (!pixelParam) return;
+
+      var pixelIds = pixelParam.split(',').map(s=>s.trim()).filter(Boolean);
+      if (!pixelIds.length) return;
+
+      !function(f,b,e,v,n,t,s){
+        if(f.fbq) return; n=f.fbq=function(){ n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments) };
+        if(!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0'; n.queue=[];
+        t=b.createElement(e); t.async=!0; t.src=v;
+        s=b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s);
+      }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+      pixelIds.forEach(function(id){
+        if (/^\d{10,20}$/.test(id)) fbq('init', id);
+      });
+
+      var amount   = (typeof goaffproOrder !== "undefined" && +goaffproOrder.total) || +(qs.get('amount') || qs.get('value') || 0);
+      var currency = (typeof goaffproOrder !== "undefined" && goaffproOrder.currency) || (qs.get('currency') || qs.get('cur') || 'USD');
+      var eid      = (typeof orderId !== "undefined" && orderId) || qs.get('order_id') || qs.get('oid') || ('TEST-' + Date.now());
+
+      var fireKey = 'fb_purchase_' + eid;
+      try { if (localStorage.getItem(fireKey)) return; } catch(e){}
+
+      fbq('track', 'Purchase', { value: isFinite(amount) ? +amount : 0, currency: currency || 'USD' }, { eventID: String(eid) });
+      try { localStorage.setItem(fireKey, '1'); } catch(e){}
+    })();
+  </script>
+
+  <!-- ✅ TikTok Purchase Event (fires once) -->
+  <script>
+    (function(){
+      const qs = new URLSearchParams(location.search);
+      const value = +(qs.get('value') || qs.get('amount') || 300);
+      const currency = (qs.get('currency') || 'USD').toUpperCase();
+      const eid = qs.get('order_id') || qs.get('v') || qs.get('oid') || ('TT-' + Date.now());
+      const key = 'ttq_purchase_' + eid;
+
+      try {
+        if (!sessionStorage.getItem(key)) {
+          ttq.track('Purchase', {
+            value: value,
+            currency: currency,
+            contents: [{ content_type: 'product', content_id: eid, quantity: 1, price: value }],
+            description: 'Order ' + eid
+          });
+          sessionStorage.setItem(key, '1');
+          console.log('[TikTok] Purchase fired for', eid);
+        } else {
+          console.log('[TikTok] Skipped duplicate for', eid);
+        }
+      } catch(e) { console.error('[TikTok] Error firing Purchase', e); }
+    })();
+  </script>
+<!-- Meta Pixels (all 3) -->
+<script>
+  fbq('init', '782671778158941');   // Pixel 1
+  fbq('init', '822761953938842');   // Pixel 2
+  fbq('init', '2079815809511322');  // Pixel 3
+
+  fbq('track', 'Lead');             // Fire Lead to ALL 3
+</script>
+
+<noscript>
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=782671778158941&ev=Lead&noscript=1" />
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=822761953938842&ev=Lead&noscript=1" />
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=2079815809511322&ev=Lead&noscript=1" />
+</noscript>
+<!-- End Meta Pixels -->
+
+</body>
+</html>
