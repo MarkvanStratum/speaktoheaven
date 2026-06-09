@@ -120,9 +120,7 @@ border:1px solid #f5bcbc;
 padding:10px;
 border-radius:10px;
 margin-top:12px;
-color:#9a1a1a;
-}
-
+color:#9a1a1a}
 .err[aria-hidden="false"]{display:block}
 
 .widget{
@@ -259,14 +257,14 @@ Sichere Kasse 🔒 <span class="stars">★★★★★</span>
 <div class="widget">
 <div class="delivery">
 <div>
-<div style="font-weight:800">Schnelle Delivery</div>
+<div style="font-weight:800">Schnelle Lieferung</div>
 <div class="sub">3 bis 5 Werktage</div>
 </div>
 <div style="margin-left:auto;font-weight:800">Kostenlos</div>
 </div>
 
 <div style="margin-top:14px;font-weight:800">Bestellübersicht</div>
-<div class="order-row"><span>Gesamt</span><span>49,95 €</span></div>
+<div class="order-row"><span>Gesamt</span><span>2,00 €</span></div>
 </div>
 
 <div class="widget">
@@ -347,7 +345,7 @@ async function initialiseFinby() {
         throw new Error("Ungültiger oder abgelaufener Checkout-Link.");
     }
 
-    const response = await fetch("https://www.legendspeak.net/api/create-promo-payment", {
+    const response = await fetch("https://www.speaktoheaven.com/api/create-promo-payment", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

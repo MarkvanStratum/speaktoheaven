@@ -171,7 +171,7 @@ Sichere Kasse 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <div style="margin-top:14px;font-weight:800">Bestellübersicht</div>
-<div class="order-row"><span>Gesamt</span><span>49,95 €</span></div>
+<div class="order-row"><span>Gesamt</span><span>2,00 €</span></div>
 </div>
 
 <div class="widget">
@@ -282,10 +282,10 @@ nextBtn.onclick = async () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        plan: "3595", // CHANGED FROM lifetime TO 3595 TIERS
+        plan: "3595", 
         step2File: "fi-de2.html",
         currency: "GBP",
-        amount: 35.95, // CHANGED FROM 49.95
+        amount: 35.95, 
         sourcePage: window.location.href,
 
         firstName: firstName.value.trim(),
