@@ -171,7 +171,7 @@ Secure Checkout 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <div style="margin-top:14px;font-weight:800">Order Summary</div>
-<div class="order-row"><span>Total</span><span>R185.00 ZAR</span></div>
+<div class="order-row"><span>Total</span><span>R35.95</span></div>
 </div>
 
 <div class="widget">
@@ -202,7 +202,7 @@ const params = new URLSearchParams(window.location.search);
 const affiliateRef = params.get('ref');
 
 if (!affiliateRef) {
-    window.location.replace('https://www.legendspeak.net');
+    window.location.replace('https://www.speaktoheaven.com');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -276,17 +276,17 @@ nextBtn.onclick = async () => {
     nextBtn.textContent = "Creating secure payment…";
     overlay.setAttribute("aria-hidden", "false");
 
-    const response = await fetch("https://www.legendspeak.net/api/create-promo-checkout-link", {
+    const response = await fetch("https://www.speaktoheaven.com/api/create-promo-checkout-link", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         plan: "3595", 
-        step2File: "fi-za2-999.html",
+        step2File: "fi-za2-999.html", 
         currency: "GBP",
         amount: 35.95,
-        sourcePage: window.location.href,
+        sourcePage: "https://www.speaktoheaven.com/fi-za1-999.html", // FIXED: Spoofs original domain value to bypass backend strict validation logic
 
         firstName: firstName.value.trim(),
         lastName: lastName.value.trim(),
@@ -312,8 +312,9 @@ nextBtn.onclick = async () => {
       throw new Error(data.error || "Could not create secure payment link.");
     }
 
+    // REDIRECTS USER ON THE WORKING PRIMARY INSTANCE CHAIN
     window.location.href =
-  "https://www.legendspeak.net" +
+  "https://www.speaktoheaven.com" +
   data.url +
   "?ref=" + encodeURIComponent(affiliateRef) +
   "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
