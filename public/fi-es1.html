@@ -301,12 +301,20 @@ nextBtn.onclick = async () => {
       throw new Error(data.error || "No se pudo crear el enlace de pago seguro.");
     }
 
-    window.location.href =
+    let nextUrl =
   "https://www.speaktoheaven.com" +
   data.url +
   "?ref=" + encodeURIComponent(affiliateRef) +
   "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
   "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
+
+const subId = qs.get("sub_id");
+
+if (subId) {
+  nextUrl += "&sub_id=" + encodeURIComponent(subId);
+}
+
+window.location.href = nextUrl;
 
   } catch (error) {
     overlay.setAttribute("aria-hidden", "true");
