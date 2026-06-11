@@ -319,6 +319,7 @@ nextBtn.onclick = async () => {
   "https://www.speaktoheaven.com" +
   data.url +
   "?ref=" + encodeURIComponent(affiliateRef) +
+  "&sub_id=" + encodeURIComponent(qs.get("sub_id") || "") +
   "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
   "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
 
