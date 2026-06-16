@@ -920,7 +920,7 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
 
 app.post("/api/create-promo-payment", async (req, res) => {
   try {
-    const { checkoutToken } = req.body || {};
+    const { checkoutToken, cardholderName } = req.body || {};
 
     if (!checkoutToken) {
       return res.status(400).json({
@@ -976,6 +976,7 @@ if (!amount) {
   `promo-${selectedPlan}-${Date.now()}`
 );
     const fullName =
+  cardholderName ||
   checkout.full_name ||
   `${checkout.first_name || ""} ${checkout.last_name || ""}`.trim() ||
   email;
@@ -996,6 +997,16 @@ formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
 formData.append("customer.email", email);
 formData.append("customer.ipAddress", req.ip || "127.0.0.1");
 
+formData.append("customer.name", fullName);
+formData.append("customer.firstName", checkout.first_name || "");
+formData.append("customer.lastName", checkout.last_name || "");
+formData.append("customer.phone", checkout.phone || "");
+
+formData.append("customer.address", checkout.address || "");
+formData.append("customer.postcode", checkout.postcode || "");
+formData.append("customer.city", checkout.city || "");
+formData.append("customer.country", countryCode);
+
 formData.append("billing.city", checkout.city || "");
 formData.append("billing.country", countryCode);
 formData.append("billing.street1", checkout.address || "");
@@ -1004,7 +1015,6 @@ formData.append("billing.postcode", checkout.postcode || "");
 formData.append("threeDSecureChallengeIndicator", "04");
 
 formData.append("cardholder", fullName);
-
     const response = await fetch("https://gw.finby.eu/api/v1/intent", {
       method: "POST",
       headers: {
