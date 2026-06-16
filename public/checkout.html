@@ -244,7 +244,7 @@
 
     <div class="form-section">
         <div class="brand-header">
-            <h1 class="brand-title">SPEAK TO HEAVEN</h1>
+            <h1 class="brand-title">Legend Speak</h1>
             <div class="brand-sub">Sacred Biblical AI Sanctuary Conversations</div>
         </div>
 
@@ -384,8 +384,9 @@ async function initialiseFinby() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            checkoutToken: tokenFromServer
-        })
+    checkoutToken: tokenFromServer,
+    cardholderName: document.getElementById("cardholder-name").value.trim()
+})
     });
 
     const text = await response.text();

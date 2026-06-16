@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sacred Offerings — Speak to Heaven</title>
+  <title>Sacred Offerings — Legend Speak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -133,7 +133,7 @@
       <div class="price">£49.95</div>
       <div class="duration">One-Time Payment •</div>
       <ul class="features">
-        <li>Un3 month access.</li>
+        <li>3 month access Access</li>
         <li>All Future Prophets Included</li>
         <li>The Ultimate Divine Bond</li>
       </ul>
@@ -165,8 +165,8 @@
         // Blank placeholder details to comply with dynamic initialization parameters
         firstName: "",
         lastName: "",
-        name: "Valued Customer",
-        email: "customer@speaktoheaven.com",
+        name: prompt("Please enter your full name for the payment:") || "",
+email: localStorage.getItem("userEmail") || "customer@speaktoheaven.com",
         phonePrefix: "+44",
         phone: "0000000000",
         address: "Main Sanctuary Street",
