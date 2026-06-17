@@ -184,7 +184,18 @@ formData.append("paymentAction", "0");
 formData.append("paymentType", "plain");
 formData.append("amount", amount.toFixed(2));
 formData.append("currency", "GBP");
-formData.append("reference", `speaktoheaven-${selectedPlan}-${Date.now()}`);
+const reference = `speaktoheaven-${selectedPlan}-${Date.now()}`;
+
+await pool.query(
+  `
+  INSERT INTO finby_payments (reference, email, plan, amount)
+  VALUES ($1, $2, $3, $4)
+  ON CONFLICT (reference) DO NOTHING
+  `,
+  [reference, email, selectedPlan, amount]
+);
+
+formData.append("reference", reference);
 formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
 formData.append("customer.email", email);
 formData.append("customer.ipAddress", req.ip || "127.0.0.1");
@@ -353,6 +364,21 @@ await pool.query(`
 `);
 
 console.log("✅ Promo checkout links table ready");
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS finby_payments (
+    id SERIAL PRIMARY KEY,
+    reference TEXT UNIQUE NOT NULL,
+    email TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    amount NUMERIC(10,2) NOT NULL,
+    status TEXT DEFAULT 'created',
+    finby_payload JSONB,
+    created_at TIMESTAMP DEFAULT NOW(),
+    paid_at TIMESTAMP
+  );
+`);
+
+console.log("✅ Finby payments table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -972,10 +998,18 @@ if (!amount) {
     formData.append("paymentType", "plain");
     formData.append("amount", amount.toFixed(2));
     formData.append("currency", "GBP");
-    formData.append(
-  "reference",
-  `promo-${selectedPlan}-${Date.now()}`
+    const reference = `promo-${selectedPlan}-${Date.now()}`;
+
+await pool.query(
+  `
+  INSERT INTO finby_payments (reference, email, plan, amount)
+  VALUES ($1, $2, $3, $4)
+  ON CONFLICT (reference) DO NOTHING
+  `,
+  [reference, email, selectedPlan, amount]
 );
+
+formData.append("reference", reference);
     const fullName =
   cardholderName ||
   checkout.full_name ||
@@ -1275,75 +1309,113 @@ app.post("/finby-webhook", async (req, res) => {
     const status =
       data?.PaymentInformation?.Status ||
       data?.paymentInformation?.status ||
-      data?.status;
-
-    const email =
-      data?.PaymentInformation?.Debtor?.Email ||
-      data?.paymentInformation?.debtor?.email ||
-      data?.customer?.email ||
-      data?.email;
+      data?.status ||
+      data?.Status ||
+      data?.result ||
+      data?.Result;
 
     const reference =
       data?.PaymentInformation?.References?.MerchantReference ||
       data?.paymentInformation?.references?.merchantReference ||
+      data?.Reference ||
       data?.reference ||
-      data?.merchantReference;
+      data?.merchantReference ||
+      data?.MerchantReference;
 
-    if (!email) {
-      console.error("FINBY WEBHOOK MISSING EMAIL:", data);
-      return res.status(400).json({ error: "Missing email" });
+    if (!reference) {
+      console.error("FINBY WEBHOOK MISSING REFERENCE:", data);
+      return res.status(400).json({ error: "Missing reference" });
     }
 
-    let plan = "god";
-    let amount = 29.95;
+    const paymentResult = await pool.query(
+      `
+      SELECT *
+      FROM finby_payments
+      WHERE reference = $1
+      `,
+      [reference]
+    );
+
+    if (paymentResult.rows.length === 0) {
+      console.error("FINBY PAYMENT NOT FOUND:", reference);
+      return res.status(404).json({ error: "Payment reference not found" });
+    }
+
+    const payment = paymentResult.rows[0];
+
+    const successful =
+      status === "Paid" ||
+      status === "Authorized" ||
+      status === "Success" ||
+      status === "Processed" ||
+      String(status).toLowerCase() === "paid" ||
+      String(status).toLowerCase() === "success" ||
+      String(status).toLowerCase() === "processed";
+
+    await pool.query(
+      `
+      UPDATE finby_payments
+      SET status = $1,
+          finby_payload = $2,
+          paid_at = CASE WHEN $3 THEN NOW() ELSE paid_at END
+      WHERE reference = $4
+      `,
+      [status || "unknown", data, successful, reference]
+    );
+
+    if (!successful) {
+      return res.json({ ok: true, message: "Payment not successful yet" });
+    }
+
+    let accessPlan = "god";
     let days = 30;
 
-    if (reference?.includes("3595")) {
-      plan = "all";
-      amount = 35.95;
+    if (payment.plan === "3595") {
+      accessPlan = "all";
       days = 30;
     }
 
-    if (reference?.includes("4995") || reference?.includes("lifetime")) {
-      plan = "all";
-      amount = 49.95;
+    if (payment.plan === "4995" || payment.plan === "lifetime") {
+      accessPlan = "all";
       days = 90;
     }
 
-    if (status === "Paid" || status === "Authorized" || status === "Success" || status === "Processed") {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + days);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + days);
 
-      const updateResult = await pool.query(
-        `
-        UPDATE users
-        SET plan = $1,
-            expires_at = $2,
-            lifetime = false,
-            messages_sent = 0
-        WHERE LOWER(email) = LOWER($3)
-        RETURNING id, email, plan, expires_at
-        `,
-        [plan, expiresAt, email]
-      );
+    const updateResult = await pool.query(
+      `
+      UPDATE users
+      SET plan = $1,
+          expires_at = $2,
+          lifetime = false,
+          messages_sent = 0
+      WHERE LOWER(email) = LOWER($3)
+      RETURNING id, email, plan, expires_at
+      `,
+      [accessPlan, expiresAt, payment.email]
+    );
 
-      if (updateResult.rows.length === 0) {
-        console.error("FINBY WEBHOOK USER NOT FOUND:", email);
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      const receiptPdf = makeReceiptPdfBase64({ email, plan, amount });
-
-      await sendEmail(
-        email,
-        "Your Speak to Heaven receipt",
-        "<h2>Payment received</h2>" +
-        "<p>Thank you for your offering.</p>" +
-        "<p><strong>Plan:</strong> " + plan + "</p>" +
-        "<p><strong>Amount:</strong> £" + Number(amount).toFixed(2) + "</p>",
-        [{ filename: "speak-to-heaven-receipt.pdf", content: receiptPdf }]
-      );
+    if (updateResult.rows.length === 0) {
+      console.error("FINBY WEBHOOK USER NOT FOUND:", payment.email);
+      return res.status(404).json({ error: "User not found" });
     }
+
+    const receiptPdf = makeReceiptPdfBase64({
+      email: payment.email,
+      plan: accessPlan,
+      amount: payment.amount
+    });
+
+    await sendEmail(
+      payment.email,
+      "Your Speak to Heaven receipt",
+      "<h2>Payment received</h2>" +
+      "<p>Thank you for your offering.</p>" +
+      "<p><strong>Plan:</strong> " + accessPlan + "</p>" +
+      "<p><strong>Amount:</strong> £" + Number(payment.amount).toFixed(2) + "</p>",
+      [{ filename: "speak-to-heaven-receipt.pdf", content: receiptPdf }]
+    );
 
     res.json({ ok: true });
   } catch (err) {
