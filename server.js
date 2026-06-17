@@ -156,6 +156,7 @@ function getCookie(req, name) {
 
 // JSON parser FIRST
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 async function createFinbyIntent(req, res, fixedPlan = null) {
   try {
@@ -1273,51 +1274,63 @@ app.post("/finby-webhook", async (req, res) => {
 
     const status =
       data?.PaymentInformation?.Status ||
-      data?.paymentInformation?.status;
+      data?.paymentInformation?.status ||
+      data?.status;
 
     const email =
       data?.PaymentInformation?.Debtor?.Email ||
-      data?.paymentInformation?.debtor?.email;
+      data?.paymentInformation?.debtor?.email ||
+      data?.customer?.email ||
+      data?.email;
 
     const reference =
       data?.PaymentInformation?.References?.MerchantReference ||
-      data?.paymentInformation?.references?.merchantReference;
+      data?.paymentInformation?.references?.merchantReference ||
+      data?.reference ||
+      data?.merchantReference;
 
     if (!email) {
+      console.error("FINBY WEBHOOK MISSING EMAIL:", data);
       return res.status(400).json({ error: "Missing email" });
     }
 
-    let plan = "2995";
-let amount = 29.95;
+    let plan = "god";
+    let amount = 29.95;
+    let days = 30;
 
-if (reference?.includes("3595")) {
-  plan = "3595";
-  amount = 35.95;
-}
+    if (reference?.includes("3595")) {
+      plan = "all";
+      amount = 35.95;
+      days = 30;
+    }
 
-if (reference?.includes("4995")) {
-  plan = "4995";
-  amount = 49.95;
-}
+    if (reference?.includes("4995") || reference?.includes("lifetime")) {
+      plan = "all";
+      amount = 49.95;
+      days = 90;
+    }
 
-    if (status === "Paid" || status === "Authorized") {
-      let expiresAt = null;
-      let isLifetime = false;
+    if (status === "Paid" || status === "Authorized" || status === "Success" || status === "Processed") {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + days);
 
-      if (plan === "2995" || plan === "3595") {
-        const date = new Date();
-        date.setDate(date.getDate() + 30);
-        expiresAt = date;
-      }
-
-      if (plan === "4995") {
-        isLifetime = true;
-      }
-
-      await pool.query(
-        "UPDATE users SET plan = $1, expires_at = $2, lifetime = $3, messages_sent = 0 WHERE email = $4",
-        [plan, expiresAt, isLifetime, email]
+      const updateResult = await pool.query(
+        `
+        UPDATE users
+        SET plan = $1,
+            expires_at = $2,
+            lifetime = false,
+            messages_sent = 0
+        WHERE LOWER(email) = LOWER($3)
+        RETURNING id, email, plan, expires_at
+        `,
+        [plan, expiresAt, email]
       );
+
+      if (updateResult.rows.length === 0) {
+        console.error("FINBY WEBHOOK USER NOT FOUND:", email);
+        return res.status(404).json({ error: "User not found" });
+      }
 
       const receiptPdf = makeReceiptPdfBase64({ email, plan, amount });
 
