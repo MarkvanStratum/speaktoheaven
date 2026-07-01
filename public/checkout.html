@@ -6,7 +6,7 @@
     <title>Sacred Offering — Secure Checkout</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="text/javascript" src="https://gw.finby.eu/js/v1.js"></script>
+    
 
     <style>
         :root {
@@ -322,23 +322,19 @@
 <script>
 const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
 
-const form = document.getElementById('payment-form');
-const submitBtn = document.getElementById('submit-button');
-const btnLoader = document.getElementById('btn-loader');
-const btnText = document.getElementById('btn-text');
-const messageBox = document.getElementById('message-box');
-const totalPriceDisplay = document.getElementById('total-price-display');
+const form = document.getElementById("payment-form");
+const submitBtn = document.getElementById("submit-button");
+const btnLoader = document.getElementById("btn-loader");
+const btnText = document.getElementById("btn-text");
+const messageBox = document.getElementById("message-box");
+const totalPriceDisplay = document.getElementById("total-price-display");
 
-const checkTerms = document.getElementById('check-terms');
-const checkPrivacy = document.getElementById('check-privacy');
+const checkTerms = document.getElementById("check-terms");
+const checkPrivacy = document.getElementById("check-privacy");
 
 const pageParams = new URLSearchParams(location.search);
 const productTitleFromUrl = pageParams.get("sub1") || "";
 const productImageFromUrl = pageParams.get("sub2") || "";
-
-let trustPayApi = null;
-let cardComponent = null;
-let paymentSecrets = null;
 
 window.addEventListener("DOMContentLoaded", () => {
     const productBox = document.getElementById("productBox");
@@ -349,22 +345,25 @@ window.addEventListener("DOMContentLoaded", () => {
         productTitle.textContent = productTitleFromUrl;
         productBox.style.display = "block";
     }
+
     if (productImageFromUrl) {
         productImg.src = productImageFromUrl;
         productImg.style.display = "block";
         productBox.style.display = "block";
     }
+
+    totalPriceDisplay.textContent = "Ready at secure payment page";
 });
 
 function setLoading(isLoading) {
     if (isLoading) {
         submitBtn.disabled = true;
-        btnLoader.style.display = 'inline-block';
-        btnText.textContent = 'Processing...';
+        btnLoader.style.display = "inline-block";
+        btnText.textContent = "Redirecting...";
     } else {
         submitBtn.disabled = false;
-        btnLoader.style.display = 'none';
-        btnText.textContent = 'Pay Securely';
+        btnLoader.style.display = "none";
+        btnText.textContent = "Pay Securely";
     }
 }
 
@@ -373,91 +372,17 @@ function showMessage(type, text) {
     messageBox.className = `message ${type}`;
 }
 
-async function initialiseFinby() {
-    if (!tokenFromServer) {
-        throw new Error('Invalid or expired checkout session. Please re-select a plan.');
-    }
-
-    const response = await fetch("/api/create-promo-payment", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-    checkoutToken: tokenFromServer,
-    cardholderName: document.getElementById("cardholder-name").value.trim()
-})
-    });
-
-    const text = await response.text();
-    let data;
-    try {
-        data = JSON.parse(text);
-    } catch (e) {
-        throw new Error(text || 'Server returned an invalid response environment.');
-    }
-
-    if (!response.ok) {
-        throw new Error(data.error || 'Could not instantiate payment record.');
-    }
-
-    if (!data.secrets || !data.secrets.payment) {
-        throw new Error('Handshake failed. No payment secret tokens were initialized.');
-    }
-
-    // FIX: Completely dynamic price parser pulled from active transaction authorization data
-    
-        // FIX: Extracting the price properly from the actual server response payload
-    const finalAmount = data.amount || (data.checkoutLink && data.checkoutLink.amount);
-    const finalCurrency = data.currency || (data.checkoutLink && data.checkoutLink.currency) || 'GBP';
-
-    if (finalAmount) {
-        const amountNum = Number(finalAmount);
-        const currencySymbol = finalCurrency === 'GBP' ? '£' : (finalCurrency === 'EUR' ? '€' : finalCurrency || '');
-        
-        if (finalCurrency === 'EUR') {
-            totalPriceDisplay.textContent = amountNum.toFixed(2).replace('.', ',') + ' €';
-        } else {
-            totalPriceDisplay.textContent = currencySymbol + amountNum.toFixed(2);
-        }
-    } else {
-        // Safe layout fallback if something goes wrong
-        totalPriceDisplay.textContent = '£' + (window.location.search.includes('3595') ? '35.95' : (window.location.search.includes('4995') ? '49.95' : '29.95'));
-    }
-
-    paymentSecrets = data.secrets;
-    trustPayApi = new TrustPayApi(paymentSecrets);
-
-    cardComponent = trustPayApi.createComponent("card", {
-        style: {
-            fontFamily: "Inter, system-ui, sans-serif",
-            fontSize: "15px",
-            color: "#0a2540"
-        }
-    });
-
-    document.getElementById("card-element").innerHTML = "";
-cardComponent.mount("#card-element");
-}
-
-window.addEventListener('load', async () => {
-    try {
-        setLoading(true);
-        await initialiseFinby();
-    } catch (error) {
-        console.error(error);
-        showMessage('error', error.message || 'Could not load payment form.');
-    } finally {
-        setLoading(false);
-    }
-});
-
-form.addEventListener('submit', async (event) => {
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    messageBox.className = 'message';
+    messageBox.className = "message";
+
+    if (!tokenFromServer) {
+        showMessage("error", "Invalid or expired checkout session. Please re-select a plan.");
+        return;
+    }
 
     if (!checkTerms.checked || !checkPrivacy.checked) {
-        showMessage('error', 'Please accept the mandatory terms and policy verification checkboxes to proceed.');
+        showMessage("error", "Please accept the terms and privacy policy to proceed.");
         return;
     }
 
@@ -469,42 +394,57 @@ form.addEventListener('submit', async (event) => {
     try {
         setLoading(true);
 
-        if (!trustPayApi || !cardComponent || !paymentSecrets) {
-            await initialiseFinby();
-        }
-
-        const result = await trustPayApi.finishCardPayment(paymentSecrets.payment, {
-            card: cardComponent
+        const response = await fetch("/api/create-promo-payment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                checkoutToken: tokenFromServer,
+                cardholderName: document.getElementById("cardholder-name").value.trim()
+            })
         });
 
-        console.log('FINBY PAYMENT RESULT:', result);
+        const text = await response.text();
 
-        const isFinbySuccess =
-            result &&
-            (
-                result.status === "paid" ||
-                result.status === "success" ||
-                result.status === "succeeded" ||
-                Number(result.status) === 0 ||
-                Number(result.status) > 0 ||
-                String(result.resultCode || result.ResultCode || "") === "100000" ||
-                String(result.reasonCode || result.ReasonCode || "") === "000.000.000"
-            );
-
-        if (isFinbySuccess) {
-            showMessage('success', 'Payment completed successfully. Your access will be activated shortly.');
-
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 1800);
-        } else {
-            showMessage('error', 'Payment was not completed. Please check your card details or try another card.');
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            throw new Error(text || "Server returned an invalid response.");
         }
 
+        if (!response.ok) {
+            throw new Error(data.error || "Could not create payment.");
+        }
+
+        const amount = data.amount || "";
+        const currency = data.currency || "GBP";
+
+        if (amount) {
+            totalPriceDisplay.textContent =
+                currency === "GBP"
+                    ? "£" + Number(amount).toFixed(2)
+                    : Number(amount).toFixed(2) + " " + currency;
+        }
+
+        const redirectUrl =
+            data.redirectUrl ||
+            data.redirect_url ||
+            data.url ||
+            data.paymentUrl ||
+            data.payment_url;
+
+        if (!redirectUrl) {
+            console.log("XOLVIS RESPONSE:", data);
+            throw new Error("Payment was created, but no redirect URL was returned.");
+        }
+
+        window.location.href = redirectUrl;
+
     } catch (error) {
-        console.error('Payment failed:', error);
-        showMessage('error', error?.message || 'Transaction submission failed.');
-    } finally {
+        console.error("Payment failed:", error);
+        showMessage("error", error?.message || "Transaction failed.");
         setLoading(false);
     }
 });
