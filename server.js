@@ -16,7 +16,7 @@ import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 import fetch from "node-fetch";
-import FormData from "form-data";
+
 
 
 //--------------------------------------------
@@ -157,86 +157,106 @@ function getCookie(req, name) {
 // JSON parser FIRST
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+function getXolvisAuthHeader() {
+  const raw = `${process.env.XOLVIS_API_USER}:${process.env.XOLVIS_API_PASSWORD}`;
+  return "Basic " + Buffer.from(raw).toString("base64");
+}
 
-async function createFinbyIntent(req, res, fixedPlan = null) {
+async function createXolvisPayment(req, res, fixedPlan = null) {
   try {
-    const { plan } = req.body;
-
-  // Read the email from the form if logged out, or from the session if logged in
-  const email = req.user ? req.user.email : req.body.email;
-
-  const selectedPlan = fixedPlan || plan;
+    const { plan } = req.body || {};
+    const email = req.user ? req.user.email : req.body.email;
+    const selectedPlan = fixedPlan || plan;
 
     const amounts = {
-  "2995": 29.95,
-  "3595": 35.95,
-  "4995": 49.95
-};
+      "2995": 29.95,
+      "3595": 35.95,
+      "4995": 49.95,
+      "lifetime": 49.95
+    };
 
     const amount = amounts[selectedPlan];
 
     if (!email) return res.status(400).json({ error: "Email is required" });
     if (!amount) return res.status(400).json({ error: "Invalid plan" });
 
-   const formData = new FormData();
+    const reference = `speaktoheaven-${selectedPlan}-${Date.now()}`;
 
-formData.append("paymentAction", "0");
-formData.append("paymentType", "plain");
-formData.append("amount", amount.toFixed(2));
-formData.append("currency", "GBP");
-const reference = `speaktoheaven-${selectedPlan}-${Date.now()}`;
+    await pool.query(
+      `
+      INSERT INTO xolvis_payments (reference, email, plan, amount)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (reference) DO NOTHING
+      `,
+      [reference, email, selectedPlan, amount]
+    );
 
-await pool.query(
-  `
-  INSERT INTO finby_payments (reference, email, plan, amount)
-  VALUES ($1, $2, $3, $4)
-  ON CONFLICT (reference) DO NOTHING
-  `,
-  [reference, email, selectedPlan, amount]
-);
+    const response = await fetch(
+      `${process.env.XOLVIS_BASE_URL}/transaction/${process.env.XOLVIS_CONNECTOR_API_KEY}/debit`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": getXolvisAuthHeader(),
+          "Content-Type": "application/json; charset=utf-8",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          merchantTransactionId: reference,
+          amount: amount.toFixed(2),
+          currency: "GBP",
+          description: "Speak to Heaven Access",
+          successUrl: process.env.XOLVIS_SUCCESS_URL,
+          cancelUrl: process.env.XOLVIS_CANCEL_URL,
+          errorUrl: process.env.XOLVIS_ERROR_URL,
+          callbackUrl: process.env.XOLVIS_CALLBACK_URL,
+          customer: {
+            email: email,
+            ipAddress: req.ip || "127.0.0.1"
+          },
+          language: "en"
+        })
+      }
+    );
 
-formData.append("reference", reference);
-formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
-formData.append("customer.email", email);
-formData.append("customer.ipAddress", req.ip || "127.0.0.1");
-formData.append("cardholder", email);
-
-const response = await fetch("https://gw.finby.eu/api/v1/intent", {
-  method: "POST",
-  headers: {
-  "X-API-KEY": process.env.FINBY_API_KEY
-},
-  body: formData
-});
     const rawText = await response.text();
+    console.log("XOLVIS STATUS:", response.status);
+    console.log("XOLVIS RAW RESPONSE:", rawText);
 
-console.log("FINBY STATUS:", response.status);
-console.log("FINBY STATUS TEXT:", response.statusText);
-console.log("FINBY RAW RESPONSE:", rawText);
+    let data = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch {
+      data = { raw: rawText };
+    }
 
-let data = {};
-try {
-  data = rawText ? JSON.parse(rawText) : {};
-} catch (e) {
-  data = { raw: rawText };
-}
+    await pool.query(
+      `
+      UPDATE xolvis_payments
+      SET xolvis_payload = $1,
+          xolvis_uuid = $2,
+          status = $3
+      WHERE reference = $4
+      `,
+      [data, data.uuid || null, data.returnType || "created", reference]
+    );
 
-    console.log("FINBY INTENT RESPONSE:", data);
-
-    if (!response.ok) {
-      return res.status(500).json({ error: "Finby error", details: data });
+    if (!response.ok || data.success === false) {
+      return res.status(500).json({
+        error: "Xolvis error",
+        details: data
+      });
     }
 
     res.json(data);
+
   } catch (err) {
-    console.error("Finby intent error:", err);
-    res.status(500).json({ error: "Could not create Finby payment" });
+    console.error("Xolvis payment error:", err);
+    res.status(500).json({ error: "Could not create Xolvis payment" });
   }
 }
-
-app.post("/api/create-landing-payment", authenticateToken, (req, res) => createFinbyIntent(req, res, "4995"));
-app.post("/api/create-au-payment-3595", authenticateToken, (req, res) => createFinbyIntent(req, res, "3595"));
-app.post("/api/create-payment-2995", authenticateToken, (req, res) => createFinbyIntent(req, res, "2995"));
+app.post("/api/create-landing-payment", authenticateToken, (req, res) => createXolvisPayment(req, res, "4995"));
+app.post("/api/create-au-payment-3595", authenticateToken, (req, res) => createXolvisPayment(req, res, "3595"));
+app.post("/api/create-payment-2995", authenticateToken, (req, res) => createXolvisPayment(req, res, "2995"));
 
 //--------------------------------------------
 //	DATABASE
@@ -365,20 +385,21 @@ await pool.query(`
 
 console.log("✅ Promo checkout links table ready");
 await pool.query(`
-  CREATE TABLE IF NOT EXISTS finby_payments (
+  CREATE TABLE IF NOT EXISTS xolvis_payments (
     id SERIAL PRIMARY KEY,
     reference TEXT UNIQUE NOT NULL,
     email TEXT NOT NULL,
     plan TEXT NOT NULL,
     amount NUMERIC(10,2) NOT NULL,
     status TEXT DEFAULT 'created',
-    finby_payload JSONB,
+    xolvis_uuid TEXT,
+    xolvis_payload JSONB,
     created_at TIMESTAMP DEFAULT NOW(),
     paid_at TIMESTAMP
   );
 `);
 
-console.log("✅ Finby payments table ready");
+console.log("✅ Xolvis payments table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -942,7 +963,7 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
 
 
 // --------------------------------------------
-// CREATE PROMO FINBY PAYMENT
+// CREATE PROMO XOLVIS PAYMENT
 // --------------------------------------------
 
 app.post("/api/create-promo-payment", async (req, res) => {
@@ -977,123 +998,140 @@ app.post("/api/create-promo-payment", async (req, res) => {
     const email = checkout.email;
     const selectedPlan = checkout.plan || "4995";
 
-const amounts = {
-  "2995": 29.95,
-  "3595": 35.95,
-  "4995": 49.95,
-  "lifetime": 49.95
-};
+    const amounts = {
+      "2995": 29.95,
+      "3595": 35.95,
+      "4995": 49.95,
+      "lifetime": 49.95
+    };
 
-const amount = amounts[selectedPlan];
+    const amount = amounts[selectedPlan];
 
-if (!amount) {
-  return res.status(400).json({
-    error: "Invalid promo plan"
-  });
-}
+    if (!amount) {
+      return res.status(400).json({
+        error: "Invalid promo plan"
+      });
+    }
 
-    const formData = new FormData();
+    const fullName =
+      cardholderName ||
+      checkout.full_name ||
+      `${checkout.first_name || ""} ${checkout.last_name || ""}`.trim() ||
+      email;
 
-    formData.append("paymentAction", "0");
-    formData.append("paymentType", "plain");
-    formData.append("amount", amount.toFixed(2));
-    formData.append("currency", "GBP");
+    const countryCodes = {
+      "United Kingdom": "GB",
+      "Denmark": "DK",
+      "Netherlands": "NL",
+      "Spain": "ES",
+      "Israel": "IL",
+      "Mexico": "MX"
+    };
+
+    const countryCode = countryCodes[checkout.country] || "GB";
+
     const reference = `promo-${selectedPlan}-${Date.now()}`;
 
-await pool.query(
-  `
-  INSERT INTO finby_payments (reference, email, plan, amount)
-  VALUES ($1, $2, $3, $4)
-  ON CONFLICT (reference) DO NOTHING
-  `,
-  [reference, email, selectedPlan, amount]
-);
+    await pool.query(
+      `
+      INSERT INTO xolvis_payments (reference, email, plan, amount)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (reference) DO NOTHING
+      `,
+      [reference, email, selectedPlan, amount]
+    );
 
-formData.append("reference", reference);
-    const fullName =
-  cardholderName ||
-  checkout.full_name ||
-  `${checkout.first_name || ""} ${checkout.last_name || ""}`.trim() ||
-  email;
+    const response = await fetch(
+      `${process.env.XOLVIS_BASE_URL}/transaction/${process.env.XOLVIS_CONNECTOR_API_KEY}/debit`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: getXolvisAuthHeader(),
+          "Content-Type": "application/json; charset=utf-8",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          merchantTransactionId: reference,
+          amount: amount.toFixed(2),
+          currency: "GBP",
+          description: "Speak to Heaven Access",
 
-const countryCodes = {
-  "United Kingdom": "GB",
-  "Denmark": "DK",
-  "Netherlands": "NL",
-  "Spain": "ES",
-  "Israel": "IL",
-  "Mexico": "MX"
-};
+          successUrl: process.env.XOLVIS_SUCCESS_URL,
+          cancelUrl: process.env.XOLVIS_CANCEL_URL,
+          errorUrl: process.env.XOLVIS_ERROR_URL,
+          callbackUrl: process.env.XOLVIS_CALLBACK_URL,
 
-const countryCode = countryCodes[checkout.country] || "GB";
+          customer: {
+            email: email,
+            firstName: checkout.first_name || "",
+            lastName: checkout.last_name || "",
+            ipAddress: req.ip || "127.0.0.1"
+          },
 
-formData.append("notificationUrl", process.env.FINBY_WEBHOOK_URL);
+          billingAddress: {
+            address1: checkout.address || "",
+            city: checkout.city || "",
+            postcode: checkout.postcode || "",
+            country: countryCode
+          },
 
-formData.append("customer.email", email);
-formData.append("customer.ipAddress", req.ip || "127.0.0.1");
-
-formData.append("customer.name", fullName);
-formData.append("customer.firstName", checkout.first_name || "");
-formData.append("customer.lastName", checkout.last_name || "");
-formData.append("customer.phone", checkout.phone || "");
-
-formData.append("customer.address", checkout.address || "");
-formData.append("customer.postcode", checkout.postcode || "");
-formData.append("customer.city", checkout.city || "");
-formData.append("customer.country", countryCode);
-
-formData.append("billing.city", checkout.city || "");
-formData.append("billing.country", countryCode);
-formData.append("billing.street1", checkout.address || "");
-formData.append("billing.postcode", checkout.postcode || "");
-
-formData.append("threeDSecureChallengeIndicator", "04");
-
-formData.append("cardholder", fullName);
-    const response = await fetch("https://gw.finby.eu/api/v1/intent", {
-      method: "POST",
-      headers: {
-        "X-API-KEY": process.env.FINBY_API_KEY
-      },
-      body: formData
-    });
+          language: "en"
+        })
+      }
+    );
 
     const rawText = await response.text();
 
-    console.log("PROMO FINBY STATUS:", response.status);
-    console.log("PROMO FINBY RAW RESPONSE:", rawText);
+    console.log("PROMO XOLVIS STATUS:", response.status);
+    console.log("PROMO XOLVIS RAW RESPONSE:", rawText);
 
     let data = {};
 
     try {
       data = rawText ? JSON.parse(rawText) : {};
-    } catch (e) {
+    } catch {
       data = { raw: rawText };
     }
 
-    if (!response.ok) {
+    await pool.query(
+      `
+      UPDATE xolvis_payments
+      SET
+        xolvis_payload = $1,
+        xolvis_uuid = $2,
+        status = $3
+      WHERE reference = $4
+      `,
+      [
+        data,
+        data.uuid || null,
+        data.returnType || "created",
+        reference
+      ]
+    );
+
+    if (!response.ok || data.success === false) {
       return res.status(500).json({
-        error: "Finby error",
+        error: "Xolvis error",
         details: data
       });
     }
 
     res.json({
-  ...data,
-  amount: amount.toFixed(2),
-  currency: "GBP",
-  plan: selectedPlan
-});
+      ...data,
+      amount: amount.toFixed(2),
+      currency: "GBP",
+      plan: selectedPlan
+    });
 
   } catch (err) {
-    console.error("Promo Finby payment error:", err);
+    console.error("Promo Xolvis payment error:", err);
 
     res.status(500).json({
       error: "Could not create promo payment"
     });
   }
 });
-
 const frontendPath = path.join(__dirname, "public");
 
 app.use(express.static(frontendPath));
@@ -1300,71 +1338,90 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 	}
 });
 
-app.post("/finby-webhook", async (req, res) => {
+app.post("/xolvis-webhook", async (req, res) => {
   try {
     const data = req.body;
 
-    console.log("FINBY WEBHOOK:", JSON.stringify(data, null, 2));
-
-    const status =
-      data?.PaymentInformation?.Status ||
-      data?.paymentInformation?.status ||
-      data?.status ||
-      data?.Status ||
-      data?.result ||
-      data?.Result;
+    console.log("XOLVIS WEBHOOK:");
+    console.log(JSON.stringify(data, null, 2));
 
     const reference =
-      data?.PaymentInformation?.References?.MerchantReference ||
-      data?.paymentInformation?.references?.merchantReference ||
-      data?.Reference ||
+      data?.merchantTransactionId ||
+      data?.merchantTransactionID ||
+      data?.transaction?.merchantTransactionId ||
       data?.reference ||
-      data?.merchantReference ||
-      data?.MerchantReference;
+      null;
 
-    if (!reference) {
-      console.error("FINBY WEBHOOK MISSING REFERENCE:", data);
-      return res.status(400).json({ error: "Missing reference" });
+    const uuid =
+      data?.uuid ||
+      data?.transactionUuid ||
+      data?.transaction?.uuid ||
+      null;
+
+    const status =
+      data?.returnType ||
+      data?.status ||
+      data?.transaction?.status ||
+      "UNKNOWN";
+
+    if (!reference && !uuid) {
+      console.error("XOLVIS WEBHOOK: Missing reference/uuid");
+      return res.status(400).json({
+        error: "Missing payment reference"
+      });
     }
 
     const paymentResult = await pool.query(
       `
       SELECT *
-      FROM finby_payments
+      FROM xolvis_payments
       WHERE reference = $1
+         OR xolvis_uuid = $2
+      LIMIT 1
       `,
-      [reference]
+      [
+        reference,
+        uuid
+      ]
     );
 
     if (paymentResult.rows.length === 0) {
-      console.error("FINBY PAYMENT NOT FOUND:", reference);
-      return res.status(404).json({ error: "Payment reference not found" });
+      console.error("Payment not found:", reference, uuid);
+
+      return res.json({
+        ok: true
+      });
     }
 
     const payment = paymentResult.rows[0];
 
-    const successful =
-      status === "Paid" ||
-      status === "Authorized" ||
-      status === "Success" ||
-      status === "Processed" ||
-      String(status).toLowerCase() === "paid" ||
-      String(status).toLowerCase() === "success" ||
-      String(status).toLowerCase() === "processed";
-
     await pool.query(
       `
-      UPDATE finby_payments
-      SET status = $1,
-          finby_payload = $2,
-          paid_at = CASE WHEN $3 THEN NOW() ELSE paid_at END
-      WHERE reference = $4
+      UPDATE xolvis_payments
+      SET
+        status = $1,
+        xolvis_payload = $2,
+        xolvis_uuid = COALESCE($3, xolvis_uuid),
+        paid_at =
+          CASE
+            WHEN $4 THEN NOW()
+            ELSE paid_at
+          END
+      WHERE id = $5
       `,
-      [status || "unknown", data, successful, reference]
+      [
+        status,
+        data,
+        uuid,
+        status === "FINISHED",
+        payment.id
+      ]
     );
 
-    if (!successful) {
-      return res.json({ ok: true, message: "Payment not successful yet" });
+    if (status !== "FINISHED") {
+      return res.json({
+        ok: true
+      });
     }
 
     let accessPlan = "god";
@@ -1375,55 +1432,98 @@ app.post("/finby-webhook", async (req, res) => {
       days = 30;
     }
 
-    if (payment.plan === "4995" || payment.plan === "lifetime") {
+    if (
+      payment.plan === "4995" ||
+      payment.plan === "lifetime"
+    ) {
       accessPlan = "all";
       days = 90;
     }
 
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + days);
+    expiresAt.setDate(
+      expiresAt.getDate() + days
+    );
 
     const updateResult = await pool.query(
       `
       UPDATE users
-      SET plan = $1,
-          expires_at = $2,
-          lifetime = false,
-          messages_sent = 0
+      SET
+        plan = $1,
+        expires_at = $2,
+        lifetime = false,
+        messages_sent = 0
       WHERE LOWER(email) = LOWER($3)
-      RETURNING id, email, plan, expires_at
+      RETURNING *
       `,
-      [accessPlan, expiresAt, payment.email]
+      [
+        accessPlan,
+        expiresAt,
+        payment.email
+      ]
     );
 
     if (updateResult.rows.length === 0) {
-      console.error("FINBY WEBHOOK USER NOT FOUND:", payment.email);
-      return res.status(404).json({ error: "User not found" });
+      console.error(
+        "User not found:",
+        payment.email
+      );
+
+      return res.json({
+        ok: true
+      });
     }
 
-    const receiptPdf = makeReceiptPdfBase64({
-      email: payment.email,
-      plan: accessPlan,
-      amount: payment.amount
-    });
+    const receiptPdf =
+      makeReceiptPdfBase64({
+        email: payment.email,
+        plan: accessPlan,
+        amount: payment.amount
+      });
 
     await sendEmail(
       payment.email,
       "Your Speak to Heaven receipt",
-      "<h2>Payment received</h2>" +
-      "<p>Thank you for your offering.</p>" +
-      "<p><strong>Plan:</strong> " + accessPlan + "</p>" +
-      "<p><strong>Amount:</strong> £" + Number(payment.amount).toFixed(2) + "</p>",
-      [{ filename: "speak-to-heaven-receipt.pdf", content: receiptPdf }]
+      `
+      <h2>Payment received</h2>
+
+      <p>Thank you for your offering.</p>
+
+      <p>
+      <strong>Plan:</strong>
+      ${accessPlan}
+      </p>
+
+      <p>
+      <strong>Amount:</strong>
+      £${Number(payment.amount).toFixed(2)}
+      </p>
+      `,
+      [
+        {
+          filename:
+            "speak-to-heaven-receipt.pdf",
+          content: receiptPdf
+        }
+      ]
     );
 
-    res.json({ ok: true });
+    res.json({
+      ok: true
+    });
+
   } catch (err) {
-    console.error("Finby webhook error:", err);
-    res.status(500).json({ error: "Finby webhook error" });
+
+    console.error(
+      "Xolvis webhook error:",
+      err
+    );
+
+    res.status(500).json({
+      error: "Webhook error"
+    });
   }
 });
-
 app.get("/test-receipt-email", async (req, res) => {
   const email = "markvanstratum67@gmail.com";
 
