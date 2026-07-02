@@ -257,6 +257,11 @@ async function createXolvisPayment(req, res, fixedPlan = null) {
 app.post("/api/create-landing-payment", authenticateToken, (req, res) => createXolvisPayment(req, res, "4995"));
 app.post("/api/create-au-payment-3595", authenticateToken, (req, res) => createXolvisPayment(req, res, "3595"));
 app.post("/api/create-payment-2995", authenticateToken, (req, res) => createXolvisPayment(req, res, "2995"));
+app.get("/api/xolvis-public-key", (req, res) => {
+  res.json({
+    publicIntegrationKey: process.env.XOLVIS_PUBLIC_INTEGRATION_KEY || ""
+  });
+});
 
 //--------------------------------------------
 //	DATABASE
@@ -701,15 +706,18 @@ if (!flowCookie) {
   );
 
   promoHtml = promoHtml.replace(
-    "</head>",
-    `
-    <script>
-      window.PROMO_CHECKOUT_TOKEN =
-        ${JSON.stringify(token)};
-    </script>
-    </head>
-    `
-  );
+  "</head>",
+  `
+  <script>
+    window.PROMO_CHECKOUT_TOKEN =
+      ${JSON.stringify(token)};
+
+    window.XOLVIS_PUBLIC_INTEGRATION_KEY =
+      ${JSON.stringify(process.env.XOLVIS_PUBLIC_INTEGRATION_KEY || "")};
+  </script>
+  </head>
+  `
+);
 
   return res.send(promoHtml);
 }
@@ -754,15 +762,18 @@ if (!flowCookie) {
   );
 
   promoHtml = promoHtml.replace(
-    "</head>",
-    `
-    <script>
-      window.PROMO_CHECKOUT_TOKEN =
-        ${JSON.stringify(token)};
-    </script>
-    </head>
-    `
-  );
+  "</head>",
+  `
+  <script>
+    window.PROMO_CHECKOUT_TOKEN =
+      ${JSON.stringify(token)};
+
+    window.XOLVIS_PUBLIC_INTEGRATION_KEY =
+      ${JSON.stringify(process.env.XOLVIS_PUBLIC_INTEGRATION_KEY || "")};
+  </script>
+  </head>
+  `
+);
 
   return res.send(promoHtml);
 }
@@ -814,15 +825,18 @@ if (!flowCookie) {
   );
 
   promoHtml = promoHtml.replace(
-    "</head>",
-    `
-    <script>
-      window.PROMO_CHECKOUT_TOKEN =
-        ${JSON.stringify(token)};
-    </script>
-    </head>
-    `
-  );
+  "</head>",
+  `
+  <script>
+    window.PROMO_CHECKOUT_TOKEN =
+      ${JSON.stringify(token)};
+
+    window.XOLVIS_PUBLIC_INTEGRATION_KEY =
+      ${JSON.stringify(process.env.XOLVIS_PUBLIC_INTEGRATION_KEY || "")};
+  </script>
+  </head>
+  `
+);
 
   return res.send(promoHtml);
 }
@@ -963,17 +977,20 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
 
 
 // --------------------------------------------
+// --------------------------------------------
 // CREATE PROMO XOLVIS PAYMENT
 // --------------------------------------------
 
 app.post("/api/create-promo-payment", async (req, res) => {
   try {
-    const { checkoutToken, cardholderName } = req.body || {};
+    const { checkoutToken, cardholderName, transactionToken } = req.body || {};
 
     if (!checkoutToken) {
-      return res.status(400).json({
-        error: "Missing checkout token"
-      });
+      return res.status(400).json({ error: "Missing checkout token" });
+    }
+
+    if (!transactionToken) {
+      return res.status(400).json({ error: "Missing Xolvis transaction token" });
     }
 
     const result = await pool.query(
@@ -988,9 +1005,7 @@ app.post("/api/create-promo-payment", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        error: "Invalid or expired checkout link"
-      });
+      return res.status(404).json({ error: "Invalid or expired checkout link" });
     }
 
     const checkout = result.rows[0];
@@ -1008,27 +1023,8 @@ app.post("/api/create-promo-payment", async (req, res) => {
     const amount = amounts[selectedPlan];
 
     if (!amount) {
-      return res.status(400).json({
-        error: "Invalid promo plan"
-      });
+      return res.status(400).json({ error: "Invalid promo plan" });
     }
-
-    const fullName =
-      cardholderName ||
-      checkout.full_name ||
-      `${checkout.first_name || ""} ${checkout.last_name || ""}`.trim() ||
-      email;
-
-    const countryCodes = {
-      "United Kingdom": "GB",
-      "Denmark": "DK",
-      "Netherlands": "NL",
-      "Spain": "ES",
-      "Israel": "IL",
-      "Mexico": "MX"
-    };
-
-    const countryCode = countryCodes[checkout.country] || "GB";
 
     const reference = `promo-${selectedPlan}-${Date.now()}`;
 
@@ -1052,29 +1048,20 @@ app.post("/api/create-promo-payment", async (req, res) => {
         },
         body: JSON.stringify({
           merchantTransactionId: reference,
+          transactionToken: transactionToken,
           amount: amount.toFixed(2),
           currency: "GBP",
           description: "Speak to Heaven Access",
-
           successUrl: process.env.XOLVIS_SUCCESS_URL,
           cancelUrl: process.env.XOLVIS_CANCEL_URL,
           errorUrl: process.env.XOLVIS_ERROR_URL,
           callbackUrl: process.env.XOLVIS_CALLBACK_URL,
-
           customer: {
             email: email,
             firstName: checkout.first_name || "",
             lastName: checkout.last_name || "",
             ipAddress: req.ip || "127.0.0.1"
           },
-
-          billingAddress: {
-            address1: checkout.address || "",
-            city: checkout.city || "",
-            postcode: checkout.postcode || "",
-            country: countryCode
-          },
-
           language: "en"
         })
       }
@@ -1086,7 +1073,6 @@ app.post("/api/create-promo-payment", async (req, res) => {
     console.log("PROMO XOLVIS RAW RESPONSE:", rawText);
 
     let data = {};
-
     try {
       data = rawText ? JSON.parse(rawText) : {};
     } catch {
@@ -1096,21 +1082,15 @@ app.post("/api/create-promo-payment", async (req, res) => {
     await pool.query(
       `
       UPDATE xolvis_payments
-      SET
-        xolvis_payload = $1,
-        xolvis_uuid = $2,
-        status = $3
+      SET xolvis_payload = $1,
+          xolvis_uuid = $2,
+          status = $3
       WHERE reference = $4
       `,
-      [
-        data,
-        data.uuid || null,
-        data.returnType || "created",
-        reference
-      ]
+      [data, data.uuid || null, data.returnType || "created", reference]
     );
 
-    if (!response.ok || data.success === false) {
+    if (!response.ok || data.success === false || data.returnType === "ERROR") {
       return res.status(500).json({
         error: "Xolvis error",
         details: data
@@ -1126,12 +1106,10 @@ app.post("/api/create-promo-payment", async (req, res) => {
 
   } catch (err) {
     console.error("Promo Xolvis payment error:", err);
-
-    res.status(500).json({
-      error: "Could not create promo payment"
-    });
+    res.status(500).json({ error: "Could not create promo payment" });
   }
 });
+
 const frontendPath = path.join(__dirname, "public");
 
 app.use(express.static(frontendPath));
