@@ -389,6 +389,14 @@ await pool.query(`
 `);
 
 console.log("✅ Promo checkout links table ready");
+
+await pool.query(`
+  ALTER TABLE promo_checkout_links
+  ADD COLUMN IF NOT EXISTS success_url TEXT;
+`);
+
+console.log("✅ Promo success URL column ready");
+
 await pool.query(`
   CREATE TABLE IF NOT EXISTS xolvis_payments (
     id SERIAL PRIMARY KEY,
@@ -885,13 +893,13 @@ if (!flowCookie) {
 app.post("/api/create-promo-checkout-link", async (req, res) => {
   try {
     const {
-  plan,
-  step2File,
-  sourcePage,
-  firstName,
-  lastName,
-  name,
-  email,
+      plan,
+      step2File,
+      sourcePage,
+      firstName,
+      lastName,
+      name,
+      email,
       phonePrefix,
       phone,
       address,
@@ -899,7 +907,8 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
       city,
       country,
       ref,
-      originalQueryString
+      originalQueryString,
+      successUrl
     } = req.body || {};
 
     if (!email) {
@@ -933,12 +942,12 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
         affiliate_ref,
         source_page,
         original_query_string,
+        success_url,
         ip,
         user_agent,
-        expires_at
-      )
-      VALUES
-      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+        expires_at      )
+            VALUES
+      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
       `,
       [
         token,
@@ -956,10 +965,10 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
         ref || null,
         sourcePage || null,
         originalQueryString || null,
+        successUrl || null,
         req.ip,
         req.headers["user-agent"] || "",
-        expiresAt
-      ]
+        expiresAt      ]
     );
 
     res.json({
@@ -1020,10 +1029,82 @@ app.post("/api/create-promo-payment", async (req, res) => {
       "lifetime": 49.95
     };
 
-    const amount = amounts[selectedPlan];
+        const amount = amounts[selectedPlan];
 
     if (!amount) {
       return res.status(400).json({ error: "Invalid promo plan" });
+    }
+
+    
+let mainSiteSuccessUrl;
+
+if (selectedPlan === "2995") {
+  mainSiteSuccessUrl =
+    process.env.XOLVIS_SUCCESS_URL_2995;
+} else if (selectedPlan === "3595") {
+  mainSiteSuccessUrl =
+    process.env.XOLVIS_SUCCESS_URL_3595;
+} else if (
+  selectedPlan === "4995" ||
+  selectedPlan === "lifetime"
+) {
+  mainSiteSuccessUrl =
+    process.env.XOLVIS_SUCCESS_URL_4995;
+}
+
+const selectedSuccessUrl =
+  checkout.success_url ||
+  mainSiteSuccessUrl ||
+  process.env.XOLVIS_SUCCESS_URL;
+    if (!selectedSuccessUrl) {
+      return res.status(500).json({
+        error: "No payment success URL configured"
+      });
+    }
+
+    let finalSuccessUrl;
+
+    try {
+      const successUrlObject =
+        new URL(selectedSuccessUrl);
+
+      if (checkout.original_query_string) {
+        const originalParameters =
+          new URLSearchParams(
+            checkout.original_query_string
+          );
+
+        for (
+          const [key, value]
+          of originalParameters.entries()
+        ) {
+          successUrlObject.searchParams.set(
+            key,
+            value
+          );
+        }
+      }
+
+      if (checkout.affiliate_ref) {
+        successUrlObject.searchParams.set(
+          "ref",
+          checkout.affiliate_ref
+        );
+      }
+
+      finalSuccessUrl =
+        successUrlObject.toString();
+
+    } catch (error) {
+      console.error(
+        "Invalid success URL:",
+        selectedSuccessUrl,
+        error
+      );
+
+      return res.status(500).json({
+        error: "Invalid payment success URL"
+      });
     }
 
     const reference = `promo-${selectedPlan}-${Date.now()}`;
@@ -1052,7 +1133,7 @@ app.post("/api/create-promo-payment", async (req, res) => {
           amount: amount.toFixed(2),
           currency: "GBP",
           description: "Speak to Heaven Access",
-          successUrl: process.env.XOLVIS_SUCCESS_URL,
+          successUrl: finalSuccessUrl,
           cancelUrl: process.env.XOLVIS_CANCEL_URL,
           errorUrl: process.env.XOLVIS_ERROR_URL,
           callbackUrl: process.env.XOLVIS_CALLBACK_URL,
@@ -1098,11 +1179,12 @@ app.post("/api/create-promo-payment", async (req, res) => {
     }
 
     res.json({
-      ...data,
-      amount: amount.toFixed(2),
-      currency: "GBP",
-      plan: selectedPlan
-    });
+  ...data,
+  amount: amount.toFixed(2),
+  currency: "GBP",
+  plan: selectedPlan,
+  successUrl: finalSuccessUrl
+});
 
   } catch (err) {
     console.error("Promo Xolvis payment error:", err);
