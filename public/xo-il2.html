@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>תשלום מאובטח — שלב 2</title>
+<title>Secure Payment</title>
 
 <meta name="referrer" content="no-referrer">
 
@@ -25,6 +25,7 @@ background:#0a0a0a;
 color:#fff;
 font-size:12px;
 padding:6px 10px;
+text-align: right;
 }
 
 .wrap{
@@ -40,6 +41,8 @@ display:flex;
 align-items:center;
 gap:8px;
 margin:6px 0 14px;
+flex-direction: row-reverse;
+justify-content: flex-end;
 }
 
 .stars{color:#f6b80c}
@@ -47,7 +50,7 @@ margin:6px 0 14px;
 
 .grid{
 display:grid;
-grid-template-columns:360px minmax(0,1fr);
+grid-template-columns:minmax(0,1fr) 360px;
 gap:18px;
 }
 
@@ -61,17 +64,20 @@ border:1px solid var(--line);
 padding:22px;
 border-radius:12px;
 min-height:430px;
+text-align: right;
 }
 
 .h2{
 font-size:18px;
 font-weight:800;
 margin:10px 0 14px;
+direction: rtl;
 }
 
 .sub{
 font-size:13px;
 color:#5b6b82;
+direction: rtl;
 }
 
 .el{
@@ -81,6 +87,8 @@ border-radius:10px;
 padding:12px;
 font-size:15px;
 background:#fff;
+text-align: right;
+direction: rtl;
 }
 
 #card-element{
@@ -119,6 +127,7 @@ padding:10px;
 border-radius:10px;
 margin-top:12px;
 color:#9a1a1a;
+text-align: right;
 }
 
 .err[aria-hidden="false"]{display:block}
@@ -128,6 +137,7 @@ background:#fff;
 border:1px solid var(--line);
 padding:16px;
 border-radius:12px;
+text-align: right;
 }
 
 .widget + .widget{margin-top:12px}
@@ -137,6 +147,7 @@ display:flex;
 justify-content:space-between;
 padding:6px 0;
 border-top:1px dashed #e6eaf1;
+direction: rtl;
 }
 
 .delivery{
@@ -147,6 +158,7 @@ border:1px dashed #d9e2ef;
 border-radius:10px;
 background:#f7fbff;
 align-items:center;
+direction: rtl;
 }
 
 .trust{
@@ -214,24 +226,27 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <body>
 
-<div class="safe">רכישה מאובטחת SSL</div>
+<div class="safe">Secure SSL Checkout</div>
 
 <div class="wrap">
 
 <div class="page-title">
-תשלום מאובטח 🔒 <span class="stars">★★★★★</span>
-<span class="reviews">(2,777 חוות דעת)</span>
+<span>תשלום מאובטח 🔒</span>
+<div>
+<span class="stars">★★★★★</span>
+<span class="reviews">(2,777 reviews)</span>
+</div>
 </div>
 
 <div class="grid">
 
 <div class="card">
 
-<div class="h2">2. פרטי תשלום</div>
-<p class="sub">פרטי כרטיס האשראי שלך מוצפנים ומעובדים בצורה מאובטחת לחלוטין.</p>
+<div class="h2">2. תשלום</div>
+<p class="sub">פרטי הכרטיס מוצפנים ומעובדים בצורה מאובטחת.</p>
 
 <div style="margin-top:14px;">
-    <label for="cardholder-name" style="display:block;font-weight:700;margin-bottom:6px;">
+    <label for="cardholder-name" style="display:block;font-weight:700;margin-bottom:6px;direction:rtl;">
         שם מלא של בעל הכרטיס
     </label>
     <input
@@ -245,28 +260,28 @@ animation:loadingBar 2.2s ease-in-out infinite;
 </div>
 
 <div style="margin-top:14px;">
-    <label style="display:block;font-weight:700;margin-bottom:6px;">
+    <label style="display:block;font-weight:700;margin-bottom:6px;direction:rtl;">
         מספר כרטיס אשראי
     </label>
     <div
         id="number_div"
-        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;"
+        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;text-align:left;"
     ></div>
 </div>
 
 <div style="margin-top:14px;">
-    <label style="display:block;font-weight:700;margin-bottom:6px;">
-        קוד אבטחה (CVV)
+    <label style="display:block;font-weight:700;margin-bottom:6px;direction:rtl;">
+        CVV
     </label>
     <div
         id="cvv_div"
-        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;"
+        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;text-align:left;"
     ></div>
 </div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
     <div>
-        <label for="exp_month" style="display:block;font-weight:700;margin-bottom:6px;">
+        <label for="exp_month" style="display:block;font-weight:700;margin-bottom:6px;direction:rtl;">
             חודש תוקף
         </label>
         <input
@@ -277,11 +292,12 @@ animation:loadingBar 2.2s ease-in-out infinite;
             inputmode="numeric"
             autocomplete="cc-exp-month"
             required
+            style="text-align:left; direction:ltr;"
         >
     </div>
 
     <div>
-        <label for="exp_year" style="display:block;font-weight:700;margin-bottom:6px;">
+        <label for="exp_year" style="display:block;font-weight:700;margin-bottom:6px;direction:rtl;">
             שנת תוקף
         </label>
         <input
@@ -292,6 +308,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
             inputmode="numeric"
             autocomplete="cc-exp-year"
             required
+            style="text-align:left; direction:ltr;"
         >
     </div>
 </div>
@@ -300,7 +317,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <div style="display:flex;gap:10px;margin-top:12px">
 <button id="backBtn" class="btn" style="width:40%">חזור</button>
-<button id="payNow" class="btn" style="width:60%">בצע תשלום מאובטח</button>
+<button id="payNow" class="btn" style="width:60%">שלם עכשיו בצורה מאובטחת</button>
 </div>
 
 </div>
@@ -308,36 +325,39 @@ animation:loadingBar 2.2s ease-in-out infinite;
 <aside>
 
 <div id="productBox" class="widget" style="display:none">
-<img id="productImg" style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
-<div id="productTitle" style="font-weight:900;font-size:18px"></div>
+<img id="productImg"
+style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
+
+<div id="productTitle"
+style="font-weight:900;font-size:18px"></div>
 </div>
 
 <div class="widget">
-<div style="text-align:center;font-weight:800">חוות דעת לקוחות</div>
-<div style="text-align:center;font-weight:700;">פנלה לארה</div>
+<div style="text-align:center;font-weight:800">Customer Reviews</div>
+<div style="text-align:center;font-weight:700;">Fenella Lara</div>
 <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-<p style="text-align:center">קיבלתי את המוצר שלי אתמול. חוויה נהדרת!</p>
+<p style="text-align:center">I received my product yesterday. Great experience!</p>
 </div>
 
 <div class="widget">
 <div class="delivery">
 <div>
-<div style="font-weight:800">משלוח מהיר</div>
-<div class="sub">גישה דיגיטלית מיידית</div>
+<div style="font-weight:800">Fast Delivery</div>
+<div class="sub">3–5 working days</div>
 </div>
-<div style="margin-left:auto;font-weight:800">חינם</div>
+<div style="margin-left:auto;font-weight:800">Free</div>
 </div>
 
-<div style="margin-top:14px;font-weight:800">סיכום הזמנה</div>
-<div class="order-row"><span>סה"כ</span><span>₪6.00</span></div>
+<div style="margin-top:14px;font-weight:800">Order Summary</div>
+<div class="order-row"><span>Total</span><span>₪6.00</span></div>
 </div>
 
 <div class="widget">
-<div style="font-weight:800;margin-bottom:10px">למה לסמוך עלינו</div>
+<div style="font-weight:800;margin-bottom:10px">Why Trust Us</div>
 <div class="trust">
-<div class="box"><div>⭐</div><div>99% ביקורות חיוביות</div></div>
-<div class="box"><div>🔒</div><div>חיבור SSL מאובטח</div></div>
-<div class="box"><div>🛡️</div><div>אחריות מלאה</div></div>
+<div class="box"><div>⭐</div><div>99% positive reviews</div></div>
+<div class="box"><div>🔒</div><div>SSL Secure</div></div>
+<div class="box"><div>🛡️</div><div>£250,000 Insurance</div></div>
 </div>
 </div>
 
@@ -348,19 +368,24 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
 <div class="loading-box">
-<div class="loading-title">מעבד תשלום…</div>
+<div class="loading-title">Processing payment…</div>
 <div class="progress-wrap"><div class="progress-bar"></div></div>
-<p class="sub" style="margin-top:10px">אנא המתן מספר שניות…</p>
+<p class="sub" style="margin-top:10px">Please wait a few seconds…</p>
 </div>
 </div>
 
 <script>
 const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
-const publicIntegrationKey = window.XOLVIS_PUBLIC_INTEGRATION_KEY || "";
+const publicIntegrationKey =
+    window.XOLVIS_PUBLIC_INTEGRATION_KEY || "";
 
 const pageParams = new URLSearchParams(location.search);
-const productTitleFromUrl = pageParams.get("sub1") || "";
-const productImageFromUrl = pageParams.get("sub2") || "";
+
+const productTitleFromUrl =
+    pageParams.get("sub1") || "";
+
+const productImageFromUrl =
+    pageParams.get("sub2") || "";
 
 const err = document.getElementById("err");
 const payNow = document.getElementById("payNow");
@@ -382,47 +407,66 @@ function clearError() {
 
 function setLoading(isLoading) {
     payNow.disabled = isLoading;
-    overlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
+    overlay.setAttribute(
+        "aria-hidden",
+        isLoading ? "false" : "true"
+    );
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const productBox = document.getElementById("productBox");
-    const productTitle = document.getElementById("productTitle");
-    const productImg = document.getElementById("productImg");
+    const productBox =
+        document.getElementById("productBox");
+
+    const productTitle =
+        document.getElementById("productTitle");
+
+    const productImg =
+        document.getElementById("productImg");
 
     if (productTitleFromUrl) {
-        productTitle.textContent = productTitleFromUrl;
+        productTitle.textContent =
+            productTitleFromUrl;
+
         productBox.style.display = "block";
     }
 
     if (productImageFromUrl) {
-        productImg.src = productImageFromUrl;
+        productImg.src =
+            productImageFromUrl;
+
         productImg.style.display = "block";
         productBox.style.display = "block";
     }
 
     if (!tokenFromServer) {
-        showError("קישור התשלום פג תוקף או אינו תקין.");
+        showError("Invalid or expired payment link.");
         payNow.disabled = true;
         return;
     }
 
     if (!publicIntegrationKey) {
-        showError("חסרה הגדרת תצורת תשלום.");
+        showError("Payment configuration is missing.");
         payNow.disabled = true;
         return;
     }
 
     try {
         payment = new PaymentJs();
+
         payment.init(
             publicIntegrationKey,
             "number_div",
             "cvv_div",
             function (paymentInstance) {
                 paymentReady = true;
-                paymentInstance.setNumberPlaceholder("מספר כרטיס");
-                paymentInstance.setCvvPlaceholder("CVV");
+
+                paymentInstance.setNumberPlaceholder(
+                    "Card number"
+                );
+
+                paymentInstance.setCvvPlaceholder(
+                    "CVV"
+                );
 
                 paymentInstance.setNumberStyle({
                     "font-size": "16px",
@@ -437,35 +481,70 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
 
                 payNow.disabled = false;
+
+                console.log(
+                    "Xolvis Payment.js ready"
+                );
             }
         );
     } catch (error) {
-        showError(error?.message || "לא ניתן לטעון את שדות התשלום.");
+        console.error(
+            "Xolvis initialization error:",
+            error
+        );
+
+        showError(
+            error?.message ||
+            "Could not load payment fields."
+        );
+
         payNow.disabled = true;
     }
 });
 
-backBtn.onclick = () => { window.history.back(); };
+backBtn.onclick = () => {
+    window.history.back();
+};
 
 payNow.onclick = () => {
     clearError();
 
     if (!tokenFromServer) {
-        showError("קישור תשלום לא תקין.");
+        showError(
+            "Invalid or expired payment link."
+        );
         return;
     }
 
     if (!paymentReady || !payment) {
-        showError("שדות התשלום עדיין נטענים. נא להמתין.");
+        showError(
+            "Payment fields are still loading. Please wait."
+        );
         return;
     }
 
-    const cardholderName = document.getElementById("cardholder-name").value.trim();
-    const expMonth = document.getElementById("exp_month").value.trim();
-    const expYear = document.getElementById("exp_year").value.trim();
+    const cardholderName =
+        document
+            .getElementById("cardholder-name")
+            .value
+            .trim();
+
+    const expMonth =
+        document
+            .getElementById("exp_month")
+            .value
+            .trim();
+
+    const expYear =
+        document
+            .getElementById("exp_year")
+            .value
+            .trim();
 
     if (!cardholderName || !expMonth || !expYear) {
-        showError("נא למלא את כל פרטי כרטיס האשראי.");
+        showError(
+            "Please complete all card details."
+        );
         return;
     }
 
@@ -477,48 +556,134 @@ payNow.onclick = () => {
             month: expMonth,
             year: expYear
         },
+
         async function (transactionToken, cardData) {
             try {
-                const response = await fetch("/api/create-promo-payment", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        checkoutToken: tokenFromServer,
-                        cardholderName: cardholderName,
-                        transactionToken: transactionToken,
-                        cardData: cardData
-                    })
-                });
+                // Point securely to the full absolute URL backend endpoint so it never hangs!
+                const response = await fetch(
+                    "https://www.speaktoheaven.com/api/create-promo-payment",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            checkoutToken:
+                                tokenFromServer,
 
-                const text = await response.text();
+                            cardholderName:
+                                cardholderName,
+
+                            transactionToken:
+                                transactionToken,
+
+                            cardData:
+                                cardData
+                        })
+                    }
+                );
+
+                const text =
+                    await response.text();
+
                 let data;
-                try { data = JSON.parse(text); } catch {
-                    throw new Error("תגובת שרת לא תקינה.");
+
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error(
+                        text ||
+                        "Server returned an invalid response."
+                    );
                 }
 
-                if (!response.ok || data.success === false || data.returnType === "ERROR") {
-                    throw new Error(data.error || data.errorMessage || "התשלום נכשל.");
+                console.log(
+                    "XOLVIS RESPONSE:",
+                    data
+                );
+
+                if (
+                    !response.ok ||
+                    data.success === false ||
+                    data.returnType === "ERROR"
+                ) {
+                    throw new Error(
+                        data.error ||
+                        data.errorMessage ||
+                        data.details?.errorMessage ||
+                        "Payment failed."
+                    );
                 }
 
-                if (data.returnType === "REDIRECT" && data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
+                if (
+                    data.returnType === "REDIRECT" &&
+                    data.redirectUrl
+                ) {
+                    window.location.href =
+                        data.redirectUrl;
+
                     return;
                 }
 
-                const qs = new URLSearchParams(location.search);
-                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
-                    "ref=" + encodeURIComponent(qs.get("ref") || "") +
-                    "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
-                    "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
+                const qs =
+                    new URLSearchParams(
+                        location.search
+                    );
+
+                const affiliateRef =
+                    qs.get("ref") || "";
+
+                const sub1 =
+                    qs.get("sub1") || "";
+
+                const sub2 =
+                    qs.get("sub2") || "";
+
+                window.location.href =
+                    "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+                    "ref=" +
+                    encodeURIComponent(affiliateRef) +
+                    "&sub1=" +
+                    encodeURIComponent(sub1) +
+                    "&sub2=" +
+                    encodeURIComponent(sub2);
 
             } catch (error) {
+                console.error(
+                    "Xolvis payment error:",
+                    error
+                );
+
                 setLoading(false);
-                showError(error?.message || "שגיאה בעיבוד התשלום.");
+
+                showError(
+                    error?.message ||
+                    "Payment failed."
+                );
             }
         },
+
         function (errors) {
+            console.error(
+                "Xolvis tokenization errors:",
+                errors
+            );
+
             setLoading(false);
-            showError("נא לבדוק את פרטי הכרטיס ולנסות שוב.");
+
+            const message =
+                Array.isArray(errors)
+                    ? errors
+                        .map(error =>
+                            error.message ||
+                            error.key ||
+                            "Payment field error"
+                        )
+                        .join(" ")
+                    : "Please check your card details.";
+
+            showError(message);
         }
     );
 };
