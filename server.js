@@ -154,6 +154,30 @@ function getCookie(req, name) {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
+function getOptionalLoggedInUser(req) {
+  try {
+    const authHeader =
+      req.headers["authorization"] || "";
+
+    const token =
+      authHeader.startsWith("Bearer ")
+        ? authHeader.slice(7)
+        : null;
+
+    if (!token) {
+      return null;
+    }
+
+    return jwt.verify(
+      token,
+      SECRET_KEY
+    );
+
+  } catch (error) {
+    return null;
+  }
+}
+
 // JSON parser FIRST
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -395,6 +419,11 @@ await pool.query(`
   ADD COLUMN IF NOT EXISTS success_url TEXT;
 `);
 
+await pool.query(`
+  ALTER TABLE promo_checkout_links
+  ADD COLUMN IF NOT EXISTS user_id INTEGER;
+`);
+
 console.log("✅ Promo success URL column ready");
 
 await pool.query(`
@@ -410,6 +439,11 @@ await pool.query(`
     created_at TIMESTAMP DEFAULT NOW(),
     paid_at TIMESTAMP
   );
+`);
+
+await pool.query(`
+  ALTER TABLE xolvis_payments
+  ADD COLUMN IF NOT EXISTS user_id INTEGER;
 `);
 
 console.log("✅ Xolvis payments table ready");
@@ -911,13 +945,23 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
       successUrl
     } = req.body || {};
 
-    if (!email) {
-      return res.status(400).json({
-        error: "Email is required"
-      });
-    }
+    const loggedInUser =
+  getOptionalLoggedInUser(req);
 
-    const token = createToken(18);
+const checkoutUserId =
+  loggedInUser?.id || null;
+
+const checkoutEmail =
+  loggedInUser?.email ||
+  email?.trim().toLowerCase();
+
+if (!checkoutEmail) {
+  return res.status(400).json({
+    error: "Email is required"
+  });
+}
+
+const token = createToken(18);
 
     const expiresAt = new Date(
       Date.now() + 30 * 60 * 1000
@@ -942,12 +986,13 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
         affiliate_ref,
         source_page,
         original_query_string,
-        success_url,
-        ip,
-        user_agent,
-        expires_at      )
+success_url,
+user_id,
+ip,
+user_agent,
+expires_at      )
             VALUES
-      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
       `,
       [
         token,
@@ -956,8 +1001,8 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
         firstName || null,
         lastName || null,
         name || null,
-        email,
-        `${phonePrefix || ""}${phone || ""}`,
+checkoutEmail,
+`${phonePrefix || ""}${phone || ""}`,
         address || null,
         postcode || null,
         city || null,
@@ -965,8 +1010,9 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
         ref || null,
         sourcePage || null,
         originalQueryString || null,
-        successUrl || null,
-        req.ip,
+successUrl || null,
+checkoutUserId,
+req.ip,
         req.headers["user-agent"] || "",
         expiresAt      ]
     );
@@ -1111,11 +1157,18 @@ const selectedSuccessUrl =
 
     await pool.query(
       `
-      INSERT INTO xolvis_payments (reference, email, plan, amount)
-      VALUES ($1, $2, $3, $4)
-      ON CONFLICT (reference) DO NOTHING
+      INSERT INTO xolvis_payments
+(reference, email, plan, amount, user_id)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (reference) DO NOTHING
       `,
-      [reference, email, selectedPlan, amount]
+      [
+  reference,
+  email,
+  selectedPlan,
+  amount,
+  checkout.user_id || null
+]
     );
 
     const response = await fetch(
@@ -1506,22 +1559,32 @@ app.post("/xolvis-webhook", async (req, res) => {
     );
 
     const updateResult = await pool.query(
-      `
-      UPDATE users
-      SET
-        plan = $1,
-        expires_at = $2,
-        lifetime = false,
-        messages_sent = 0
-      WHERE LOWER(email) = LOWER($3)
-      RETURNING *
-      `,
-      [
-        accessPlan,
-        expiresAt,
-        payment.email
-      ]
-    );
+  `
+  UPDATE users
+  SET
+    plan = $1,
+    expires_at = $2,
+    lifetime = false,
+    messages_sent = 0
+  WHERE
+    (
+      $3::integer IS NOT NULL
+      AND id = $3
+    )
+    OR
+    (
+      $3::integer IS NULL
+      AND LOWER(email) = LOWER($4)
+    )
+  RETURNING *
+  `,
+  [
+    accessPlan,
+    expiresAt,
+    payment.user_id || null,
+    payment.email
+  ]
+);
 
     if (updateResult.rows.length === 0) {
       console.error(
