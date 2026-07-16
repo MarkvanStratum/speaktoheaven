@@ -476,8 +476,8 @@ form.addEventListener("submit", async (event) => {
                 showMessage("success", "Payment completed successfully. Your access will be activated shortly.");
 
                 setTimeout(() => {
-                    window.location.href = "/login.html";
-                }, 1800);
+    window.location.href = data.successUrl || "/";
+}, 1800);
 
             } catch (error) {
                 console.error("Payment failed:", error);
