@@ -1171,6 +1171,11 @@ ON CONFLICT (reference) DO NOTHING
 ]
     );
 
+console.log(
+  "XOLVIS CALLBACK URL SENT:",
+  JSON.stringify(process.env.XOLVIS_CALLBACK_URL)
+);
+
     const response = await fetch(
       `${process.env.XOLVIS_BASE_URL}/transaction/${process.env.XOLVIS_CONNECTOR_API_KEY}/debit`,
       {
@@ -1449,6 +1454,11 @@ app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
 		console.error("Fetch messages error:", err);
 		res.status(500).json({ error: "Server error" });
 	}
+});
+
+app.get("/xolvis-webhook", (req, res) => {
+  console.log("XOLVIS WEBHOOK GET TEST");
+  res.send("Xolvis webhook endpoint is reachable");
 });
 
 app.post("/xolvis-webhook", async (req, res) => {
