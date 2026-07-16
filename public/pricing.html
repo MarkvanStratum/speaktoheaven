@@ -149,12 +149,21 @@
     const affiliateRef = params.get('ref') || '';
 
     // Route through your hidden promotion framework infrastructure
-    const response = await fetch("/api/create-promo-checkout-link", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
+const loginToken = localStorage.getItem("token");
+
+const requestHeaders = {
+  "Content-Type": "application/json"
+};
+
+if (loginToken) {
+  requestHeaders["Authorization"] =
+    `Bearer ${loginToken}`;
+}
+
+const response = await fetch("/api/create-promo-checkout-link", {
+  method: "POST",
+  headers: requestHeaders,
+  body: JSON.stringify({
         plan: planName,
         step2File: "checkout.html", // Set target step 2 layout filename
         currency: "GBP",
