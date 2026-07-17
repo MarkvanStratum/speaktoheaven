@@ -237,7 +237,10 @@ async function createXolvisPayment(req, res, fixedPlan = null) {
             email: email,
             ipAddress: req.ip || "127.0.0.1"
           },
-          language: "en"
+          language: "en",
+          extraData: {
+            "3dsecure": "MANDATORY"
+          }
         })
       }
     );
