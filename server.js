@@ -1485,10 +1485,17 @@ app.post("/xolvis-webhook", async (req, res) => {
       null;
 
     const status =
-      data?.returnType ||
-      data?.status ||
-      data?.transaction?.status ||
-      "UNKNOWN";
+  data?.result ||
+  data?.returnType ||
+  data?.status ||
+  data?.transaction?.status ||
+  "UNKNOWN";
+
+const isSuccessful =
+  data?.result === "OK" ||
+  data?.returnType === "FINISHED" ||
+  data?.status === "FINISHED" ||
+  data?.transaction?.status === "FINISHED";
 
     if (!reference && !uuid) {
       console.error("XOLVIS WEBHOOK: Missing reference/uuid");
@@ -1539,16 +1546,16 @@ app.post("/xolvis-webhook", async (req, res) => {
         status,
         data,
         uuid,
-        status === "FINISHED",
-        payment.id
+        isSuccessful,
+payment.id
       ]
     );
 
-    if (status !== "FINISHED") {
-      return res.json({
-        ok: true
-      });
-    }
+    if (!isSuccessful) {
+  return res.json({
+    ok: true
+  });
+}
 
     let accessPlan = "god";
     let days = 30;
