@@ -951,6 +951,17 @@ app.post("/api/create-promo-checkout-link", async (req, res) => {
     const loggedInUser =
   getOptionalLoggedInUser(req);
 
+// Main website checkout must always belong
+// to a logged-in user account.
+if (
+  step2File === "checkout.html" &&
+  !loggedInUser
+) {
+  return res.status(401).json({
+    error: "Please log in before continuing to checkout"
+  });
+}
+
 const checkoutUserId =
   loggedInUser?.id || null;
 
