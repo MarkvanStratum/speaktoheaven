@@ -441,7 +441,7 @@ form.addEventListener("submit", async (event) => {
         },
         async function (transactionToken, cardData) {
             try {
-                const loginToken = localStorage.getItem("token");
+                const loginToken = localStorage.getItem("jwt");
 
 const requestHeaders = {
     "Content-Type": "application/json"

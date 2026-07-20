@@ -149,7 +149,7 @@
     const affiliateRef = params.get('ref') || '';
 
     // Route through your hidden promotion framework infrastructure
-const loginToken = localStorage.getItem("token");
+const loginToken = localStorage.getItem("jwt");
 
 if (!loginToken) {
   alert("Please log in to your account before selecting a plan.");
