@@ -151,14 +151,16 @@
     // Route through your hidden promotion framework infrastructure
 const loginToken = localStorage.getItem("token");
 
-const requestHeaders = {
-  "Content-Type": "application/json"
-};
-
-if (loginToken) {
-  requestHeaders["Authorization"] =
-    `Bearer ${loginToken}`;
+if (!loginToken) {
+  alert("Please log in to your account before selecting a plan.");
+  window.location.href = "/";
+  return;
 }
+
+const requestHeaders = {
+  "Content-Type": "application/json",
+  "Authorization": `Bearer ${loginToken}`
+};
 
 const response = await fetch("/api/create-promo-checkout-link", {
   method: "POST",
@@ -171,17 +173,17 @@ const response = await fetch("/api/create-promo-checkout-link", {
         sourcePage: window.location.pathname,
         ref: affiliateRef,
         
-        // Blank placeholder details to comply with dynamic initialization parameters
-        firstName: "",
-        lastName: "",
-        name: prompt("Please enter your full name for the payment:") || "",
-email: prompt("Please enter your email address for the payment receipt:") || "",
-        phonePrefix: "+44",
-        phone: "0000000000",
-        address: "Main Sanctuary Street",
-        postcode: "SW1A 1AA",
-        city: "London",
-        country: "United Kingdom",
+        // Customer account email is taken automatically
+// from the logged-in user's account
+firstName: "",
+lastName: "",
+name: "",
+phonePrefix: "+44",
+phone: "0000000000",
+address: "Main Sanctuary Street",
+postcode: "SW1A 1AA",
+city: "London",
+country: "United Kingdom",
         originalQueryString: window.location.search.replace(/^\?/, "")
       })
     });

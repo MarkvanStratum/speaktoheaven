@@ -441,18 +441,27 @@ form.addEventListener("submit", async (event) => {
         },
         async function (transactionToken, cardData) {
             try {
-                const response = await fetch("/api/create-promo-payment", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        checkoutToken: tokenFromServer,
-                        cardholderName: cardholderName,
-                        transactionToken: transactionToken,
-                        cardData: cardData
-                    })
-                });
+                const loginToken = localStorage.getItem("token");
+
+const requestHeaders = {
+    "Content-Type": "application/json"
+};
+
+if (loginToken) {
+    requestHeaders["Authorization"] =
+        `Bearer ${loginToken}`;
+}
+
+const response = await fetch("/api/create-promo-payment", {
+    method: "POST",
+    headers: requestHeaders,
+    body: JSON.stringify({
+        checkoutToken: tokenFromServer,
+        cardholderName: cardholderName,
+        transactionToken: transactionToken,
+        cardData: cardData
+    })
+});
 
                 const text = await response.text();
 
