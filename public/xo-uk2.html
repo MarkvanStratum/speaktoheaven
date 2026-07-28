@@ -623,14 +623,19 @@ payNow.onclick = () => {
                 const sub2 =
                     qs.get("sub2") || "";
 
+const pixel =
+    qs.get("pixel") || "";
+
                 window.location.href =
-                    "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
-                    "ref=" +
-                    encodeURIComponent(affiliateRef) +
-                    "&sub1=" +
-                    encodeURIComponent(sub1) +
-                    "&sub2=" +
-                    encodeURIComponent(sub2);
+    "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+    "ref=" +
+    encodeURIComponent(affiliateRef) +
+    "&sub1=" +
+    encodeURIComponent(sub1) +
+    "&sub2=" +
+    encodeURIComponent(sub2) +
+    "&pixel=" +
+    encodeURIComponent(pixel);
 
             } catch (error) {
                 console.error(
