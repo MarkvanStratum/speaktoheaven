@@ -449,6 +449,16 @@ await pool.query(`
   ADD COLUMN IF NOT EXISTS user_id INTEGER;
 `);
 
+await pool.query(`
+  ALTER TABLE xolvis_payments
+  ADD COLUMN IF NOT EXISTS binom_clickid TEXT;
+`);
+
+await pool.query(`
+  ALTER TABLE xolvis_payments
+  ADD COLUMN IF NOT EXISTS binom_postback_sent BOOLEAN DEFAULT FALSE;
+`);
+
 console.log("✅ Xolvis payments table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
@@ -1052,7 +1062,12 @@ req.ip,
 
 app.post("/api/create-promo-payment", async (req, res) => {
   try {
-    const { checkoutToken, cardholderName, transactionToken } = req.body || {};
+    const {
+  checkoutToken,
+  cardholderName,
+  transactionToken,
+  clickid
+} = req.body || {};
 
     if (!checkoutToken) {
       return res.status(400).json({ error: "Missing checkout token" });
@@ -1169,21 +1184,22 @@ const selectedSuccessUrl =
 
     const reference = `promo-${selectedPlan}-${Date.now()}`;
 
-    await pool.query(
-      `
-      INSERT INTO xolvis_payments
-(reference, email, plan, amount, user_id)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (reference) DO NOTHING
-      `,
-      [
-  reference,
-  email,
-  selectedPlan,
-  amount,
-  checkout.user_id || null
-]
-    );
+await pool.query(
+  `
+    INSERT INTO xolvis_payments
+    (reference, email, plan, amount, user_id, binom_clickid)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ON CONFLICT (reference) DO NOTHING
+  `,
+  [
+    reference,
+    email,
+    selectedPlan,
+    amount,
+    checkout.user_id || null,
+    clickid || null
+  ]
+);
 
 console.log(
   "XOLVIS CALLBACK URL SENT:",
@@ -1566,6 +1582,45 @@ payment.id
   return res.json({
     ok: true
   });
+}
+
+if (
+  payment.binom_clickid &&
+  !payment.binom_postback_sent
+) {
+  try {
+    const binomUrl =
+      "http://trackingpower4.com/click" +
+      "?cnv_id=" +
+      encodeURIComponent(payment.binom_clickid) +
+      "&payout=" +
+      encodeURIComponent(Number(payment.amount).toFixed(2));
+
+    console.log("SENDING BINOM POSTBACK:", binomUrl);
+
+    const binomResponse = await fetch(binomUrl);
+    const binomText = await binomResponse.text();
+
+    console.log(
+      "BINOM POSTBACK RESPONSE:",
+      binomResponse.status,
+      binomText
+    );
+
+    if (binomResponse.ok) {
+      await pool.query(
+        `
+          UPDATE xolvis_payments
+          SET binom_postback_sent = TRUE
+          WHERE id = $1
+        `,
+        [payment.id]
+      );
+    }
+
+  } catch (error) {
+    console.error("BINOM POSTBACK ERROR:", error);
+  }
 }
 
     let accessPlan = "god";
