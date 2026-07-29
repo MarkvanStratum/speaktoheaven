@@ -1605,7 +1605,7 @@ if (
   "https://trackingpower2.com/conversion" +
   "?clickid=" +
   encodeURIComponent(payment.binom_clickid) +
-  "&source=" +
+  "&affiliate_source=" +
   encodeURIComponent(payment.affiliate_source || "");
 
 console.log(
