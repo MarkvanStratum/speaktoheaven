@@ -459,6 +459,11 @@ await pool.query(`
   ADD COLUMN IF NOT EXISTS binom_postback_sent BOOLEAN DEFAULT FALSE;
 `);
 
+await pool.query(`
+  ALTER TABLE xolvis_payments
+  ADD COLUMN IF NOT EXISTS affiliate_source TEXT;
+`);
+
 console.log("✅ Xolvis payments table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
@@ -1094,6 +1099,12 @@ app.post("/api/create-promo-payment", async (req, res) => {
 
     const checkout = result.rows[0];
 
+const originalParams =
+  new URLSearchParams(checkout.original_query_string || "");
+
+const affiliateSource =
+  originalParams.get("source") || "";
+
     const email = checkout.email;
     const selectedPlan = checkout.plan || "4995";
 
@@ -1187,8 +1198,8 @@ const selectedSuccessUrl =
 await pool.query(
   `
     INSERT INTO xolvis_payments
-    (reference, email, plan, amount, user_id, binom_clickid)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    (reference, email, plan, amount, user_id, binom_clickid, affiliate_source)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
     ON CONFLICT (reference) DO NOTHING
   `,
   [
@@ -1197,7 +1208,8 @@ await pool.query(
     selectedPlan,
     amount,
     checkout.user_id || null,
-    clickid || null
+    clickid || null,
+    affiliateSource || null
   ]
 );
 
@@ -1589,16 +1601,19 @@ if (
   !payment.binom_postback_sent
 ) {
   try {
-    const binomUrl =
-      "http://trackingpower4.com/click" +
-      "?cnv_id=" +
-      encodeURIComponent(payment.binom_clickid) +
-      "&payout=" +
-      encodeURIComponent(Number(payment.amount).toFixed(2));
+    const conversionUrl =
+  "https://trackingpower2.com/conversion" +
+  "?clickid=" +
+  encodeURIComponent(payment.binom_clickid) +
+  "&source=" +
+  encodeURIComponent(payment.affiliate_source || "");
 
-    console.log("SENDING BINOM POSTBACK:", binomUrl);
+console.log(
+  "SENDING CONVERSION TO TRACKINGPOWER2:",
+  conversionUrl
+);
 
-    const binomResponse = await fetch(binomUrl);
+const binomResponse = await fetch(conversionUrl);
     const binomText = await binomResponse.text();
 
     console.log(
