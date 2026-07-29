@@ -1071,7 +1071,8 @@ app.post("/api/create-promo-payment", async (req, res) => {
   checkoutToken,
   cardholderName,
   transactionToken,
-  clickid
+  clickid,
+  affiliate_source
 } = req.body || {};
 
     if (!checkoutToken) {
@@ -1103,9 +1104,14 @@ const originalParams =
   new URLSearchParams(checkout.original_query_string || "");
 
 const affiliateSource =
-  originalParams.get("affiliate_source") || "";
+  originalParams.get("affiliate_source") ||
+  affiliate_source ||
+  "";
 
-    const email = checkout.email;
+const binomClickid =
+  originalParams.get("clickid") || clickid || "";
+
+const email = checkout.email;
     const selectedPlan = checkout.plan || "4995";
 
     const amounts = {
@@ -1208,15 +1214,17 @@ await pool.query(
     selectedPlan,
     amount,
     checkout.user_id || null,
-    clickid || null,
+    binomClickid || null,
     affiliateSource || null
   ]
 );
 
-console.log(
-  "XOLVIS CALLBACK URL SENT:",
-  JSON.stringify(process.env.XOLVIS_CALLBACK_URL)
-);
+const trackingCallbackUrl =
+  process.env.XOLVIS_CALLBACK_URL +
+  "?clickid=" +
+  encodeURIComponent(binomClickid) +
+  "&affiliate_source=" +
+  encodeURIComponent(affiliateSource);
 
     const response = await fetch(
       `${process.env.XOLVIS_BASE_URL}/transaction/${process.env.XOLVIS_CONNECTOR_API_KEY}/debit`,
@@ -1236,7 +1244,7 @@ console.log(
           successUrl: finalSuccessUrl,
           cancelUrl: process.env.XOLVIS_CANCEL_URL,
           errorUrl: process.env.XOLVIS_ERROR_URL,
-          callbackUrl: process.env.XOLVIS_CALLBACK_URL,
+          callbackUrl: trackingCallbackUrl,
           customer: {
             email: email,
             firstName: checkout.first_name || "",
