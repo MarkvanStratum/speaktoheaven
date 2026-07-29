@@ -552,18 +552,22 @@ payNow.onclick = () => {
                                 "application/json"
                         },
                         body: JSON.stringify({
-                            checkoutToken:
-                                tokenFromServer,
+    checkoutToken:
+        tokenFromServer,
 
-                            cardholderName:
-                                cardholderName,
+    cardholderName:
+        cardholderName,
 
-                            transactionToken:
-                                transactionToken,
+    transactionToken:
+        transactionToken,
 
-                            cardData:
-                                cardData
-                        })
+    cardData:
+        cardData,
+
+    clickid:
+        new URLSearchParams(window.location.search).get("clickid") || ""
+})
+
                     }
                 );
 
