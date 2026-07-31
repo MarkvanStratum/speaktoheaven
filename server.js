@@ -770,10 +770,13 @@ if (!flowCookie) {
   `
   <script>
     window.PROMO_CHECKOUT_TOKEN =
-      ${JSON.stringify(token)};
+  ${JSON.stringify(token)};
 
-    window.XOLVIS_PUBLIC_INTEGRATION_KEY =
-      ${JSON.stringify(process.env.XOLVIS_PUBLIC_INTEGRATION_KEY || "")};
+window.CHECKOUT_PLAN =
+  ${JSON.stringify(promoCheckout.plan)};
+
+window.XOLVIS_PUBLIC_INTEGRATION_KEY =
+  ${JSON.stringify(process.env.XOLVIS_PUBLIC_INTEGRATION_KEY || "")};
   </script>
   </head>
   `
