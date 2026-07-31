@@ -340,6 +340,7 @@
 
 <script>
 const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
+const selectedPlan = window.CHECKOUT_PLAN || null;
 const publicIntegrationKey = window.XOLVIS_PUBLIC_INTEGRATION_KEY || "";
 
 const form = document.getElementById("payment-form");
@@ -348,6 +349,12 @@ const btnLoader = document.getElementById("btn-loader");
 const btnText = document.getElementById("btn-text");
 const messageBox = document.getElementById("message-box");
 const totalPriceDisplay = document.getElementById("total-price-display");
+const planPrices = {
+    "2995": "£29.95",
+    "3595": "£35.95",
+    "4995": "£49.95",
+    "lifetime": "£49.95"
+};
 
 const checkTerms = document.getElementById("check-terms");
 const checkPrivacy = document.getElementById("check-privacy");
@@ -367,7 +374,8 @@ function showMessage(type, text) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    totalPriceDisplay.textContent = "Enter card details securely";
+    totalPriceDisplay.textContent =
+        planPrices[selectedPlan] || "Price unavailable";
 
     if (!publicIntegrationKey) {
         showMessage("error", "Payment configuration missing. Please contact support.");
