@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Attempts Admin</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;color:#111827}
+    .container{max-width:1500px;margin:0 auto;padding:24px}
+    h1{margin:0 0 8px}.subtext{margin:0 0 24px;color:#6b7280}
+    .toolbar{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+    input,select,button{font:inherit}input,select{padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff}
+    button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;background:#111827;color:#fff}
+    button.secondary{background:#4b5563}button.danger{background:#991b1b}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .label{color:#6b7280;font-size:14px;margin-bottom:8px}.value{font-size:28px;font-weight:700}
+    .table-wrap{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    table{width:100%;border-collapse:collapse;min-width:1300px}th,td{padding:12px;text-align:left;border-bottom:1px solid #e5e7eb;vertical-align:top;font-size:14px}
+    th{background:#f9fafb;position:sticky;top:0}.mono{font-family:Consolas,Monaco,monospace;font-size:12px;word-break:break-all}
+    .yes{color:#166534;font-weight:700}.no{color:#991b1b;font-weight:700}.empty{padding:30px;text-align:center;color:#6b7280}
+    .status{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;display:inline-block;background:#e5e7eb;color:#374151}
+    #message{margin:0 0 16px;padding:12px;border-radius:8px;display:none}#message.error{display:block;background:#fee2e2;color:#991b1b}#message.success{display:block;background:#dcfce7;color:#166534}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Payment Attempts Dashboard</h1>
+    <p class="subtext">View the latest payment attempts recorded by the server.</p>
+    <div id="message"></div>
+
+    <section class="toolbar">
+      <input id="adminPassword" type="password" placeholder="Admin password" autocomplete="current-password" />
+      <button id="loadButton" type="button">Load dashboard</button>
+      <button id="refreshButton" class="secondary" type="button">Refresh</button>
+      <button id="downloadButton" class="secondary" type="button">Download CSV</button>
+      <button id="logoutButton" class="danger" type="button">Forget password</button>
+    </section>
+
+    <section class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search email, reference, token, IP..." />
+      <select id="statusFilter"><option value="">All statuses</option></select>
+    </section>
+
+    <section class="cards">
+      <div class="card"><div class="label">Total attempts</div><div id="totalCount" class="value">0</div></div>
+      <div class="card"><div class="label">Successful</div><div id="successfulCount" class="value">0</div></div>
+      <div class="card"><div class="label">Declined</div><div id="declinedCount" class="value">0</div></div>
+      <div class="card"><div class="label">Blocked</div><div id="blockedCount" class="value">0</div></div>
+      <div class="card"><div class="label">Gateway errors</div><div id="errorCount" class="value">0</div></div>
+      <div class="card"><div class="label">Pending / review</div><div id="pendingCount" class="value">0</div></div>
+    </section>
+
+    <section class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Time</th><th>Email</th><th>Attempt</th><th>Status</th><th>Sent to gateway</th><th>Would be blocked</th><th>Amount</th><th>Plan</th><th>Payment reference</th><th>Gateway status</th><th>Checkout token</th><th>IP address</th><th>Block reason</th>
+        </tr></thead>
+        <tbody id="attemptsBody"><tr><td colspan="13" class="empty">Enter the admin password and click “Load dashboard”.</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const passwordInput=document.getElementById('adminPassword');
+    const messageBox=document.getElementById('message');
+    const attemptsBody=document.getElementById('attemptsBody');
+    const searchInput=document.getElementById('searchInput');
+    const statusFilter=document.getElementById('statusFilter');
+    let allAttempts=[];
+    const savedPassword=sessionStorage.getItem('paymentAdminPassword');
+    if(savedPassword) passwordInput.value=savedPassword;
+
+    function showMessage(text,type){messageBox.textContent=text;messageBox.className=type}
+    function clearMessage(){messageBox.textContent='';messageBox.className='';messageBox.style.display='none'}
+    function normalizeStatus(status){return String(status||'UNKNOWN').trim().toUpperCase()}
+    function escapeHtml(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+    function formatDate(value){if(!value)return '';const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleString()}
+    function boolText(v){return v?'Yes':'No'}
+
+    function updateStatusFilter(){
+      const current=statusFilter.value;
+      const statuses=[...new Set(allAttempts.map(x=>normalizeStatus(x.status)))].sort();
+      statusFilter.innerHTML='<option value="">All statuses</option>'+statuses.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+      if(statuses.includes(current))statusFilter.value=current;
+    }
+
+    function getFilteredAttempts(){
+      const search=searchInput.value.trim().toLowerCase();
+      const status=statusFilter.value;
+      return allAttempts.filter(item=>{
+        const matchesStatus=!status||normalizeStatus(item.status)===status;
+        const searchable=[item.email,item.payment_reference,item.checkout_token,item.xolvis_uuid,item.ip_address,item.gateway_status,item.block_reason].filter(Boolean).join(' ').toLowerCase();
+        return matchesStatus&&(!search||searchable.includes(search));
+      });
+    }
+
+    function updateSummary(rows){
+      const count=s=>rows.filter(x=>normalizeStatus(x.status)===s).length;
+      document.getElementById('totalCount').textContent=rows.length;
+      document.getElementById('successfulCount').textContent=count('SUCCESSFUL');
+      document.getElementById('declinedCount').textContent=count('DECLINED');
+      document.getElementById('blockedCount').textContent=count('BLOCKED_RETRY_LIMIT');
+      document.getElementById('errorCount').textContent=count('GATEWAY_ERROR');
+      document.getElementById('pendingCount').textContent=rows.filter(x=>['PENDING','REVIEW_REQUIRED','CREATED','SUBMITTED'].includes(normalizeStatus(x.status))).length;
+    }
+
+    function renderAttempts(){
+      const rows=getFilteredAttempts();updateSummary(rows);
+      if(!rows.length){attemptsBody.innerHTML='<tr><td colspan="13" class="empty">No payment attempts found.</td></tr>';return}
+      attemptsBody.innerHTML=rows.map(item=>`<tr>
+        <td>${escapeHtml(formatDate(item.created_at))}</td>
+        <td>${escapeHtml(item.email)}</td>
+        <td>${escapeHtml(item.attempt_number)}</td>
+        <td><span class="status">${escapeHtml(normalizeStatus(item.status))}</span></td>
+        <td class="${item.sent_to_gateway?'yes':'no'}">${boolText(item.sent_to_gateway)}</td>
+        <td class="${item.would_be_blocked?'no':'yes'}">${boolText(item.would_be_blocked)}</td>
+        <td>${item.amount==null?'':'£'+escapeHtml(Number(item.amount).toFixed(2))}</td>
+        <td>${escapeHtml(item.plan)}</td>
+        <td class="mono">${escapeHtml(item.payment_reference)}</td>
+        <td>${escapeHtml(item.gateway_status)}</td>
+        <td class="mono">${escapeHtml(item.checkout_token)}</td>
+        <td class="mono">${escapeHtml(item.ip_address)}</td>
+        <td>${escapeHtml(item.block_reason)}</td>
+      </tr>`).join('');
+    }
+
+    async function loadAttempts(){
+      clearMessage();const password=passwordInput.value;
+      if(!password){showMessage('Enter the admin password first.','error');return}
+      try{
+        const response=await fetch('/api/admin/payment-attempts',{headers:{'x-admin-password':password}});
+        if(response.status===401)throw new Error('The admin password is incorrect.');
+        if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.error||'Could not load payment attempts.');}
+        const data=await response.json();if(!Array.isArray(data))throw new Error('The server returned an unexpected response.');
+        sessionStorage.setItem('paymentAdminPassword',password);allAttempts=data;updateStatusFilter();renderAttempts();showMessage(`Loaded ${allAttempts.length} payment attempt(s).`,'success');
+      }catch(error){showMessage(error.message||'Could not load dashboard.','error')}
+    }
+
+    function downloadCsv(){
+      const rows=getFilteredAttempts();if(!rows.length){showMessage('There is no data to download.','error');return}
+      const columns=['created_at','email','attempt_number','status','sent_to_gateway','would_be_blocked','amount','plan','payment_reference','xolvis_uuid','gateway_status','checkout_token','ip_address','block_reason'];
+      const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;
+      const csv=[columns.join(','),...rows.map(r=>columns.map(c=>quote(r[c])).join(','))].join('\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`payment-attempts-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('loadButton').addEventListener('click',loadAttempts);
+    document.getElementById('refreshButton').addEventListener('click',loadAttempts);
+    document.getElementById('downloadButton').addEventListener('click',downloadCsv);
+    document.getElementById('logoutButton').addEventListener('click',()=>{sessionStorage.removeItem('paymentAdminPassword');passwordInput.value='';allAttempts=[];updateStatusFilter();renderAttempts();showMessage('The saved password was removed.','success')});
+    searchInput.addEventListener('input',renderAttempts);statusFilter.addEventListener('change',renderAttempts);
+    passwordInput.addEventListener('keydown',e=>{if(e.key==='Enter')loadAttempts()});
+  </script>
+</body>
+</html>
