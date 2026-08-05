@@ -133,6 +133,10 @@
     }
     .badge-success { background: #14532d; color: #bbf7d0; }
     .badge-failed { background: #7f1d1d; color: #fecaca; }
+.badge-blocked {
+  background: #4c1d95;
+  color: #ddd6fe;
+}
     .badge-created { background: #78350f; color: #fde68a; }
     .badge-other { background: #334155; color: #e2e8f0; }
     .empty-state { padding: 40px; text-align: center; color: #94a3b8; }
@@ -189,6 +193,7 @@
           <option value="ALL">All statuses</option>
           <option value="SUCCESSFUL">Successful</option>
           <option value="FAILED">Failed</option>
+<option value="BLOCKED">Blocked</option>
           <option value="CREATED">Created / pending</option>
         </select>
         <select id="planFilter"><option value="ALL">All plans</option></select>
@@ -266,17 +271,44 @@
     }
 
     function normalizeStatus(transaction) {
-      const attempt = String(transaction.attempt_status || "").toUpperCase();
-      const payment = String(transaction.payment_status || "").toUpperCase();
+  const attempt =
+    String(transaction.attempt_status || "").toUpperCase();
 
-      if (attempt === "SUCCESSFUL" || payment === "FINISHED" || payment === "OK" || payment === "SUCCESSFUL") return "SUCCESSFUL";
-      if (attempt === "FAILED" || payment === "ERROR" || payment === "FAILED" || payment === "DECLINED") return "FAILED";
-      return "CREATED";
-    }
+  const payment =
+    String(transaction.payment_status || "").toUpperCase();
+
+  if (
+    attempt === "BLOCKED" ||
+    payment === "BLOCKED"
+  ) {
+    return "BLOCKED";
+  }
+
+  if (
+    attempt === "SUCCESSFUL" ||
+    payment === "FINISHED" ||
+    payment === "OK" ||
+    payment === "SUCCESSFUL"
+  ) {
+    return "SUCCESSFUL";
+  }
+
+  if (
+    attempt === "FAILED" ||
+    payment === "ERROR" ||
+    payment === "FAILED" ||
+    payment === "DECLINED"
+  ) {
+    return "FAILED";
+  }
+
+  return "CREATED";
+}
 
     function getStatusBadge(status) {
       if (status === "SUCCESSFUL") return '<span class="badge badge-success">Successful</span>';
       if (status === "FAILED") return '<span class="badge badge-failed">Failed</span>';
+if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</span>';
       if (status === "CREATED") return '<span class="badge badge-created">Created</span>';
       return '<span class="badge badge-other">' + escapeHtml(status) + "</span>";
     }
@@ -392,20 +424,79 @@
       renderTable();
     }
 
-    function renderSummary() {
-      const total = filteredTransactions.length;
-      const successful = filteredTransactions.filter(t => normalizeStatus(t) === "SUCCESSFUL").length;
-      const failed = filteredTransactions.filter(t => normalizeStatus(t) === "FAILED").length;
-      const pending = total - successful - failed;
-      const completed = successful + failed;
-      const rate = completed > 0 ? (successful / completed) * 100 : 0;
+    function isThreeDSExcluded(transaction) {
+  const combinedText = [
+    transaction.reason,
+    transaction.gateway_status,
+    transaction.payment_status,
+    transaction.attempt_status
+  ]
+    .map(value => String(value || "").toUpperCase())
+    .join(" ");
 
-      totalCount.textContent = total;
-      successfulCount.textContent = successful;
-      failedCount.textContent = failed;
-      pendingCount.textContent = pending;
-      approvalRate.textContent = rate.toFixed(1) + "%";
-    }
+  return (
+    combinedText.includes("3D SECURE") ||
+    combinedText.includes("3DS") ||
+    combinedText.includes("USER AUTHENTICATION FAILED") ||
+    combinedText.includes("AUTHENTICATION FAILED") ||
+    combinedText.includes("AUTHENTICATION PENDING") ||
+    combinedText.includes("CHALLENGE PENDING") ||
+    combinedText.includes("CHALLENGE CANCELLED") ||
+    combinedText.includes("CHALLENGE CANCELED") ||
+    combinedText.includes("AUTHENTICATION CANCELLED") ||
+    combinedText.includes("AUTHENTICATION CANCELED") ||
+    combinedText.includes("CARDHOLDER CANCELLED") ||
+    combinedText.includes("CARDHOLDER CANCELED")
+  );
+}
+
+function renderSummary() {
+  const total = filteredTransactions.length;
+
+  const successful = filteredTransactions.filter(
+    t => normalizeStatus(t) === "SUCCESSFUL"
+  ).length;
+
+  const blocked = filteredTransactions.filter(
+    t => normalizeStatus(t) === "BLOCKED"
+  ).length;
+
+  const threeDSExcluded = filteredTransactions.filter(
+    t =>
+      normalizeStatus(t) !== "BLOCKED" &&
+      isThreeDSExcluded(t)
+  ).length;
+
+  const failed = filteredTransactions.filter(
+    t =>
+      normalizeStatus(t) === "FAILED" &&
+      !isThreeDSExcluded(t)
+  ).length;
+
+  const pending = filteredTransactions.filter(
+    t =>
+      normalizeStatus(t) === "CREATED" &&
+      !isThreeDSExcluded(t)
+  ).length;
+
+  const completed = successful + failed;
+
+  const rate =
+    completed > 0
+      ? (successful / completed) * 100
+      : 0;
+
+  totalCount.textContent = total;
+  successfulCount.textContent = successful;
+ failedCount.textContent = failed;
+  pendingCount.textContent = pending;
+  approvalRate.textContent = rate.toFixed(1) + "%";
+
+  console.log({
+    blocked,
+    threeDSExcluded
+  });
+}
 
     function renderTable() {
       transactionsBody.innerHTML = "";
