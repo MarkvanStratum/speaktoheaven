@@ -1633,39 +1633,61 @@ app.get(
   async (req, res) => {
     try {
       const result = await pool.query(`
-        SELECT
-          p.reference,
-          p.email,
-          p.plan,
-          p.amount,
-          p.status AS payment_status,
-          p.created_at,
-          p.paid_at,
-          p.xolvis_uuid,
-          p.affiliate_source,
+  SELECT
+    COALESCE(
+      p.reference,
+      a.payment_reference
+    ) AS reference,
 
-          a.card_bin,
-          a.card_type,
-          a.last_four,
-          a.status AS attempt_status,
-          a.gateway_status,
+    COALESCE(
+      p.email,
+      a.email
+    ) AS email,
 
-          COALESCE(
-            p.xolvis_payload->>'adapterMessage',
-            p.xolvis_payload->>'message',
-            p.xolvis_payload->>'result',
-            p.status
-          ) AS reason
+    p.plan,
+    p.amount,
 
-        FROM xolvis_payments p
+    COALESCE(
+      p.status,
+      a.status
+    ) AS payment_status,
 
-        LEFT JOIN card_payment_attempts a
-          ON a.payment_reference = p.reference
+    COALESCE(
+      p.created_at,
+      a.created_at
+    ) AS created_at,
 
-        ORDER BY p.created_at DESC
+    p.paid_at,
+    p.xolvis_uuid,
+    p.affiliate_source,
 
-        LIMIT 500
-      `);
+    a.card_bin,
+    a.card_type,
+    a.last_four,
+    a.status AS attempt_status,
+    a.gateway_status,
+
+    COALESCE(
+      p.xolvis_payload->>'adapterMessage',
+      p.xolvis_payload->>'message',
+      p.xolvis_payload->>'result',
+      a.gateway_status,
+      a.status,
+      p.status
+    ) AS reason
+
+  FROM xolvis_payments p
+
+  FULL OUTER JOIN card_payment_attempts a
+    ON a.payment_reference = p.reference
+
+  ORDER BY COALESCE(
+    p.created_at,
+    a.created_at
+  ) DESC
+
+  LIMIT 500
+`);
 
       res.json({
         success: true,
