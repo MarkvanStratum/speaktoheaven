@@ -465,6 +465,38 @@ await pool.query(`
 `);
 
 console.log("✅ Xolvis payments table ready");
+
+// --------------------------------------------
+// CARD PAYMENT ATTEMPTS TABLE
+// --------------------------------------------
+
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS card_payment_attempts (
+    id BIGSERIAL PRIMARY KEY,
+    payment_reference TEXT UNIQUE,
+    fingerprint_hash TEXT NOT NULL,
+    card_bin TEXT,
+    card_type TEXT,
+    last_four TEXT,
+    email TEXT,
+    status TEXT NOT NULL DEFAULT 'CREATED',
+    gateway_status TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+
+await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_card_attempts_fingerprint
+  ON card_payment_attempts(fingerprint_hash);
+`);
+
+await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_card_attempts_created
+  ON card_payment_attempts(created_at);
+`);
+
+console.log("✅ Card payment attempts table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
 	}
@@ -1074,6 +1106,7 @@ app.post("/api/create-promo-payment", async (req, res) => {
   checkoutToken,
   cardholderName,
   transactionToken,
+  cardData,
   clickid,
   affiliate_source
 } = req.body || {};
@@ -1085,6 +1118,69 @@ app.post("/api/create-promo-payment", async (req, res) => {
     if (!transactionToken) {
       return res.status(400).json({ error: "Missing Xolvis transaction token" });
     }
+
+// --------------------------------------------
+// SAFE CARD METADATA FROM XOLVIS PAYMENT.JS
+// --------------------------------------------
+
+const cardBin =
+  String(
+    cardData?.first_six_digits ||
+    cardData?.bin_digits ||
+    ""
+  )
+    .replace(/\D/g, "")
+    .slice(0, 8);
+
+const cardType =
+  typeof cardData?.card_type === "string"
+    ? cardData.card_type.trim().toLowerCase()
+    : "";
+
+const cardLastFour =
+  String(cardData?.last_four_digits || "")
+    .replace(/\D/g, "")
+    .slice(-4);
+
+const cardFingerprint =
+  typeof cardData?.fingerprint === "string"
+    ? cardData.fingerprint.trim()
+    : "";
+
+console.log("SAFE CARD METADATA:", {
+  bin: cardBin,
+  cardType,
+  lastFour: cardLastFour
+});
+
+// --------------------------------------------
+// BLOCK CONFIGURED CARD BINS
+// --------------------------------------------
+
+const blockedCardBins =
+  String(process.env.BLOCKED_CARD_BINS || "")
+    .split(",")
+    .map(bin => bin.trim().replace(/\D/g, ""))
+    .filter(Boolean);
+
+const isBlockedBin =
+  Boolean(cardBin) &&
+  blockedCardBins.includes(cardBin);
+
+if (isBlockedBin) {
+  console.warn("PAYMENT BLOCKED BY BIN RULE:", {
+    bin: cardBin,
+    cardType,
+    lastFour: cardLastFour
+  });
+
+  return res.status(400).json({
+    success: false,
+    error:
+      "This card cannot be accepted. Please use another payment method.",
+    code: "CARD_BIN_BLOCKED"
+  });
+}
 
     const result = await pool.query(
       `
@@ -1204,12 +1300,94 @@ const selectedSuccessUrl =
 
     const reference = `promo-${selectedPlan}-${Date.now()}`;
 
+// --------------------------------------------
+// RECORD CARD PAYMENT ATTEMPT
+// --------------------------------------------
+
+if (!cardFingerprint) {
+  return res.status(400).json({
+    success: false,
+    error: "Card identification data is missing. Please try again.",
+    code: "CARD_FINGERPRINT_MISSING"
+  });
+}
+
+const fingerprintHash = crypto
+  .createHmac("sha256", SECRET_KEY)
+  .update(cardFingerprint)
+  .digest("hex");
+
+// --------------------------------------------
+// BLOCK CARD AFTER TWO FAILED PAYMENTS
+// --------------------------------------------
+
+const failedAttemptsResult = await pool.query(
+  `
+  SELECT COUNT(*)::int AS failed_count
+  FROM card_payment_attempts
+  WHERE fingerprint_hash = $1
+    AND status = 'FAILED'
+  `,
+  [fingerprintHash]
+);
+
+const failedAttemptCount =
+  failedAttemptsResult.rows[0]?.failed_count || 0;
+
+if (failedAttemptCount >= 2) {
+  console.warn("PAYMENT BLOCKED BY RETRY LIMIT:", {
+    bin: cardBin,
+    cardType,
+    lastFour: cardLastFour,
+    failedAttemptCount
+  });
+
+  return res.status(429).json({
+    success: false,
+    error:
+      "The maximum number of payment attempts has been reached. Please use another card.",
+    code: "CARD_RETRY_LIMIT_REACHED"
+  });
+}
+
 await pool.query(
   `
-    INSERT INTO xolvis_payments
-    (reference, email, plan, amount, user_id, binom_clickid, affiliate_source)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT (reference) DO NOTHING
+  INSERT INTO card_payment_attempts
+  (
+    payment_reference,
+    fingerprint_hash,
+    card_bin,
+    card_type,
+    last_four,
+    email,
+    status
+  )
+  VALUES ($1, $2, $3, $4, $5, $6, 'CREATED')
+  `,
+  [
+    reference,
+    fingerprintHash,
+    cardBin || null,
+    cardType || null,
+    cardLastFour || null,
+    email
+  ]
+);
+
+await pool.query(
+  `
+  INSERT INTO xolvis_payments
+  (
+    reference,
+    email,
+    plan,
+    amount,
+    user_id,
+    binom_clickid,
+    affiliate_source
+  )
+  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  ON CONFLICT (reference) DO NOTHING
   `,
   [
     reference,
@@ -1602,6 +1780,22 @@ const isSuccessful =
 payment.id
       ]
     );
+
+await pool.query(
+  `
+  UPDATE card_payment_attempts
+  SET
+    status = $1,
+    gateway_status = $2,
+    updated_at = NOW()
+  WHERE payment_reference = $3
+  `,
+  [
+    isSuccessful ? "SUCCESSFUL" : "FAILED",
+    status,
+    payment.reference
+  ]
+);
 
     if (!isSuccessful) {
   return res.json({
