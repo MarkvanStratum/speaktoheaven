@@ -506,6 +506,7 @@ function calculateVatIncluded(amount, vatRate) {
     combinedText.includes("AUTHENTICATION CANCELLED") ||
     combinedText.includes("AUTHENTICATION CANCELED") ||
 combinedText.includes("NOT AUTHENTICATED BECAUSE THE ISSUER IS REJECTING AUTHENTICATION") ||
+combinedText.includes("Transaction rejected because cardholder authentication unavailable") ||
     combinedText.includes("CARDHOLDER CANCELLED") ||
 combinedText.includes("CARDHOLDER CANCELED") ||
 combinedText.includes("CANCELLED BY USER") ||
