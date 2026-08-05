@@ -1176,34 +1176,6 @@ console.log("SAFE CARD METADATA:", {
   lastFour: cardLastFour
 });
 
-// --------------------------------------------
-// BLOCK CONFIGURED CARD BINS
-// --------------------------------------------
-
-const blockedCardBins =
-  String(process.env.BLOCKED_CARD_BINS || "")
-    .split(",")
-    .map(bin => bin.trim().replace(/\D/g, ""))
-    .filter(Boolean);
-
-const isBlockedBin =
-  Boolean(cardBin) &&
-  blockedCardBins.includes(cardBin);
-
-if (isBlockedBin) {
-  console.warn("PAYMENT BLOCKED BY BIN RULE:", {
-    bin: cardBin,
-    cardType,
-    lastFour: cardLastFour
-  });
-
-  return res.status(400).json({
-    success: false,
-    error:
-      "This card cannot be accepted. Please use another payment method.",
-    code: "CARD_BIN_BLOCKED"
-  });
-}
 
     const result = await pool.query(
       `
@@ -1324,7 +1296,7 @@ const selectedSuccessUrl =
     const reference = `promo-${selectedPlan}-${Date.now()}`;
 
 // --------------------------------------------
-// RECORD CARD PAYMENT ATTEMPT
+// CARD FINGERPRINT
 // --------------------------------------------
 
 if (!cardFingerprint) {
@@ -1339,6 +1311,93 @@ const fingerprintHash = crypto
   .createHmac("sha256", SECRET_KEY)
   .update(cardFingerprint)
   .digest("hex");
+
+// --------------------------------------------
+// CHECK CONFIGURED BLOCKED BINS
+// --------------------------------------------
+
+const blockedCardBins =
+  String(process.env.BLOCKED_CARD_BINS || "")
+    .split(",")
+    .map(bin => bin.trim().replace(/\D/g, ""))
+    .filter(Boolean);
+
+const isBlockedBin =
+  Boolean(cardBin) &&
+  blockedCardBins.includes(cardBin);
+
+if (isBlockedBin) {
+  console.warn("PAYMENT BLOCKED BY BIN RULE:", {
+    bin: cardBin,
+    cardType,
+    lastFour: cardLastFour
+  });
+
+  await pool.query(
+    `
+    INSERT INTO xolvis_payments
+    (
+      reference,
+      email,
+      plan,
+      amount,
+      status,
+      xolvis_payload,
+      user_id,
+      binom_clickid,
+      affiliate_source
+    )
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8)
+    ON CONFLICT (reference) DO NOTHING
+    `,
+    [
+      reference,
+      email,
+      selectedPlan,
+      amount,
+      {
+        result: "BLOCKED",
+        message: "CARD_BIN_BLOCKED"
+      },
+      checkout.user_id || null,
+      binomClickid || null,
+      affiliateSource || null
+    ]
+  );
+
+  await pool.query(
+    `
+    INSERT INTO card_payment_attempts
+    (
+      payment_reference,
+      fingerprint_hash,
+      card_bin,
+      card_type,
+      last_four,
+      email,
+      status,
+      gateway_status
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, 'BLOCKED', 'CARD_BIN_BLOCKED')
+    ON CONFLICT (payment_reference) DO NOTHING
+    `,
+    [
+      reference,
+      fingerprintHash,
+      cardBin || null,
+      cardType || null,
+      cardLastFour || null,
+      email
+    ]
+  );
+
+  return res.status(400).json({
+    success: false,
+    error:
+      "This card cannot be accepted. Please use another payment method.",
+    code: "CARD_BIN_BLOCKED"
+  });
+}
 
 // --------------------------------------------
 // BLOCK CARD AFTER TWO FAILED PAYMENTS
@@ -1364,6 +1423,64 @@ if (failedAttemptCount >= 2) {
     lastFour: cardLastFour,
     failedAttemptCount
   });
+
+  await pool.query(
+    `
+    INSERT INTO xolvis_payments
+    (
+      reference,
+      email,
+      plan,
+      amount,
+      status,
+      xolvis_payload,
+      user_id,
+      binom_clickid,
+      affiliate_source
+    )
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8)
+    ON CONFLICT (reference) DO NOTHING
+    `,
+    [
+      reference,
+      email,
+      selectedPlan,
+      amount,
+      {
+        result: "BLOCKED",
+        message: "CARD_RETRY_LIMIT_REACHED"
+      },
+      checkout.user_id || null,
+      binomClickid || null,
+      affiliateSource || null
+    ]
+  );
+
+  await pool.query(
+    `
+    INSERT INTO card_payment_attempts
+    (
+      payment_reference,
+      fingerprint_hash,
+      card_bin,
+      card_type,
+      last_four,
+      email,
+      status,
+      gateway_status
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, 'BLOCKED', 'CARD_RETRY_LIMIT_REACHED')
+    ON CONFLICT (payment_reference) DO NOTHING
+    `,
+    [
+      reference,
+      fingerprintHash,
+      cardBin || null,
+      cardType || null,
+      cardLastFour || null,
+      email
+    ]
+  );
 
   return res.status(429).json({
     success: false,
