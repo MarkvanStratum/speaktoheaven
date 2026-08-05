@@ -1313,6 +1313,103 @@ const fingerprintHash = crypto
   .digest("hex");
 
 // --------------------------------------------
+// BLOCK UNSUPPORTED CARD BRANDS
+// --------------------------------------------
+
+const normalizedCardType =
+  String(cardType || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+
+const supportedCardTypes = [
+  "visa",
+  "mastercard",
+  "mastercarddebit",
+  "mastercardcredit",
+  "mc"
+];
+
+const isUnsupportedCardType =
+  Boolean(normalizedCardType) &&
+  !supportedCardTypes.includes(normalizedCardType);
+
+if (isUnsupportedCardType) {
+  console.warn("PAYMENT BLOCKED BY CARD TYPE RULE:", {
+    cardType,
+    normalizedCardType,
+    bin: cardBin,
+    lastFour: cardLastFour
+  });
+
+  await pool.query(
+    `
+    INSERT INTO xolvis_payments
+    (
+      reference,
+      email,
+      plan,
+      amount,
+      status,
+      xolvis_payload,
+      user_id,
+      binom_clickid,
+      affiliate_source
+    )
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8)
+    ON CONFLICT (reference) DO NOTHING
+    `,
+    [
+      reference,
+      email,
+      selectedPlan,
+      amount,
+      {
+        result: "BLOCKED",
+        message: "CARD_TYPE_NOT_SUPPORTED",
+        cardType: cardType || null
+      },
+      checkout.user_id || null,
+      binomClickid || null,
+      affiliateSource || null
+    ]
+  );
+
+  await pool.query(
+    `
+    INSERT INTO card_payment_attempts
+    (
+      payment_reference,
+      fingerprint_hash,
+      card_bin,
+      card_type,
+      last_four,
+      email,
+      status,
+      gateway_status
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, 'BLOCKED', 'CARD_TYPE_NOT_SUPPORTED')
+    ON CONFLICT (payment_reference) DO NOTHING
+    `,
+    [
+      reference,
+      fingerprintHash,
+      cardBin || null,
+      cardType || null,
+      cardLastFour || null,
+      email
+    ]
+  );
+
+  return res.status(400).json({
+    success: false,
+    error:
+      "Only Visa and Mastercard are accepted. Please use another card.",
+    code: "CARD_TYPE_NOT_SUPPORTED"
+  });
+}
+
+// --------------------------------------------
 // CHECK CONFIGURED BLOCKED BINS
 // --------------------------------------------
 
