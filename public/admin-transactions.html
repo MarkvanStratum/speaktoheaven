@@ -185,6 +185,9 @@
         <div class="card"><div class="card-label">Failed</div><div id="failedCount" class="card-value">0</div></div>
         <div class="card"><div class="card-label">Pending / created</div><div id="pendingCount" class="card-value">0</div></div>
         <div class="card"><div class="card-label">Approval rate</div><div id="approvalRate" class="card-value">0%</div></div>
+<div class="card"><div class="card-label">Gross revenue</div><div id="grossRevenue" class="card-value">£0.00</div></div>
+<div class="card"><div class="card-label">Estimated VAT</div><div id="estimatedVat" class="card-value">£0.00</div></div>
+<div class="card"><div class="card-label">Net revenue</div><div id="netRevenue" class="card-value">£0.00</div></div>
       </div>
 
       <div class="filters">
@@ -260,6 +263,9 @@
     const failedCount = byId("failedCount");
     const pendingCount = byId("pendingCount");
     const approvalRate = byId("approvalRate");
+const grossRevenue = byId("grossRevenue");
+const estimatedVat = byId("estimatedVat");
+const netRevenue = byId("netRevenue");
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -429,6 +435,54 @@ if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</spa
       renderTable();
     }
 
+const VAT_RATES = {
+  GB: 20,
+
+  AT: 20,
+  BE: 21,
+  BG: 20,
+  HR: 25,
+  CY: 19,
+  CZ: 21,
+  DK: 25,
+  EE: 24,
+  FI: 25.5,
+  FR: 20,
+  DE: 19,
+  GR: 24,
+  HU: 27,
+  IE: 23,
+  IT: 22,
+  LV: 21,
+  LT: 21,
+  LU: 17,
+  MT: 18,
+  NL: 21,
+  PL: 23,
+  PT: 23,
+  RO: 21,
+  SK: 23,
+  SI: 22,
+  ES: 21,
+  SE: 25
+};
+
+function getVatRate(transaction) {
+  const country =
+    String(transaction.card_country || "")
+      .trim()
+      .toUpperCase();
+
+  return VAT_RATES[country] || 0;
+}
+
+function calculateVatIncluded(amount, vatRate) {
+  if (!vatRate) {
+    return 0;
+  }
+
+  return amount - amount / (1 + vatRate / 100);
+}
     function isThreeDSExcluded(transaction) {
   const combinedText = [
     transaction.reason,
@@ -462,30 +516,35 @@ combinedText.includes("USER CANCELED")
 function renderSummary() {
   const total = filteredTransactions.length;
 
-  const successful = filteredTransactions.filter(
-    t => normalizeStatus(t) === "SUCCESSFUL"
-  ).length;
+  const successfulTransactions =
+    filteredTransactions.filter(
+      transaction =>
+        normalizeStatus(transaction) === "SUCCESSFUL"
+    );
+
+  const successful = successfulTransactions.length;
 
   const blocked = filteredTransactions.filter(
-    t => normalizeStatus(t) === "BLOCKED"
+    transaction =>
+      normalizeStatus(transaction) === "BLOCKED"
   ).length;
 
   const threeDSExcluded = filteredTransactions.filter(
-    t =>
-      normalizeStatus(t) !== "BLOCKED" &&
-      isThreeDSExcluded(t)
+    transaction =>
+      normalizeStatus(transaction) !== "BLOCKED" &&
+      isThreeDSExcluded(transaction)
   ).length;
 
   const failed = filteredTransactions.filter(
-    t =>
-      normalizeStatus(t) === "FAILED" &&
-      !isThreeDSExcluded(t)
+    transaction =>
+      normalizeStatus(transaction) === "FAILED" &&
+      !isThreeDSExcluded(transaction)
   ).length;
 
   const pending = filteredTransactions.filter(
-    t =>
-      normalizeStatus(t) === "CREATED" &&
-      !isThreeDSExcluded(t)
+    transaction =>
+      normalizeStatus(transaction) === "CREATED" &&
+      !isThreeDSExcluded(transaction)
   ).length;
 
   const completed = successful + failed;
@@ -495,15 +554,44 @@ function renderSummary() {
       ? (successful / completed) * 100
       : 0;
 
+  let grossAmount = 0;
+  let vatAmount = 0;
+
+  for (const transaction of successfulTransactions) {
+    const amount = Number(transaction.amount) || 0;
+    const vatRate = getVatRate(transaction);
+
+    grossAmount += amount;
+    vatAmount += calculateVatIncluded(
+      amount,
+      vatRate
+    );
+  }
+
+  const netAmount =
+    grossAmount - vatAmount;
+
   totalCount.textContent = total;
   successfulCount.textContent = successful;
- failedCount.textContent = failed;
+  failedCount.textContent = failed;
   pendingCount.textContent = pending;
   approvalRate.textContent = rate.toFixed(1) + "%";
 
+  grossRevenue.textContent =
+    "£" + grossAmount.toFixed(2);
+
+  estimatedVat.textContent =
+    "£" + vatAmount.toFixed(2);
+
+  netRevenue.textContent =
+    "£" + netAmount.toFixed(2);
+
   console.log({
     blocked,
-    threeDSExcluded
+    threeDSExcluded,
+    grossAmount,
+    vatAmount,
+    netAmount
   });
 }
 
