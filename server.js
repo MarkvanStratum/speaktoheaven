@@ -178,6 +178,29 @@ function getOptionalLoggedInUser(req) {
   }
 }
 
+// --------------------------------------------
+// ADMIN DASHBOARD PASSWORD CHECK
+// --------------------------------------------
+
+function requireAdminPassword(req, res, next) {
+  const enteredPassword =
+    req.headers["x-admin-password"] || "";
+
+  const correctPassword =
+    process.env.ADMIN_DASHBOARD_PASSWORD || "";
+
+  if (
+    !correctPassword ||
+    enteredPassword !== correctPassword
+  ) {
+    return res.status(401).json({
+      error: "Incorrect admin password"
+    });
+  }
+
+  next();
+}
+
 // JSON parser FIRST
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -1482,6 +1505,69 @@ if (!trackingCallbackUrl) {
     res.status(500).json({ error: "Could not create promo payment" });
   }
 });
+
+// --------------------------------------------
+// ADMIN TRANSACTIONS API
+// --------------------------------------------
+
+app.get(
+  "/api/admin/transactions",
+  requireAdminPassword,
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          p.reference,
+          p.email,
+          p.plan,
+          p.amount,
+          p.status AS payment_status,
+          p.created_at,
+          p.paid_at,
+          p.xolvis_uuid,
+          p.affiliate_source,
+
+          a.card_bin,
+          a.card_type,
+          a.last_four,
+          a.status AS attempt_status,
+          a.gateway_status,
+
+          COALESCE(
+            p.xolvis_payload->>'adapterMessage',
+            p.xolvis_payload->>'message',
+            p.xolvis_payload->>'result',
+            p.status
+          ) AS reason
+
+        FROM xolvis_payments p
+
+        LEFT JOIN card_payment_attempts a
+          ON a.payment_reference = p.reference
+
+        ORDER BY p.created_at DESC
+
+        LIMIT 500
+      `);
+
+      res.json({
+        success: true,
+        transactions: result.rows
+      });
+
+    } catch (error) {
+      console.error(
+        "Admin transactions error:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        error: "Could not load transactions"
+      });
+    }
+  }
+);
 
 const frontendPath = path.join(__dirname, "public");
 
