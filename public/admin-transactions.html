@@ -275,14 +275,19 @@
     String(transaction.attempt_status || "").toUpperCase();
 
   const payment =
-    String(transaction.payment_status || "").toUpperCase();
+  String(transaction.payment_status || "").toUpperCase();
 
-  if (
-    attempt === "BLOCKED" ||
-    payment === "BLOCKED"
-  ) {
-    return "BLOCKED";
-  }
+const gatewayStatus =
+  String(transaction.gateway_status || "").toUpperCase();
+
+if (
+  attempt === "BLOCKED" ||
+  payment === "BLOCKED" ||
+  gatewayStatus === "CARD_BIN_BLOCKED" ||
+  gatewayStatus === "CARD_RETRY_LIMIT_REACHED"
+) {
+  return "BLOCKED";
+}
 
   if (
     attempt === "SUCCESSFUL" ||
