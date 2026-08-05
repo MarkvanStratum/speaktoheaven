@@ -1665,16 +1665,23 @@ app.get(
     a.card_type,
     a.last_four,
     a.status AS attempt_status,
-    a.gateway_status,
+a.gateway_status,
 
-    COALESCE(
-      p.xolvis_payload->>'adapterMessage',
-      p.xolvis_payload->>'message',
-      p.xolvis_payload->>'result',
-      a.gateway_status,
-      a.status,
-      p.status
-    ) AS reason
+COALESCE(
+  p.xolvis_payload #>> '{returnData,binCountry}',
+  p.xolvis_payload #>> '{returnData,binRawData,data,country_alpha2}',
+  p.xolvis_payload #>> '{customer,binCountry}',
+  p.xolvis_payload->>'binCountry'
+) AS card_country,
+
+COALESCE(
+  p.xolvis_payload->>'adapterMessage',
+  p.xolvis_payload->>'message',
+  p.xolvis_payload->>'result',
+  a.gateway_status,
+  a.status,
+  p.status
+) AS reason
 
   FROM xolvis_payments p
 
@@ -1685,8 +1692,6 @@ app.get(
     p.created_at,
     a.created_at
   ) DESC
-
-  LIMIT 500
 `);
 
       res.json({
