@@ -81,7 +81,7 @@
     .card-value { font-size: 28px; font-weight: 800; }
     .filters {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto;
       gap: 12px;
       margin-bottom: 18px;
       padding: 16px;
@@ -201,12 +201,28 @@
         </select>
         <select id="planFilter"><option value="ALL">All plans</option></select>
         <select id="dateFilter">
-          <option value="ALL">All dates</option>
-          <option value="TODAY">Today</option>
-          <option value="7_DAYS">Last 7 days</option>
-          <option value="30_DAYS">Last 30 days</option>
-        </select>
-        <button id="clearFiltersButton" class="secondary-button">Clear</button>
+  <option value="ALL">All dates</option>
+  <option value="TODAY">Today</option>
+  <option value="7_DAYS">Last 7 days</option>
+  <option value="30_DAYS">Last 30 days</option>
+  <option value="CUSTOM">Custom date range</option>
+</select>
+
+<input
+  id="startDateInput"
+  type="date"
+  aria-label="From date"
+  title="From date"
+/>
+
+<input
+  id="endDateInput"
+  type="date"
+  aria-label="To date"
+  title="To date"
+/>
+
+<button id="clearFiltersButton" class="secondary-button">Clear</button>
       </div>
 
       <div class="table-wrap">
@@ -255,6 +271,8 @@
     const statusFilter = byId("statusFilter");
     const planFilter = byId("planFilter");
     const dateFilter = byId("dateFilter");
+const startDateInput = byId("startDateInput");
+const endDateInput = byId("endDateInput");
     const statusLine = byId("statusLine");
     const transactionsBody = byId("transactionsBody");
     const emptyState = byId("emptyState");
@@ -336,23 +354,66 @@ if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</spa
       return Number.isNaN(amount) ? "-" : "£" + amount.toFixed(2);
     }
 
-    function isWithinDateFilter(dateValue, filterValue) {
-      if (filterValue === "ALL") return true;
-      const transactionDate = new Date(dateValue);
-      if (Number.isNaN(transactionDate.getTime())) return false;
-      const now = new Date();
+    function isWithinDateFilter(
+  dateValue,
+  filterValue,
+  startDateValue,
+  endDateValue
+) {
+  const transactionDate = new Date(dateValue);
 
-      if (filterValue === "TODAY") {
-        return transactionDate.getFullYear() === now.getFullYear() &&
-               transactionDate.getMonth() === now.getMonth() &&
-               transactionDate.getDate() === now.getDate();
+  if (Number.isNaN(transactionDate.getTime())) {
+    return false;
+  }
+
+  const now = new Date();
+
+  if (filterValue === "TODAY") {
+    return (
+      transactionDate.getFullYear() === now.getFullYear() &&
+      transactionDate.getMonth() === now.getMonth() &&
+      transactionDate.getDate() === now.getDate()
+    );
+  }
+
+  if (filterValue === "7_DAYS") {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    return transactionDate >= sevenDaysAgo;
+  }
+
+  if (filterValue === "30_DAYS") {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    return transactionDate >= thirtyDaysAgo;
+  }
+
+  if (filterValue === "CUSTOM") {
+    if (startDateValue) {
+      const startDate =
+        new Date(startDateValue + "T00:00:00");
+
+      if (transactionDate < startDate) {
+        return false;
       }
-
-      const days = (now.getTime() - transactionDate.getTime()) / 86400000;
-      if (filterValue === "7_DAYS") return days <= 7;
-      if (filterValue === "30_DAYS") return days <= 30;
-      return true;
     }
+
+    if (endDateValue) {
+      const endDate =
+        new Date(endDateValue + "T23:59:59.999");
+
+      if (transactionDate > endDate) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return true;
+}
 
     async function loadTransactions(showLoginError = false) {
       statusLine.textContent = "Loading transactions...";
@@ -407,7 +468,9 @@ if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</spa
       const searchValue = searchInput.value.trim().toLowerCase();
       const selectedStatus = statusFilter.value;
       const selectedPlan = planFilter.value;
-      const selectedDate = dateFilter.value;
+const selectedDate = dateFilter.value;
+const selectedStartDate = startDateInput.value;
+const selectedEndDate = endDateInput.value;
 
       filteredTransactions = allTransactions.filter(transaction => {
         const status = normalizeStatus(transaction);
@@ -429,7 +492,12 @@ if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</spa
         return (!searchValue || searchable.includes(searchValue)) &&
                (selectedStatus === "ALL" || status === selectedStatus) &&
                (selectedPlan === "ALL" || String(transaction.plan || "") === selectedPlan) &&
-               isWithinDateFilter(transaction.created_at, selectedDate);
+               isWithinDateFilter(
+  transaction.created_at,
+  selectedDate,
+  selectedStartDate,
+  selectedEndDate
+);
       });
 
       renderSummary();
@@ -666,10 +734,12 @@ function renderSummary() {
 
     function clearFilters() {
       searchInput.value = "";
-      statusFilter.value = "ALL";
-      planFilter.value = "ALL";
-      dateFilter.value = "ALL";
-      applyFilters();
+statusFilter.value = "ALL";
+planFilter.value = "ALL";
+dateFilter.value = "ALL";
+startDateInput.value = "";
+endDateInput.value = "";
+applyFilters();
     }
 
     function logout() {
@@ -705,6 +775,21 @@ function renderSummary() {
     statusFilter.addEventListener("change", applyFilters);
     planFilter.addEventListener("change", applyFilters);
     dateFilter.addEventListener("change", applyFilters);
+startDateInput.addEventListener("change", () => {
+  if (startDateInput.value) {
+    dateFilter.value = "CUSTOM";
+  }
+
+  applyFilters();
+});
+
+endDateInput.addEventListener("change", () => {
+  if (endDateInput.value) {
+    dateFilter.value = "CUSTOM";
+  }
+
+  applyFilters();
+});
   </script>
 </body>
 </html>
