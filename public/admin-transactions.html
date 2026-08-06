@@ -236,8 +236,9 @@
               <th>Status</th>
               <th>Reason</th>
               <th>BIN</th>
-              <th>Card</th>
-              <th>Last 4</th>
+<th>Country</th>
+<th>Card</th>
+<th>Last 4</th>
               <th>Affiliate</th>
               <th>Reference</th>
               <th>Xolvis UUID</th>
@@ -688,8 +689,9 @@ function renderSummary() {
           <td>${getStatusBadge(status)}</td>
           <td>${escapeHtml(reason)}</td>
           <td class="mono">${escapeHtml(transaction.card_bin || "-")}</td>
-          <td>${escapeHtml(transaction.card_type || "-")}</td>
-          <td class="mono">${escapeHtml(transaction.last_four || "-")}</td>
+<td>${escapeHtml(transaction.card_country || "-")}</td>
+<td>${escapeHtml(transaction.card_type || "-")}</td>
+<td class="mono">${escapeHtml(transaction.last_four || "-")}</td>
           <td>${escapeHtml(transaction.affiliate_source || "-")}</td>
           <td class="mono">${escapeHtml(transaction.reference || "-")}</td>
           <td class="mono">${escapeHtml(transaction.xolvis_uuid || "-")}</td>
@@ -704,7 +706,21 @@ function renderSummary() {
     }
 
     function downloadCsv() {
-      const headers = ["Date and time","Email","Amount","Plan","Status","Reason","BIN","Card type","Last four","Affiliate source","Reference","Xolvis UUID"];
+      const headers = [
+  "Date and time",
+  "Email",
+  "Amount",
+  "Plan",
+  "Status",
+  "Reason",
+  "BIN",
+  "Country",
+  "Card type",
+  "Last four",
+  "Affiliate source",
+  "Reference",
+  "Xolvis UUID"
+];
       const rows = filteredTransactions.map(t => [
         formatDate(t.created_at),
         t.email || "",
@@ -713,8 +729,9 @@ function renderSummary() {
         normalizeStatus(t),
         t.reason || t.gateway_status || t.payment_status || "",
         t.card_bin || "",
-        t.card_type || "",
-        t.last_four || "",
+t.card_country || "",
+t.card_type || "",
+t.last_four || "",
         t.affiliate_source || "",
         t.reference || "",
         t.xolvis_uuid || ""
