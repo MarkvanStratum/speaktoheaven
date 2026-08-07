@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sichere Kasse</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+    </script>
+    <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde" type="text/javascript" async></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f7f7f7; color: #1a1a1a; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 24px 16px;
+        }
+        .payment-card {
+            background: #fff; border-radius: 12px; width: 100%; max-width: 420px;
+            padding: 40px 32px 32px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+        .amount { font-size: 42px; font-weight: 600; text-align: center; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { text-align: center; color: #6b6b6b; font-size: 15px; margin-top: 6px; margin-bottom: 28px; }
+        .divider { height: 1px; background: #e5e5e5; margin-bottom: 28px; }
+        .field-group { margin-bottom: 18px; }
+        .field-label { display: block; font-size: 13px; color: #6b6b6b; margin-bottom: 6px; }
+        .input-wrapper {
+            display: flex; align-items: center; border: 1px solid #d0d0d0;
+            border-radius: 8px; background: #fff; height: 48px; padding: 0 14px;
+            transition: border-color 0.15s;
+        }
+        .input-wrapper:focus-within { border-color: #1a73e8; box-shadow: 0 0 0 1px #1a73e8; }
+        .input-wrapper input { border: none; outline: none; font-size: 15px; width: 100%; background: transparent; color: #1a1a1a; }
+        .input-wrapper input::placeholder { color: #b0b0b0; }
+        .row { display: flex; gap: 14px; }
+        .row .field-group { flex: 1; }
+        .pay-btn {
+            display: block; width: 100%; height: 52px; margin-top: 28px;
+            background: #1a73e8; color: #fff; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; transition: background 0.15s;
+        }
+        .pay-btn:hover { background: #1557b0; }
+        .pay-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+        .err {
+            display: none; background: #fff1f1; border: 1px solid #f5bcbc;
+            padding: 10px; border-radius: 8px; margin-top: 14px; color: #9a1a1a; font-size: 13px;
+        }
+        .err[aria-hidden="false"] { display: block; }
+        .footer-logos { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 32px; opacity: 0.55; }
+        .footer-logos svg { height: 18px; width: auto; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(246,249,252,.92); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        .loading-overlay[aria-hidden="false"] { display: flex; }
+        .loading-box { width: min(92vw,420px); background: #fff; border: 1px solid #e6edf5; border-radius: 14px; padding: 24px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+        .loading-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+        .progress-wrap { width: 100%; height: 10px; background: #ecf1f8; border-radius: 999px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
+        @keyframes loadingBar { 0% { width: 0% } 60% { width: 80% } 100% { width: 100% } }
+        @media (max-width: 480px) { .payment-card { padding: 32px 20px 24px; } .amount { font-size: 36px; } .row { flex-direction: column; gap: 0; } }
+    </style>
+</head>
+<body>
+
+<script>
+    sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<div class="payment-card">
+    <div class="amount">9,95 €</div>
+    <div class="subtitle" id="checkout-subtitle">Sichere Kasse</div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+        <div class="field-group">
+            <label class="field-label" for="firstName">Vorname</label>
+            <div class="input-wrapper">
+                <input id="firstName" type="text" placeholder="Max" required>
+            </div>
+        </div>
+        <div class="field-group">
+            <label class="field-label" for="lastName">Nachname</label>
+            <div class="input-wrapper">
+                <input id="lastName" type="text" placeholder="Mustermann" required>
+            </div>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label" for="emailInput">E-Mail-Adresse</label>
+        <div class="input-wrapper">
+            <input id="emailInput" type="email" placeholder="max@beispiel.de" required>
+        </div>
+    </div>
+
+    <div id="err" class="err" aria-hidden="true"></div>
+
+    <button id="nextBtn" class="pay-btn">Weiter zur Zahlung</button>
+
+    <div class="footer-logos">
+        <svg viewBox="0 0 193.4 68.4"><g><g><g><g><path d="M33,30.5c0,1.3-0.5,2.3-1.4,2.8c-0.9,0.6-2.3,0.9-4,0.9h-1.2v-7.3h1.3C31.2,26.9,33,28.1,33,30.5z" fill="#6b6b6b"></path><path d="M96.8,27.8L84.3,0L0,4.7l23.4,63.7l46.3-14.5l-6.2-5h-0.2c-2.9,0-5.5-0.3-7.7-1c-2.3-0.7-4.2-1.6-5.8-2.8c-1.6-1.2-2.8-2.7-3.6-4.4C45.4,38.9,45,37,45,34.9s0.4-4,1.3-5.8c0.9-1.7,2.1-3.2,3.7-4.5c1.6-1.2,3.5-2.2,5.7-2.9s4.6-1,7.2-1c2,0,3.9,0.1,5.6,0.4c1.7,0.4,1.7,0.4,3,0.9v7.3c-1-0.6-2.2-1.1-3.5-1.4c-1.3-0.4-2.7-0.6-4.1-0.6c-2.4,0-4.3,0.7-5.8,1.9c-1.5,1.3-2.2,3.1-2.2,5.6c0,1.2,0.2,2.3,0.7,3.3c0.5,0.9,1.1,1.7,1.9,2.3s1.7,1.1,2.8,1.4c0.7,0.2,1.4,0.3,2.1,0.4l9.2-11.4l3.8,3.1V21.1H87v18.1C89.7,35.7,93,31.8,96.8,27.8z M41.9,34.7c-0.7,1.2-1.7,2.3-3,3.1c-1.3,0.8-2.9,1.4-4.7,1.8c-1.8,0.4-3.8,0.6-6.1,0.6h-1.6v8.2H16.1V21.1h12.2c4.6,0,8.2,0.8,10.8,2.3c2.6,1.5,3.9,3.9,3.9,7C43,32,42.6,33.4,41.9,34.7z M86.3,16.8c-1.2,1-2.7,1.6-4.5,1.6s-3.3-0.5-4.5-1.6c-1.2-1-1.8-2.5-1.8-4.3c0-1.9,0.6-3.3,1.8-4.4C78.5,7,80,6.5,81.8,6.5s3.3,0.5,4.5,1.6c1.2,1,1.8,2.5,1.8,4.4C88.1,14.3,87.5,15.8,86.3,16.8z" fill="#6b6b6b"></path></g></g></g></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="2.11676in" height="1.5in" viewBox="0 0 152.407 108"><g><rect width="152.407" height="108" fill="none"></rect><g><rect x="60.4117" y="25.6968" width="31.5" height="56.6064" fill="#B8B8B8"></rect><path d="M382.20839,306a35.9375,35.9375,0,0,1,13.7499-28.3032,36,36,0,1,0,0,56.6064A35.938,35.938,0,0,1,382.20839,306Z" transform="translate(-319.79649 -252)" fill="#404040"></path><path d="M454.20349,306a35.99867,35.99867,0,0,1-58.2452,28.3032,36.00518,36.00518,0,0,0,0-56.6064A35.99867,35.99867,0,0,1,454.20349,306Z" transform="translate(-319.79649 -252)" fill="#7A7A7A"></path></g></g></svg>
+        <svg viewBox="0 0 3384.54 2077.85"><path d="M1461.26,739.84l-251.37,599.74h-164l-123.7-478.62c-7.51-29.48-14.04-40.28-36.88-52.7c-37.29-20.23-98.87-39.21-153.05-50.99l3.68-17.43h263.99c33.65,0,63.9,22.4,71.54,61.15l65.33,347.04l161.46-408.2H1461.26z M2103.84,1143.77c0.66-158.29-218.88-167.01-217.37-237.72c0.47-21.52,20.96-44.4,65.81-50.24c22.23-2.91,83.48-5.13,152.95,26.84l27.25-127.18c-37.33-13.55-85.36-26.59-145.12-26.59c-153.35,0-261.27,81.52-262.18,198.25c-0.99,86.34,77.03,134.52,135.81,163.21c60.47,29.38,80.76,48.26,80.53,74.54c-0.43,40.23-48.23,57.99-92.9,58.69c-77.98,1.2-123.23-21.1-159.3-37.87l-28.12,131.39c36.25,16.63,103.16,31.14,172.53,31.87C1996.72,1348.96,2103.34,1268.45,2103.84,1143.77 M2508.78,1339.58h143.49l-125.25-599.74h-132.44c-29.78,0-54.9,17.34-66.02,44l-232.81,555.74h162.91L2291,1250h199.05L2508.78,1339.58z M2335.67,1127.08l81.66-225.18l47,225.18H2335.67z M1682.93,739.84l-128.29,599.74H1399.5l128.34-599.74H1682.93z" fill="#6b6b6b"></path></svg>
+    </div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+    <div class="loading-box">
+        <div class="loading-title">Sichere Kasse wird erstellt…</div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
+        <p style="margin-top:10px; font-size: 13px; color: #5b6b82;">Bitte warten Sie einige Sekunden…</p>
+    </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const affiliateRef = params.get('ref');
+
+if (!affiliateRef) {
+    window.location.replace('https://www.speaktoheaven.com');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const d = v => {
+        try { return decodeURIComponent(v || '') }
+        catch { return v || '' }
+    };
+
+    const nextBtn = document.getElementById('nextBtn');
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const emailInput = document.getElementById('emailInput');
+    const err = document.getElementById('err');
+    const overlay = document.getElementById("loading-overlay");
+
+    if (params.get('sub1')) {
+        document.getElementById("checkout-subtitle").textContent = d(params.get('sub1'));
+    }
+
+    if (params.get('sub3')) firstName.value = d(params.get('sub3'));
+    if (params.get('sub4')) lastName.value = d(params.get('sub4'));
+    if (params.get('sub9')) emailInput.value = d(params.get('sub9'));
+
+    nextBtn.onclick = async () => {
+        err.setAttribute("aria-hidden", "true");
+
+        if (!firstName.value.trim() || !lastName.value.trim() || !emailInput.value.trim()) {
+            err.textContent = "Bitte füllen Sie alle erforderlichen Felder aus.";
+            err.setAttribute("aria-hidden", "false");
+            return;
+        }
+
+        try {
+            nextBtn.disabled = true;
+            overlay.setAttribute("aria-hidden", "false");
+
+            const response = await fetch("https://www.speaktoheaven.com/api/create-promo-checkout-link", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    plan: "lifetime",
+                    step2File: "xo-de2-999-2.html",
+                    currency: "EUR",
+                    amount: 49.95,
+                    sourcePage: window.location.href,
+                    firstName: firstName.value.trim(),
+                    lastName: lastName.value.trim(),
+                    name: `${firstName.value.trim()} ${lastName.value.trim()}`,
+                    email: emailInput.value.trim(),
+                    country: "Germany",
+                    ref: affiliateRef,
+                    originalQueryString: sessionStorage.getItem("orig_qs") || "",
+                    successUrl: "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7"
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.url) {
+                throw new Error(data.error || "Sicherer Checkout-Link konnte nicht erstellt werden.");
+            }
+
+            let nextUrl = "https://www.speaktoheaven.com" + data.url +
+                "?ref=" + encodeURIComponent(affiliateRef) +
+                "&sub1=" + encodeURIComponent(params.get("sub1") || "") +
+                "&sub2=" + encodeURIComponent(params.get("sub2") || "") +
+                "&sub3=" + encodeURIComponent(firstName.value.trim()) +
+                "&sub4=" + encodeURIComponent(lastName.value.trim());
+
+            const subId = params.get("sub_id");
+            if (subId) nextUrl += "&sub_id=" + encodeURIComponent(subId);
+
+            window.location.href = nextUrl;
+
+        } catch (error) {
+            overlay.setAttribute("aria-hidden", "true");
+            nextBtn.disabled = false;
+            err.textContent = error.message || "Sicherer Checkout konnte nicht geöffnet werden.";
+            err.setAttribute("aria-hidden", "false");
+        }
+    };
+});
+</script>
+</body>
+</html>
