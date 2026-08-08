@@ -200,6 +200,9 @@
           <option value="CREATED">Created / pending</option>
         </select>
         <select id="planFilter"><option value="ALL">All plans</option></select>
+<select id="countryFilter">
+  <option value="ALL">All countries</option>
+</select>
         <select id="dateFilter">
   <option value="ALL">All dates</option>
   <option value="TODAY">Today</option>
@@ -271,6 +274,7 @@
     const searchInput = byId("searchInput");
     const statusFilter = byId("statusFilter");
     const planFilter = byId("planFilter");
+const countryFilter = byId("countryFilter");
     const dateFilter = byId("dateFilter");
 const startDateInput = byId("startDateInput");
 const endDateInput = byId("endDateInput");
@@ -437,7 +441,8 @@ if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</spa
         dashboard.style.display = "block";
 
         populatePlanFilter();
-        applyFilters();
+populateCountryFilter();
+applyFilters();
         statusLine.textContent = "Last refreshed: " + new Date().toLocaleTimeString();
 
         if (!refreshTimer) {
@@ -465,10 +470,37 @@ if (status === "BLOCKED") return '<span class="badge badge-blocked">Blocked</spa
       if (plans.includes(currentValue)) planFilter.value = currentValue;
     }
 
+function populateCountryFilter() {
+  const currentValue = countryFilter.value;
+
+  const countries = [
+    ...new Set(
+      allTransactions
+        .map(t => String(t.card_country || "").trim().toUpperCase())
+        .filter(Boolean)
+    )
+  ].sort();
+
+  countryFilter.innerHTML =
+    '<option value="ALL">All countries</option>';
+
+  for (const country of countries) {
+    const option = document.createElement("option");
+    option.value = country;
+    option.textContent = country;
+    countryFilter.appendChild(option);
+  }
+
+  if (countries.includes(currentValue)) {
+    countryFilter.value = currentValue;
+  }
+}
+
     function applyFilters() {
       const searchValue = searchInput.value.trim().toLowerCase();
       const selectedStatus = statusFilter.value;
       const selectedPlan = planFilter.value;
+const selectedCountry = countryFilter.value;
 const selectedDate = dateFilter.value;
 const selectedStartDate = startDateInput.value;
 const selectedEndDate = endDateInput.value;
@@ -491,14 +523,18 @@ const selectedEndDate = endDateInput.value;
         ].map(v => String(v || "").toLowerCase()).join(" ");
 
         return (!searchValue || searchable.includes(searchValue)) &&
-               (selectedStatus === "ALL" || status === selectedStatus) &&
-               (selectedPlan === "ALL" || String(transaction.plan || "") === selectedPlan) &&
-               isWithinDateFilter(
-  transaction.created_at,
-  selectedDate,
-  selectedStartDate,
-  selectedEndDate
-);
+       (selectedStatus === "ALL" || status === selectedStatus) &&
+       (selectedPlan === "ALL" || String(transaction.plan || "") === selectedPlan) &&
+       (
+         selectedCountry === "ALL" ||
+         String(transaction.card_country || "").trim().toUpperCase() === selectedCountry
+       ) &&
+       isWithinDateFilter(
+         transaction.created_at,
+         selectedDate,
+         selectedStartDate,
+         selectedEndDate
+       );
       });
 
       renderSummary();
@@ -753,6 +789,7 @@ t.last_four || "",
       searchInput.value = "";
 statusFilter.value = "ALL";
 planFilter.value = "ALL";
+countryFilter.value = "ALL";
 dateFilter.value = "ALL";
 startDateInput.value = "";
 endDateInput.value = "";
@@ -791,6 +828,7 @@ applyFilters();
     searchInput.addEventListener("input", applyFilters);
     statusFilter.addEventListener("change", applyFilters);
     planFilter.addEventListener("change", applyFilters);
+countryFilter.addEventListener("change", applyFilters);
     dateFilter.addEventListener("change", applyFilters);
 startDateInput.addEventListener("change", () => {
   if (startDateInput.value) {
