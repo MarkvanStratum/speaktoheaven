@@ -1988,12 +1988,57 @@ app.post(
 
         let matchedPayment = null;
 
+const merchantReference =
+  String(
+    row["Merch Tran Ref."] || ""
+  ).trim();
+
+if (merchantReference) {
+  const referenceMatch =
+    await pool.query(
+      `
+      SELECT
+        p.reference,
+        p.email,
+        p.plan,
+        p.affiliate_source,
+        p.amount,
+        a.card_type,
+
+        COALESCE(
+          p.xolvis_payload #>> '{returnData,binCountry}',
+          p.xolvis_payload #>> '{returnData,binRawData,data,country_alpha2}',
+          p.xolvis_payload #>> '{customer,binCountry}',
+          p.xolvis_payload->>'binCountry'
+        ) AS card_country
+
+      FROM xolvis_payments p
+
+      LEFT JOIN card_payment_attempts a
+        ON a.payment_reference = p.reference
+
+      WHERE p.reference = $1
+
+      LIMIT 1
+      `,
+      [merchantReference]
+    );
+
+  if (referenceMatch.rows.length) {
+    matchedPayment =
+      referenceMatch.rows[0];
+
+    matched++;
+  }
+}
+
         if (
-          cardBin &&
-          lastFour &&
-          transactionDate &&
-          Number.isFinite(amount)
-        ) {
+  !matchedPayment &&
+  cardBin &&
+  lastFour &&
+  transactionDate &&
+  Number.isFinite(amount)
+) {
           const matchResult =
             await pool.query(
               `
