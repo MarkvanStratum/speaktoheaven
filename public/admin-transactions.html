@@ -1864,11 +1864,15 @@ chargebacksTabButton.addEventListener(
     )
 );
 
-uploadChargebacksButton.addEventListener(
-  "click",
-  uploadChargebackCsv
-);
+uploadChargebacksButton.addEventListener("click", () => {
+  chargebackFileInput.click();
+});
 
+chargebackFileInput.addEventListener("change", () => {
+  if (chargebackFileInput.files.length > 0) {
+    uploadChargebackCsv();
+  }
+});
 refreshChargebacksButton.addEventListener(
   "click",
   () =>
