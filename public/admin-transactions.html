@@ -140,13 +140,76 @@
     .badge-created { background: #78350f; color: #fde68a; }
     .badge-other { background: #334155; color: #e2e8f0; }
     .empty-state { padding: 40px; text-align: center; color: #94a3b8; }
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 18px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: #334155;
+  color: #fff;
+}
+
+.tab-button.active {
+  background: #2563eb;
+}
+
+.view-hidden {
+  display: none !important;
+}
+
+.chargeback-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 16px;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 12px;
+}
+
+.chargeback-toolbar input[type="file"] {
+  max-width: 420px;
+  color: #e5e7eb;
+}
+
+.chargeback-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 12px;
+}
+
+.chargeback-filters select,
+.chargeback-filters input {
+  width: 100%;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.chargeback-note {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: -8px 0 18px;
+}
     @media (max-width: 1100px) {
       .cards { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
-      .filters { grid-template-columns: 1fr 1fr; }
+      .filters, .chargeback-filters { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 640px) {
       .page { padding: 14px; }
-      .cards, .filters { grid-template-columns: 1fr; }
+      .cards, .filters, .chargeback-filters { grid-template-columns: 1fr; }
       .login-row { flex-direction: column; }
       .header h1 { font-size: 24px; }
     }
@@ -178,6 +241,12 @@
       </div>
 
       <div id="statusLine" class="status-line">Waiting for data...</div>
+<div class="tabs">
+  <button id="transactionsTabButton" class="tab-button active">Transactions</button>
+  <button id="chargebacksTabButton" class="tab-button">Chargebacks</button>
+</div>
+
+<div id="transactionsView">
 
       <div class="cards">
         <div class="card"><div class="card-label">Total transactions</div><div id="totalCount" class="card-value">0</div></div>
@@ -250,15 +319,170 @@
           <tbody id="transactionsBody"></tbody>
         </table>
         <div id="emptyState" class="empty-state" style="display:none;">No transactions match the selected filters.</div>
-      </div>
+            </div>
+    </div>
+
+<div id="chargebacksView" class="view-hidden">
+
+  <div class="chargeback-toolbar">
+    <input
+      id="chargebackFileInput"
+      type="file"
+      accept=".csv,text/csv"
+    />
+
+    <button
+      id="uploadChargebacksButton"
+      class="primary-button"
+    >
+      Upload chargeback CSV
+    </button>
+
+    <button
+      id="refreshChargebacksButton"
+      class="secondary-button"
+    >
+      Refresh chargebacks
+    </button>
+  </div>
+
+  <div
+    id="chargebackStatusLine"
+    class="status-line"
+  >
+    No chargeback file uploaded yet.
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Successful sales</div>
+      <div id="cbSuccessfulSales" class="card-value">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Chargebacks</div>
+      <div id="cbCount" class="card-value">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Chargeback rate</div>
+      <div id="cbRate" class="card-value">0%</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Chargeback amount</div>
+      <div id="cbAmount" class="card-value">£0.00</div>
     </div>
   </div>
 
-  <script>
-    const API_URL = "/api/admin/transactions";
+  <div class="chargeback-filters">
+
+    <select id="cbGroupBy">
+      <option value="card_bin">Rows: BIN</option>
+      <option value="card_country">Rows: Country</option>
+      <option value="affiliate_source">Rows: Affiliate</option>
+      <option value="plan">Rows: Plan</option>
+      <option value="card_type">Rows: Card type</option>
+      <option value="reason_code">Rows: Reason</option>
+      <option value="network">Rows: Network</option>
+    </select>
+
+    <select id="cbSortBy">
+      <option value="rate_desc">Sort: Chargeback rate</option>
+      <option value="chargebacks_desc">Sort: Chargebacks</option>
+      <option value="amount_desc">Sort: Chargeback amount</option>
+      <option value="sales_desc">Sort: Successful sales</option>
+      <option value="group_asc">Sort: Group name</option>
+    </select>
+
+    <select id="cbCountryFilter">
+      <option value="ALL">All countries</option>
+    </select>
+
+    <select id="cbAffiliateFilter">
+      <option value="ALL">All affiliates</option>
+    </select>
+
+    <select id="cbPlanFilter">
+      <option value="ALL">All plans</option>
+    </select>
+
+    <select id="cbCardTypeFilter">
+      <option value="ALL">All card types</option>
+    </select>
+
+    <select id="cbReasonFilter">
+      <option value="ALL">All reasons</option>
+    </select>
+
+    <select id="cbNetworkFilter">
+      <option value="ALL">All networks</option>
+    </select>
+
+    <input
+      id="cbStartDate"
+      type="date"
+      title="Chargeback from date"
+      aria-label="Chargeback from date"
+    />
+
+    <input
+      id="cbEndDate"
+      type="date"
+      title="Chargeback to date"
+      aria-label="Chargeback to date"
+    />
+
+    <button
+      id="cbClearFilters"
+      class="secondary-button"
+    >
+      Clear chargeback filters
+    </button>
+
+  </div>
+
+  <div class="chargeback-note">
+    The rate is chargebacks divided by successful sales for the same selected traffic. BIN is the default row grouping.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th id="cbGroupHeader">BIN</th>
+          <th>Successful sales</th>
+          <th>Chargebacks</th>
+          <th>Chargeback rate</th>
+          <th>Chargeback amount</th>
+          <th>Average CB amount</th>
+        </tr>
+      </thead>
+
+      <tbody id="chargebackPivotBody"></tbody>
+    </table>
+
+    <div
+      id="chargebackEmptyState"
+      class="empty-state"
+      style="display:none;"
+    >
+      No chargeback data matches the selected filters.
+    </div>
+  </div>
+
+</div>
+
+    </div>
+  </div>
+
+  <script>    const API_URL = "/api/admin/transactions";
+const CHARGEBACKS_API_URL = "/api/admin/chargebacks";
+const CHARGEBACK_UPLOAD_URL = "/api/admin/chargebacks/upload";
     let adminPassword = "";
     let allTransactions = [];
     let filteredTransactions = [];
+let allChargebacks = [];
     let refreshTimer = null;
 
     const byId = id => document.getElementById(id);
@@ -289,6 +513,40 @@ const endDateInput = byId("endDateInput");
 const grossRevenue = byId("grossRevenue");
 const estimatedVat = byId("estimatedVat");
 const netRevenue = byId("netRevenue");
+const transactionsTabButton = byId("transactionsTabButton");
+const chargebacksTabButton = byId("chargebacksTabButton");
+
+const transactionsView = byId("transactionsView");
+const chargebacksView = byId("chargebacksView");
+
+const chargebackFileInput = byId("chargebackFileInput");
+const uploadChargebacksButton = byId("uploadChargebacksButton");
+const refreshChargebacksButton = byId("refreshChargebacksButton");
+const chargebackStatusLine = byId("chargebackStatusLine");
+
+const cbSuccessfulSales = byId("cbSuccessfulSales");
+const cbCount = byId("cbCount");
+const cbRate = byId("cbRate");
+const cbAmount = byId("cbAmount");
+
+const cbGroupBy = byId("cbGroupBy");
+const cbSortBy = byId("cbSortBy");
+
+const cbCountryFilter = byId("cbCountryFilter");
+const cbAffiliateFilter = byId("cbAffiliateFilter");
+const cbPlanFilter = byId("cbPlanFilter");
+const cbCardTypeFilter = byId("cbCardTypeFilter");
+const cbReasonFilter = byId("cbReasonFilter");
+const cbNetworkFilter = byId("cbNetworkFilter");
+
+const cbStartDate = byId("cbStartDate");
+const cbEndDate = byId("cbEndDate");
+
+const cbClearFilters = byId("cbClearFilters");
+
+const cbGroupHeader = byId("cbGroupHeader");
+const chargebackPivotBody = byId("chargebackPivotBody");
+const chargebackEmptyState = byId("chargebackEmptyState");
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -785,6 +1043,749 @@ t.last_four || "",
       URL.revokeObjectURL(url);
     }
 
+function showDashboardView(viewName) {
+  const showChargebacks =
+    viewName === "chargebacks";
+
+  transactionsView.classList.toggle(
+    "view-hidden",
+    showChargebacks
+  );
+
+  chargebacksView.classList.toggle(
+    "view-hidden",
+    !showChargebacks
+  );
+
+  transactionsTabButton.classList.toggle(
+    "active",
+    !showChargebacks
+  );
+
+  chargebacksTabButton.classList.toggle(
+    "active",
+    showChargebacks
+  );
+
+  if (showChargebacks) {
+    loadChargebacks(false);
+  }
+}
+
+function fillSelect(
+  select,
+  values,
+  allLabel
+) {
+  const current = select.value;
+
+  const cleaned = [
+    ...new Set(
+      values
+        .map(
+          value =>
+            String(value || "").trim()
+        )
+        .filter(Boolean)
+    )
+  ].sort();
+
+  select.innerHTML =
+    '<option value="ALL">' +
+    allLabel +
+    "</option>";
+
+  for (const value of cleaned) {
+    const option =
+      document.createElement("option");
+
+    option.value = value;
+    option.textContent = value;
+
+    select.appendChild(option);
+  }
+
+  if (cleaned.includes(current)) {
+    select.value = current;
+  }
+}
+
+function populateChargebackFilters() {
+  const transactionCountries =
+    allTransactions.map(
+      transaction =>
+        String(
+          transaction.card_country || ""
+        )
+          .trim()
+          .toUpperCase()
+    );
+
+  const chargebackCountries =
+    allChargebacks.map(
+      chargeback =>
+        String(
+          chargeback.card_country || ""
+        )
+          .trim()
+          .toUpperCase()
+    );
+
+  fillSelect(
+    cbCountryFilter,
+    transactionCountries.concat(
+      chargebackCountries
+    ),
+    "All countries"
+  );
+
+  fillSelect(
+    cbAffiliateFilter,
+    allTransactions
+      .map(t => t.affiliate_source)
+      .concat(
+        allChargebacks.map(
+          c => c.affiliate_source
+        )
+      ),
+    "All affiliates"
+  );
+
+  fillSelect(
+    cbPlanFilter,
+    allTransactions
+      .map(t => t.plan)
+      .concat(
+        allChargebacks.map(
+          c => c.plan
+        )
+      ),
+    "All plans"
+  );
+
+  fillSelect(
+    cbCardTypeFilter,
+    allTransactions
+      .map(t => t.card_type)
+      .concat(
+        allChargebacks.map(
+          c => c.card_type
+        )
+      ),
+    "All card types"
+  );
+
+  fillSelect(
+    cbReasonFilter,
+    allChargebacks.map(
+      c => c.reason_code
+    ),
+    "All reasons"
+  );
+
+  fillSelect(
+    cbNetworkFilter,
+    allChargebacks.map(
+      c => c.network
+    ),
+    "All networks"
+  );
+}
+
+async function loadChargebacks(
+  showError = true
+) {
+  try {
+    const response =
+      await fetch(
+        CHARGEBACKS_API_URL,
+        {
+          headers: {
+            "x-admin-password":
+              adminPassword
+          },
+          cache: "no-store"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok ||
+      data.success !== true
+    ) {
+      throw new Error(
+        data.error ||
+        "Could not load chargebacks"
+      );
+    }
+
+    allChargebacks =
+      Array.isArray(data.chargebacks)
+        ? data.chargebacks
+        : [];
+
+    populateChargebackFilters();
+    renderChargebackReport();
+
+    chargebackStatusLine.textContent =
+      "Loaded " +
+      allChargebacks.length +
+      " chargeback(s).";
+
+  } catch (error) {
+    if (showError) {
+      chargebackStatusLine.textContent =
+        error.message;
+    } else {
+      console.error(error);
+    }
+  }
+}
+
+async function uploadChargebackCsv() {
+  const file =
+    chargebackFileInput.files[0];
+
+  if (!file) {
+    chargebackStatusLine.textContent =
+      "Choose a CSV file first.";
+
+    return;
+  }
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    file
+  );
+
+  uploadChargebacksButton.disabled = true;
+
+  chargebackStatusLine.textContent =
+    "Uploading and matching chargebacks...";
+
+  try {
+    const response =
+      await fetch(
+        CHARGEBACK_UPLOAD_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "x-admin-password":
+              adminPassword
+          },
+
+          body: formData
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok ||
+      data.success !== true
+    ) {
+      throw new Error(
+        data.error ||
+        "Could not upload chargebacks"
+      );
+    }
+
+    chargebackStatusLine.textContent =
+      "Upload complete: " +
+      data.imported +
+      " new, " +
+      data.updated +
+      " updated, " +
+      data.matched +
+      " matched to successful payments, " +
+      data.skipped +
+      " skipped.";
+
+    chargebackFileInput.value = "";
+
+    await loadChargebacks(false);
+
+  } catch (error) {
+    chargebackStatusLine.textContent =
+      error.message;
+
+  } finally {
+    uploadChargebacksButton.disabled =
+      false;
+  }
+}
+
+function dateInChargebackRange(value) {
+  if (!value) {
+    return false;
+  }
+
+  const date =
+    new Date(
+      String(value).slice(0, 10) +
+      "T12:00:00"
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return false;
+  }
+
+  if (cbStartDate.value) {
+    const start =
+      new Date(
+        cbStartDate.value +
+        "T00:00:00"
+      );
+
+    if (date < start) {
+      return false;
+    }
+  }
+
+  if (cbEndDate.value) {
+    const end =
+      new Date(
+        cbEndDate.value +
+        "T23:59:59.999"
+      );
+
+    if (date > end) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function passesCommonCbFilters(item) {
+  const country =
+    String(
+      item.card_country || ""
+    )
+      .trim()
+      .toUpperCase();
+
+  const affiliate =
+    String(
+      item.affiliate_source || ""
+    ).trim();
+
+  const plan =
+    String(
+      item.plan || ""
+    ).trim();
+
+  const cardType =
+    String(
+      item.card_type || ""
+    ).trim();
+
+  return (
+    (
+      cbCountryFilter.value === "ALL" ||
+      country === cbCountryFilter.value
+    ) &&
+    (
+      cbAffiliateFilter.value === "ALL" ||
+      affiliate === cbAffiliateFilter.value
+    ) &&
+    (
+      cbPlanFilter.value === "ALL" ||
+      plan === cbPlanFilter.value
+    ) &&
+    (
+      cbCardTypeFilter.value === "ALL" ||
+      cardType === cbCardTypeFilter.value
+    )
+  );
+}
+
+function groupValue(item, field) {
+  let value =
+    item[field];
+
+  if (
+    field === "card_country"
+  ) {
+    value =
+      String(value || "")
+        .toUpperCase();
+  }
+
+  return (
+    String(
+      value || "Unknown"
+    ).trim() ||
+    "Unknown"
+  );
+}
+
+function renderChargebackReport() {
+  const groupField =
+    cbGroupBy.value;
+
+  const groupNames = {
+    card_bin: "BIN",
+    card_country: "Country",
+    affiliate_source: "Affiliate",
+    plan: "Plan",
+    card_type: "Card type",
+    reason_code: "Reason",
+    network: "Network"
+  };
+
+  cbGroupHeader.textContent =
+    groupNames[groupField] ||
+    "Group";
+
+  const successfulSales =
+    allTransactions.filter(
+      transaction => {
+
+        if (
+          normalizeStatus(
+            transaction
+          ) !== "SUCCESSFUL"
+        ) {
+          return false;
+        }
+
+        if (
+          !passesCommonCbFilters(
+            transaction
+          )
+        ) {
+          return false;
+        }
+
+        return dateInChargebackRange(
+          transaction.created_at
+        );
+      }
+    );
+
+  const chargebacks =
+    allChargebacks.filter(
+      chargeback => {
+
+        if (
+          !passesCommonCbFilters(
+            chargeback
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          !dateInChargebackRange(
+            chargeback.transaction_date
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          cbReasonFilter.value !== "ALL" &&
+          String(
+            chargeback.reason_code || ""
+          ) !== cbReasonFilter.value
+        ) {
+          return false;
+        }
+
+        if (
+          cbNetworkFilter.value !== "ALL" &&
+          String(
+            chargeback.network || ""
+          ) !== cbNetworkFilter.value
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+    );
+
+  const totalCbAmount =
+    chargebacks.reduce(
+      (sum, chargeback) =>
+        sum +
+        (
+          Number(
+            chargeback.amount
+          ) || 0
+        ),
+      0
+    );
+
+  const totalRate =
+    successfulSales.length
+      ? (
+          chargebacks.length /
+          successfulSales.length
+        ) * 100
+      : 0;
+
+  cbSuccessfulSales.textContent =
+    successfulSales.length;
+
+  cbCount.textContent =
+    chargebacks.length;
+
+  cbRate.textContent =
+    totalRate.toFixed(2) + "%";
+
+  cbAmount.textContent =
+    "£" +
+    totalCbAmount.toFixed(2);
+
+  const groups =
+    new Map();
+
+  function ensure(name) {
+    if (!groups.has(name)) {
+      groups.set(
+        name,
+        {
+          group: name,
+          sales: 0,
+          chargebacks: 0,
+          amount: 0
+        }
+      );
+    }
+
+    return groups.get(name);
+  }
+
+  if (
+    [
+      "reason_code",
+      "network"
+    ].includes(groupField)
+  ) {
+    const denominator =
+      successfulSales.length;
+
+    for (
+      const chargeback
+      of chargebacks
+    ) {
+      const group =
+        ensure(
+          groupValue(
+            chargeback,
+            groupField
+          )
+        );
+
+      group.chargebacks++;
+
+      group.amount +=
+        Number(
+          chargeback.amount
+        ) || 0;
+
+      group.sales =
+        denominator;
+    }
+
+  } else {
+    for (
+      const sale
+      of successfulSales
+    ) {
+      ensure(
+        groupValue(
+          sale,
+          groupField
+        )
+      ).sales++;
+    }
+
+    for (
+      const chargeback
+      of chargebacks
+    ) {
+      const group =
+        ensure(
+          groupValue(
+            chargeback,
+            groupField
+          )
+        );
+
+      group.chargebacks++;
+
+      group.amount +=
+        Number(
+          chargeback.amount
+        ) || 0;
+    }
+  }
+
+  let rows =
+    [...groups.values()]
+      .map(group => ({
+        ...group,
+
+        rate:
+          group.sales
+            ? (
+                group.chargebacks /
+                group.sales
+              ) * 100
+            : (
+                group.chargebacks
+                  ? Infinity
+                  : 0
+              ),
+
+        avg:
+          group.chargebacks
+            ? (
+                group.amount /
+                group.chargebacks
+              )
+            : 0
+      }));
+
+  const sort =
+    cbSortBy.value;
+
+  rows.sort(
+    (a, b) => {
+
+      if (
+        sort ===
+        "chargebacks_desc"
+      ) {
+        return (
+          b.chargebacks -
+          a.chargebacks
+        );
+      }
+
+      if (
+        sort ===
+        "amount_desc"
+      ) {
+        return (
+          b.amount -
+          a.amount
+        );
+      }
+
+      if (
+        sort ===
+        "sales_desc"
+      ) {
+        return (
+          b.sales -
+          a.sales
+        );
+      }
+
+      if (
+        sort ===
+        "group_asc"
+      ) {
+        return (
+          a.group.localeCompare(
+            b.group
+          )
+        );
+      }
+
+      return (
+        b.rate -
+        a.rate
+      );
+    }
+  );
+
+  chargebackPivotBody.innerHTML =
+    "";
+
+  if (!rows.length) {
+    chargebackEmptyState.style.display =
+      "block";
+
+    return;
+  }
+
+  chargebackEmptyState.style.display =
+    "none";
+
+  for (const item of rows) {
+    const row =
+      document.createElement("tr");
+
+    const rateText =
+      Number.isFinite(
+        item.rate
+      )
+        ? item.rate.toFixed(2) + "%"
+        : "No sales";
+
+    row.innerHTML = `
+      <td class="mono">${escapeHtml(item.group)}</td>
+      <td>${escapeHtml(item.sales)}</td>
+      <td>${escapeHtml(item.chargebacks)}</td>
+      <td>${escapeHtml(rateText)}</td>
+      <td>${escapeHtml("£" + item.amount.toFixed(2))}</td>
+      <td>${escapeHtml("£" + item.avg.toFixed(2))}</td>
+    `;
+
+    chargebackPivotBody.appendChild(
+      row
+    );
+  }
+}
+
+function clearChargebackFilters() {
+  cbGroupBy.value =
+    "card_bin";
+
+  cbSortBy.value =
+    "rate_desc";
+
+  cbCountryFilter.value =
+    "ALL";
+
+  cbAffiliateFilter.value =
+    "ALL";
+
+  cbPlanFilter.value =
+    "ALL";
+
+  cbCardTypeFilter.value =
+    "ALL";
+
+  cbReasonFilter.value =
+    "ALL";
+
+  cbNetworkFilter.value =
+    "ALL";
+
+  cbStartDate.value = "";
+  cbEndDate.value = "";
+
+  renderChargebackReport();
+}
+
+
     function clearFilters() {
       searchInput.value = "";
 statusFilter.value = "ALL";
@@ -800,6 +1801,7 @@ applyFilters();
       adminPassword = "";
       allTransactions = [];
       filteredTransactions = [];
+allChargebacks = [];
       if (refreshTimer) clearInterval(refreshTimer);
       refreshTimer = null;
       passwordInput.value = "";
@@ -845,6 +1847,57 @@ endDateInput.addEventListener("change", () => {
 
   applyFilters();
 });
+
+transactionsTabButton.addEventListener(
+  "click",
+  () =>
+    showDashboardView(
+      "transactions"
+    )
+);
+
+chargebacksTabButton.addEventListener(
+  "click",
+  () =>
+    showDashboardView(
+      "chargebacks"
+    )
+);
+
+uploadChargebacksButton.addEventListener(
+  "click",
+  uploadChargebackCsv
+);
+
+refreshChargebacksButton.addEventListener(
+  "click",
+  () =>
+    loadChargebacks(true)
+);
+
+cbClearFilters.addEventListener(
+  "click",
+  clearChargebackFilters
+);
+
+[
+  cbGroupBy,
+  cbSortBy,
+  cbCountryFilter,
+  cbAffiliateFilter,
+  cbPlanFilter,
+  cbCardTypeFilter,
+  cbReasonFilter,
+  cbNetworkFilter,
+  cbStartDate,
+  cbEndDate
+].forEach(control => {
+  control.addEventListener(
+    "change",
+    renderChargebackReport
+  );
+});
+
   </script>
 </body>
 </html>
