@@ -2080,11 +2080,14 @@ if (merchantReference) {
                 ) < 0.01
 
                 AND DATE(
-                  COALESCE(
-                    p.paid_at,
-                    p.created_at
-                  )
-                ) = $4::date
+  COALESCE(
+    p.paid_at,
+    p.created_at
+  )
+) BETWEEN
+  ($4::date - INTERVAL '3 days')
+  AND
+  ($4::date + INTERVAL '3 days')
 
                 AND (
                   UPPER(
