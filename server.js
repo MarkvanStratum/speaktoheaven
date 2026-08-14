@@ -598,6 +598,11 @@ await pool.query(`
   ADD COLUMN IF NOT EXISTS affiliate_source TEXT;
 `);
 
+await pool.query(`
+  ALTER TABLE xolvis_payments
+  ADD COLUMN IF NOT EXISTS sub_id TEXT;
+`);
+
 console.log("✅ Xolvis payments table ready");
 
 // --------------------------------------------
@@ -1382,6 +1387,9 @@ const affiliateSource =
 const binomClickid =
   originalParams.get("clickid") || clickid || "";
 
+const subId =
+  originalParams.get("sub_id") || "";
+
 const email = checkout.email;
     const selectedPlan = checkout.plan || "4995";
 
@@ -1516,9 +1524,10 @@ if (isUnsupportedCardType) {
       xolvis_payload,
       user_id,
       binom_clickid,
-      affiliate_source
+      affiliate_source,
+      sub_id
     )
-    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8)
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8, $9)
     ON CONFLICT (reference) DO NOTHING
     `,
     [
@@ -1527,20 +1536,21 @@ if (isUnsupportedCardType) {
       selectedPlan,
       amount,
       {
-  result: "BLOCKED",
-  message: "CARD_TYPE_NOT_SUPPORTED",
-  binCountry: cardCountry || null,
-  cardType: cardType || null,
-  cardBin: cardBin || null,
-  lastFour: cardLastFour || null
-},
+        result: "BLOCKED",
+        message: "CARD_TYPE_NOT_SUPPORTED",
+        binCountry: cardCountry || null,
+        cardType: cardType || null,
+        cardBin: cardBin || null,
+        lastFour: cardLastFour || null
+      },
       checkout.user_id || null,
       binomClickid || null,
-      affiliateSource || null
+      affiliateSource || null,
+      subId || null
     ]
   );
 
-    return res.status(400).json({
+  return res.status(400).json({
     success: false,
     error:
       "Only Visa and Mastercard are accepted. Please use another card.",
@@ -1581,9 +1591,10 @@ if (isBlockedBin) {
       xolvis_payload,
       user_id,
       binom_clickid,
-      affiliate_source
+      affiliate_source,
+      sub_id
     )
-    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8)
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8, $9)
     ON CONFLICT (reference) DO NOTHING
     `,
     [
@@ -1592,20 +1603,20 @@ if (isBlockedBin) {
       selectedPlan,
       amount,
       {
-  result: "BLOCKED",
-  message: "CARD_BIN_BLOCKED",
-  binCountry: cardCountry || null,
-  cardType: cardType || null,
-  cardBin: cardBin || null,
-  lastFour: cardLastFour || null
-},
+        result: "BLOCKED",
+        message: "CARD_BIN_BLOCKED",
+        binCountry: cardCountry || null,
+        cardType: cardType || null,
+        cardBin: cardBin || null,
+        lastFour: cardLastFour || null
+      },
       checkout.user_id || null,
       binomClickid || null,
-      affiliateSource || null
+      affiliateSource || null,
+      subId || null
     ]
   );
 
-  
   return res.status(400).json({
     success: false,
     error:
@@ -1624,9 +1635,10 @@ await pool.query(
     amount,
     user_id,
     binom_clickid,
-    affiliate_source
+    affiliate_source,
+    sub_id
   )
-  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
   ON CONFLICT (reference) DO NOTHING
   `,
   [
@@ -1636,7 +1648,8 @@ await pool.query(
     amount,
     checkout.user_id || null,
     binomClickid || null,
-    affiliateSource || null
+    affiliateSource || null,
+    subId || null
   ]
 );
 
@@ -2188,10 +2201,11 @@ app.get(
     ) AS created_at,
 
     p.paid_at,
-    p.xolvis_uuid,
-    p.affiliate_source,
+p.xolvis_uuid,
+p.affiliate_source,
+p.sub_id,
 
-    a.card_bin,
+a.card_bin,
     a.card_type,
     a.last_four,
     a.status AS attempt_status,
