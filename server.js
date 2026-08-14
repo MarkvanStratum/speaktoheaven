@@ -605,9 +605,13 @@ await pool.query(`
 
 await pool.query(`
   ALTER TABLE xolvis_payments
-  ADD COLUMN IF NOT EXISTS card_bin TEXT;
+  ADD COLUMN IF NOT EXISTS traffic_source TEXT;
 `);
 
+await pool.query(`
+  ALTER TABLE xolvis_payments
+  ADD COLUMN IF NOT EXISTS card_bin TEXT;
+`);
 await pool.query(`
   ALTER TABLE xolvis_payments
   ADD COLUMN IF NOT EXISTS card_type TEXT;
@@ -1395,16 +1399,20 @@ const originalParams =
   new URLSearchParams(checkout.original_query_string || "");
 
 const affiliateSource =
+  originalParams.get("ref") ||
+  checkout.affiliate_ref ||
   originalParams.get("affiliate_source") ||
   affiliate_source ||
   "";
+
+const trafficSource =
+  originalParams.get("source") || "";
 
 const binomClickid =
   originalParams.get("clickid") || clickid || "";
 
 const subId =
   originalParams.get("sub_id") || "";
-
 const email = checkout.email;
     const selectedPlan = checkout.plan || "4995";
 
@@ -1527,7 +1535,7 @@ if (isUnsupportedCardType) {
     lastFour: cardLastFour
   });
 
-  await pool.query(
+   await pool.query(
     `
     INSERT INTO xolvis_payments
     (
@@ -1540,12 +1548,14 @@ if (isUnsupportedCardType) {
       user_id,
       binom_clickid,
       affiliate_source,
+      traffic_source,
       sub_id,
       card_bin,
       card_type,
       last_four
     )
-    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8, $9, $10, $11, $12)    ON CONFLICT (reference) DO NOTHING
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    ON CONFLICT (reference) DO NOTHING
     `,
     [
       reference,
@@ -1563,10 +1573,12 @@ if (isUnsupportedCardType) {
       checkout.user_id || null,
       binomClickid || null,
       affiliateSource || null,
+      trafficSource || null,
       subId || null,
       cardBin || null,
       cardType || null,
-      cardLastFour || null    ]
+      cardLastFour || null
+    ]
   );
 
   return res.status(400).json({
@@ -1611,13 +1623,14 @@ if (isBlockedBin) {
       xolvis_payload,
       user_id,
       binom_clickid,
-      affiliate_source,
+            affiliate_source,
+      traffic_source,
       sub_id,
       card_bin,
       card_type,
       last_four
     )
-    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8, $9, $10, $11, $12)
+    VALUES ($1, $2, $3, $4, 'BLOCKED', $5, $6, $7, $8, $9, $10, $11, $12, $13)
     ON CONFLICT (reference) DO NOTHING
     `,
     [
@@ -1636,10 +1649,12 @@ if (isBlockedBin) {
       checkout.user_id || null,
       binomClickid || null,
       affiliateSource || null,
+      trafficSource || null,
       subId || null,
       cardBin || null,
       cardType || null,
-      cardLastFour || null    ]
+      cardLastFour || null
+]
   );
 
   return res.status(400).json({
@@ -1661,12 +1676,13 @@ await pool.query(
     user_id,
     binom_clickid,
     affiliate_source,
+    traffic_source,
     sub_id,
     card_bin,
     card_type,
     last_four
   )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
   ON CONFLICT (reference) DO NOTHING
   `,
   [
@@ -1677,13 +1693,13 @@ await pool.query(
     checkout.user_id || null,
     binomClickid || null,
     affiliateSource || null,
+    trafficSource || null,
     subId || null,
     cardBin || null,
     cardType || null,
     cardLastFour || null
   ]
-);
-const trackingCallbackUrl =
+);const trackingCallbackUrl =
   process.env.XOLVIS_CALLBACK_URL;
 
 if (!trackingCallbackUrl) {
@@ -2233,6 +2249,7 @@ app.get(
     p.paid_at,
 p.xolvis_uuid,
 p.affiliate_source,
+p.traffic_source,
 p.sub_id,
 
 COALESCE(p.card_bin, a.card_bin) AS card_bin,
