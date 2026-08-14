@@ -1346,10 +1346,6 @@ const cardCountry =
     .trim()
     .toUpperCase();
 
-const cardFingerprint =
-  typeof cardData?.fingerprint === "string"
-    ? cardData.fingerprint.trim()
-    : "";
 
 console.log("SAFE CARD METADATA:", {
   bin: cardBin,
@@ -1476,22 +1472,7 @@ const selectedSuccessUrl =
 
     const reference = `promo-${selectedPlan}-${Date.now()}`;
 
-// --------------------------------------------
-// CARD FINGERPRINT
-// --------------------------------------------
 
-if (!cardFingerprint) {
-  return res.status(400).json({
-    success: false,
-    error: "Card identification data is missing. Please try again.",
-    code: "CARD_FINGERPRINT_MISSING"
-  });
-}
-
-const fingerprintHash = crypto
-  .createHmac("sha256", SECRET_KEY)
-  .update(cardFingerprint)
-  .digest("hex");
 
 // --------------------------------------------
 // BLOCK UNSUPPORTED CARD BRANDS
@@ -1650,32 +1631,7 @@ if (isBlockedBin) {
     ]
   );
 
-  await pool.query(
-    `
-    INSERT INTO card_payment_attempts
-    (
-      payment_reference,
-      fingerprint_hash,
-      card_bin,
-      card_type,
-      last_four,
-      email,
-      status,
-      gateway_status
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, 'BLOCKED', 'CARD_BIN_BLOCKED')
-    ON CONFLICT (payment_reference) DO NOTHING
-    `,
-    [
-      reference,
-      fingerprintHash,
-      cardBin || null,
-      cardType || null,
-      cardLastFour || null,
-      email
-    ]
-  );
-
+  
   return res.status(400).json({
     success: false,
     error:
