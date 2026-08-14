@@ -313,8 +313,9 @@
 <th>Card</th>
 <th>Last 4</th>
               <th>Affiliate</th>
-              <th>Reference</th>
-              <th>Xolvis UUID</th>
+<th>Sub ID</th>
+<th>Reference</th>
+<th>Xolvis UUID</th>
             </tr>
           </thead>
           <tbody id="transactionsBody"></tbody>
@@ -778,8 +779,9 @@ const selectedEndDate = endDateInput.value;
           transaction.payment_status,
           transaction.attempt_status,
           transaction.affiliate_source,
-          transaction.xolvis_uuid,
-          transaction.plan
+transaction.sub_id,
+transaction.xolvis_uuid,
+transaction.plan
         ].map(v => String(v || "").toLowerCase()).join(" ");
 
         return (!searchValue || searchable.includes(searchValue)) &&
@@ -999,8 +1001,9 @@ netRevenue.textContent =
 <td>${escapeHtml(transaction.card_type || "-")}</td>
 <td class="mono">${escapeHtml(transaction.last_four || "-")}</td>
           <td>${escapeHtml(transaction.affiliate_source || "-")}</td>
-          <td class="mono">${escapeHtml(transaction.reference || "-")}</td>
-          <td class="mono">${escapeHtml(transaction.xolvis_uuid || "-")}</td>
+<td class="mono">${escapeHtml(transaction.sub_id || "-")}</td>
+<td class="mono">${escapeHtml(transaction.reference || "-")}</td>
+<td class="mono">${escapeHtml(transaction.xolvis_uuid || "-")}</td>
         `;
 
         transactionsBody.appendChild(row);
@@ -1024,8 +1027,9 @@ netRevenue.textContent =
   "Card type",
   "Last four",
   "Affiliate source",
-  "Reference",
-  "Xolvis UUID"
+"Sub ID",
+"Reference",
+"Xolvis UUID"
 ];
       const rows = filteredTransactions.map(t => [
         formatDate(t.created_at),
@@ -1039,8 +1043,9 @@ t.card_country || "",
 t.card_type || "",
 t.last_four || "",
         t.affiliate_source || "",
-        t.reference || "",
-        t.xolvis_uuid || ""
+t.sub_id || "",
+t.reference || "",
+t.xolvis_uuid || ""
       ]);
 
       const csv = [headers.map(csvCell).join(","), ...rows.map(row => row.map(csvCell).join(","))].join("\n");
