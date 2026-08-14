@@ -313,6 +313,7 @@
 <th>Card</th>
 <th>Last 4</th>
               <th>Affiliate</th>
+<th>Source</th>
 <th>Sub ID</th>
 <th>Reference</th>
 <th>Xolvis UUID</th>
@@ -779,6 +780,7 @@ const selectedEndDate = endDateInput.value;
           transaction.payment_status,
           transaction.attempt_status,
           transaction.affiliate_source,
+transaction.traffic_source,
 transaction.sub_id,
 transaction.xolvis_uuid,
 transaction.plan
@@ -1001,6 +1003,7 @@ netRevenue.textContent =
 <td>${escapeHtml(transaction.card_type || "-")}</td>
 <td class="mono">${escapeHtml(transaction.last_four || "-")}</td>
           <td>${escapeHtml(transaction.affiliate_source || "-")}</td>
+<td>${escapeHtml(transaction.traffic_source || "-")}</td>
 <td class="mono">${escapeHtml(transaction.sub_id || "-")}</td>
 <td class="mono">${escapeHtml(transaction.reference || "-")}</td>
 <td class="mono">${escapeHtml(transaction.xolvis_uuid || "-")}</td>
@@ -1026,7 +1029,8 @@ netRevenue.textContent =
   "Country",
   "Card type",
   "Last four",
-  "Affiliate source",
+  "Affiliate",
+"Source",
 "Sub ID",
 "Reference",
 "Xolvis UUID"
@@ -1043,6 +1047,7 @@ t.card_country || "",
 t.card_type || "",
 t.last_four || "",
         t.affiliate_source || "",
+t.traffic_source || "",
 t.sub_id || "",
 t.reference || "",
 t.xolvis_uuid || ""
