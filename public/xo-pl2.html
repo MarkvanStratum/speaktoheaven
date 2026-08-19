@@ -599,37 +599,25 @@ payNow.onclick = () => {
                 }
 
                 if (
-                    data.returnType === "REDIRECT" &&
-                    data.redirectUrl
-                ) {
-                    window.location.href =
-                        data.redirectUrl;
+    data.returnType === "REDIRECT" &&
+    data.redirectUrl
+) {
+    window.location.href =
+        data.redirectUrl;
 
-                    return;
-                }
+    return;
+}
 
-                const qs =
-                    new URLSearchParams(
-                        location.search
-                    );
+if (data.paymentResultUrl) {
+    window.location.href =
+        data.paymentResultUrl;
 
-                const affiliateRef =
-                    qs.get("ref") || "";
+    return;
+}
 
-                const sub1 =
-                    qs.get("sub1") || "";
-
-                const sub2 =
-                    qs.get("sub2") || "";
-
-                window.location.href =
-                    "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
-                    "ref=" +
-                    encodeURIComponent(affiliateRef) +
-                    "&sub1=" +
-                    encodeURIComponent(sub1) +
-                    "&sub2=" +
-                    encodeURIComponent(sub2);
+throw new Error(
+    "Nie udało się zweryfikować statusu płatności."
+);
 
             } catch (error) {
                 console.error(
