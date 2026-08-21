@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ko" dir="ltr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>安全な決済</title>
+<title>안전한 결제</title>
 
 <meta name="referrer" content="no-referrer">
 
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
 <script data-main="payment-js" src="https://api.xolvispay.com/js/integrated/payment.1.3.min.js"></script>
+
 <style>
 :root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
 *{box-sizing:border-box}
@@ -26,6 +26,7 @@ background:#0a0a0a;
 color:#fff;
 font-size:12px;
 padding:6px 10px;
+text-align:right;
 }
 
 .wrap{
@@ -214,31 +215,31 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <body>
 
-<div class="safe">SSL暗号化による安全な決済</div>
+<div class="safe">SSL 암호화를 통한 안전한 결제</div>
 
 <div class="wrap">
 
 <div class="page-title">
-安全な決済 🔒 <span class="stars">★★★★★</span>
-<span class="reviews">(2,777件のレビュー)</span>
+안전한 결제 🔒 <span class="stars">★★★★★</span>
+<span class="reviews">(2,777개 리뷰)</span>
 </div>
 
 <div class="grid">
 
 <div class="card">
 
-<div class="h2">2. お支払い情報</div>
-<p class="sub">カード情報は暗号化され、安全に処理されます。</p>
+<div class="h2">2. 결제 정보</div>
+<p class="sub">카드 정보는 안전하게 암호화되어 처리됩니다.</p>
 
 <div style="margin-top:14px;">
     <label for="cardholder-name" style="display:block;font-weight:700;margin-bottom:6px;">
-        カード名義人（フルネーム）
+        카드 소유자 이름
     </label>
     <input
         type="text"
         id="cardholder-name"
         class="el"
-        placeholder="Taro Yamada"
+        placeholder="홍길동"
         autocomplete="cc-name"
         required
     >
@@ -246,7 +247,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <div style="margin-top:14px;">
     <label style="display:block;font-weight:700;margin-bottom:6px;">
-        カード番号
+        카드 번호
     </label>
     <div
         id="number_div"
@@ -256,7 +257,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <div style="margin-top:14px;">
     <label style="display:block;font-weight:700;margin-bottom:6px;">
-        セキュリティコード (CVV)
+        보안 코드 (CVV)
     </label>
     <div
         id="cvv_div"
@@ -267,7 +268,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
     <div>
         <label for="exp_month" style="display:block;font-weight:700;margin-bottom:6px;">
-            有効期限（月）
+            유효기간 (월)
         </label>
         <input
             type="text"
@@ -282,7 +283,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
     <div>
         <label for="exp_year" style="display:block;font-weight:700;margin-bottom:6px;">
-            有効期限（年）
+            유효기간 (년)
         </label>
         <input
             type="text"
@@ -299,8 +300,8 @@ animation:loadingBar 2.2s ease-in-out infinite;
 <div id="err" class="err" aria-hidden="true"></div>
 
 <div style="display:flex;gap:10px;margin-top:12px">
-<button id="backBtn" class="btn" style="width:40%">戻る</button>
-<button id="payNow" class="btn" style="width:60%">安全に支払う</button>
+<button id="backBtn" class="btn" style="width:40%">이전</button>
+<button id="payNow" class="btn" style="width:60%">지금 안전하게 결제</button>
 </div>
 
 </div>
@@ -308,39 +309,36 @@ animation:loadingBar 2.2s ease-in-out infinite;
 <aside>
 
 <div id="productBox" class="widget" style="display:none">
-<img id="productImg"
-style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
-
-<div id="productTitle"
-style="font-weight:900;font-size:18px"></div>
+<img id="productImg" style="width:100%;border-radius:12px;margin-bottom:12px;display:none">
+<div id="productTitle" style="font-weight:900;font-size:18px"></div>
 </div>
 
 <div class="widget">
-<div style="text-align:center;font-weight:800">カスタマーレビュー</div>
-<div style="text-align:center;font-weight:700;">Fenella Lara</div>
+<div style="text-align:center;font-weight:800">고객 후기</div>
+<div style="text-align:center;font-weight:700;">김민지</div>
 <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-<p style="text-align:center">昨日商品を受け取りました。素晴らしい対応でした！</p>
+<p style="text-align:center">어제 상품을 잘 받았습니다. 서비스가 매우 만족스럽습니다!</p>
 </div>
 
 <div class="widget">
 <div class="delivery">
 <div>
-<div style="font-weight:800">スピード配送</div>
-<div class="sub">3〜5営業日でお届け</div>
+<div style="font-weight:800">빠른 배송</div>
+<div class="sub">영업일 기준 3–5일</div>
 </div>
-<div style="margin-left:auto;font-weight:800">無料</div>
+<div style="margin-left:auto;font-weight:800">무료</div>
 </div>
 
-<div style="margin-top:14px;font-weight:800">ご注文内容</div>
-<div class="order-row"><span>合計</span><span>¥ 1500</span></div>
+<div style="margin-top:14px;font-weight:800">주문 요약</div>
+<div class="order-row"><span>합계</span><span>₩2,750</span></div>
 </div>
 
 <div class="widget">
-<div style="font-weight:800;margin-bottom:10px">選ばれる理由</div>
+<div style="font-weight:800;margin-bottom:10px">믿을 수 있는 이유</div>
 <div class="trust">
-<div class="box"><div>⭐</div><div>99%の高評価レビュー</div></div>
-<div class="box"><div>🔒</div><div>SSL安全保護</div></div>
-<div class="box"><div>🛡️</div><div>$250,000補償制度</div></div>
+<div class="box"><div>⭐</div><div>99% 긍정적 평가</div></div>
+<div class="box"><div>🔒</div><div>안전한 SSL 암호화</div></div>
+<div class="box"><div>🛡️</div><div>$250,000 보증</div></div>
 </div>
 </div>
 
@@ -351,24 +349,19 @@ style="font-weight:900;font-size:18px"></div>
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
 <div class="loading-box">
-<div class="loading-title">決済処理中…</div>
+<div class="loading-title">결제를 처리 중입니다…</div>
 <div class="progress-wrap"><div class="progress-bar"></div></div>
-<p class="sub" style="margin-top:10px">そのまま数秒間お待ちください…</p>
+<p class="sub" style="margin-top:10px">잠시만 기다려 주세요…</p>
 </div>
 </div>
 
 <script>
 const tokenFromServer = window.PROMO_CHECKOUT_TOKEN || null;
-const publicIntegrationKey =
-    window.XOLVIS_PUBLIC_INTEGRATION_KEY || "";
+const publicIntegrationKey = window.XOLVIS_PUBLIC_INTEGRATION_KEY || "";
 
 const pageParams = new URLSearchParams(location.search);
-
-const productTitleFromUrl =
-    pageParams.get("sub1") || "";
-
-const productImageFromUrl =
-    pageParams.get("sub2") || "";
+const productTitleFromUrl = pageParams.get("sub1") || "";
+const productImageFromUrl = pageParams.get("sub2") || "";
 
 const err = document.getElementById("err");
 const payNow = document.getElementById("payNow");
@@ -390,45 +383,33 @@ function clearError() {
 
 function setLoading(isLoading) {
     payNow.disabled = isLoading;
-    overlay.setAttribute(
-        "aria-hidden",
-        isLoading ? "false" : "true"
-    );
+    overlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const productBox =
-        document.getElementById("productBox");
-
-    const productTitle =
-        document.getElementById("productTitle");
-
-    const productImg =
-        document.getElementById("productImg");
+    const productBox = document.getElementById("productBox");
+    const productTitle = document.getElementById("productTitle");
+    const productImg = document.getElementById("productImg");
 
     if (productTitleFromUrl) {
-        productTitle.textContent =
-            productTitleFromUrl;
-
+        productTitle.textContent = productTitleFromUrl;
         productBox.style.display = "block";
     }
 
     if (productImageFromUrl) {
-        productImg.src =
-            productImageFromUrl;
-
+        productImg.src = productImageFromUrl;
         productImg.style.display = "block";
         productBox.style.display = "block";
     }
 
     if (!tokenFromServer) {
-        showError("無効または期限切れの決済リンクです。");
+        showError("결제 링크가 유효하지 않거나 만료되었습니다.");
         payNow.disabled = true;
         return;
     }
 
     if (!publicIntegrationKey) {
-        showError("決済の設定情報が見つかりません。");
+        showError("결제 설정이 누락되었습니다.");
         payNow.disabled = true;
         return;
     }
@@ -443,13 +424,8 @@ window.addEventListener("DOMContentLoaded", () => {
             function (paymentInstance) {
                 paymentReady = true;
 
-                paymentInstance.setNumberPlaceholder(
-                    "カード番号"
-                );
-
-                paymentInstance.setCvvPlaceholder(
-                    "CVV"
-                );
+                paymentInstance.setNumberPlaceholder("카드 번호");
+                paymentInstance.setCvvPlaceholder("보안 코드");
 
                 paymentInstance.setNumberStyle({
                     "font-size": "16px",
@@ -464,23 +440,10 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
 
                 payNow.disabled = false;
-
-                console.log(
-                    "Xolvis Payment.js ready"
-                );
             }
         );
     } catch (error) {
-        console.error(
-            "Xolvis initialization error:",
-            error
-        );
-
-        showError(
-            error?.message ||
-            "決済フィールドを読み込めませんでした。"
-        );
-
+        showError(error?.message || "결제 필드를 로드할 수 없습니다.");
         payNow.disabled = true;
     }
 });
@@ -493,41 +456,21 @@ payNow.onclick = () => {
     clearError();
 
     if (!tokenFromServer) {
-        showError(
-            "無効または期限切れの決済リンクです。"
-        );
+        showError("결제 링크가 유효하지 않거나 만료되었습니다.");
         return;
     }
 
     if (!paymentReady || !payment) {
-        showError(
-            "決済フィールドを読み込んでいます。しばらくお待ちください。"
-        );
+        showError("결제 입력란을 로드 중입니다. 잠시만 기다려 주세요.");
         return;
     }
 
-    const cardholderName =
-        document
-            .getElementById("cardholder-name")
-            .value
-            .trim();
-
-    const expMonth =
-        document
-            .getElementById("exp_month")
-            .value
-            .trim();
-
-    const expYear =
-        document
-            .getElementById("exp_year")
-            .value
-            .trim();
+    const cardholderName = document.getElementById("cardholder-name").value.trim();
+    const expMonth = document.getElementById("exp_month").value.trim();
+    const expYear = document.getElementById("exp_year").value.trim();
 
     if (!cardholderName || !expMonth || !expYear) {
-        showError(
-            "カードの情報をすべて入力してください。"
-        );
+        showError("모든 카드 정보를 입력해 주세요.");
         return;
     }
 
@@ -539,123 +482,58 @@ payNow.onclick = () => {
             month: expMonth,
             year: expYear
         },
-
         async function (transactionToken, cardData) {
             try {
-                const response = await fetch(
-                    "/api/create-promo-payment",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-                        body: JSON.stringify({
-                            checkoutToken:
-                                tokenFromServer,
+                const response = await fetch("/api/create-promo-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        checkoutToken: tokenFromServer,
+                        cardholderName: cardholderName,
+                        transactionToken: transactionToken,
+                        cardData: cardData
+                    })
+                });
 
-                            cardholderName:
-                                cardholderName,
-
-                            transactionToken:
-                                transactionToken,
-
-                            cardData:
-                                cardData
-                        })
-                    }
-                );
-
-                const text =
-                    await response.text();
-
+                const text = await response.text();
                 let data;
 
                 try {
                     data = JSON.parse(text);
                 } catch {
-                    throw new Error(
-                        text ||
-                        "サーバーから無効な応答が返されました。"
-                    );
+                    throw new Error(text || "서버에서 잘못된 응답을 반환했습니다.");
                 }
 
-                console.log(
-                    "XOLVIS RESPONSE:",
-                    data
-                );
-
-                if (
-                    !response.ok ||
-                    data.success === false ||
-                    data.returnType === "ERROR"
-                ) {
-                    throw new Error(
-                        data.error ||
-                        data.errorMessage ||
-                        data.details?.errorMessage ||
-                        "決済に失敗しました。"
-                    );
+                if (!response.ok || data.success === false || data.returnType === "ERROR") {
+                    throw new Error(data.error || data.errorMessage || data.details?.errorMessage || "결제에 실패했습니다.");
                 }
 
-                if (
-    data.returnType === "REDIRECT" &&
-    data.redirectUrl
-) {
-    window.location.href =
-        data.redirectUrl;
+                if (data.returnType === "REDIRECT" && data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                    return;
+                }
 
-    return;
-}
+                if (data.paymentResultUrl) {
+                    window.location.href = data.paymentResultUrl;
+                    return;
+                }
 
-if (data.paymentResultUrl) {
-    window.location.href =
-        data.paymentResultUrl;
-
-    return;
-}
-
-throw new Error(
-    "決済状態を確認できませんでした。"
-);
+                throw new Error("결제 상태를 확인할 수 없습니다.");
 
             } catch (error) {
-                console.error(
-                    "Xolvis payment error:",
-                    error
-                );
-
                 setLoading(false);
-
-                showError(
-                    error?.message ||
-                    "決済に失敗しました。"
-                );
+                showError(error?.message || "결제에 실패했습니다.");
             }
         },
-
         function (errors) {
-            console.error(
-                "Xolvis tokenization errors:",
-                errors
-            );
-
             setLoading(false);
-
-            const message =
-                Array.isArray(errors)
-                    ? errors
-                        .map(error =>
-                            error.message ||
-                            error.key ||
-                            "カード入力エラー"
-                        )
-                        .join(" ")
-                    : "カードの詳細情報を確認してください。";
-
+            const message = Array.isArray(errors)
+                ? errors.map(e => e.message || e.key || "결제 필드 오류").join(" ")
+                : "카드 정보를 확인해 주세요.";
             showError(message);
         }
     );
 };
-</script></body>
+</script>
+</body>
 </html>
