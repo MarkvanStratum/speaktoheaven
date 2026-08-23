@@ -1501,8 +1501,196 @@ const selectedSuccessUrl =
       });
     }
 
-    const reference = `promo-${selectedPlan}-${Date.now()}`;
+let finalErrorUrl;
 
+try {
+    const errorUrlObject =
+        new URL(
+            process.env.XOLVIS_ERROR_URL ||
+            process.env.XOLVIS_CANCEL_URL
+        );
+
+    if (checkout.original_query_string) {
+        const originalParameters =
+            new URLSearchParams(
+                checkout.original_query_string
+            );
+
+        for (
+            const [key, value]
+            of originalParameters.entries()
+        ) {
+            errorUrlObject.searchParams.set(
+                key,
+                value
+            );
+        }
+    }
+
+    if (checkout.affiliate_ref) {
+        errorUrlObject.searchParams.set(
+            "ref",
+            checkout.affiliate_ref
+        );
+    }
+
+    finalErrorUrl =
+        errorUrlObject.toString();
+
+} catch (error) {
+
+    console.error(
+        "Invalid payment error URL:",
+        error
+    );
+
+    return res.status(500).json({
+        error:
+            "Invalid payment error URL"
+    });
+}
+
+    const reference =
+    `promo-${selectedPlan}-${Date.now()}`;
+
+
+// --------------------------------------------
+// MAXIMUM 3 GATEWAY ATTEMPTS PER EMAIL / 24 HOURS
+// --------------------------------------------
+
+const previousAttemptsResult =
+    await pool.query(
+        `
+        SELECT COUNT(*)::int AS attempt_count
+        FROM xolvis_payments
+        WHERE LOWER(email) = LOWER($1)
+
+          AND created_at >=
+              NOW() - INTERVAL '24 hours'
+
+          AND reference LIKE 'promo-%'
+
+          AND xolvis_payload IS NOT NULL
+
+          AND UPPER(
+              COALESCE(status, '')
+          ) NOT IN (
+              'OK',
+              'FINISHED',
+              'SUCCESSFUL',
+              'BLOCKED'
+          )
+        `,
+        [email]
+    );
+
+const previousAttempts =
+    Number(
+        previousAttemptsResult
+            .rows[0]
+            ?.attempt_count || 0
+    );
+
+console.log(
+    "PREVIOUS FAILED/PENDING GATEWAY ATTEMPTS:",
+    email,
+    previousAttempts
+);
+
+if (previousAttempts >= 3) {
+
+    console.warn(
+        "PAYMENT BLOCKED: RETRY LIMIT REACHED:",
+        {
+            email,
+            previousAttempts,
+            bin: cardBin,
+            lastFour: cardLastFour
+        }
+    );
+
+    await pool.query(
+        `
+        INSERT INTO xolvis_payments
+        (
+            reference,
+            email,
+            plan,
+            amount,
+            status,
+            xolvis_payload,
+            user_id,
+            binom_clickid,
+            affiliate_source,
+            traffic_source,
+            sub_id,
+            card_bin,
+            card_type,
+            last_four
+        )
+        VALUES
+        (
+            $1,$2,$3,$4,
+            'BLOCKED',
+            $5,$6,$7,$8,$9,$10,$11,$12,$13
+        )
+
+        ON CONFLICT (reference)
+        DO NOTHING
+        `,
+        [
+            reference,
+            email,
+            selectedPlan,
+            amount,
+
+            {
+                result:
+                    "BLOCKED",
+
+                message:
+                    "CARD_RETRY_LIMIT_REACHED",
+
+                previousAttempts:
+                    previousAttempts,
+
+                cardBin:
+                    cardBin || null,
+
+                cardType:
+                    cardType || null,
+
+                lastFour:
+                    cardLastFour || null,
+
+                binCountry:
+                    cardCountry || null
+            },
+
+            checkout.user_id || null,
+            binomClickid || null,
+            affiliateSource || null,
+            trafficSource || null,
+            subId || null,
+            cardBin || null,
+            cardType || null,
+            cardLastFour || null
+        ]
+    );
+
+    return res.json({
+        success: true,
+
+        returnType:
+            "REDIRECT",
+
+        redirectUrl:
+            finalErrorUrl,
+
+        code:
+            "CARD_RETRY_LIMIT_REACHED"
+    });
+}
 
 
 // --------------------------------------------
@@ -1724,8 +1912,8 @@ if (!trackingCallbackUrl) {
           currency: "GBP",
           description: "Speak to Heaven Access",
           successUrl: finalSuccessUrl,
-          cancelUrl: process.env.XOLVIS_CANCEL_URL,
-          errorUrl: process.env.XOLVIS_ERROR_URL,
+cancelUrl: process.env.XOLVIS_CANCEL_URL,
+errorUrl: finalErrorUrl,
           callbackUrl: trackingCallbackUrl,
           customer: {
             email: email,
