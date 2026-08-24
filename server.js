@@ -1510,21 +1510,31 @@ try {
             process.env.XOLVIS_CANCEL_URL
         );
 
-    if (checkout.original_query_string) {
-        const originalParameters =
-            new URLSearchParams(
-                checkout.original_query_string
-            );
+    const originalParameters =
+        new URLSearchParams(
+            checkout.original_query_string || ""
+        );
 
-        for (
-            const [key, value]
-            of originalParameters.entries()
-        ) {
-            errorUrlObject.searchParams.set(
-                key,
-                value
-            );
-        }
+    const incomingSub1 =
+        originalParameters.get("sub1");
+
+    const incomingSub2 =
+        originalParameters.get("sub2");
+
+    // Affiliate sub1 becomes sub3
+    if (incomingSub1) {
+        errorUrlObject.searchParams.set(
+            "sub3",
+            incomingSub1
+        );
+    }
+
+    // Affiliate sub2 becomes sub4
+    if (incomingSub2) {
+        errorUrlObject.searchParams.set(
+            "sub4",
+            incomingSub2
+        );
     }
 
     if (checkout.affiliate_ref) {
@@ -1912,7 +1922,7 @@ if (!trackingCallbackUrl) {
           currency: "GBP",
           description: "Speak to Heaven Access",
           successUrl: finalSuccessUrl,
-cancelUrl: process.env.XOLVIS_CANCEL_URL,
+cancelUrl: finalErrorUrl,
 errorUrl: finalErrorUrl,
           callbackUrl: trackingCallbackUrl,
           customer: {
