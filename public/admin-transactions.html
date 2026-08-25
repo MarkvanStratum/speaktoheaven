@@ -258,6 +258,10 @@
 <div class="card"><div class="card-label">Estimated VAT</div><div id="estimatedVat" class="card-value">£0.00</div></div>
 <div class="card"><div class="card-label">Transaction fees</div><div id="transactionFees" class="card-value">£0.00</div></div>
 <div class="card"><div class="card-label">Net revenue</div><div id="netRevenue" class="card-value">£0.00</div></div>
+<div class="card">
+  <div class="card-label">Rolling reserve (10% / 6 months)</div>
+  <div id="rollingReserve" class="card-value">£0.00</div>
+</div>
       </div>
 
       <div class="filters">
@@ -517,6 +521,8 @@ const grossRevenue = byId("grossRevenue");
 const estimatedVat = byId("estimatedVat");
 const transactionFeesDisplay = byId("transactionFees");
 const netRevenue = byId("netRevenue");
+const rollingReserve =
+    byId("rollingReserve");
 const transactionsTabButton = byId("transactionsTabButton");
 const chargebacksTabButton = byId("chargebacksTabButton");
 
@@ -950,6 +956,45 @@ const netAmount =
   vatAmount -
   transactionFees;
 
+const sixMonthsAgo = new Date();
+
+sixMonthsAgo.setMonth(
+    sixMonthsAgo.getMonth() - 6
+);
+
+let sixMonthGrossRevenue = 0;
+
+for (const transaction of allTransactions) {
+
+    if (
+        normalizeStatus(transaction) !==
+        "SUCCESSFUL"
+    ) {
+        continue;
+    }
+
+    const transactionDate =
+        new Date(transaction.created_at);
+
+    if (
+        Number.isNaN(
+            transactionDate.getTime()
+        )
+    ) {
+        continue;
+    }
+
+    if (
+        transactionDate >= sixMonthsAgo
+    ) {
+        sixMonthGrossRevenue +=
+            Number(transaction.amount) || 0;
+    }
+}
+
+const rollingReserveAmount =
+    sixMonthGrossRevenue * 0.10;
+
   totalCount.textContent = total;
   successfulCount.textContent = successful;
   failedCount.textContent = failed;
@@ -967,6 +1012,10 @@ transactionFeesDisplay.textContent =
 
 netRevenue.textContent =
   "£" + netAmount.toFixed(2);
+
+rollingReserve.textContent =
+    "£" +
+    rollingReserveAmount.toFixed(2);
 
   console.log({
     blocked,
