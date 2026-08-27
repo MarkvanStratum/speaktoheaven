@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thank you</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+  <script>
+    /* GA init (required for page_view). Without this, the loader above won't send hits. */
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
+  </script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fff; color: #111;
+    }
+    main { text-align: center; max-width: 60ch; padding: 2rem; }
+    h1 { margin: 0 0 .5rem; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    p  { margin: 0; font-size: 1.1rem; opacity: .9; }
+  </style>
+
+<!-- TikTok Pixel for affiliates - uses ?pixel= -->
+<script>
+(function () {
+  var qs = new URLSearchParams(window.location.search);
+
+  var pixelParam =
+    qs.get("pixel") ||
+    qs.get("fb_pixel") ||
+    qs.get("fbp") ||
+    "";
+
+  if (!pixelParam) return;
+
+  var pixelIds =
+    pixelParam
+      .split(",")
+      .map(function (id) {
+        return id.trim();
+      })
+      .filter(Boolean);
+
+  if (!pixelIds.length) return;
+
+  !function (w, d, t) {
+    w.TiktokAnalyticsObject = t;
+
+    var ttq = w[t] = w[t] || [];
+
+    ttq.methods = [
+      "page",
+      "track",
+      "identify",
+      "instances",
+      "debug",
+      "on",
+      "off",
+      "once",
+      "ready",
+      "setUserProperties",
+      "setVisitorProperties",
+      "reset"
+    ];
+
+    ttq.setAndDefer = function (t, e) {
+      t[e] = function () {
+        t.push([e].concat([].slice.call(arguments, 0)));
+      };
+    };
+
+    for (var i = 0; i < ttq.methods.length; i++) {
+      ttq.setAndDefer(ttq, ttq.methods[i]);
+    }
+
+    ttq.load = function (e, n) {
+      var i =
+        "https://analytics.tiktok.com/i18n/pixel/events.js";
+
+      ttq._i = ttq._i || {};
+      ttq._i[e] = [];
+      ttq._i[e]._u = i;
+
+      ttq._t = ttq._t || {};
+      ttq._t[e] = +new Date();
+
+      ttq._o = ttq._o || {};
+      ttq._o[e] = n || {};
+
+      var s = d.createElement("script");
+      s.type = "text/javascript";
+      s.async = true;
+      s.src =
+        i +
+        "?sdkid=" +
+        encodeURIComponent(e) +
+        "&lib=" +
+        t;
+
+      var c =
+        d.getElementsByTagName("script")[0];
+
+      c.parentNode.insertBefore(s, c);
+    };
+  }(window, document, "ttq");
+
+  pixelIds.forEach(function (id) {
+    ttq.load(id);
+  });
+
+  ttq.page();
+})();
+</script>
+
+</head>
+<body>
+  <main>
+    <h1>Thank you for your order.</h1>
+    <p>We will contact you shortly with delivery details.</p>
+  </main>
+
+  <!-- Ensure sub_id is present in URL before GoAffPro loads -->
+  <script>
+    (function ensureSubIdInURL(){
+      var url = new URL(location.href);
+      if (!url.searchParams.get("sub_id")) {
+        function getStored(){
+          try{
+            var m = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+            if (m) return decodeURIComponent(m[1]);
+            var ls = localStorage.getItem("aff_sub_id");
+            if (ls) return ls;
+          }catch(e){}
+          return null;
+        }
+        var sub = getStored();
+        if (!sub && document.referrer) {
+          try{
+            var ref = new URL(document.referrer);
+            sub = ref.searchParams.get("sub_id") || ref.searchParams.get("subid") ||
+                  ref.searchParams.get("aff_sub") || ref.searchParams.get("click_id") ||
+                  ref.searchParams.get("cid")    || ref.searchParams.get("tid");
+          }catch(e){}
+        }
+        if (sub) {
+          url.searchParams.set("sub_id", sub);
+          history.replaceState(null, "", url.toString());
+        }
+      }
+    })();
+  </script>
+
+  <!-- GoAffPro loader -->
+  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
+  <!-- Idempotent GoAffPro conversion fire (prevents double tracking) -->
+  <script>
+    // 1) Build a stable order id from the redirect (v=...), with safe fallbacks.
+    const qs = new URLSearchParams(location.search);
+    const orderId =
+      qs.get('v') || qs.get('order_id') || qs.get('oid') || qs.get('t') || ('TEST-' + Date.now());
+
+    // 2) Prevent duplicate fires for the same order id (persists across refreshes).
+    function alreadyFired(id){
+      try { return JSON.parse(localStorage.getItem('goaffpro_fired')||'{}')[id]; } catch { return false; }
+    }
+    function markFired(id){
+      try {
+        const m = JSON.parse(localStorage.getItem('goaffpro_fired')||'{}');
+        m[id] = Date.now();
+        localStorage.setItem('goaffpro_fired', JSON.stringify(m));
+      } catch {}
+    }
+
+    // 3) Payload (keep your values; fill with real total/currency if available).
+    var goaffproOrder = {
+      id: orderId,            // string
+      number: orderId,        // string (can match id)
+      total: 250,             // number
+      currency: "USD",        // ISO code
+      forceSDK: true
+    };
+
+    // 4) Call the tracker once the SDK is ready, but only once per orderId.
+    (function wait(i){
+      if (alreadyFired(orderId)) {
+        console.log('[GoAffPro] Skipping duplicate for', orderId);
+        return;
+      }
+      if (typeof window.goaffproTrackConversion === "function") {
+        window.goaffproTrackConversion(goaffproOrder);
+        markFired(orderId);
+        console.log("[GoAffPro] Sent once for", orderId);
+      } else if (i < 50) {          // ~10s max
+        setTimeout(() => wait(i+1), 200);
+      } else {
+        console.error("[GoAffPro] goaffproTrackConversion not found. Check CSP/ad-blockers/shop key.");
+      }
+    })(0);
+  </script>
+
+<!-- TikTok Purchase Event -->
+<script>
+(function () {
+  const qs = new URLSearchParams(location.search);
+
+  const value =
+    +(qs.get("value") || qs.get("amount") || 200);
+
+  const currency =
+    (qs.get("currency") || "USD").toUpperCase();
+
+  const eid =
+    qs.get("order_id") ||
+    qs.get("v") ||
+    qs.get("oid") ||
+    ("TT-" + Date.now());
+
+  const key =
+    "ttq_purchase_" + eid;
+
+  try {
+    if (!sessionStorage.getItem(key)) {
+
+      ttq.track("Purchase", {
+        value: value,
+        currency: currency,
+        contents: [
+          {
+            content_type: "product",
+            content_id: eid,
+            quantity: 1,
+            price: value
+          }
+        ],
+        description: "Order " + eid
+      });
+
+      sessionStorage.setItem(key, "1");
+
+      console.log(
+        "[TikTok] Purchase fired for",
+        eid
+      );
+
+    } else {
+
+      console.log(
+        "[TikTok] Skipped duplicate for",
+        eid
+      );
+
+    }
+
+  } catch (e) {
+
+    console.error(e);
+
+  }
+
+})();
+</script>
+
+</body>
+</html>
