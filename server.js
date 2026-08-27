@@ -2026,12 +2026,50 @@ app.post(
           continue;
         }
 
+        const merchantName =
+          String(
+            row["Merchant Name"] || ""
+          )
+            .trim()
+            .toUpperCase();
+
+        if (merchantName !== "SPEAKTOHEAVEN.COM") {
+          skipped++;
+          continue;
+        }
+
+        const caseKind =
+          String(
+            row["Kind"] || ""
+          )
+            .trim()
+            .toUpperCase();
+
+        if (caseKind !== "CBK1") {
+          skipped++;
+          continue;
+        }
+
         const {
           cardBin,
           lastFour
         } = getChargebackCardParts(
           row["Card No."]
         );
+
+        const networkCode =
+          String(
+            row["Ntwk"] || ""
+          )
+            .trim()
+            .toUpperCase();
+
+        const csvCardType =
+          networkCode === "VI"
+            ? "VISA"
+            : networkCode === "MC"
+              ? "MASTERCARD"
+              : networkCode || null;
 
         const transactionDate =
           parsePaystraxDate(
@@ -2056,57 +2094,12 @@ app.post(
 
         let matchedPayment = null;
 
-const merchantReference =
-  String(
-    row["Merch Tran Ref."] || ""
-  ).trim();
-
-if (merchantReference) {
-  const referenceMatch =
-    await pool.query(
-      `
-      SELECT
-        p.reference,
-        p.email,
-        p.plan,
-        p.affiliate_source,
-        p.amount,
-        a.card_type,
-
-        COALESCE(
-          p.xolvis_payload #>> '{returnData,binCountry}',
-          p.xolvis_payload #>> '{returnData,binRawData,data,country_alpha2}',
-          p.xolvis_payload #>> '{customer,binCountry}',
-          p.xolvis_payload->>'binCountry'
-        ) AS card_country
-
-      FROM xolvis_payments p
-
-      LEFT JOIN card_payment_attempts a
-        ON a.payment_reference = p.reference
-
-      WHERE p.reference = $1
-
-      LIMIT 1
-      `,
-      [merchantReference]
-    );
-
-  if (referenceMatch.rows.length) {
-    matchedPayment =
-      referenceMatch.rows[0];
-
-    matched++;
-  }
-}
-
         if (
-  !matchedPayment &&
-  cardBin &&
-  lastFour &&
-  transactionDate &&
-  Number.isFinite(amount)
-) {
+          cardBin &&
+          lastFour &&
+          transactionDate &&
+          Number.isFinite(amount)
+        ) {
           const matchResult =
             await pool.query(
               `
@@ -2116,7 +2109,11 @@ if (merchantReference) {
                 p.plan,
                 p.affiliate_source,
                 p.amount,
-                a.card_type,
+
+                COALESCE(
+                  p.card_type,
+                  a.card_type
+                ) AS card_type,
 
                 COALESCE(
                   p.xolvis_payload #>> '{returnData,binCountry}',
@@ -2127,13 +2124,17 @@ if (merchantReference) {
 
               FROM xolvis_payments p
 
-              JOIN card_payment_attempts a
+              LEFT JOIN card_payment_attempts a
                 ON a.payment_reference = p.reference
 
               WHERE
                 LEFT(
                   REGEXP_REPLACE(
-                    COALESCE(a.card_bin, ''),
+                    COALESCE(
+                      p.card_bin,
+                      a.card_bin,
+                      ''
+                    ),
                     '[^0-9]',
                     '',
                     'g'
@@ -2141,21 +2142,33 @@ if (merchantReference) {
                   6
                 ) = $1
 
-                AND a.last_four = $2
+                AND RIGHT(
+                  REGEXP_REPLACE(
+                    COALESCE(
+                      p.last_four,
+                      a.last_four,
+                      ''
+                    ),
+                    '[^0-9]',
+                    '',
+                    'g'
+                  ),
+                  4
+                ) = $2
 
                 AND ABS(
                   COALESCE(p.amount, 0) - $3
                 ) < 0.01
 
                 AND DATE(
-  COALESCE(
-    p.paid_at,
-    p.created_at
-  )
-) BETWEEN
-  ($4::date - INTERVAL '3 days')
-  AND
-  ($4::date + INTERVAL '3 days')
+                  COALESCE(
+                    p.paid_at,
+                    p.created_at
+                  )
+                ) BETWEEN
+                  ($4::date - INTERVAL '3 days')
+                  AND
+                  ($4::date + INTERVAL '3 days')
 
                 AND (
                   UPPER(
@@ -2180,6 +2193,15 @@ if (merchantReference) {
                 )
 
               ORDER BY
+                ABS(
+                  DATE(
+                    COALESCE(
+                      p.paid_at,
+                      p.created_at
+                    )
+                  ) - $4::date
+                ) ASC,
+
                 COALESCE(
                   p.paid_at,
                   p.created_at
@@ -2202,7 +2224,6 @@ if (merchantReference) {
             matched++;
           }
         }
-
         const existing =
           await pool.query(
             `
@@ -2314,7 +2335,7 @@ if (merchantReference) {
             matchedPayment?.card_country || null,
             matchedPayment?.affiliate_source || null,
             matchedPayment?.plan || null,
-            matchedPayment?.card_type || null,
+            matchedPayment?.card_type || csvCardType || null,
             matchedPayment?.email || null
           ]
         );
@@ -2384,6 +2405,16 @@ app.get(
             imported_at
 
           FROM chargebacks
+
+          WHERE
+            UPPER(
+              TRIM(
+                COALESCE(
+                  merchant_name,
+                  ''
+                )
+              )
+            ) = 'SPEAKTOHEAVEN.COM'
 
           ORDER BY
             transaction_date DESC,
