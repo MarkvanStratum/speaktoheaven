@@ -676,9 +676,13 @@
           <th>
             Fraud cases
           </th>
-          <th>
-            Fraud rate
-          </th>
+          <th
+  id="fraudRateHeader"
+  style="cursor:pointer; user-select:none;"
+  title="Click to sort by fraud rate"
+>
+  Fraud rate ▼
+</th>
           <th>
             Fraud amount
           </th>
@@ -812,9 +816,11 @@ const fraudEndDate = byId("fraudEndDate");
 const fraudClearFilters = byId("fraudClearFilters");
 
 const fraudGroupHeader = byId("fraudGroupHeader");
+const fraudRateHeader = byId("fraudRateHeader");
 const fraudPivotBody = byId("fraudPivotBody");
 const fraudEmptyState = byId("fraudEmptyState");
 
+let fraudRateSortDirection = "desc";
     function escapeHtml(value) {
       return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -2011,18 +2017,18 @@ function renderChargebackReport() {
       }));
 
   const sort =
-    cbSortBy.value;
+    fraudSortBy.value;
 
   rows.sort(
     (a, b) => {
 
       if (
         sort ===
-        "chargebacks_desc"
+        "fraud_desc"
       ) {
         return (
-          b.chargebacks -
-          a.chargebacks
+          b.fraud -
+          a.fraud
         );
       }
 
@@ -2054,6 +2060,26 @@ function renderChargebackReport() {
           a.group.localeCompare(
             b.group
           )
+        );
+      }
+
+      if (
+        sort ===
+        "rate_click"
+      ) {
+        if (
+          fraudRateSortDirection ===
+          "asc"
+        ) {
+          return (
+            a.rate -
+            b.rate
+          );
+        }
+
+        return (
+          b.rate -
+          a.rate
         );
       }
 
@@ -2977,6 +3003,34 @@ refreshFraudButton.addEventListener(
 fraudClearFilters.addEventListener(
   "click",
   clearFraudFilters
+);
+
+
+fraudRateHeader.addEventListener(
+  "click",
+  () => {
+    if (
+      fraudRateSortDirection ===
+      "desc"
+    ) {
+      fraudRateSortDirection =
+        "asc";
+
+      fraudRateHeader.textContent =
+        "Fraud rate ▲";
+    } else {
+      fraudRateSortDirection =
+        "desc";
+
+      fraudRateHeader.textContent =
+        "Fraud rate ▼";
+    }
+
+    fraudSortBy.value =
+      "rate_click";
+
+    renderFraudReport();
+  }
 );
 
 
