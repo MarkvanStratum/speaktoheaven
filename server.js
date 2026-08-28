@@ -16,6 +16,21 @@ import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 import fetch from "node-fetch";
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  GetObjectCommand
+} from "@aws-sdk/client-s3";
+
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb
+} from "pdf-lib";
+
+import archiver from "archiver";
+import ExcelJS from "exceljs";
 
 
 
@@ -54,81 +69,307 @@ async function sendEmail(to, subject, html, attachments = []) {
   console.log("EMAIL RESPONSE:", text);
 }
 
-function makeReceiptPdfBase64({ email, plan, amount }) {
-  const date = new Date().toLocaleDateString("en-US");
-  const invoiceNumber = "STH-" + Date.now();
-  const amountText = "£" + Number(amount).toFixed(2);
+const r2Client = new S3Client({
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+  }
+});
 
-  const lines = [
-    { text: "SPEAK TO HEAVEN", size: 22, x: 72, y: 720 },
-    { text: "Official Payment Receipt", size: 16, x: 72, y: 690 },
+const R2_BUCKET = process.env.R2_BUCKET;
 
-    { text: "Invoice Number: " + invoiceNumber, size: 11, x: 72, y: 640 },
-    { text: "Date: " + date, size: 11, x: 72, y: 620 },
 
-    { text: "Billed To:", size: 13, x: 72, y: 575 },
-    { text: email, size: 11, x: 72, y: 555 },
-
-    { text: "Company:", size: 13, x: 72, y: 510 },
-{ text: "RIDGWELL SERVICES LIMITED", size: 11, x: 72, y: 490 },
-{ text: "Company No: 16277582", size: 11, x: 72, y: 472 },
-{ text: "85 Great Portland Street", size: 11, x: 72, y: 454 },
-{ text: "First Floor", size: 11, x: 72, y: 436 },
-{ text: "London, W1W 7LT", size: 11, x: 72, y: 418 },
-
-    { text: "Description", size: 12, x: 72, y: 390 },
-    { text: "Plan", size: 12, x: 300, y: 390 },
-    { text: "Amount", size: 12, x: 450, y: 390 },
-
-    { text: "Speak to Heaven Access", size: 11, x: 72, y: 360 },
-    { text: plan, size: 11, x: 300, y: 360 },
-    { text: amountText, size: 11, x: 450, y: 360 },
-
-    { text: "Total Paid: " + amountText, size: 15, x: 360, y: 300 },
-
-    { text: "Payment Status: Paid", size: 12, x: 72, y: 250 },
-    { text: "Thank you for your offering.", size: 12, x: 72, y: 220 },
-    { text: "This receipt confirms your successful payment.", size: 10, x: 72, y: 200 }
-  ];
-
-  function escapePdfText(str) {
-    return String(str)
-      .replace(/\\/g, "\\\\")
-      .replace(/\(/g, "\\(")
-      .replace(/\)/g, "\\)");
+function getReceiptProductName(plan) {
+  if (plan === "2995") {
+    return "SpeakToHeaven.com God Access";
   }
 
-  const content = lines.map(line =>
-    `BT /F1 ${line.size} Tf ${line.x} ${line.y} Td (${escapePdfText(line.text)}) Tj ET`
-  ).join("\n");
+  if (plan === "3595") {
+    return "SpeakToHeaven.com Full Divine Access";
+  }
 
-  const pdf =
-`%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
-endobj
-4 0 obj
-<< /Length ${content.length} >>
-stream
-${content}
-endstream
-endobj
-5 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-trailer
-<< /Root 1 0 R >>
-%%EOF`;
+  if (
+    plan === "4995" ||
+    plan === "lifetime"
+  ) {
+    return "SpeakToHeaven.com 3 Month Full Access";
+  }
 
-  return Buffer.from(pdf).toString("base64");
+  return "SpeakToHeaven.com Access";
 }
-app.use(cors());
+
+
+function formatReceiptDate(date) {
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }
+  ).format(date);
+}
+
+
+async function makeReceiptPdf({
+  receiptNumber,
+  customerName,
+  email,
+  productName,
+  amount,
+  paymentMethod,
+  reference
+}) {
+  const templatePath =
+    path.join(__dirname, "receipt-template.pdf");
+
+  const templateBytes =
+    fs.readFileSync(templatePath);
+
+  const pdfDoc =
+    await PDFDocument.load(templateBytes);
+
+  const page =
+    pdfDoc.getPages()[0];
+
+  const font =
+    await pdfDoc.embedFont(
+      StandardFonts.Helvetica
+    );
+
+  const boldFont =
+    await pdfDoc.embedFont(
+      StandardFonts.HelveticaBold
+    );
+
+  const darkText =
+    rgb(0.08, 0.18, 0.27);
+
+  const amountText =
+    "£" + Number(amount).toFixed(2);
+
+  const dateText =
+    formatReceiptDate(new Date());
+
+  const safeName =
+    customerName || "Customer";
+
+  const safePaymentMethod =
+    paymentMethod || "Credit Card";
+
+  page.drawRectangle({
+    x: 70,
+    y: 558,
+    width: 115,
+    height: 20,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 195,
+    y: 558,
+    width: 95,
+    height: 20,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 335,
+    y: 558,
+    width: 165,
+    height: 20,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 140,
+    y: 409,
+    width: 220,
+    height: 22,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 430,
+    y: 409,
+    width: 85,
+    height: 22,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 365,
+    y: 317,
+    width: 155,
+    height: 29,
+    color: rgb(0.055, 0.16, 0.24)
+  });
+
+  page.drawRectangle({
+    x: 195,
+    y: 237,
+    width: 180,
+    height: 21,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 195,
+    y: 202,
+    width: 235,
+    height: 21,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawRectangle({
+    x: 195,
+    y: 167,
+    width: 235,
+    height: 21,
+    color: rgb(1, 1, 1)
+  });
+
+  page.drawText(
+    String(receiptNumber),
+    {
+      x: 76,
+      y: 566,
+      size: 9,
+      font: boldFont,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    dateText,
+    {
+      x: 201,
+      y: 566,
+      size: 9,
+      font,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    String(safeName).slice(0, 38),
+    {
+      x: 341,
+      y: 566,
+      size: 9,
+      font,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    String(productName).slice(0, 48),
+    {
+      x: 147,
+      y: 419,
+      size: 9,
+      font: boldFont,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    amountText,
+    {
+      x: 469,
+      y: 419,
+      size: 10,
+      font: boldFont,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    amountText,
+    {
+      x: 458,
+      y: 326,
+      size: 13,
+      font: boldFont,
+      color: rgb(1, 1, 1)
+    }
+  );
+
+  page.drawText(
+    String(safePaymentMethod).slice(0, 35),
+    {
+      x: 205,
+      y: 246,
+      size: 9,
+      font,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    String(reference).slice(0, 48),
+    {
+      x: 205,
+      y: 211,
+      size: 8.5,
+      font,
+      color: darkText
+    }
+  );
+
+  page.drawText(
+    String(email).slice(0, 48),
+    {
+      x: 205,
+      y: 176,
+      size: 8.5,
+      font,
+      color: darkText
+    }
+  );
+
+  const pdfBytes =
+    await pdfDoc.save({
+      useObjectStreams: false
+    });
+
+  return Buffer.from(pdfBytes);
+}
+
+
+async function uploadReceiptToR2({
+  pdfBuffer,
+  receiptNumber,
+  date = new Date()
+}) {
+  const year =
+    String(date.getFullYear());
+
+  const month =
+    String(date.getMonth() + 1)
+      .padStart(2, "0");
+
+  const key =
+    `receipts/${year}/${month}/${receiptNumber}.pdf`;
+
+  await r2Client.send(
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: pdfBuffer,
+      ContentType: "application/pdf"
+    })
+  );
+
+  console.log(
+    "✅ RECEIPT UPLOADED TO R2:",
+    key
+  );
+
+  return key;
+}app.use(cors());
 
 // --------------------------------------------
 // PROTECTED CHECKOUT HELPERS
@@ -311,6 +552,92 @@ function getChargebackCardParts(maskedCard) {
         : null
   };
 }
+
+
+function getFraudExcelCellValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (value instanceof Date) {
+    return value;
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null
+  ) {
+    if (value.text !== undefined) {
+      return String(value.text).trim();
+    }
+
+    if (value.result !== undefined) {
+      return value.result;
+    }
+
+    if (Array.isArray(value.richText)) {
+      return value.richText
+        .map(item => item.text || "")
+        .join("")
+        .trim();
+    }
+  }
+
+  return String(value).trim();
+}
+
+
+function normalizeFraudExcelDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      return null;
+    }
+
+    return value
+      .toISOString()
+      .slice(0, 10);
+  }
+
+  const text = String(value).trim();
+
+  const isoMatch =
+    text.match(
+      /^(\d{4})-(\d{2})-(\d{2})/
+    );
+
+  if (isoMatch) {
+    return (
+      isoMatch[1] +
+      "-" +
+      isoMatch[2] +
+      "-" +
+      isoMatch[3]
+    );
+  }
+
+  const ukMatch =
+    text.match(
+      /^(\d{2})\/(\d{2})\/(\d{4})/
+    );
+
+  if (ukMatch) {
+    return (
+      ukMatch[3] +
+      "-" +
+      ukMatch[2] +
+      "-" +
+      ukMatch[1]
+    );
+  }
+
+  return null;
+}
+
+// JSON parser FIRST
 
 // JSON parser FIRST
 app.use(express.json());
@@ -706,6 +1033,82 @@ await pool.query(`
 
 console.log("✅ Chargebacks table ready");
 
+// --------------------------------------------
+// FRAUD REPORTS TABLE
+// --------------------------------------------
+
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS fraud_reports (
+    id BIGSERIAL PRIMARY KEY,
+
+    gateway_reference TEXT,
+    sequence_number TEXT,
+
+    card_bin TEXT,
+    last_four TEXT,
+    card_scheme TEXT,
+
+    merchant_name TEXT,
+    mid TEXT,
+
+    acquirer_reference TEXT,
+
+    record_date DATE,
+    transaction_date DATE,
+    post_date DATE,
+
+    fraud_amount_usd NUMERIC(12,2),
+    fraud_type TEXT,
+
+    original_currency TEXT,
+    original_amount NUMERIC(12,2),
+
+    auth_code TEXT,
+    file_reference TEXT,
+
+    merchant_city TEXT,
+    mcc TEXT,
+    pos_entry TEXT,
+    cap_method TEXT,
+
+    matched_payment_reference TEXT,
+
+    card_country TEXT,
+    affiliate_source TEXT,
+    plan TEXT,
+    card_type TEXT,
+    email TEXT,
+
+    imported_at TIMESTAMP DEFAULT NOW(),
+
+    UNIQUE (
+      gateway_reference,
+      sequence_number,
+      card_bin,
+      last_four,
+      transaction_date,
+      original_amount
+    )
+  );
+`);
+
+await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_fraud_reports_bin
+  ON fraud_reports(card_bin);
+`);
+
+await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_fraud_reports_transaction_date
+  ON fraud_reports(transaction_date);
+`);
+
+await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_fraud_reports_mid
+  ON fraud_reports(mid);
+`);
+
+console.log("✅ Fraud reports table ready");
+
 console.log("✅ Card payment attempts table ready");
 	} catch (err) {
 		console.error("❌ DB Init error:", err);
@@ -868,8 +1271,14 @@ const chargebackUpload = multer({
   }
 });
 
-app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => {
-	if (!req.file)
+const fraudUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  }
+});
+
+app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => {	if (!req.file)
 		return res.status(400).json({ error: "No file uploaded" });
 
 	res.json({ url: `/uploads/${req.file.filename}` });
@@ -2420,6 +2829,732 @@ app.get(
 );
 
 // --------------------------------------------
+// ADMIN FRAUD REPORT UPLOAD
+// --------------------------------------------
+
+app.post(
+  "/api/admin/fraud/upload",
+  requireAdminPassword,
+  fraudUpload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: "No fraud Excel file uploaded"
+        });
+      }
+
+      const workbook =
+        new ExcelJS.Workbook();
+
+      await workbook.xlsx.load(
+        req.file.buffer
+      );
+
+      const worksheet =
+        workbook.worksheets[0];
+
+      if (!worksheet) {
+        return res.status(400).json({
+          success: false,
+          error: "The Excel file contains no worksheet"
+        });
+      }
+
+      const headers = [];
+
+      worksheet
+        .getRow(1)
+        .eachCell(
+          {
+            includeEmpty: true
+          },
+          (cell, columnNumber) => {
+            headers[columnNumber - 1] =
+              String(
+                getFraudExcelCellValue(
+                  cell.value
+                )
+              )
+                .trim()
+                .toUpperCase();
+          }
+        );
+
+      const requiredHeaders = [
+        "GATEWAY_REFERENCE_1",
+        "SEQUENCE_NUM",
+        "CARD_ACCT_NO",
+        "MERCH_NAME",
+        "MID",
+        "TXN_DATE",
+        "FRAUD_TYPE",
+        "ORIG_TXN_CCY",
+        "ORIG_TXN_AMT"
+      ];
+
+      const missingHeaders =
+        requiredHeaders.filter(
+          header =>
+            !headers.includes(header)
+        );
+
+      if (missingHeaders.length) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Fraud report is missing columns: " +
+            missingHeaders.join(", ")
+        });
+      }
+
+      const fraudRows = [];
+
+      worksheet.eachRow(
+        {
+          includeEmpty: false
+        },
+        (row, rowNumber) => {
+          if (rowNumber === 1) {
+            return;
+          }
+
+          const item = {};
+
+          headers.forEach(
+            (header, index) => {
+              if (!header) {
+                return;
+              }
+
+              item[header] =
+                getFraudExcelCellValue(
+                  row.getCell(
+                    index + 1
+                  ).value
+                );
+            }
+          );
+
+          fraudRows.push(item);
+        }
+      );
+
+      let imported = 0;
+      let updated = 0;
+      let skipped = 0;
+      let ignoredOtherMerchant = 0;
+      let matched = 0;
+
+      for (const row of fraudRows) {
+        const merchantName =
+          String(
+            row.MERCH_NAME || ""
+          ).trim();
+
+        const normalizedMerchantName =
+          merchantName
+            .replace(/\s+/g, "")
+            .toLowerCase();
+
+        const mid =
+          String(
+            row.MID || ""
+          ).trim();
+
+        const isSpeakToHeaven =
+          normalizedMerchantName ===
+            "speaktoheaven.com" ||
+          mid ===
+            "000106901001030";
+
+        if (!isSpeakToHeaven) {
+          ignoredOtherMerchant++;
+          continue;
+        }
+
+        const maskedCard =
+          String(
+            row.CARD_ACCT_NO || ""
+          ).trim();
+
+        const {
+          cardBin,
+          lastFour
+        } =
+          getChargebackCardParts(
+            maskedCard
+          );
+
+        const transactionDate =
+          normalizeFraudExcelDate(
+            row.TXN_DATE
+          );
+
+        const recordDate =
+          normalizeFraudExcelDate(
+            row.RECORD_DATE
+          );
+
+        const postDate =
+          normalizeFraudExcelDate(
+            row.POST_DATE
+          );
+
+        const originalAmount =
+          Number(
+            row.ORIG_TXN_AMT
+          );
+
+        const fraudAmountUsd =
+          Number(
+            row.FRAUD_AMT_USD
+          );
+
+        if (
+          !cardBin ||
+          !lastFour ||
+          !transactionDate ||
+          !Number.isFinite(
+            originalAmount
+          )
+        ) {
+          skipped++;
+          continue;
+        }
+
+        let matchedPayment = null;
+
+        const paymentMatch =
+          await pool.query(
+            `
+            SELECT
+              p.reference,
+              p.email,
+              p.plan,
+              p.affiliate_source,
+
+              COALESCE(
+                NULLIF(
+                  p.card_bin,
+                  ''
+                ),
+                a.card_bin
+              ) AS card_bin,
+
+              COALESCE(
+                NULLIF(
+                  p.last_four,
+                  ''
+                ),
+                a.last_four
+              ) AS last_four,
+
+              COALESCE(
+                NULLIF(
+                  p.card_type,
+                  ''
+                ),
+                a.card_type
+              ) AS card_type,
+
+              COALESCE(
+                p.xolvis_payload
+                  #>>
+                  '{returnData,binCountry}',
+
+                p.xolvis_payload
+                  #>>
+                  '{returnData,binRawData,data,country_alpha2}',
+
+                p.xolvis_payload
+                  #>>
+                  '{customer,binCountry}',
+
+                p.xolvis_payload
+                  ->>
+                  'binCountry'
+              ) AS card_country
+
+            FROM xolvis_payments p
+
+            LEFT JOIN card_payment_attempts a
+              ON
+                a.payment_reference =
+                p.reference
+
+            WHERE
+              p.paid_at IS NOT NULL
+
+              AND LEFT(
+                REGEXP_REPLACE(
+                  COALESCE(
+                    NULLIF(
+                      p.card_bin,
+                      ''
+                    ),
+                    a.card_bin,
+                    ''
+                  ),
+                  '[^0-9]',
+                  '',
+                  'g'
+                ),
+                6
+              ) = $1
+
+              AND RIGHT(
+                REGEXP_REPLACE(
+                  COALESCE(
+                    NULLIF(
+                      p.last_four,
+                      ''
+                    ),
+                    a.last_four,
+                    ''
+                  ),
+                  '[^0-9]',
+                  '',
+                  'g'
+                ),
+                4
+              ) = $2
+
+              AND ABS(
+                p.amount -
+                $3::numeric
+              ) < 0.01
+
+              AND p.created_at >=
+                $4::date -
+                INTERVAL '1 day'
+
+              AND p.created_at <
+                $4::date +
+                INTERVAL '2 days'
+
+            ORDER BY
+              ABS(
+                EXTRACT(
+                  EPOCH FROM
+                  (
+                    p.created_at -
+                    $4::date
+                  )
+                )
+              )
+
+            LIMIT 1
+            `,
+            [
+              cardBin,
+              lastFour,
+              originalAmount,
+              transactionDate
+            ]
+          );
+
+        if (
+          paymentMatch.rows.length
+        ) {
+          matchedPayment =
+            paymentMatch.rows[0];
+
+          matched++;
+        }
+
+        const gatewayReference =
+          String(
+            row.GATEWAY_REFERENCE_1 ||
+            ""
+          ).trim();
+
+        const sequenceNumber =
+          String(
+            row.SEQUENCE_NUM ||
+            ""
+          ).trim();
+
+        const existing =
+          await pool.query(
+            `
+            SELECT id
+            FROM fraud_reports
+
+            WHERE
+              gateway_reference = $1
+              AND sequence_number = $2
+              AND card_bin = $3
+              AND last_four = $4
+              AND transaction_date = $5
+              AND original_amount = $6
+            `,
+            [
+              gatewayReference,
+              sequenceNumber,
+              cardBin,
+              lastFour,
+              transactionDate,
+              originalAmount
+            ]
+          );
+
+        await pool.query(
+          `
+          INSERT INTO fraud_reports (
+            gateway_reference,
+            sequence_number,
+
+            card_bin,
+            last_four,
+            card_scheme,
+
+            merchant_name,
+            mid,
+
+            acquirer_reference,
+
+            record_date,
+            transaction_date,
+            post_date,
+
+            fraud_amount_usd,
+            fraud_type,
+
+            original_currency,
+            original_amount,
+
+            auth_code,
+            file_reference,
+
+            merchant_city,
+            mcc,
+            pos_entry,
+            cap_method,
+
+            matched_payment_reference,
+
+            card_country,
+            affiliate_source,
+            plan,
+            card_type,
+            email
+          )
+
+          VALUES (
+            $1, $2,
+            $3, $4, $5,
+            $6, $7,
+            $8,
+            $9, $10, $11,
+            $12, $13,
+            $14, $15,
+            $16, $17,
+            $18, $19, $20, $21,
+            $22,
+            $23, $24, $25, $26, $27
+          )
+
+          ON CONFLICT (
+            gateway_reference,
+            sequence_number,
+            card_bin,
+            last_four,
+            transaction_date,
+            original_amount
+          )
+
+          DO UPDATE SET
+            card_scheme =
+              EXCLUDED.card_scheme,
+
+            merchant_name =
+              EXCLUDED.merchant_name,
+
+            mid =
+              EXCLUDED.mid,
+
+            acquirer_reference =
+              EXCLUDED.acquirer_reference,
+
+            record_date =
+              EXCLUDED.record_date,
+
+            post_date =
+              EXCLUDED.post_date,
+
+            fraud_amount_usd =
+              EXCLUDED.fraud_amount_usd,
+
+            fraud_type =
+              EXCLUDED.fraud_type,
+
+            original_currency =
+              EXCLUDED.original_currency,
+
+            auth_code =
+              EXCLUDED.auth_code,
+
+            file_reference =
+              EXCLUDED.file_reference,
+
+            merchant_city =
+              EXCLUDED.merchant_city,
+
+            mcc =
+              EXCLUDED.mcc,
+
+            pos_entry =
+              EXCLUDED.pos_entry,
+
+            cap_method =
+              EXCLUDED.cap_method,
+
+            matched_payment_reference =
+              EXCLUDED.matched_payment_reference,
+
+            card_country =
+              EXCLUDED.card_country,
+
+            affiliate_source =
+              EXCLUDED.affiliate_source,
+
+            plan =
+              EXCLUDED.plan,
+
+            card_type =
+              EXCLUDED.card_type,
+
+            email =
+              EXCLUDED.email,
+
+            imported_at =
+              NOW()
+          `,
+          [
+            gatewayReference,
+            sequenceNumber,
+
+            cardBin,
+            lastFour,
+            String(
+              row.CARD_SCHEME || ""
+            ).trim(),
+
+            merchantName,
+            mid,
+
+            String(
+              row.ACQ_REF_N || ""
+            ).trim(),
+
+            recordDate,
+            transactionDate,
+            postDate,
+
+            Number.isFinite(
+              fraudAmountUsd
+            )
+              ? fraudAmountUsd
+              : null,
+
+            String(
+              row.FRAUD_TYPE || ""
+            ).trim(),
+
+            String(
+              row.ORIG_TXN_CCY || ""
+            ).trim(),
+
+            originalAmount,
+
+            String(
+              row.AUTH_CODE || ""
+            ).trim(),
+
+            String(
+              row.FILE_REFERENCE || ""
+            ).trim(),
+
+            String(
+              row.MERCH_CITY || ""
+            ).trim(),
+
+            String(
+              row.MCC || ""
+            ).trim(),
+
+            String(
+              row.POS_ENTRY || ""
+            ).trim(),
+
+            String(
+              row.CAP_MET || ""
+            ).trim(),
+
+            matchedPayment
+              ?.reference ||
+              null,
+
+            matchedPayment
+              ?.card_country ||
+              null,
+
+            matchedPayment
+              ?.affiliate_source ||
+              null,
+
+            matchedPayment
+              ?.plan ||
+              null,
+
+            matchedPayment
+              ?.card_type ||
+              null,
+
+            matchedPayment
+              ?.email ||
+              null
+          ]
+        );
+
+        if (existing.rows.length) {
+          updated++;
+        } else {
+          imported++;
+        }
+      }
+
+      return res.json({
+        success: true,
+        imported,
+        updated,
+        skipped,
+        ignoredOtherMerchant,
+        matched
+      });
+
+    } catch (error) {
+      console.error(
+        "Fraud Excel import error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        error:
+          "Could not import fraud Excel report"
+      });
+    }
+  }
+);
+
+
+// --------------------------------------------
+// ADMIN FRAUD REPORTS API
+// --------------------------------------------
+
+app.get(
+  "/api/admin/fraud",
+  requireAdminPassword,
+  async (req, res) => {
+    try {
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+
+            gateway_reference,
+            sequence_number,
+
+            card_bin,
+            last_four,
+            card_scheme,
+
+            merchant_name,
+            mid,
+
+            acquirer_reference,
+
+            record_date,
+            transaction_date,
+            post_date,
+
+            fraud_amount_usd,
+            fraud_type,
+
+            original_currency,
+            original_amount,
+
+            auth_code,
+            file_reference,
+
+            merchant_city,
+            mcc,
+            pos_entry,
+            cap_method,
+
+            matched_payment_reference,
+
+            card_country,
+            affiliate_source,
+            plan,
+            card_type,
+            email,
+
+            imported_at
+
+          FROM fraud_reports
+
+          WHERE
+            (
+              LOWER(
+                REPLACE(
+                  COALESCE(
+                    merchant_name,
+                    ''
+                  ),
+                  ' ',
+                  ''
+                )
+              ) = 'speaktoheaven.com'
+
+              OR
+
+              mid = '000106901001030'
+            )
+
+          ORDER BY
+            transaction_date DESC,
+            id DESC
+          `
+        );
+
+      return res.json({
+        success: true,
+        fraudReports:
+          result.rows
+      });
+
+    } catch (error) {
+      console.error(
+        "Fraud reports API error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        error:
+          "Could not load fraud reports"
+      });
+    }
+  }
+);
+
+
+// --------------------------------------------
 // ADMIN TRANSACTIONS API
 // --------------------------------------------
 
@@ -2785,6 +3920,9 @@ const isSuccessful =
 
     const payment = paymentResult.rows[0];
 
+    const wasAlreadyPaid =
+      payment.paid_at != null;
+
     await pool.query(
       `
       UPDATE xolvis_payments
@@ -2825,6 +3963,17 @@ await pool.query(
 );
 
     if (!isSuccessful) {
+  return res.json({
+    ok: true
+  });
+}
+
+if (wasAlreadyPaid) {
+  console.log(
+    "XOLVIS WEBHOOK: Successful payment already processed, skipping duplicate:",
+    payment.reference
+  );
+
   return res.json({
     ok: true
   });
@@ -2885,45 +4034,102 @@ await pool.query(
         "User not found:",
         payment.email
       );
-
-      return res.json({
-        ok: true
-      });
     }
 
-    const receiptPdf =
-      makeReceiptPdfBase64({
-        email: payment.email,
-        plan: accessPlan,
-        amount: payment.amount
+    try {
+      const productName =
+        getReceiptProductName(
+          payment.plan
+        );
+
+      const firstName =
+        data?.customer?.firstName ||
+        "";
+
+      const lastName =
+        data?.customer?.lastName ||
+        "";
+
+      const customerName =
+        `${firstName} ${lastName}`.trim() ||
+        data?.returnData?.cardHolder ||
+        "Customer";
+
+      let paymentMethod =
+        data?.paymentMethod ||
+        "Credit Card";
+
+      if (
+        String(paymentMethod)
+          .toLowerCase() ===
+        "creditcard"
+      ) {
+        paymentMethod =
+          "Credit Card";
+      }
+
+      const receiptNumber =
+        "STH-" +
+        String(payment.id)
+          .padStart(6, "0");
+
+      const receiptPdf =
+        await makeReceiptPdf({
+          receiptNumber,
+          customerName,
+          email: payment.email,
+          productName,
+          amount: payment.amount,
+          paymentMethod,
+          reference: payment.reference
+        });
+
+      await uploadReceiptToR2({
+        pdfBuffer: receiptPdf,
+        receiptNumber
       });
 
-    await sendEmail(
-      payment.email,
-      "Your Speak to Heaven receipt",
-      `
-      <h2>Payment received</h2>
+      await sendEmail(
+        payment.email,
+        "Your SpeakToHeaven.com receipt",
+        `
+        <h2>Payment received</h2>
 
-      <p>Thank you for your offering.</p>
+        <p>Thank you for your payment.</p>
 
-      <p>
-      <strong>Plan:</strong>
-      ${accessPlan}
-      </p>
+        <p>
+        <strong>Product:</strong>
+        ${productName}
+        </p>
 
-      <p>
-      <strong>Amount:</strong>
-      £${Number(payment.amount).toFixed(2)}
-      </p>
-      `,
-      [
-        {
-          filename:
-            "speak-to-heaven-receipt.pdf",
-          content: receiptPdf
-        }
-      ]
-    );
+        <p>
+        <strong>Amount:</strong>
+        £${Number(payment.amount).toFixed(2)}
+        </p>
+
+        <p>Your payment receipt is attached.</p>
+        `,
+        [
+          {
+            filename:
+              `${receiptNumber}.pdf`,
+            content:
+              receiptPdf.toString("base64")
+          }
+        ]
+      );
+
+      console.log(
+        "✅ RECEIPT PROCESS COMPLETE:",
+        receiptNumber
+      );
+
+    } catch (receiptError) {
+      console.error(
+        "❌ RECEIPT PROCESS FAILED:",
+        receiptError
+      );
+    }
 
     res.json({
       ok: true
@@ -2942,33 +4148,78 @@ await pool.query(
   }
 });
 app.get("/test-receipt-email", async (req, res) => {
-  const email = "markvanstratum67@gmail.com";
+  try {
+    const email =
+      "markvanstratum67@gmail.com";
 
-  const receiptPdf = makeReceiptPdfBase64({
-    email,
-    plan: "lifetime",
-    amount: 49.95
-  });
+    const receiptNumber =
+      "STH-TEST-" +
+      Date.now();
 
-  await sendEmail(
-    email,
-    "TEST Receipt",
-    "<h2>Thank you for your order with SpeakToHeaven.com</h2>" +
-"<p>We have received your payment successfully.</p>" +
-"<p>Your receipt is attached to this email as a PDF.</p>" +
-"<p><strong>Plan:</strong> Lifetime Access</p>" +
-"<p><strong>Amount paid:</strong> £49.95</p>",
-[
-      {
-        filename: "receipt.pdf",
-        content: receiptPdf
-      }
-    ]
-  );
+    const receiptPdf =
+      await makeReceiptPdf({
+        receiptNumber,
+        customerName:
+          "Test Customer",
+        email,
+        productName:
+          "SpeakToHeaven.com 3 Month Full Access",
+        amount:
+          49.95,
+        paymentMethod:
+          "Credit Card",
+        reference:
+          "TEST-PAYMENT"
+      });
 
-  res.send("Test email sent");
+    const r2Key =
+      await uploadReceiptToR2({
+        pdfBuffer:
+          receiptPdf,
+        receiptNumber
+      });
+
+    await sendEmail(
+      email,
+      "TEST SpeakToHeaven.com Receipt",
+      `
+        <h2>SpeakToHeaven.com receipt test</h2>
+        <p>This is a test payment receipt.</p>
+        <p><strong>Product:</strong> SpeakToHeaven.com 3 Month Full Access</p>
+        <p><strong>Amount:</strong> £49.95</p>
+      `,
+      [
+        {
+          filename:
+            `${receiptNumber}.pdf`,
+          content:
+            receiptPdf.toString("base64")
+        }
+      ]
+    );
+
+    res.json({
+      success: true,
+      receiptNumber,
+      r2Key
+    });
+
+  } catch (error) {
+    console.error(
+      "TEST RECEIPT ERROR:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      error:
+        String(
+          error?.message ||
+          error
+        )
+    });
+  }
 });
-
 app.get("/", (req, res) => {
 	res.send(`
 <!DOCTYPE html>
