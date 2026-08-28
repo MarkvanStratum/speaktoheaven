@@ -244,6 +244,7 @@
 <div class="tabs">
   <button id="transactionsTabButton" class="tab-button active">Transactions</button>
   <button id="chargebacksTabButton" class="tab-button">Chargebacks</button>
+  <button id="fraudTabButton" class="tab-button">Fraud</button>
 </div>
 
 <div id="transactionsView">
@@ -480,16 +481,242 @@
 
 </div>
 
+<div id="fraudView" class="view-hidden">
+
+  <div class="chargeback-toolbar">
+    <input
+      id="fraudFileInput"
+      type="file"
+      accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      style="display:none;"
+    />
+
+    <button
+      id="uploadFraudButton"
+      class="primary-button"
+    >
+      Upload fraud Excel
+    </button>
+
+    <button
+      id="refreshFraudButton"
+      class="secondary-button"
+    >
+      Refresh fraud
+    </button>
+  </div>
+
+  <div
+    id="fraudStatusLine"
+    class="status-line"
+  >
+    No fraud file uploaded yet.
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-label">
+        Successful sales
+      </div>
+      <div
+        id="fraudSuccessfulSales"
+        class="card-value"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        Fraud cases
+      </div>
+      <div
+        id="fraudCount"
+        class="card-value"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        Fraud rate
+      </div>
+      <div
+        id="fraudRate"
+        class="card-value"
+      >
+        0%
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        Fraud amount (USD)
+      </div>
+      <div
+        id="fraudAmount"
+        class="card-value"
+      >
+        $0.00
+      </div>
+    </div>
+
+  </div>
+
+  <div class="chargeback-filters">
+
+    <select id="fraudGroupBy">
+      <option value="card_bin">
+        Rows: BIN
+      </option>
+      <option value="card_country">
+        Rows: Country
+      </option>
+      <option value="affiliate_source">
+        Rows: Affiliate
+      </option>
+      <option value="plan">
+        Rows: Plan
+      </option>
+      <option value="card_type">
+        Rows: Card type
+      </option>
+      <option value="fraud_type">
+        Rows: Fraud type
+      </option>
+    </select>
+
+    <select id="fraudSortBy">
+      <option value="rate_desc">
+        Sort: Fraud rate
+      </option>
+      <option value="fraud_desc">
+        Sort: Fraud cases
+      </option>
+      <option value="amount_desc">
+        Sort: Fraud amount
+      </option>
+      <option value="sales_desc">
+        Sort: Successful sales
+      </option>
+      <option value="group_asc">
+        Sort: Group name
+      </option>
+    </select>
+
+    <select id="fraudCountryFilter">
+      <option value="ALL">
+        All countries
+      </option>
+    </select>
+
+    <select id="fraudAffiliateFilter">
+      <option value="ALL">
+        All affiliates
+      </option>
+    </select>
+
+    <select id="fraudPlanFilter">
+      <option value="ALL">
+        All plans
+      </option>
+    </select>
+
+    <select id="fraudCardTypeFilter">
+      <option value="ALL">
+        All card types
+      </option>
+    </select>
+
+    <select id="fraudTypeFilter">
+      <option value="ALL">
+        All fraud types
+      </option>
+    </select>
+
+    <input
+      id="fraudStartDate"
+      type="date"
+      title="Fraud from date"
+      aria-label="Fraud from date"
+    />
+
+    <input
+      id="fraudEndDate"
+      type="date"
+      title="Fraud to date"
+      aria-label="Fraud to date"
+    />
+
+    <button
+      id="fraudClearFilters"
+      class="secondary-button"
+    >
+      Clear fraud filters
+    </button>
+
+  </div>
+
+  <div class="chargeback-note">
+    Fraud rate is fraud-reported transactions divided by successful sales for the same selected traffic. BIN is the default row grouping.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th id="fraudGroupHeader">
+            BIN
+          </th>
+          <th>
+            Successful sales
+          </th>
+          <th>
+            Fraud cases
+          </th>
+          <th>
+            Fraud rate
+          </th>
+          <th>
+            Fraud amount
+          </th>
+          <th>
+            Average fraud amount
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="fraudPivotBody"></tbody>
+    </table>
+
+    <div
+      id="fraudEmptyState"
+      class="empty-state"
+      style="display:none;"
+    >
+      No fraud data matches the selected filters.
+    </div>
+  </div>
+
+</div>
+
     </div>
   </div>
 
   <script>    const API_URL = "/api/admin/transactions";
 const CHARGEBACKS_API_URL = "/api/admin/chargebacks";
 const CHARGEBACK_UPLOAD_URL = "/api/admin/chargebacks/upload";
+
+const FRAUD_API_URL = "/api/admin/fraud";
+const FRAUD_UPLOAD_URL = "/api/admin/fraud/upload";
+
     let adminPassword = "";
     let allTransactions = [];
     let filteredTransactions = [];
 let allChargebacks = [];
+let allFraudReports = [];
     let refreshTimer = null;
 
     const byId = id => document.getElementById(id);
@@ -525,9 +752,11 @@ const rollingReserve =
     byId("rollingReserve");
 const transactionsTabButton = byId("transactionsTabButton");
 const chargebacksTabButton = byId("chargebacksTabButton");
+const fraudTabButton = byId("fraudTabButton");
 
 const transactionsView = byId("transactionsView");
 const chargebacksView = byId("chargebacksView");
+const fraudView = byId("fraudView");
 
 const chargebackFileInput = byId("chargebackFileInput");
 const uploadChargebacksButton = byId("uploadChargebacksButton");
@@ -557,6 +786,34 @@ const cbClearFilters = byId("cbClearFilters");
 const cbGroupHeader = byId("cbGroupHeader");
 const chargebackPivotBody = byId("chargebackPivotBody");
 const chargebackEmptyState = byId("chargebackEmptyState");
+
+const fraudFileInput = byId("fraudFileInput");
+const uploadFraudButton = byId("uploadFraudButton");
+const refreshFraudButton = byId("refreshFraudButton");
+const fraudStatusLine = byId("fraudStatusLine");
+
+const fraudSuccessfulSales = byId("fraudSuccessfulSales");
+const fraudCount = byId("fraudCount");
+const fraudRate = byId("fraudRate");
+const fraudAmount = byId("fraudAmount");
+
+const fraudGroupBy = byId("fraudGroupBy");
+const fraudSortBy = byId("fraudSortBy");
+
+const fraudCountryFilter = byId("fraudCountryFilter");
+const fraudAffiliateFilter = byId("fraudAffiliateFilter");
+const fraudPlanFilter = byId("fraudPlanFilter");
+const fraudCardTypeFilter = byId("fraudCardTypeFilter");
+const fraudTypeFilter = byId("fraudTypeFilter");
+
+const fraudStartDate = byId("fraudStartDate");
+const fraudEndDate = byId("fraudEndDate");
+
+const fraudClearFilters = byId("fraudClearFilters");
+
+const fraudGroupHeader = byId("fraudGroupHeader");
+const fraudPivotBody = byId("fraudPivotBody");
+const fraudEmptyState = byId("fraudEmptyState");
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -1118,9 +1375,16 @@ function showDashboardView(viewName) {
   const showChargebacks =
     viewName === "chargebacks";
 
+  const showFraud =
+    viewName === "fraud";
+
+  const showTransactions =
+    !showChargebacks &&
+    !showFraud;
+
   transactionsView.classList.toggle(
     "view-hidden",
-    showChargebacks
+    !showTransactions
   );
 
   chargebacksView.classList.toggle(
@@ -1128,9 +1392,14 @@ function showDashboardView(viewName) {
     !showChargebacks
   );
 
+  fraudView.classList.toggle(
+    "view-hidden",
+    !showFraud
+  );
+
   transactionsTabButton.classList.toggle(
     "active",
-    !showChargebacks
+    showTransactions
   );
 
   chargebacksTabButton.classList.toggle(
@@ -1138,8 +1407,17 @@ function showDashboardView(viewName) {
     showChargebacks
   );
 
+  fraudTabButton.classList.toggle(
+    "active",
+    showFraud
+  );
+
   if (showChargebacks) {
     loadChargebacks(false);
+  }
+
+  if (showFraud) {
+    loadFraudReports(false);
   }
 }
 
@@ -1857,8 +2135,691 @@ function clearChargebackFilters() {
 }
 
 
-    function clearFilters() {
-      searchInput.value = "";
+function populateFraudFilters() {
+  const transactionCountries =
+    allTransactions.map(
+      transaction =>
+        String(
+          transaction.card_country || ""
+        )
+          .trim()
+          .toUpperCase()
+    );
+
+  const fraudCountries =
+    allFraudReports.map(
+      item =>
+        String(
+          item.card_country || ""
+        )
+          .trim()
+          .toUpperCase()
+    );
+
+  fillSelect(
+    fraudCountryFilter,
+    transactionCountries.concat(
+      fraudCountries
+    ),
+    "All countries"
+  );
+
+  fillSelect(
+    fraudAffiliateFilter,
+    allTransactions
+      .map(
+        transaction =>
+          transaction.affiliate_source
+      )
+      .concat(
+        allFraudReports.map(
+          item =>
+            item.affiliate_source
+        )
+      ),
+    "All affiliates"
+  );
+
+  fillSelect(
+    fraudPlanFilter,
+    allTransactions
+      .map(
+        transaction =>
+          transaction.plan
+      )
+      .concat(
+        allFraudReports.map(
+          item =>
+            item.plan
+        )
+      ),
+    "All plans"
+  );
+
+  fillSelect(
+    fraudCardTypeFilter,
+    allTransactions
+      .map(
+        transaction =>
+          transaction.card_type
+      )
+      .concat(
+        allFraudReports.map(
+          item =>
+            item.card_type
+        )
+      ),
+    "All card types"
+  );
+
+  fillSelect(
+    fraudTypeFilter,
+    allFraudReports.map(
+      item =>
+        item.fraud_type
+    ),
+    "All fraud types"
+  );
+}
+
+
+async function loadFraudReports(
+  showError = true
+) {
+  try {
+    const response =
+      await fetch(
+        FRAUD_API_URL,
+        {
+          headers: {
+            "x-admin-password":
+              adminPassword
+          },
+          cache: "no-store"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok ||
+      data.success !== true
+    ) {
+      throw new Error(
+        data.error ||
+        "Could not load fraud reports"
+      );
+    }
+
+    allFraudReports =
+      Array.isArray(
+        data.fraudReports
+      )
+        ? data.fraudReports
+        : [];
+
+    populateFraudFilters();
+    renderFraudReport();
+
+    fraudStatusLine.textContent =
+      "Loaded " +
+      allFraudReports.length +
+      " fraud report(s).";
+
+  } catch (error) {
+    if (showError) {
+      fraudStatusLine.textContent =
+        error.message;
+    } else {
+      console.error(error);
+    }
+  }
+}
+
+
+async function uploadFraudExcel() {
+  const file =
+    fraudFileInput.files[0];
+
+  if (!file) {
+    fraudStatusLine.textContent =
+      "Choose an Excel file first.";
+
+    return;
+  }
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    file
+  );
+
+  uploadFraudButton.disabled =
+    true;
+
+  fraudStatusLine.textContent =
+    "Uploading and matching fraud report...";
+
+  try {
+    const response =
+      await fetch(
+        FRAUD_UPLOAD_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "x-admin-password":
+              adminPassword
+          },
+
+          body: formData
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok ||
+      data.success !== true
+    ) {
+      throw new Error(
+        data.error ||
+        "Could not import fraud Excel report"
+      );
+    }
+
+    const resultText =
+      "Upload complete: " +
+      data.imported +
+      " new, " +
+      data.updated +
+      " updated, " +
+      data.matched +
+      " matched to successful payments, " +
+      data.skipped +
+      " skipped, " +
+      data.ignoredOtherMerchant +
+      " other-merchant row(s) ignored.";
+
+    fraudFileInput.value =
+      "";
+
+    await loadFraudReports(
+      false
+    );
+
+    fraudStatusLine.textContent =
+      resultText;
+
+  } catch (error) {
+    fraudStatusLine.textContent =
+      error.message;
+
+  } finally {
+    uploadFraudButton.disabled =
+      false;
+  }
+}
+
+
+function dateInFraudRange(value) {
+  if (!value) {
+    return false;
+  }
+
+  const date =
+    new Date(
+      String(value).slice(0, 10) +
+      "T12:00:00"
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return false;
+  }
+
+  if (fraudStartDate.value) {
+    const start =
+      new Date(
+        fraudStartDate.value +
+        "T00:00:00"
+      );
+
+    if (date < start) {
+      return false;
+    }
+  }
+
+  if (fraudEndDate.value) {
+    const end =
+      new Date(
+        fraudEndDate.value +
+        "T23:59:59.999"
+      );
+
+    if (date > end) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+function passesCommonFraudFilters(
+  item
+) {
+  const country =
+    String(
+      item.card_country || ""
+    )
+      .trim()
+      .toUpperCase();
+
+  const affiliate =
+    String(
+      item.affiliate_source ||
+      ""
+    ).trim();
+
+  const plan =
+    String(
+      item.plan ||
+      ""
+    ).trim();
+
+  const cardType =
+    String(
+      item.card_type ||
+      ""
+    ).trim();
+
+  return (
+    (
+      fraudCountryFilter.value ===
+        "ALL" ||
+      country ===
+        fraudCountryFilter.value
+    ) &&
+    (
+      fraudAffiliateFilter.value ===
+        "ALL" ||
+      affiliate ===
+        fraudAffiliateFilter.value
+    ) &&
+    (
+      fraudPlanFilter.value ===
+        "ALL" ||
+      plan ===
+        fraudPlanFilter.value
+    ) &&
+    (
+      fraudCardTypeFilter.value ===
+        "ALL" ||
+      cardType ===
+        fraudCardTypeFilter.value
+    )
+  );
+}
+
+
+function renderFraudReport() {
+  const groupField =
+    fraudGroupBy.value;
+
+  const groupNames = {
+    card_bin: "BIN",
+    card_country: "Country",
+    affiliate_source: "Affiliate",
+    plan: "Plan",
+    card_type: "Card type",
+    fraud_type: "Fraud type"
+  };
+
+  fraudGroupHeader.textContent =
+    groupNames[groupField] ||
+    "Group";
+
+  const successfulSales =
+    allTransactions.filter(
+      transaction => {
+        if (
+          normalizeStatus(
+            transaction
+          ) !== "SUCCESSFUL"
+        ) {
+          return false;
+        }
+
+        if (
+          !passesCommonFraudFilters(
+            transaction
+          )
+        ) {
+          return false;
+        }
+
+        return dateInFraudRange(
+          transaction.created_at
+        );
+      }
+    );
+
+  const fraudReports =
+    allFraudReports.filter(
+      item => {
+        if (
+          !passesCommonFraudFilters(
+            item
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          !dateInFraudRange(
+            item.transaction_date
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          fraudTypeFilter.value !==
+            "ALL" &&
+          String(
+            item.fraud_type ||
+            ""
+          ) !==
+            fraudTypeFilter.value
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+    );
+
+  const totalFraudAmount =
+    fraudReports.reduce(
+      (sum, item) =>
+        sum +
+        (
+          Number(
+            item.fraud_amount_usd
+          ) || 0
+        ),
+      0
+    );
+
+  const totalRate =
+    successfulSales.length
+      ? (
+          fraudReports.length /
+          successfulSales.length
+        ) * 100
+      : 0;
+
+  fraudSuccessfulSales.textContent =
+    successfulSales.length;
+
+  fraudCount.textContent =
+    fraudReports.length;
+
+  fraudRate.textContent =
+    totalRate.toFixed(2) +
+    "%";
+
+  fraudAmount.textContent =
+    "$" +
+    totalFraudAmount.toFixed(2);
+
+  const groups =
+    new Map();
+
+  function ensure(name) {
+    if (!groups.has(name)) {
+      groups.set(
+        name,
+        {
+          group: name,
+          sales: 0,
+          fraud: 0,
+          amount: 0
+        }
+      );
+    }
+
+    return groups.get(name);
+  }
+
+  if (
+    groupField ===
+    "fraud_type"
+  ) {
+    const denominator =
+      successfulSales.length;
+
+    for (
+      const item
+      of fraudReports
+    ) {
+      const group =
+        ensure(
+          groupValue(
+            item,
+            groupField
+          )
+        );
+
+      group.fraud++;
+
+      group.amount +=
+        Number(
+          item.fraud_amount_usd
+        ) || 0;
+
+      group.sales =
+        denominator;
+    }
+
+  } else {
+
+    for (
+      const sale
+      of successfulSales
+    ) {
+      ensure(
+        groupValue(
+          sale,
+          groupField
+        )
+      ).sales++;
+    }
+
+    for (
+      const item
+      of fraudReports
+    ) {
+      const group =
+        ensure(
+          groupValue(
+            item,
+            groupField
+          )
+        );
+
+      group.fraud++;
+
+      group.amount +=
+        Number(
+          item.fraud_amount_usd
+        ) || 0;
+    }
+  }
+
+  let rows =
+    [...groups.values()]
+      .map(
+        group => ({
+          ...group,
+
+          rate:
+            group.sales
+              ? (
+                  group.fraud /
+                  group.sales
+                ) * 100
+              : (
+                  group.fraud
+                    ? Infinity
+                    : 0
+                ),
+
+          avg:
+            group.fraud
+              ? (
+                  group.amount /
+                  group.fraud
+                )
+              : 0
+        })
+      );
+
+  const sort =
+    fraudSortBy.value;
+
+  rows.sort(
+    (a, b) => {
+
+      if (
+        sort ===
+        "fraud_desc"
+      ) {
+        return (
+          b.fraud -
+          a.fraud
+        );
+      }
+
+      if (
+        sort ===
+        "amount_desc"
+      ) {
+        return (
+          b.amount -
+          a.amount
+        );
+      }
+
+      if (
+        sort ===
+        "sales_desc"
+      ) {
+        return (
+          b.sales -
+          a.sales
+        );
+      }
+
+      if (
+        sort ===
+        "group_asc"
+      ) {
+        return (
+          a.group.localeCompare(
+            b.group
+          )
+        );
+      }
+
+      return (
+        b.rate -
+        a.rate
+      );
+    }
+  );
+
+  fraudPivotBody.innerHTML =
+    "";
+
+  if (!rows.length) {
+    fraudEmptyState.style.display =
+      "block";
+
+    return;
+  }
+
+  fraudEmptyState.style.display =
+    "none";
+
+  for (const item of rows) {
+    const row =
+      document.createElement(
+        "tr"
+      );
+
+    const rateText =
+      Number.isFinite(
+        item.rate
+      )
+        ? item.rate.toFixed(2) +
+          "%"
+        : "No sales";
+
+    row.innerHTML = `
+      <td class="mono">${escapeHtml(item.group)}</td>
+      <td>${escapeHtml(item.sales)}</td>
+      <td>${escapeHtml(item.fraud)}</td>
+      <td>${escapeHtml(rateText)}</td>
+      <td>${escapeHtml("$" + item.amount.toFixed(2))}</td>
+      <td>${escapeHtml("$" + item.avg.toFixed(2))}</td>
+    `;
+
+    fraudPivotBody.appendChild(
+      row
+    );
+  }
+}
+
+
+function clearFraudFilters() {
+  fraudGroupBy.value =
+    "card_bin";
+
+  fraudSortBy.value =
+    "rate_desc";
+
+  fraudCountryFilter.value =
+    "ALL";
+
+  fraudAffiliateFilter.value =
+    "ALL";
+
+  fraudPlanFilter.value =
+    "ALL";
+
+  fraudCardTypeFilter.value =
+    "ALL";
+
+  fraudTypeFilter.value =
+    "ALL";
+
+  fraudStartDate.value = "";
+  fraudEndDate.value = "";
+
+  renderFraudReport();
+}
+
+
+    function clearFilters() {      searchInput.value = "";
 statusFilter.value = "ALL";
 planFilter.value = "ALL";
 countryFilter.value = "ALL";
@@ -1973,6 +2934,68 @@ cbClearFilters.addEventListener(
   );
 });
 
-  </script>
-</body>
+
+fraudTabButton.addEventListener(
+  "click",
+  () =>
+    showDashboardView(
+      "fraud"
+    )
+);
+
+
+uploadFraudButton.addEventListener(
+  "click",
+  () => {
+    fraudFileInput.click();
+  }
+);
+
+
+fraudFileInput.addEventListener(
+  "change",
+  () => {
+    if (
+      fraudFileInput.files.length >
+      0
+    ) {
+      uploadFraudExcel();
+    }
+  }
+);
+
+
+refreshFraudButton.addEventListener(
+  "click",
+  () =>
+    loadFraudReports(
+      true
+    )
+);
+
+
+fraudClearFilters.addEventListener(
+  "click",
+  clearFraudFilters
+);
+
+
+[
+  fraudGroupBy,
+  fraudSortBy,
+  fraudCountryFilter,
+  fraudAffiliateFilter,
+  fraudPlanFilter,
+  fraudCardTypeFilter,
+  fraudTypeFilter,
+  fraudStartDate,
+  fraudEndDate
+].forEach(control => {
+  control.addEventListener(
+    "change",
+    renderFraudReport
+  );
+});
+
+  </script></body>
 </html>
