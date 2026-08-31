@@ -1211,10 +1211,15 @@ function renderSummary() {
     );
   }
 
-  const transactionFee = 0.40;
+ const transactionFee = 0.40;
+
+const billableTransactions = filteredTransactions.filter(
+  transaction =>
+    normalizeStatus(transaction) !== "BLOCKED"
+).length;
 
 const transactionFees =
-  completed * transactionFee;
+  billableTransactions * transactionFee;
 
 const netAmount =
   grossAmount -
