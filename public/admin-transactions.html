@@ -723,6 +723,8 @@ let allChargebacks = [];
 let allFraudReports = [];
     let refreshTimer = null;
 
+let currentDashboardView = "transactions";
+
     const byId = id => document.getElementById(id);
     const loginPanel = byId("loginPanel");
     const dashboard = byId("dashboard");
@@ -1326,58 +1328,103 @@ rollingReserve.textContent =
     }
 
     function csvCell(value) {
-      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
-    }
+  let text = String(value ?? "");
+
+  // Remove null characters
+  text = text.replace(/\0/g, "");
+
+  // Prevent Excel/CSV formula injection
+  if (/^\s*[=+\-@]/.test(text)) {
+    text = "'" + text;
+  }
+
+  return '"' + text.replace(/"/g, '""') + '"';
+}
 
     function downloadCsv() {
-      const headers = [
-  "Date and time",
-  "Email",
-  "Amount",
-  "Plan",
-  "Status",
-  "Reason",
-  "BIN",
-  "Country",
-  "Card type",
-  "Last four",
-  "Affiliate",
-"Source",
-"Sub ID",
-"Reference",
-"Xolvis UUID"
-];
-      const rows = filteredTransactions.map(t => [
-        formatDate(t.created_at),
-        t.email || "",
-        t.amount || "",
-        t.plan || "",
-        normalizeStatus(t),
-        t.reason || t.gateway_status || t.payment_status || "",
-        t.card_bin || "",
-t.card_country || "",
-t.card_type || "",
-t.last_four || "",
-        t.affiliate_source || "",
-t.traffic_source || "",
-t.sub_id || "",
-t.reference || "",
-t.xolvis_uuid || ""
-      ]);
+  let table;
+  let filenamePrefix;
 
-      const csv = [headers.map(csvCell).join(","), ...rows.map(row => row.map(csvCell).join(","))].join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "speak-to-heaven-transactions-" + new Date().toISOString().slice(0,10) + ".csv";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+  if (currentDashboardView === "fraud") {
+    table = fraudView.querySelector("table");
+    filenamePrefix = "speak-to-heaven-fraud";
+  } else if (currentDashboardView === "chargebacks") {
+    table = chargebacksView.querySelector("table");
+    filenamePrefix = "speak-to-heaven-chargebacks";
+  } else {
+    table = transactionsView.querySelector("table");
+    filenamePrefix = "speak-to-heaven-transactions";
+  }
+
+  if (!table) {
+    alert("No table available to download.");
+    return;
+  }
+
+  const csvRows = [];
+
+  const tableRows = table.querySelectorAll("tr");
+
+  tableRows.forEach(row => {
+    const cells = row.querySelectorAll("th, td");
+
+    if (!cells.length) {
+      return;
     }
 
+    const csvRow = Array.from(cells).map(cell => {
+      return csvCell(cell.textContent.trim());
+    });
+
+    csvRows.push(csvRow.join(","));
+  });
+
+  if (!csvRows.length) {
+    alert("There is no data to download.");
+    return;
+  }
+
+  const csv =
+    "\uFEFF" +
+    csvRows.join("\r\n");
+
+  const blob = new Blob(
+    [csv],
+    {
+      type: "text/csv;charset=utf-8"
+    }
+  );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    filenamePrefix +
+    "-" +
+    new Date()
+      .toISOString()
+      .slice(0, 10) +
+    ".csv";
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
 function showDashboardView(viewName) {
+currentDashboardView = viewName;
+
   const showChargebacks =
     viewName === "chargebacks";
 
