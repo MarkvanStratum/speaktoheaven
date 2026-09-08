@@ -169,7 +169,7 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <div style="margin-top:14px;font-weight:800">Order Summary</div>
-<div class="order-row"><span>Total</span><span>HK$78.00</span></div>
+<div class="order-row"><span>Total</span><span>HK$15.00</span></div>
 </div>
 
 <div class="widget">
@@ -282,11 +282,10 @@ nextBtn.onclick = async () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        plan: "lifetime",
-        step2File: "xo-hk2.html",
-        currency: "GBP",
-        amount: 49.95,
-        sourcePage: window.location.href,
+    plan: "3595",
+    step2File: "xo-hk2.html",
+    currency: "GBP",
+    amount: 35.95,
 
         firstName: firstName.value.trim(),
         lastName: lastName.value.trim(),
