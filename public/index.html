@@ -6,221 +6,2332 @@
   <title>Speak to Heaven — Biblical AI Chat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
   <style>
     :root {
-      --bg-heaven: #fdfcfb; 
-      --marble: #ffffff;
-      --gold-divine: #c5a059;
-      --blue-saint: #2c3e50;
-      --text-main: #33302c;
-      --text-muted: #8a8276;
-      --border-holy: rgba(197, 160, 89, 0.25);
+      --ink: #011f91;
+      --ink-deep: #021c78;
+      --gold: #dda400;
+      --gr: linear-gradient(180deg, #001555 0%, #021D9F 100%);
+      --gr-gold: linear-gradient(180deg, #B68505 0%, #ECB327 100%);
+      --btn: #0059F3;
+      --btn-hover: #1f58e8;
+      --muted: #5a6aa5;
+      --chat-border: rgba(47, 107, 255, 0.14);
       --radius: 12px;
-      --divine-shadow: 0 15px 50px rgba(0,0,0,0.04);
+      --gutter: max(16px, calc(33.5vw - 513px));
+      --shell: calc(100% - var(--gutter) * 2);
+      --chat-w: 513px;
+      --header-top: 16px;
+      --header-h: 83px;
     }
 
     * { box-sizing: border-box; }
-    body { margin: 0; color: var(--text-main); background-color: var(--bg-heaven); font-family: "EB Garamond", serif; font-size: 19px; line-height: 1.7; }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 0px 20px 40px; }
-    body.logged-in .wrap { max-width: none; width: 100%; padding: 0 10px 20px; }
+    html, body {
+      margin: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      position: relative;
+      color: var(--ink);
+      background: #f3f7ff;
+      font-family: "Inter", system-ui, sans-serif;
+    }
 
-    header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--border-holy); margin-bottom: 40px; }
-    .brand { display: flex; align-items: center; gap: 15px; }
-    .logo { width: 50px; height: 50px; background: white; border: 1.5px solid var(--gold-divine); border-radius: 50%; display: grid; place-items: center; font-family: "Cinzel", serif; color: var(--gold-divine); font-size: 22px; }
-    
-    .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px; }
-    body.logged-in .grid { grid-template-columns: 1fr; gap: 0; }
+    .hero-frame {
+      position: relative;
+      width: 100%;
+      height: 1050px;
+      min-height: 1000px;
+      overflow: hidden;
+    }
 
-    .card { background: var(--marble); border: 1px solid var(--border-holy); border-radius: var(--radius); box-shadow: var(--divine-shadow); overflow: hidden; }
-    .tabs { display: flex; background: #f8f8f8; cursor: pointer; border-bottom: 1px solid var(--border-holy); }
-    .tab { flex: 1; padding: 15px; text-align: center; font-family: "Cinzel", serif; color: var(--text-muted); font-size: 14px; }
-    .tab.active { background: white; color: var(--gold-divine); border-top: 2px solid var(--gold-divine); }
+    .hero-frame picture {
+      display: contents;
+    }
 
-    input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 16px; }
-    .btn { padding: 14px 28px; border-radius: 6px; font-family: "Cinzel", serif; cursor: pointer; border: 1px solid var(--gold-divine); background: transparent; color: var(--gold-divine); text-transform: uppercase; letter-spacing: 1px; width: 100%; }
-    .btn.primary { background: var(--gold-divine); color: white; border: none; }
+    .hero-art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 1050px;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-    .chat-shell {
+    .hero-jesus {
+      display: none;
+    }
+
+    .hero-stage {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: var(--shell);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--chat-w);
+      gap: 32px;
+      align-items: start;
+      align-content: center;
+      padding-top: calc(var(--header-top) + var(--header-h));
+      padding-bottom: 0;
+      box-sizing: border-box;
+      z-index: 1;
+    }
+
+    .site-header {
+      position: absolute;
+      top: var(--header-top);
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--shell);
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      padding: 14px 25px;
+      z-index: 20;
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      border-radius: 40px;
+      background-color: rgba(250, 252, 255, 0.92);
+      background-clip: padding-box;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .site-logo {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .site-logo img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 39px;
+      margin-left: 84px;
+      font-size: 20px;
+      font-weight: 400;
+      color: #021fb8;
+    }
+
+    .nav-links a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: #4d7dff;
+    }
+
+    .menu-btn {
+      display: none;
+      margin-left: auto;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      background: transparent;
+      color: #021fb8;
+      cursor: pointer;
+      place-items: center;
+      padding: 0;
+    }
+
+    .menu-btn .las {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .header-panel {
+      display: contents;
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      background: transparent;
+      color: var(--ink-deep);
+      cursor: pointer;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  height: 600px;
-  min-height: 0;
-}
+      place-items: center;
+      border-radius: 50%;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
 
-body.logged-in .chat-shell {
-  height: calc(100vh - 140px);
-  min-height: 0;
-}
+    .icon-btn:hover {
+      background: rgba(2, 31, 184, 0.08);
+      color: #021fb8;
+    }
 
-.chat-shell > div:last-child {
-  min-height: 0;
-}
+    .icon-btn .las {
+      font-size: 22px;
+      line-height: 1;
+    }
 
-.chat-log {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-    .sidebar { background: #faf9f7; border-right: 1px solid var(--border-holy); padding: 15px; overflow-y: auto; }
-    
-    .pitem { display: flex; align-items: center; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: white; font-family: "Cinzel", serif; font-size: 16px; }
-    .pitem.active { border-color: var(--gold-divine); background: #fffdf9; color: var(--gold-divine); }
-    
+    .btn-login,
+    .btn-signup,
+    .btn-exit {
+      height: 56px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-sizing: border-box;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-login:hover,
+    .btn-exit:hover {
+      background: rgba(2, 31, 184, 0.03);
+    }
+
+    .btn-signup:hover,
+    .btn-explore:hover,
+    .btn-send:hover {
+      background: var(--btn-hover);
+    }
+
+    .btn-explore:hover {
+      box-shadow: 0 16px 36px rgba(47, 107, 255, 0.35);
+    }
+
+    .btn-login {
+      width: 117px;
+      border: 1px solid #021FB8;
+      background: transparent;
+      color: #021fb8;
+      font-weight: 500;
+    }
+
+    .btn-signup,
+    .btn-explore,
+    .btn-send,
+    .limit-box .btn.primary {
+      border: 0;
+      background: var(--btn);
+      color: #fff;
+    }
+
+    .btn-signup {
+      min-width: 214px;
+      padding: 0 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-exit {
+      min-width: 120px;
+      border: 1.5px solid #d8def0;
+      background: #fff;
+      color: var(--ink-deep);
+      display: none;
+    }
+
+    body.logged-in .guest-only { display: none !important; }
+    body.logged-in .btn-exit { display: inline-flex; }
+
+    .hero-copy {
+      position: relative;
+      width: auto;
+      min-width: 0;
+      margin-top: 72px;
+      z-index: 3;
+      margin-left: 120px;
+    }
+
+    .hero-copy h1 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 68px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-copy h1 span {
+      display: block;
+      background: var(--gr);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .hero-copy h1 em {
+      display: block;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 70px;
+      background: var(--gr-gold);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .gold-rule {
+      display: block;
+      width: 520px;
+      max-width: 100%;
+      height: auto;
+      margin: 4px 0 18px;
+    }
+
+    .hero-copy p {
+      margin: 20px 0 30px;
+      max-width: 560px;
+      font-size: 20px;
+      line-height: 1.45;
+      color: #011f91;
+    }
+
+    .btn-explore {
+      width: min(430px, 100%);
+      height: 70px;
+      border-radius: 999px;
+      font-size: 26px;
+      font-weight: 400;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.4);
+      border: 3px solid #F9EDEE;
+      background-image: -moz-linear-gradient( 90deg, rgba(0,89,243,0.99608) 0%, rgb(0,83,226) 50%, rgb(0,93,250) 100%);
+  background-image: -webkit-linear-gradient( 90deg, rgba(0,89,243,0.99608) 0%, rgb(0,83,226) 50%, rgb(0,93,250) 100%);
+  background-image: -ms-linear-gradient( 90deg, rgba(0,89,243,0.99608) 0%, rgb(0,83,226) 50%, rgb(0,93,250) 100%);
+
+    }
+
+
+
+    .trust {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 34px;
+    }
+
+    .trust img { height: 64px; width: auto; }
+    .trust-copy { color: var(--ink); }
+    .stars {
+      display: flex;
+      gap: 2px;
+      line-height: 1;
+      color: #FCB501;
+    }
+
+    .stars .las {
+      font-size: 18px;
+      font-weight: 900;
+    }
+    .trust-copy small {
+      display: block;
+      margin-top: 4px;
+      font-size: 16px;
+      color: #011f91;
+    }
+
+    .chat-widget {
+      position: relative;
+      width: 513px;
+      min-width: 513px;
+      height: 790px;
+      max-height: 100%;
+      background: rgba(250, 252, 255, 0.92);
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      background-clip: padding-box;
+      border-radius: 28px;
+      box-shadow: 0 24px 70px rgba(30, 60, 140, 0.16);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 4;
+    }
+
+    .chat-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 30px 16px;
+      border-bottom: 1px solid #D7E6FD;
+    }
+    .chat-head i {
+      font-size: 40px;
+    }
+
+    .chat-head .lar {
+      font-size: 40px;
+      color: #021fb8;
+      line-height: 1;
+    }
+
+    .chat-head h2 {
+      margin: 0;
+      font-size: 25px;
+      color: var(--ink-deep);
+      font-weight: 400;
+    }
+
+    .chat-head .ai {
+      margin-left: auto;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(2, 31, 184, 0.8);
+      font-weight: 400;
+    }
+    .chat-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 20px 30px 30px 30px;
+    }
+
+    .chat-choose {
+      font-size: 16px;
+      color: #021fb8;
+      margin-bottom: 9px;
+    }
+
+    .profiles {
+      display: grid;
+      grid-template-columns: repeat(5, 81px);
+      justify-content: space-between;
+      width: 100%;
+      row-gap: 10px;
+    }
+
+    .profiles .pitem-extra {
+      display: none;
+    }
+
+    .profiles.open .pitem-extra {
+      display: block;
+    }
+
+    .pitem {
+      width: 81px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+      color: var(--ink);
+    }
+
+    .pitem-photo {
+      position: relative;
+      display: block;
+      width: 81px;
+      height: 81px;
+      margin: 0 auto 6px;
+    }
+
+    .pitem img,
+    .pitem .more-circle,
+    .pitem .fallback {
+      width: 81px;
+      height: 81px;
+      border-radius: 50%;
+      display: block;
+      margin: 0;
+      object-fit: cover;
+      box-sizing: border-box;
+      border: 3px solid transparent;
+    }
+
+    .pitem .more-circle {
+      margin: 0 auto 6px;
+    }
+
+    .pitem.active img,
+    .pitem.active .fallback {
+      border-color: #021fb8;
+    }
+
+    .pitem-check {
+      display: none;
+      position: absolute;
+      top: 6px;
+      right: -3px;
+      font-size: 15px;
+      line-height: 1;
+      color: #fff;
+      background: #021FB8;
+      border-radius: 50%;
+      z-index: 1;
+      padding: 3px;
+    }
+
+    .pitem.active .pitem-check {
+      display: grid;
+    }
+
+    .pitem-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      color: #021fb8;
+    }
+
+    .more-circle,
+    .fallback {
+      display: grid !important;
+      place-items: center;
+      background: #eef2fb;
+      color: var(--ink-deep);
+      font-weight: 800;
+      font-size: 22px;
+    }
+
+    .more-circle .las {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      color: #021fb8;
+    }
+
     .chat-log {
-  padding: 30px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 30px;
+    }
+
+    .msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    .msg.me {
+      justify-content: flex-end;
+    }
+
+    .msg-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .msg-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex: none;
+      background: #eef2fb;
+      padding: 1px;
+    }
+
+    .msg-col {
+      display: flex;
+      flex-direction: column;
+      max-width: min(340px, calc(100% - 62px));
+      min-width: 0;
+    }
+
+    .msg.them .msg-col {
+      max-width: 100%;
+    }
+
+    .msg.me .msg-col {
+      max-width: min(340px, 86%);
+      align-items: flex-end;
+    }
+
+    .bubble {
+      position: relative;
+      padding: 16px 20px;
+      border-radius: 24px;
+      font-size: 16px;
+      line-height: 1.45;
+      color: #021fb8;
+    }
+
+    .bubble.them {
+      border-color: rgb(255, 255, 255);
+      background-color: rgb(255, 255, 255);
+      box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.15);
+      color: #021fb8;
+    }
+
+    .bubble.them::before {
+      content: "";
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 9px solid transparent;
+      border-bottom: 9px solid transparent;
+      border-right: 10px solid #fff;
+      filter: drop-shadow(-3px 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .bubble.me {
+      background: var(--btn);
+      color: #fff;
+    }
+
+    .msg.them .msg-meta {
+      padding-left: 76px;
+    }
+
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(2, 31, 184, 0.45);
+    }
+
+    .msg-meta .las {
+      font-size: 11px;
+      color: rgba(2, 31, 184, 0.6);
+    } 
+
+    .chips {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .chips button {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      border: 1px solid rgba(0, 93, 250, 0.1);
+      background: #fff;
+      border-radius: 15px;
+      padding: 8px 10px;
+      font-size: 14px;
+      color: #021fb8;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.15);
+    }
+
+
+    .composer {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  overflow-y: auto;
+      gap: 10px;
+      padding: 0 16px 18px;
+      align-items: center;
+    }
+
+    .composer textarea {
   flex: 1;
-  min-height: 0;
-  background: #fff;
-  scroll-behavior: smooth;
-}
-    .bubble { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 17px; word-wrap: break-word; }
-    .bubble.them { background: #f8f6f2; align-self: flex-start; }
-    .bubble.me { background: var(--blue-saint); color: white; align-self: flex-end; }
+      height: 60px;
+      resize: none;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 93, 250, 0.5);
+      padding: 18px 23px;
+      font: 16px "Inter", system-ui, sans-serif;
+      color: var(--ink);
+      outline: none;
+      background: rgba(250, 252, 255, 1);
+    }
+    .composer textarea::placeholder {
+       color: rgba(2, 31, 184, 0.5);
+    }
+   
+    .btn-send {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex: none;
+    }
+
+    .btn-send .las {
+      font-size: 27px;
+      color: #fff;
+      line-height: 1;
+      transform: rotate(-45deg);
+    }
+
     .hide { display: none !important; }
 
-    footer { margin-top: 40px; padding: 30px 20px; border-top: 1px solid var(--border-holy); text-align: center; }
-    .footer-links { margin-bottom: 20px; }
-    .footer-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-size: 15px; font-family: "EB Garamond", serif; }
-    .footer-links a:hover { color: var(--gold-divine); }
-    .payment-icons { display: flex; justify-content: center; gap: 15px; align-items: center; opacity: 0.7; }
-    .payment-icons img { height: 24px; filter: grayscale(1); }
+    .figures-section {
+      --fig-cols: 6;
+      --fig-gap: 26px;
+      --fig-pad-x: 30px;
+      position: relative;
+      padding: 134px 0;
+      background: #b9d9ff url("/img/home/talk-to-inspiring-figures-bg.png") center top / cover no-repeat;
+      overflow: hidden;
+    }
+
+    .figures-inner {
+      width: min(calc(1580px + var(--fig-pad-x) * 2), var(--shell));
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0 var(--fig-pad-x);
+      text-align: center;
+    }
+
+    .figures-section h2 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 60px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      background: var(--gr);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .figures-br,
+    .higher-br { display: none; }
+
+    .figures-section > .figures-inner > p,
+    .figures-lead {
+      margin: 20px auto 0;
+      max-width: 620px;
+      font-size: 20px;
+      line-height: 1.45;
+      color: #011f91;
+    }
+
+    .figures-viewport {
+      overflow: hidden;
+      width: 100%;
+      padding: 30px 15px;
+      cursor: grab;
+      touch-action: pan-y;
+      container-type: inline-size;
+    }
+
+    .figures-viewport.is-dragging {
+      cursor: grabbing;
+    }
+
+    .figures-track {
+      display: flex;
+      width: max-content;
+      gap: var(--fig-gap);
+      transition: transform 0.45s ease;
+    }
+
+    .figure-card {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 calc((100cqw - (var(--fig-gap) * (var(--fig-cols) - 1))) / var(--fig-cols));
+      width: calc((100cqw - (var(--fig-gap) * (var(--fig-cols) - 1))) / var(--fig-cols));
+      min-width: 0;
+      max-width: calc((100cqw - (var(--fig-gap) * (var(--fig-cols) - 1))) / var(--fig-cols));
+      height: auto;
+      appearance: none;
+      -webkit-appearance: none;
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      background-color: rgb(250, 252, 255);
+      background-clip: padding-box;
+      padding: 0;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.2);
+      cursor: grab;
+      font-family: inherit;
+      color: #011f91;
+      text-align: center;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+ 
+
+    .figure-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .figure-card img {
+      flex: none;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      object-position: center 12%;
+      display: block;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    .figure-copy {
+      display: flex;
+      flex-direction: column;
+      flex: none;
+      width: 100%;
+      height: 124px;
+      box-sizing: border-box;
+      padding: 16px 12px 18px;
+      overflow: hidden;
+    }
+
+    .figure-name {
+      display: block;
+      height: 34px;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 28px;
+      line-height: 34px;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      background: var(--gr);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .figure-desc {
+      display: block;
+      margin-top: 4px;
+      height: calc(17px * 1.4 * 2);
+      overflow: hidden;
+      font-size: 17px;
+      line-height: 1.4;
+      color: #011f91;
+    }
+
+    .figures-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 0px;
+    }
+
+    .figures-dots button {
+      width: 18px;
+      height: 9px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: width 0.2s ease, background 0.2s ease;
+      background: transparent;
+      border: 1px solid rgb(0, 93, 250);
+    }
+
+    .figures-dots button.active {
+      width: 27px;
+      background: #005DFA;
+    }
+
+    .figures-all {
+      margin-top: 37px;
+      height: 70px;
+      padding: 0 70px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--btn);
+      color: #fff;
+      font-family: inherit;
+      font-size: 24px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      border: 2px solid #fff;
+    }
+
+    .figures-all:hover {
+      background: var(--btn-hover);
+      box-shadow: 0 16px 36px rgba(47, 107, 255, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .separator {
+      display: block;
+      border-style: solid;
+      border-width: 2px;
+      border-color: rgba(255, 255, 255, 0.085);
+      background-color: rgba(250, 252, 255, 0.085);
+      box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 100%;
+      height: 1px;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      z-index: 5;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+
+    .higher-section {
+      position: relative;
+      padding: 0px 0 80px;
+      padding-top: 135px;
+      padding-bottom: 150px;
+      background: #9ecbff url("/img/home/section-bg.png") center top / cover no-repeat;
+      overflow: hidden;
+    }
+
+    .higher-inner {
+      width: min(1080px, var(--shell));
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .higher-section h2 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 60px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .higher-section h2 span {
+      background: var(--gr);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .higher-section h2 em {
+      font-style: italic;
+      font-weight: 700;
+      font-size: 68px;
+      background: var(--gr-gold);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .higher-lead {
+      margin: 16px auto 0;
+      font-size: 20px;
+      line-height: 1.45;
+      color: #011f91;
+      max-width: 700px;
+    }
+
+    .higher-features {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+      margin-top: 35px;
+    }
+
+    .higher-feature h3 {
+      margin: 0 0 8px;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 25px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      color: #011f91;
+    }
+
+    .higher-feature p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.45;
+      color: #011f91;
+    }
+
+    .higher-icon {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 102px;
+      height: 102px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      /* border: 3px solid rgba(255, 255, 255, 0.55); */
+      background: none;
+      box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.4);
+    }
+
+    .higher-icon::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(246, 246, 246, 0.7);
+      clip-path: inset(3px round 50%);
+      pointer-events: none;
+    }
+
+    .higher-icon > * {
+      position: relative;
+      z-index: 1;
+    }
+   
+
+    .higher-icon .las,
+    .higher-icon .lar {
+      font-size: 58px;
+      line-height: 1;
+      color: #e15a48;
+    }
+
+    .higher-icon--chat .las,
+    .higher-icon--chat .lar {
+      color: #0063f5;
+    }
+
+    .higher-icon--heart .las,
+    .higher-icon--heart .lar {
+      color: #ff3831;
+    }
+
+    .higher-icon--book .las,
+    .higher-icon--book .lar {
+      color: #d7a120;
+    }
+
+    .higher-icon--globe .las,
+    .higher-icon--globe .lar {
+      color: #7a3eff;
+    }
+
+    .higher-stats {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      width: min(660px, 100%);
+      margin: 45px auto 0;
+      padding: 20px 26px;
+      border-radius: 30px;
+      background-color: rgba(250, 252, 255, 0.9);
+      background-clip: padding-box;
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .higher-stat {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      color: #011f91;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 26px;
+    }
+
+    .higher-stat .las,
+    .higher-stat .lar {
+      font-size: 58px;
+      line-height: 1;
+      color: #011f91;
+    }
+
+    .higher-stat strong {
+      display: block;
+      font-family: inherit;
+      font-weight: inherit;
+      font-size: inherit;
+      line-height: 1.2;
+    }
+
+    .higher-stat span {
+      display: block;
+      font-family: "Inter", system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+    }
+
+    .site-footer {
+      position: relative;
+      overflow: hidden;
+      color: #011f91;
+      padding: 90px 0 36px;
+    }
+
+    .site-footer picture {
+      display: contents;
+    }
+
+    .site-footer-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .footer-corner {
+      position: absolute;
+      bottom: 0;
+      width: min(15vw, 34vw);
+      height: auto;
+      pointer-events: none;
+      z-index: 99;
+
+    }
+
+    .footer-corner--left { left: 0; }
+    .footer-corner--right { right: 0; }
+
+    .footer-inner {
+      position: relative;
+      z-index: 2;
+      width: min(1180px, var(--shell));
+      margin: 0 auto;
+    }
+
+    .footer-cta {
+      position: relative;
+      overflow: visible;
+      padding: 48px 200px 56px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
+      border: 1px solid #f5e8c6;
+      border-radius: 50px;
+      width: 1030px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 10vw;
+    }
+
+    .footer-avatar {
+      position: absolute;
+      width: 168px;
+      height: 168px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: 50% 14%;
+      border: 3px solid var(--gold);
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    .footer-avatar--tl,
+    .footer-avatar--tr {
+      width: 230px;
+      height: 230px;
+    }
+
+    .footer-avatar--bl,
+    .footer-avatar--br {
+      width: 195px;
+      height: 195px;
+    }
+
+    .footer-avatar--tl { top: 80px; left: -93px; }
+    .footer-avatar--tr { top: 30px; right: -64px; object-position: 50% 22%; }
+    .footer-avatar--bl { bottom: -84px; left: -130px; }
+    .footer-avatar--br { bottom: -74px; right: -92px; object-position: 58% 16%; }
+
+    .footer-cta h2 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 60px;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+    }
+
+    .footer-cta h2 span {
+      display: block;
+      background: var(--gr);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .footer-cta h2 em {
+      display: block;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 60px;
+      background: var(--gr-gold);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .footer-cta-lead {
+      margin: 18px auto 28px;
+      max-width: 615px;
+      font-size: 20px;
+      line-height: 1.5;
+      color: #011f91;
+    }
+
+    .footer-cta-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-btn {
+      height: 62px;
+      padding: 0 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 500;
+      text-decoration: none;
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .footer-btn .las,
+    .footer-btn .lar {
+      font-size: 40px;
+      line-height: 1;
+    }
+
+    .footer-btn .la-arrow-right {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .footer-btn--primary {
+      border: 2px solid #fff;
+      background: var(--btn);
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .footer-btn--primary:hover {
+      background: var(--btn-hover);
+      box-shadow: 0 16px 36px rgba(47, 107, 255, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .footer-btn--ghost {
+      border: 2px solid #b3bbe9;
+      background: #fff;
+      color: #021fb8;
+      box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.2);
+    }
+
+
+
+
+    .footer-btn--ghost:hover {
+      background: rgba(2, 31, 184, 0.03);
+    }
+
+    .footer-cols {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.9fr) minmax(0, 0.85fr) minmax(220px, 1.25fr) minmax(0, 0.9fr) minmax(0, 1fr);
+      gap: 36px 20px;
+      margin-top: 48px;
+      padding-top: 8px;
+    }
+
+    .footer-brand p {
+      margin: 10px 0 0;
+      max-width: 360px;
+      font-size: 18px;
+      line-height: 2;
+    }
+
+    .footer-social {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .footer-social a {
+      color: #011f91;
+      font-size: 35px;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    .footer-social a:hover { color: #4d7dff; }
+
+    .footer-col h3 {
+      margin: 8px 0 16px;
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      font-size: 25px;
+      color: #011f91;
+      white-space: nowrap;
+    }
+
+    .footer-col a,
+    .footer-figure {
+      display: block;
+      margin: 0 0 14px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #011f91;
+      font: inherit;
+      font-size: 18px;
+      line-height: 1.4;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .footer-col a:hover,
+    .footer-figure:hover { color: #4d7dff; }
+
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-top: 36px;
+      padding-top: 30px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #011f91;
+      border-top: 1px solid rgba(2, 31, 184, 0.1);
+    }
+ 
+
+    .footer-bar p {
+      margin: 0;
+      max-width: 900px;
+    }
 
 .limit-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
+      background: rgba(8, 16, 48, .55);
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+      z-index: 50;
   padding: 20px;
 }
 
 .limit-modal.show { display: flex; }
 
 .limit-box {
-  background: white;
-  max-width: 460px;
-  width: 100%;
-  padding: 35px;
-  border-radius: 16px;
-  text-align: center;
-  border: 1px solid var(--border-holy);
+      width: min(440px, 100%);
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px;
   box-shadow: 0 20px 70px rgba(0,0,0,.2);
 }
 
 .limit-box h2 {
-  font-family: "Cinzel", serif;
-  color: var(--blue-saint);
-  margin-top: 0;
-}
+      font-family: "Playfair Display", serif;
+      margin: 0 0 16px;
+      color: var(--ink-deep);
+    }
 
-.limit-box p {
-  color: var(--text-muted);
-  font-size: 18px;
-}
+    .limit-box .btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 999px;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+    }
+
+    .limit-box .btn.primary { background: var(--btn); color: #fff; }
+    .limit-box .btn:not(.primary) {
+      margin-top: 10px;
+      background: #eef2fb;
+      color: var(--ink);
+    }
+    @media (max-width: 1600px) {
+      :root {
+        --gutter: clamp(28px, 4vw, 64px);
+      }
+      .hero-stage {
+        padding-top: calc(var(--header-top) + var(--header-h));
+        padding-bottom: 0;
+      }
+      .hero-copy {
+        margin-left: 0px;
+        margin-top: 35px;
+      }
+      .hero-art {
+        height: 100%;
+        object-position: right;
+      }
+      .hero-frame {
+        height: 1060px;
+      }
+      .figures-inner {
+        width: min(calc(1580px + var(--fig-pad-x) * 2), calc(100% - 24px));
+      }
+      .higher-inner {
+        width: min(1000px, calc(100% - 24px));
+      }
+    }
+    @media (max-width: 1500px) {
+      .hero-copy h1 { font-size: 54px; }
+      .hero-copy h1 em { font-size: 56px; }
+      .hero-copy {
+        margin-top: 75px;
+      }
+    }
+
+    @media (max-width: 1300px) {
+      .nav-links {
+        margin-left: 28px;
+        gap: 18px;
+      }
+      .header-actions {
+        gap: 8px;
+      }
+      .hero-art {
+        object-position: center;
+      }
+      .footer-corner {
+        z-index: 0;
+      }
+    }
+    @media (max-width: 1200px) {
+      :root { --header-h: 72px; }
+      .site-header {
+        height: 72px;
+        padding: 8px 14px;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .site-logo { flex-shrink: 0; }
+      .site-logo img { height: 36px; }
+      .nav-links {
+        flex: 1;
+        justify-content: center;
+        margin-left: 0;
+        gap: 12px;
+        font-size: 15px;
+        min-width: 0;
+      }
+      .nav-links a { white-space: nowrap; }
+      .header-actions {
+        flex-shrink: 0;
+        gap: 6px;
+      }
+      .header-actions .icon-btn { display: none !important; }
+      .btn-login,
+      .btn-signup,
+      .btn-exit {
+        height: 42px;
+        font-size: 15px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .btn-login {
+        width: auto;
+        padding: 0 16px;
+      }
+      .btn-signup {
+        min-width: auto;
+        padding: 0 14px;
+      }
+      .footer-avatar {
+        display: none;
+      }
+    }
+    @media (max-width: 992px) {
+      :root {
+        --header-top: 0px;
+        --header-h: 82px;
+      }
+      .site-header {
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        padding: 20px 20px;
+        padding-right: 16px;
+        border: 0;
+        border-bottom: 3px solid rgba(255, 255, 255, 0.55);
+        border-radius: 0;
+        background-clip: padding-box;
+        background-color: rgb(250, 252, 255);
+        box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.4);
+      }
+      .site-logo img {
+        height: 42px;
+      }
+      .menu-btn { display: grid; }
+      .header-panel {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 30px;
+        padding: 20px 20px 24px;
+        background-color: rgb(250, 252, 255);
+        /* box-shadow: 0 12px 24px rgba(2, 31, 184, 0.08); */
+      }
+      .site-header.is-open .header-panel { display: flex; }
+      .nav-links {
+        display: flex;
+        flex-direction: column;
+        margin-left: 0;
+        gap: 20px;
+      }
+      .header-actions {
+        margin-left: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .icon-btn { display: none; }
+      .btn-signup { min-width: 0; width: 100%; padding: 0 14px; font-size: 16px; height: 48px; }
+      .btn-login { display: flex; width: 100%; }
+      .hero-frame {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+      }
+      .hero-art {
+        height: 100%;
+        object-fit: cover;
+        object-position: 59% 20%;
+      }
+      .hero-stage {
+        position: relative;
+        left: auto;
+        top: auto;
+        bottom: auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        transform: none;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 16px 0;
+        padding-top: calc(var(--header-h) + 50px);
+      }
+      .hero-copy, .chat-widget { position: relative; left: auto; top: auto; }
+      .hero-copy {
+        width: auto;
+        max-width: none;
+        flex: none;
+        margin: 0;
+        padding: 0 4px;
+        text-align: center;
+      }
+      .hero-copy h1,
+      .hero-copy h1 em {
+        font-size: 40px;
+        line-height: 1.12;
+      }
+      .gold-rule {
+        width: 320px;
+        margin: 6px auto 16px;
+      }
+      .hero-copy p {
+        margin: 12px auto 22px;
+        max-width: none;
+        font-size: 18px;
+        line-height: 1.5;
+      }
+      .btn-explore {
+        width: 100%;
+        height: 70px;
+        font-size: 24px;
+      }
+      .trust {
+        justify-content: center;
+        margin-top: 22px;
+        img {
+          height: 54px;
+        }
+      }
+      .trust-copy small {
+        font-size: 15px;
+        text-align: left;
+        font-weight: 500;
+      }
+      .chat-widget {
+        width: 440px;
+        min-width: 0;
+        flex: none;
+        height: auto;
+        min-height: 620px;
+        max-height: none;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 20px;
+      }
+      .profiles {
+        grid-template-columns: repeat(5, 66px);
+        justify-content: start;
+        column-gap: 5px;
+        width: auto;
+      }
+      .pitem { width: 66px; }
+      .pitem-photo {
+        width: 66px;
+        height: 66px;
+      }
+      .pitem img,
+      .pitem .more-circle,
+      .pitem .fallback {
+        width: 66px;
+        height: 66px;
+      }
+      .pitem-check {
+        font-size: 11px;
+        padding: 2px;
+        top: 4px;
+        right: -2px;
+      }
+      .msg-avatar {
+        width: 47px;
+        height: 47px;
+      }
+      .chips button {
+        font-size: 12px;
+        padding: 8px 6px;
+      }
+      .hero-jesus {
+        display: block;
+        width: calc(100% + 32px);
+        max-width: none;
+        height: auto;
+        margin: -8px -16px 0;
+        position: relative;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .chat-head {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      .chat-body {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      .chat-head h2 {
+        font-size: 22px;
+        font-weight: 600;
+      }
+      .chat-head .lar {
+        font-size: 35px;
+      }
+      .chat-head {
+        gap: 5px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      .chat-head .ai {
+        font-size: 10px;
+        font-weight: 300x;
+      }
+      .chat-choose {
+        font-size: 14px;
+      }
+      .composer textarea {
+        height: 53px;
+      }
+      .composer textarea {
+        padding-top: 15px;
+        padding-bottom: 15px;
+      }
+      .figures-dots button {
+        width: 9px;
+        height: 9px;
+      }
+      .figures-dots button.active {
+        width: 27px;
+      }
+      .figures-inner {
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .footer-corner {
+        display: none;
+      }
+      .site-footer {
+        padding: 48px 0 32px;
+      }
+      .footer-inner {
+        width: calc(100% - 40px);
+      }
+      .footer-cta {
+        min-height: 0;
+        padding: 8px 0 36px;
+        border: 0;
+        background: none;
+        border-radius: 0;
+        margin-bottom: 8px;
+      }
+      .footer-avatar { display: none; }
+      .footer-cta h2 {
+        font-size: 36px;
+        line-height: 1.2;
+      }
+      .footer-cta h2 em { font-size: 38px; }
+      .footer-cta-lead {
+        font-size: 16px;
+        line-height: 1.5;
+        max-width: 300px;
+        margin: 16px auto 24px;
+      }
+      .footer-cta-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .footer-btn {
+        width: 100%;
+        height: 56px;
+        font-size: 18px;
+      }
+      .footer-btn .las,
+      .footer-btn .lar { font-size: 28px; }
+      .footer-btn .la-arrow-right { font-size: 20px; }
+      .footer-cols {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-top: 36px;
+        gap: 32px;
+      }
+      .footer-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        grid-column: auto;
+      }
+      .footer-brand p {
+        max-width: 280px;
+        text-align: center;
+        line-height: 1.55;
+      }
+      .footer-social {
+        justify-content: center;
+      }
+      .footer-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .footer-col h3 {
+        margin: 0 0 14px;
+        white-space: normal;
+      }
+      .footer-col a,
+      .footer-figure {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .footer-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 24px;
+      }
+      .footer-bar p {
+        max-width: 320px;
+      }
+    }
+    @media (max-width: 480px) {
+      .chat-widget {
+        width: calc(100% + 32px);
+        margin-left: -16px;
+        margin-right: -16px;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+      }
+    }
+    @media (max-width: 388px) {
+      .hero-copy h1,
+      .hero-copy h1 em {
+        font-size: 38px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .figures-section {
+        --fig-cols: 3;
+        min-height: 0;
+        padding: 80px 0 72px;
+      }
+      .figures-section h2 { font-size: 40px; }
+      .higher-section {
+        min-height: 0;
+        padding: 72px 0 64px;
+      }
+      .higher-section h2 { font-size: 40px; }
+      .higher-section h2 em { font-size: 46px; }
+      .higher-features {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px 24px;
+      }
+      .footer-cta {
+        min-height: 0;
+        padding: 36px 32px 40px;
+      }
+      .footer-avatar { display: none; }
+      .footer-cta h2 { font-size: 40px; }
+      .footer-cta h2 em { font-size: 44px; }
+      .footer-cols {
+        grid-template-columns: 1fr 1fr;
+        gap: 28px 32px;
+      }
+      .footer-brand { grid-column: 1 / -1; }
+      .footer-col h3 { white-space: normal; }
+    }
+
+    @media (max-width: 800px) {
+      .figures-section {
+        --fig-cols: 1;
+        --fig-gap: 32px;
+        --fig-pad-x: 16px;
+        padding: 56px 0 48px;
+      }
+      .figures-inner {
+        width: calc(100% - 32px);
+      }
+      .figures-br { display: block; }
+      .figures-section h2 {
+        font-size: 40px;
+        line-height: 1.3;
+      }
+      .figures-lead {
+        max-width: 320px;
+        margin-top: 12px;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .figures-viewport {
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 28px;
+        padding-bottom: 20px;
+      }
+      .figure-copy {
+        height: auto;
+        min-height: 108px;
+        padding: 18px 16px 22px;
+      }
+      .figure-name {
+        height: auto;
+        font-size: 24px;
+        line-height: 1.2;
+        margin-bottom: 6px;
+      }
+      .figure-desc {
+        height: auto;
+        min-height: calc(16px * 1.4 * 2);
+        font-size: 16px;
+      }
+      .figures-dots {
+        margin-top: 8px;
+      }
+      .figures-all {
+        width: 100%;
+        height: 64px;
+        padding: 0 24px;
+        font-size: 20px;
+        margin-top: 28px;
+      }
+      .figures-section {
+        padding-top: 80px;
+        padding-bottom: 110px;
+      }
+      .higher-section {
+        padding: 72px 0 64px;
+        background-position: 62% top;
+      }
+      .higher-inner {
+        width: calc(100% - 40px);
+      }
+      .higher-br { display: block; }
+      .higher-section h2 {
+        font-size: 40px;
+        line-height: 1.2;
+      }
+      .higher-section h2 em { font-size: 40px; }
+      .higher-lead {
+        font-size: 18px;
+        line-height: 1.5;
+        max-width: 320px;
+        
+      }
+      .higher-features {
+        grid-template-columns: 1fr;
+        margin-top: 40px;
+        gap: 36px;
+      }
+      .higher-feature h3 { font-size: 25px; }
+      .higher-feature p {
+        font-size: 16px;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .higher-icon {
+        width: 94px;
+        height: 94px;
+        margin-bottom: 18px;
+      }
+      .higher-icon .las,
+      .higher-icon .lar {
+        font-size: 58px;
+      }
+      .higher-stats {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        width: 100%;
+        margin-top: 40px;
+        padding: 28px 24px;
+        border-radius: 28px;
+      }
+      .higher-stat {
+        gap: 14px;
+        min-width: 170px;
+      }
+      .higher-stat .las,
+      .higher-stat .lar {
+        font-size: 58px;
+      }
+    }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand"><div class="logo">S</div><h1>Speak to Heaven</h1></div>
-      <button class="btn" id="logoutBtn" style="display:none; width: auto;">Exit</button>
+
+  
+  <!-- start header -->
+  <header class="site-header">
+    <a class="site-logo" href="/"><img src="/img/home/logo.png" alt="SpeakToHeaven"></a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu">
+      <i class="las la-bars" id="menuIcon"></i>
+    </button>
+    <div class="header-panel" id="headerPanel">
+      <nav class="nav-links">
+        <a href="#characters">Characters</a>
+        <a href="#about">About</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="#">Blog</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn guest-only" type="button" aria-label="Search">
+          <i class="las la-search"></i>
+        </button>
+        <a class="btn-login guest-only" href="/login.html">Login</a>
+        <a class="btn-signup guest-only" href="/register.html">Create account <i class="las la-arrow-right"></i></a>
+        <button class="btn-exit" id="logoutBtn" type="button">Exit</button>
+      </div>
+    </div>
     </header>
+  <!-- end header -->
 
-    <div class="grid">
-      <div class="stack" id="authSection">
-        <div class="card" style="margin-bottom: 30px;">
-          <div class="tabs"><div class="tab active" id="tabLogin">Sign In</div><div class="tab" id="tabRegister">New Account</div></div>
-          <div style="padding: 30px;">
-            <div id="loginPane"><input id="loginEmail" type="email" placeholder="Email"><input id="loginPassword" type="password" placeholder="Password"><button class="btn primary" id="loginBtn">Enter</button></div>
-            <div id="registerPane" class="hide"><input id="regEmail" type="email" placeholder="Email"><input id="regPassword" type="password" placeholder="Password"><button class="btn primary" id="registerBtn">Create Account</button></div>
+  <!-- start hero -->
+  <div class="hero-frame">
+    <picture>
+      <source media="(max-width: 992px)" srcset="/img/home/mobile-bg.png">
+      <img class="hero-art" src="/img/home/hero-bg.png" alt="">
+    </picture>
+    <div class="hero-stage" id="heroStage">
+      <div class="hero-copy">
+        <h1><span>Have Meaningful</span><em>Conversations</em><span>Beyond This World</span></h1>
+        <img class="gold-rule" src="/img/home/line.png" alt="" aria-hidden="true">
+        <p>Chat with Jesus, Mary, Moses and many other biblical figures. Ask questions, seek guidance, or simply have a conversation. Faith, inspiration and wisdom - anytime, anywhere.</p>
+        <button class="btn-explore" type="button" id="exploreBtn">Explore Characters</button>
+        <div class="trust">
+          <img src="/img/home/trust-avatars.png" alt="">
+          <div class="trust-copy">
+            <div class="stars" aria-label="5 stars">
+              <i class="las la-star" aria-hidden="true"></i>
+              <i class="las la-star" aria-hidden="true"></i>
+              <i class="las la-star" aria-hidden="true"></i>
+              <i class="las la-star" aria-hidden="true"></i>
+              <i class="las la-star" aria-hidden="true"></i>
+            </div>
+            <small>Trusted by 250,000+ seekers worldwide.</small>
           </div>
-                </div>
-
-        <div class="card" style="padding: 30px;">
-          <h4 style="font-family: Cinzel; color: var(--gold-divine);">
-            Divine Offerings
-          </h4>
-
-          <p style="font-size:15px; line-height:1.5; color:var(--text-muted); margin-top:0;">
-            SpeakToHeaven.com is an AI chat website. Conversations are simulated and are not real communications with God, biblical figures, living people, or deceased persons.
-          </p>
-
-          <button class="btn" onclick="goToPricing()">
-            God Access (£29.95)
-          </button>
-
-          <button class="btn" onclick="goToPricing()" style="margin-top:10px;">
-            Full Divine Access (£35.95)
-          </button>
-
-          <button class="btn primary" onclick="goToPricing()" style="margin-top:10px;">
-            3 month full Access (£49.95)
-          </button>
         </div>
       </div>
 
-      <div class="card" id="chatCard">
-        <div class="chat-shell">
-          <div class="sidebar" id="profiles"></div>
-          <div style="display: flex; flex-direction: column; height: 100%;">
-            <div style="padding: 20px; border-bottom: 1px solid var(--border-holy); font-family: Cinzel;" id="chatTitle">Select a Character</div>
-            <div class="chat-log" id="chatLog"></div>
-            <div style="padding: 20px; border-top: 1px solid var(--border-holy); display: flex; gap: 12px; background: white;">
-              <textarea id="chatInput" placeholder="Write your message..." disabled style="flex:1; height: 60px; resize: none;"></textarea>
-              <button class="btn primary" id="sendBtn" disabled style="width: auto;">Send</button>
-            </div>
+      <aside class="chat-widget" id="chat">
+        <div class="chat-head">
+          <i class="lar la-comments" aria-hidden="true"></i>
+          <h2 id="chatTitle">Try a conversation</h2>
+          <span class="ai">Powered by AI</span>
+        </div>
+        <div class="chat-body">
+          <div class="chat-choose">Choose a figure:</div>
+          <div class="profiles" id="profiles"></div>
+          <div class="chat-log" id="chatLog"></div>
+          <div class="chips">
+            <button type="button" data-chip="Give me hope">🌟 Give me hope</button>
+            <button type="button" data-chip="A Bible verse">📖 A Bible verse</button>
+            <button type="button" data-chip="Help me pray">🙏 Help me pray</button>
+          </div>
+        </div>
+        <div class="composer">
+          <textarea id="chatInput" placeholder="Type your message..." disabled></textarea>
+          <button class="btn-send" id="sendBtn" type="button" disabled aria-label="Send">
+            <i class="las la-paper-plane" aria-hidden="true"></i>
+          </button>
+        </div>
+      </aside>
+      <img class="hero-jesus" src="/img/home/hero-jesus.png" alt="">
+    </div>
+  </div>
+  <hr class="separator" />
+  <!-- end hero -->
+
+  <!-- start figures -->
+  <section class="figures-section" id="characters">
+    <div class="figures-inner">
+      <h2>Talk to <br class="figures-br">Inspiring Figures</h2>
+      <p class="figures-lead">Choose from a growing collection of biblical figures and religious leaders, each with their own unique personality and wisdom.</p>
+      <div class="figures-viewport" id="figuresViewport">
+        <div class="figures-track" id="figuresTrack">
+          <button type="button" class="figure-card" data-figure-id="2">
+            <img src="/img/jesus.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Jesus</span>
+              <span class="figure-desc">Love, guidance and eternal life.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="4">
+            <img src="/img/mary.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Mary</span>
+              <span class="figure-desc">Compassion, faith and motherly support.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="5">
+            <img src="/img/moses.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Moses</span>
+              <span class="figure-desc">Leadership, courage and divine purpose.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="12">
+            <img src="/img/david.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">David</span>
+              <span class="figure-desc">Faith, creativity and perseverance.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="solomon">
+            <img src="/img/Solomon.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Solomon</span>
+              <span class="figure-desc">Wisdom, discernment and understanding.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="noah">
+            <img src="/img/Noah.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Noah</span>
+              <span class="figure-desc">Obedience, trust and new beginnings.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="1">
+            <img src="/img/god.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">God</span>
+              <span class="figure-desc">Creator, eternal and almighty love.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="3">
+            <img src="/img/Holy_Spirit.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Holy Spirit</span>
+              <span class="figure-desc">Comfort, guidance and inner strength.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="11">
+            <img src="/img/eve.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Eve</span>
+              <span class="figure-desc">Wonder, beginnings and human experience.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="14">
+            <img src="/img/isaiah.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Isaiah</span>
+              <span class="figure-desc">Prophetic vision, judgment and hope.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="17">
+            <img src="/img/daniel.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Daniel</span>
+              <span class="figure-desc">Wisdom, faith and courage in exile.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="24">
+            <img src="/img/peter.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Peter</span>
+              <span class="figure-desc">Bold faith and a shepherd's heart.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="25">
+            <img src="/img/paul.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">Paul</span>
+              <span class="figure-desc">Grace, teaching and missionary fire.</span>
+            </span>
+          </button>
+          <button type="button" class="figure-card" data-figure-id="26">
+            <img src="/img/john.jpg" alt="">
+            <span class="figure-copy">
+              <span class="figure-name">John</span>
+              <span class="figure-desc">Love, light and lasting fellowship.</span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="figures-dots" id="figuresDots"></div>
+      <button class="figures-all" type="button" id="viewAllFigures">View all characters</button>
+    </div>
+  </section>
+  <!-- end figures -->
+
+  <hr class="separator" />
+
+  <!-- start higher way -->
+  <section class="higher-section" id="about">
+    <div class="higher-inner">
+      <h2><span>A Higher Way to </span><br class="higher-br"><em>Connect</em></h2>
+      <p class="higher-lead">More than just answers — real conversations that inspire, guide and uplift.</p>
+      <div class="higher-features">
+        <article class="higher-feature">
+          <span class="higher-icon higher-icon--chat" aria-hidden="true"><i class="lar la-comment-dots"></i></span>
+          <h3>Meaningful <br> Conversations</h3>
+          <p>Ask anything and get thoughtful, faith-based responses.</p>
+        </article>
+        <article class="higher-feature">
+          <span class="higher-icon higher-icon--heart" aria-hidden="true"><i class="lar la-heart"></i></span>
+          <h3>Guidance &amp; <br> Support</h3>
+          <p>Find comfort, clarity and encouragement in your journey.</p>
+        </article>
+        <article class="higher-feature">
+          <span class="higher-icon higher-icon--book" aria-hidden="true"><i class="las la-book-open"></i></span>
+          <h3>Learn &amp; <br> Explore</h3>
+          <p>Discover new perspectives and deepen understanding of your faith.</p>
+        </article>
+        <article class="higher-feature">
+          <span class="higher-icon higher-icon--globe" aria-hidden="true"><i class="las la-globe"></i></span>
+          <h3>Available <br> Worldwide</h3>
+          <p>Connect anytime, anywhere — you're never alone when you follow God.</p>
+        </article>
+      </div>
+      <div class="higher-stats">
+        <div class="higher-stat">
+          <i class="las la-users" aria-hidden="true"></i>
+          <div>
+            <strong>250K+</strong>
+            <span>Happy Users</span>
+          </div>
+        </div>
+        <div class="higher-stat">
+          <i class="las la-comment" aria-hidden="true"></i>
+          <div>
+            <strong>5M+</strong>
+            <span>Conversations</span>
+          </div>
+        </div>
+        <div class="higher-stat">
+          <i class="las la-flag" aria-hidden="true"></i>
+          <div>
+            <strong>150+</strong>
+            <span>Countries</span>
           </div>
         </div>
       </div>
     </div>
+  </section>
+  <!-- end higher way -->
 
-    <footer>
-  <div class="footer-links">
-    <a href="/contact.html">Contact</a>
-    <a href="/terms">Terms & Conditions</a>
-    <a href="/privacy-policy">Privacy Policy</a>
-    <a href="/refund-policy.html">Refund Policy</a>
-  </div>
+  <hr class="separator" />
 
-  <div style="margin-top:20px; color:#8a8276; font-size:14px; line-height:1.6;">
-    <strong>RIDGWELL SERVICES LIMITED</strong><br>
-    85 Great Portland Street, First Floor,<br>
-    London, England, W1W 7LT
-  </div>
-
-  <div class="payment-icons" style="margin-top:20px;">
-    <img src="https://logos-world.net/wp-content/uploads/2020/04/Visa-Symbol.png" alt="Visa">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-  </div>
-</footer>
-  </div>
+  <!-- start footer -->
+  <footer class="site-footer">
+    <picture>
+      <source media="(max-width: 992px)" srcset="/img/home/footer-mobile.png">
+      <img class="site-footer-bg" src="/img/home/footer.png" alt="">
+    </picture>
+    <img class="footer-corner footer-corner--left" src="/img/home/footer-left.png" alt="" aria-hidden="true">
+    <img class="footer-corner footer-corner--right" src="/img/home/footer-right.png" alt="" aria-hidden="true">
+    <div class="footer-inner">
+      <div class="footer-cta">
+        <img class="footer-avatar footer-avatar--tl" src="/img/jesus.jpg" alt="">
+        <img class="footer-avatar footer-avatar--tr" src="/img/moses.jpg" alt="">
+        <img class="footer-avatar footer-avatar--bl" src="/img/mary.jpg" alt="">
+        <img class="footer-avatar footer-avatar--br" src="/img/david.jpg" alt="">
+        <h2><span>Continue Your</span><em>Conversation in Faith</em></h2>
+        <p class="footer-cta-lead">Speak with biblical and religious figures for guidance, wisdom, inspiration, and meaningful conversation — anytime, anywhere.</p>
+        <div class="footer-cta-actions">
+          <button class="footer-btn footer-btn--primary" type="button" id="footerExplore">
+            <i class="las la-comments" aria-hidden="true"></i>
+            Explore Characters
+            <i class="las la-arrow-right" aria-hidden="true"></i>
+          </button>
+          <a class="footer-btn footer-btn--ghost guest-only" href="/register.html">
+            <i class="las la-user-check" aria-hidden="true"></i>
+            Create Account
+            <i class="las la-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <hr class="separator" />
+    <div class="footer-inner">
+      <div class="footer-cols">
+        <div class="footer-brand">
+          <a class="site-logo" href="/"><img src="/img/home/logo.png" alt="SpeakToHeaven"></a>
+          <p>Meaningful conversations with biblical figures and religious leaders. Ask questions, seek guidance, and find inspiration — anytime, anywhere.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Facebook"><i class="lab la-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="lab la-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="lab la-youtube"></i></a>
+          </div>
+        </div>
+        <nav class="footer-col">
+          <h3>Explore</h3>
+          <a href="#characters">Characters</a>
+          <a href="/pricing.html">Pricing</a>
+          <a href="#about">About</a>
+          <a href="#about">Faith &amp; Inspiration</a>
+          <a href="#">Blog</a>
+        </nav>
+        <nav class="footer-col">
+          <h3>Popular Figures</h3>
+          <button type="button" class="footer-figure" data-figure-id="2">Jesus</button>
+          <button type="button" class="footer-figure" data-figure-id="4">Mary</button>
+          <button type="button" class="footer-figure" data-figure-id="5">Moses</button>
+          <button type="button" class="footer-figure" data-figure-id="12">David</button>
+          <button type="button" class="footer-figure" data-figure-id="solomon">Solomon</button>
+          <button type="button" class="footer-figure" data-figure-id="noah">Noah</button>
+        </nav>
+        <nav class="footer-col">
+          <h3>Account</h3>
+          <a class="guest-only" href="/login.html">Sign In</a>
+          <a class="guest-only" href="/register.html">Create Account</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/contact.html">Help &amp; Support</a>
+          <a href="/contact.html">Feedback</a>
+        </nav>
+        <nav class="footer-col">
+          <h3>Legal</h3>
+          <a href="/terms">Terms &amp; Conditions</a>
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/refund-policy.html">Refund Policy</a>
+          <a href="/privacy-policy">AI Disclosure</a>
+        </nav>
+      </div>
+      <div class="footer-bar">
+        <p>© 2026 SpeakToHeaven. All rights reserved.</p>
+        <p>SpeakToHeaven uses AI to create simulated conversations. These are not real communications with God, biblical figures, living people, or deceased persons.</p>
+      </div>
+    </div>
+  </footer>
+  <!-- end footer -->
 
 <div class="limit-modal" id="limitModal">
   <div class="limit-box">
     <h2>Your Free Messages Are Complete</h2>
-    <p>
-      You have used your 3 free messages. Please select a plan to continue
-      your conversations with Speak to Heaven.
-    </p>
-    <button class="btn primary" onclick="window.location.href='/pricing.html'">
-      Select Your Plan
-    </button>
-    <button class="btn" style="margin-top:12px;" onclick="closeLimitModal()">
-      Not Now
-    </button>
-  </div>
+      <p>You have used your 3 free messages. Please select a plan to continue your conversations with Speak to Heaven.</p>
+      <button class="btn primary" onclick="window.location.href='/pricing.html'">Select Your Plan</button>
+      <button class="btn" type="button" onclick="closeLimitModal()">Not Now</button>
+    </div>
 </div>
 
   <script>
+    const $ = (id) => document.getElementById(id);
+    let selectedId = null;
+    let selectedImage = "";
+
+    function getToken() {
+      return localStorage.getItem("jwt") || localStorage.getItem("token");
+    }
+
+    const header = document.querySelector(".site-header");
+    const menuBtn = $("menuBtn");
+    const menuIcon = $("menuIcon");
+
+    function closeMenu() {
+      if (!header) return;
+      header.classList.remove("is-open");
+      if (menuIcon) menuIcon.className = "las la-bars";
+    }
+
+    function toggleMenu() {
+      header.classList.toggle("is-open");
+      const open = header.classList.contains("is-open");
+      menuIcon.className = open ? "las la-times" : "las la-bars";
+    }
+
+    if (menuBtn) menuBtn.onclick = toggleMenu;
+    document.querySelectorAll(".header-panel a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 992) closeMenu();
+    });
 
 function showLimitModal() {
   $("limitModal").classList.add("show");
@@ -231,29 +2342,40 @@ function showLimitModal() {
 function closeLimitModal() {
   $("limitModal").classList.remove("show");
 }
-    const $ = (id) => document.getElementById(id);
-    let selectedId = null;
 
-    function getToken() { return localStorage.getItem("jwt"); }
+    function shortName(name) {
+      return name.replace("Jesus Christ", "Jesus").replace("King David", "David");
+    }
 
-    async function sendMessage() {
-      const text = $("chatInput").value.trim();
+    function enableChat() {
+      if (!getToken() || !selectedId) return;
+      $("chatInput").disabled = false;
+      $("sendBtn").disabled = false;
+    }
+
+    function requireLogin() {
+      if (getToken()) return false;
+      window.location.href = "/login.html";
+      return true;
+    }
+
+    async function sendMessage(preset) {
+      const text = (preset || $("chatInput").value).trim();
       if (!text || !selectedId) return;
+      if (requireLogin()) return;
       appendMessage("me", text);
       $("chatInput").value = "";
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` },
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() },
         body: JSON.stringify({ characterId: selectedId, message: text })
       });
       if (res.status === 403) {
   const data = await res.json().catch(() => ({}));
-
   if (data.error === "LIMIT_REACHED") {
     showLimitModal();
     return;
   }
-
   alert(data.message || "Access denied.");
   return;
 }
@@ -261,60 +2383,359 @@ function closeLimitModal() {
       if (data.reply) appendMessage("them", data.reply);
     }
 
+    function formatChatTime(date) {
+      return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    }
+
     function appendMessage(side, text) {
-      const div = document.createElement("div");
-      div.className = `bubble ${side}`;
-      div.innerText = text;
+      const row = document.createElement("div");
+      row.className = "msg " + side;
+
+      const col = document.createElement("div");
+      col.className = "msg-col";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + side;
+      bubble.innerText = text;
+
+      const meta = document.createElement("div");
+      meta.className = "msg-meta";
+      const time = document.createElement("span");
+      time.textContent = formatChatTime(new Date());
+      meta.appendChild(time);
+      if (side === "me") {
+        const check = document.createElement("i");
+        check.className = "las la-check";
+        check.setAttribute("aria-hidden", "true");
+        meta.appendChild(check);
+      }
+
+      if (side === "them") {
+        const main = document.createElement("div");
+        main.className = "msg-main";
+        const avatar = document.createElement("img");
+        avatar.className = "msg-avatar";
+        avatar.src = selectedImage || "/img/jesus.jpg";
+        avatar.alt = "";
+        main.appendChild(avatar);
+        main.appendChild(bubble);
+        col.appendChild(main);
+      } else {
+        col.appendChild(bubble);
+      }
+
+      col.appendChild(meta);
+      row.appendChild(col);
+
       const log = $("chatLog");
-      log.appendChild(div);
+      log.appendChild(row);
       log.scrollTop = log.scrollHeight;
+    }
+
+    function selectProfile(profile, button) {
+      document.querySelectorAll(".pitem").forEach((item) => item.classList.remove("active"));
+      if (button) button.classList.add("active");
+      selectedId = profile.id;
+      selectedImage = profile.image || "";
+      $("chatTitle").innerText = "Try a conversation";
+      $("chatLog").innerHTML = "";
+      appendMessage("them", "I am " + profile.name + ". How can I guide you?");
+      enableChat();
+    }
+
+    function createPitem(profile) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pitem";
+      btn.dataset.id = String(profile.id);
+      const src = profile.image;
+      const photo = src
+        ? '<img src="' + src + '" alt="">'
+        : '<span class="fallback">' + shortName(profile.name)[0] + "</span>";
+      btn.innerHTML =
+        '<span class="pitem-photo">' + photo +
+        '<i class="las la-check-circle pitem-check" aria-hidden="true"></i></span>' +
+        '<span class="pitem-label">' + shortName(profile.name) + "</span>";
+      btn.onclick = () => selectProfile(profile, btn);
+      return btn;
     }
 
     async function loadProfiles() {
       const res = await fetch("/api/profiles");
       const profiles = await res.json();
-      profiles.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "pitem"; 
-        div.innerHTML = `<span>${p.name}</span>`;
-        div.onclick = () => {
-          document.querySelectorAll(".pitem").forEach(i => i.classList.remove("active"));
-          div.classList.add("active");
-          selectedId = p.id;
-          $("chatTitle").innerText = p.name;
-          $("chatLog").innerHTML = `<div class="bubble them">I am ${p.name}. How can I guide you?</div>`;
-          if (getToken()) { $("chatInput").disabled = false; $("sendBtn").disabled = false; $("chatInput").focus(); }
-        };
-        $("profiles").appendChild(div);
-      });
+      const featuredIds = [2, 4, 5, 12];
+      const featured = featuredIds
+        .map((id) => profiles.find((p) => p.id === id))
+        .filter(Boolean);
+      const box = $("profiles");
+      box.innerHTML = "";
+
+      featured.forEach((profile) => box.appendChild(createPitem(profile)));
+
+      profiles
+        .filter((profile) => !featuredIds.includes(profile.id))
+        .forEach((profile) => {
+          const btn = createPitem(profile);
+          btn.classList.add("pitem-extra");
+          box.appendChild(btn);
+        });
+
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "pitem";
+      more.innerHTML = '<span class="more-circle"><i class="las la-ellipsis-h" aria-hidden="true"></i></span><span class="pitem-label">View all</span>';
+      more.onclick = () => {
+        const open = box.classList.toggle("open");
+        more.querySelector(".pitem-label").textContent = open ? "Show less" : "View all";
+      };
+      box.appendChild(more);
+
+      const first = box.querySelector(".pitem");
+      if (first && featured[0]) first.click();
     }
 
-    $("logoutBtn").onclick = () => { localStorage.removeItem("jwt"); location.reload(); };
-    $("sendBtn").onclick = sendMessage;
-    $("chatInput").onkeypress = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+    function openChatProfiles(expandAll) {
+      const box = $("profiles");
+      if (expandAll && box && !box.classList.contains("open")) {
+        const more = box.querySelector(".pitem:last-child");
+        if (more) more.click();
+      }
+      $("chat").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 
-    $("loginBtn").onclick = async () => {
-      const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: $("loginEmail").value, password: $("loginPassword").value }) });
-      if (res.ok) { const d = await res.json(); localStorage.setItem("jwt", d.token); location.reload(); } else { alert("Login failed."); }
+    function selectFigureInChat(id) {
+      const btn = document.querySelector('#profiles .pitem[data-id="' + id + '"]');
+      if (btn) {
+        if (btn.classList.contains("pitem-extra")) {
+          $("profiles").classList.add("open");
+          const more = $("profiles").querySelector(".pitem:last-child .pitem-label");
+          if (more) more.textContent = "Show less";
+        }
+        btn.click();
+      }
+      $("chat").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    (function initFiguresCarousel() {
+      const viewport = $("figuresViewport");
+      const track = $("figuresTrack");
+      const dotsBox = $("figuresDots");
+      if (!viewport || !track || !dotsBox) return;
+
+      const cards = [...track.querySelectorAll(".figure-card")];
+      let cardIndex = 0;
+      let dragX = 0;
+      let startX = 0;
+      let startY = 0;
+      let dragging = false;
+      let maybeDrag = false;
+      let skipClick = false;
+
+      function perView() {
+        const w = window.innerWidth;
+        if (w <= 800) return 1;
+        if (w <= 1100) return 3;
+        return 6;
+      }
+
+      function maxIndex() {
+        return Math.max(0, cards.length - perView());
+      }
+
+      function snapPoints() {
+        const cols = perView();
+        const max = maxIndex();
+        const points = [];
+        for (let i = 0; i < cards.length; i += cols) {
+          points.push(Math.min(i, max));
+        }
+        if (points[points.length - 1] !== max) points.push(max);
+        return [...new Set(points)];
+      }
+
+      function gap() {
+        return parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 18;
+      }
+
+      function contentWidth() {
+        const styles = getComputedStyle(viewport);
+        return viewport.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingRight);
+      }
+
+      function step() {
+        const cols = perView();
+        return (contentWidth() - gap() * (cols - 1)) / cols + gap();
+      }
+
+      function xForIndex(i) {
+        return i * step();
+      }
+
+      function clampX(x) {
+        return Math.max(0, Math.min(maxIndex() * step(), x));
+      }
+
+      function logicalPage() {
+        const points = snapPoints();
+        let best = 0;
+        let dist = Infinity;
+        points.forEach((p, idx) => {
+          const d = Math.abs(cardIndex - p);
+          if (d < dist) {
+            dist = d;
+            best = idx;
+          }
+        });
+        return best;
+      }
+
+      function applyX(x, animate) {
+        if (animate === false) {
+          track.style.transition = "none";
+          track.style.transform = "translate3d(" + (-x) + "px,0,0)";
+          void track.offsetWidth;
+          track.style.transition = "";
+        } else {
+          track.style.transition = "";
+          track.style.transform = "translate3d(" + (-x) + "px,0,0)";
+        }
+      }
+
+      function updateDots() {
+        const current = logicalPage();
+        [...dotsBox.children].forEach((dot, i) => {
+          dot.classList.toggle("active", i === current);
+          dot.setAttribute("aria-current", i === current ? "true" : "false");
+        });
+      }
+
+      function goToIndex(next, animate) {
+        cardIndex = Math.max(0, Math.min(maxIndex(), next));
+        applyX(xForIndex(cardIndex), animate !== false);
+        updateDots();
+      }
+
+      function goToPage(page) {
+        const points = snapPoints();
+        goToIndex(points[Math.max(0, Math.min(points.length - 1, page))], true);
+      }
+
+      function nearestIndex(from) {
+        const points = snapPoints();
+        return points.reduce((best, p) =>
+          Math.abs(p - from) < Math.abs(best - from) ? p : best
+        , points[0]);
+      }
+
+      function renderDots() {
+        const points = snapPoints();
+        dotsBox.hidden = points.length <= 1;
+        dotsBox.innerHTML = "";
+        points.forEach((_, i) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.setAttribute("aria-label", "Show characters page " + (i + 1));
+          dot.addEventListener("click", () => goToPage(i));
+          dotsBox.appendChild(dot);
+        });
+        goToIndex(nearestIndex(cardIndex), false);
+      }
+
+      track.addEventListener("dragstart", (e) => e.preventDefault());
+
+      viewport.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        maybeDrag = true;
+        dragging = false;
+        skipClick = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        dragX = 0;
+      });
+
+      viewport.addEventListener("pointermove", (e) => {
+        if (!maybeDrag) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!dragging) {
+          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+          if (Math.abs(dy) >= Math.abs(dx)) {
+            maybeDrag = false;
+            return;
+          }
+          dragging = true;
+          skipClick = true;
+          viewport.classList.add("is-dragging");
+          track.style.transition = "none";
+          viewport.setPointerCapture(e.pointerId);
+        }
+        dragX = dx;
+        track.style.transform = "translate3d(" + (-clampX(xForIndex(cardIndex) - dragX)) + "px,0,0)";
+      });
+
+      function endDrag() {
+        maybeDrag = false;
+        if (!dragging) return;
+        dragging = false;
+        viewport.classList.remove("is-dragging");
+        const from = cardIndex - dragX / step();
+        const next = Math.abs(dragX) > 50
+          ? nearestIndex(cardIndex + (dragX < 0 ? perView() : -perView()))
+          : nearestIndex(from);
+        goToIndex(next, true);
+      }
+
+      viewport.addEventListener("pointerup", endDrag);
+      viewport.addEventListener("pointercancel", endDrag);
+      window.addEventListener("resize", renderDots);
+
+      track.addEventListener("click", (e) => {
+        const card = e.target.closest(".figure-card");
+        if (!card) return;
+        if (skipClick || Math.abs(dragX) > 8) {
+          e.preventDefault();
+          skipClick = false;
+          return;
+        }
+        const id = card.getAttribute("data-figure-id");
+        if (id && /^\d+$/.test(id)) selectFigureInChat(id);
+        else $("chat").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      renderDots();
+    })();
+
+    $("logoutBtn").onclick = () => {
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("token");
+      location.reload();
+    };
+    $("sendBtn").onclick = () => sendMessage();
+    $("exploreBtn").onclick = () => $("characters").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("footerExplore").onclick = () => $("characters").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelectorAll(".footer-figure").forEach((btn) => {
+      btn.onclick = () => {
+        const id = btn.getAttribute("data-figure-id");
+        if (id && /^\d+$/.test(id)) selectFigureInChat(id);
+        else $("chat").scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+    });
+    $("viewAllFigures").onclick = () => openChatProfiles(true);
+    $("chatInput").onkeypress = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
     };
 
-    $("registerBtn").onclick = async () => {
-      const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: $("regEmail").value, password: $("regPassword").value }) });
-      if (res.ok) { alert("Success. Please sign in."); $("tabLogin").click(); }
-    };
+    document.querySelectorAll("[data-chip]").forEach((chip) => {
+      chip.onclick = () => {
+        $("chatInput").value = chip.getAttribute("data-chip");
+        sendMessage();
+      };
+    });
 
-    $("tabLogin").onclick = () => { $("tabLogin").className="tab active"; $("tabRegister").className="tab"; $("loginPane").classList.remove("hide"); $("registerPane").classList.add("hide"); };
-    $("tabRegister").onclick = () => { $("tabRegister").className="tab active"; $("tabLogin").className="tab"; $("registerPane").classList.remove("hide"); $("loginPane").classList.add("hide"); };
-
-function goToPricing() {
-  if (!getToken()) {
-    alert("Please create an account or sign in before selecting a plan.");
-    return;
-  }
-
-  window.location.href = "/pricing.html";
-}
-    if (getToken()) { document.body.classList.add("logged-in"); $("authSection").classList.add("hide"); $("logoutBtn").style.display = "block"; }
+    if (getToken()) document.body.classList.add("logged-in");
     loadProfiles();
   </script>
 </body>
