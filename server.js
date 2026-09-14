@@ -4261,7 +4261,7 @@ app.use((req, res) => {
 //	SERVER START
 //--------------------------------------------
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
 	console.log("======================================");
 	console.log("📖 HOLY CHAT SERVER RUNNING");
 	console.log(`🌍 Port: ${PORT}`);
