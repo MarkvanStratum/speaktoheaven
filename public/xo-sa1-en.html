@@ -199,7 +199,7 @@ const params = new URLSearchParams(window.location.search);
 const affiliateRef = params.get('ref');
 
 if (!affiliateRef) {
-    window.location.replace('https://www.speaktoheaven..ai');
+    window.location.replace('https://www.speaktoheaven.ai');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -317,7 +317,7 @@ nextBtn.onclick = async () => {
     if (data.url.startsWith("http://") || data.url.startsWith("https://")) {
       targetUrl = new URL(data.url);
     } else {
-      targetUrl = new URL(data.url, "https://www.speaktoheaven..ai");
+      targetUrl = new URL(data.url, "https://www.speaktoheaven.ai");
     }
 
     if (affiliateRef) targetUrl.searchParams.set("ref", affiliateRef);
