@@ -236,6 +236,21 @@
             margin-right: 8px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+.accepted-cards {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.card-logo {
+    width: 48px;
+    height: 30px;
+    display: block;
+}
     </style>
 </head>
 <body>
@@ -281,7 +296,29 @@
     </div>
 </div>
 
-            <label class="checkbox-container">
+<div class="accepted-cards">
+    <span>We accept</span>
+
+    <svg class="card-logo" viewBox="0 0 48 30" aria-label="Visa">
+        <rect width="48" height="30" rx="4" fill="white" stroke="#d1d5db"/>
+        <text x="24" y="20"
+              text-anchor="middle"
+              font-family="Arial, sans-serif"
+              font-size="13"
+              font-weight="bold"
+              font-style="italic"
+              fill="#1A1F71">VISA</text>
+    </svg>
+
+    <svg class="card-logo" viewBox="0 0 48 30" aria-label="Mastercard">
+        <rect width="48" height="30" rx="4" fill="white" stroke="#d1d5db"/>
+        <circle cx="20" cy="15" r="8" fill="#EB001B"/>
+        <circle cx="28" cy="15" r="8" fill="#F79E1B"/>
+        <path d="M24 8.8a8 8 0 0 1 0 12.4 8 8 0 0 1 0-12.4z" fill="#FF5F00"/>
+    </svg>
+</div>
+
+<label class="checkbox-container">
                 <input type="checkbox" id="check-terms" required>
                 <span>I explicitly authorize and accept the platform <a href="/terms" target="_blank">Terms & Conditions</a> along with the default automated renewal provisioning specifications.</span>
             </label>
