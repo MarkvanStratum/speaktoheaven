@@ -234,10 +234,22 @@
           <p>Latest payment attempts and gateway results.</p>
         </div>
         <div class="header-actions">
-          <button id="refreshButton" class="primary-button">Refresh</button>
-          <button id="downloadButton" class="secondary-button">Download CSV</button>
-          <button id="logoutButton" class="danger-button">Log out</button>
-        </div>
+  <input
+    id="transactionImportFileInput"
+    type="file"
+    accept=".csv,text/csv"
+    multiple
+    style="display:none;"
+  />
+
+  <button id="uploadTransactionsButton" class="primary-button">
+    Import Historical Transactions
+  </button>
+
+  <button id="refreshButton" class="primary-button">Refresh</button>
+  <button id="downloadButton" class="secondary-button">Download CSV</button>
+  <button id="logoutButton" class="danger-button">Log out</button>
+</div>
       </div>
 
       <div id="statusLine" class="status-line">Waiting for data...</div>
@@ -710,6 +722,7 @@
   </div>
 
   <script>    const API_URL = "/api/admin/transactions";
+const TRANSACTION_IMPORT_URL = "/api/admin/transactions/import";
 const CHARGEBACKS_API_URL = "/api/admin/chargebacks";
 const CHARGEBACK_UPLOAD_URL = "/api/admin/chargebacks/upload";
 
@@ -731,9 +744,11 @@ let currentDashboardView = "transactions";
     const passwordInput = byId("passwordInput");
     const loginButton = byId("loginButton");
     const loginError = byId("loginError");
-    const refreshButton = byId("refreshButton");
-    const downloadButton = byId("downloadButton");
-    const logoutButton = byId("logoutButton");
+    const transactionImportFileInput = byId("transactionImportFileInput");
+const uploadTransactionsButton = byId("uploadTransactionsButton");
+const refreshButton = byId("refreshButton");
+const downloadButton = byId("downloadButton");
+const logoutButton = byId("logoutButton");
     const clearFiltersButton = byId("clearFiltersButton");
     const searchInput = byId("searchInput");
     const statusFilter = byId("statusFilter");
@@ -1659,6 +1674,103 @@ async function loadChargebacks(
     } else {
       console.error(error);
     }
+  }
+}
+
+async function uploadHistoricalTransactions() {
+  const files =
+    Array.from(
+      transactionImportFileInput.files || []
+    );
+
+  if (!files.length) {
+    statusLine.textContent =
+      "Choose one or more transaction CSV files first.";
+    return;
+  }
+
+  const formData =
+    new FormData();
+
+  for (const file of files) {
+    formData.append(
+      "files",
+      file
+    );
+  }
+
+  uploadTransactionsButton.disabled = true;
+
+  statusLine.textContent =
+    "Importing historical transactions...";
+
+  try {
+    const response =
+      await fetch(
+        TRANSACTION_IMPORT_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "x-admin-password":
+              adminPassword
+          },
+
+          body: formData
+        }
+      );
+
+    let data = {};
+
+    try {
+      data = await response.json();
+    } catch {}
+
+    if (
+      !response.ok ||
+      data.success !== true
+    ) {
+      throw new Error(
+        data.error ||
+        "Could not import historical transactions"
+      );
+    }
+
+    statusLine.textContent =
+      "Historical import complete: " +
+      data.imported +
+      " imported, " +
+      data.duplicates +
+      " duplicates, " +
+      data.ignoredOtherMerchant +
+      " other-merchant rows ignored, " +
+      data.ignoredNonPurchase +
+      " non-purchase rows ignored, " +
+      data.ignoredNotCleared +
+      " non-cleared rows ignored, " +
+      data.skipped +
+      " invalid rows skipped.";
+
+    transactionImportFileInput.value = "";
+
+    await loadTransactions(false);
+
+    if (currentDashboardView === "chargebacks") {
+      await loadChargebacks(false);
+    }
+
+    if (currentDashboardView === "fraud") {
+      await loadFraudReports(false);
+    }
+
+  } catch (error) {
+    statusLine.textContent =
+      "Historical import failed: " +
+      error.message;
+
+  } finally {
+    uploadTransactionsButton.disabled =
+      false;
   }
 }
 
@@ -2944,9 +3056,27 @@ allChargebacks = [];
       if (event.key === "Enter") loginButton.click();
     });
 
-    refreshButton.addEventListener("click", () => loadTransactions(false));
-    downloadButton.addEventListener("click", downloadCsv);
-    logoutButton.addEventListener("click", logout);
+    uploadTransactionsButton.addEventListener(
+  "click",
+  () => {
+    transactionImportFileInput.click();
+  }
+);
+
+transactionImportFileInput.addEventListener(
+  "change",
+  () => {
+    if (
+      transactionImportFileInput.files.length > 0
+    ) {
+      uploadHistoricalTransactions();
+    }
+  }
+);
+
+refreshButton.addEventListener("click", () => loadTransactions(false));
+downloadButton.addEventListener("click", downloadCsv);
+logoutButton.addEventListener("click", logout);
     clearFiltersButton.addEventListener("click", clearFilters);
     searchInput.addEventListener("input", applyFilters);
     statusFilter.addEventListener("change", applyFilters);
