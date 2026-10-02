@@ -497,11 +497,12 @@
 
   <div class="chargeback-toolbar">
     <input
-      id="fraudFileInput"
-      type="file"
-      accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      style="display:none;"
-    />
+  id="fraudFileInput"
+  type="file"
+  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  multiple
+  style="display:none;"
+/>
 
     <button
       id="uploadFraudButton"
@@ -2480,81 +2481,116 @@ async function loadFraudReports(
 
 
 async function uploadFraudExcel() {
-  const file =
-    fraudFileInput.files[0];
+  const files =
+    Array.from(
+      fraudFileInput.files || []
+    );
 
-  if (!file) {
+  if (files.length === 0) {
     fraudStatusLine.textContent =
-      "Choose an Excel file first.";
+      "Choose at least one Excel file first.";
 
     return;
   }
 
-  const formData =
-    new FormData();
+  uploadFraudButton.disabled = true;
 
-  formData.append(
-    "file",
-    file
-  );
-
-  uploadFraudButton.disabled =
-    true;
-
-  fraudStatusLine.textContent =
-    "Uploading and matching fraud report...";
+  let totalImported = 0;
+  let totalUpdated = 0;
+  let totalMatched = 0;
+  let totalSkipped = 0;
+  let totalIgnoredOtherMerchant = 0;
+  let filesProcessed = 0;
 
   try {
-    const response =
-      await fetch(
-        FRAUD_UPLOAD_URL,
-        {
-          method: "POST",
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
-          headers: {
-            "x-admin-password":
-              adminPassword
-          },
+      fraudStatusLine.textContent =
+        "Uploading fraud file " +
+        (i + 1) +
+        " of " +
+        files.length +
+        ": " +
+        file.name;
 
-          body: formData
-        }
+      const formData =
+        new FormData();
+
+      formData.append(
+        "file",
+        file
       );
 
-    const data =
-      await response.json();
+      const response =
+        await fetch(
+          FRAUD_UPLOAD_URL,
+          {
+            method: "POST",
 
-    if (
-      !response.ok ||
-      data.success !== true
-    ) {
-      throw new Error(
-        data.error ||
-        "Could not import fraud Excel report"
-      );
+            headers: {
+              "x-admin-password":
+                adminPassword
+            },
+
+            body: formData
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok ||
+        data.success !== true
+      ) {
+        throw new Error(
+          "Failed on " +
+          file.name +
+          ": " +
+          (
+            data.error ||
+            "Could not upload fraud report"
+          )
+        );
+      }
+
+      totalImported +=
+        Number(data.imported) || 0;
+
+      totalUpdated +=
+        Number(data.updated) || 0;
+
+      totalMatched +=
+        Number(data.matched) || 0;
+
+      totalSkipped +=
+        Number(data.skipped) || 0;
+
+      totalIgnoredOtherMerchant +=
+        Number(data.ignoredOtherMerchant) || 0;
+
+      filesProcessed++;
     }
 
-    const resultText =
-      "Upload complete: " +
-      data.imported +
-      " new, " +
-      data.updated +
-      " updated, " +
-      data.matched +
-      " matched to successful payments, " +
-      data.skipped +
-      " skipped, " +
-      data.ignoredOtherMerchant +
-      " other-merchant row(s) ignored.";
+    fraudFileInput.value = "";
 
-    fraudFileInput.value =
-      "";
-
-    await loadFraudReports(
-      false
-    );
+    await loadFraudReports(false);
 
     fraudStatusLine.textContent =
-      resultText;
+      "Upload complete: " +
+      filesProcessed +
+      " file(s) processed, " +
+      totalImported +
+      " new, " +
+      totalUpdated +
+      " updated, " +
+      totalMatched +
+      " matched to successful payments, " +
+      totalSkipped +
+      " skipped, " +
+      totalIgnoredOtherMerchant +
+      " other-merchant row(s) ignored.";
 
   } catch (error) {
     fraudStatusLine.textContent =
