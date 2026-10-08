@@ -199,7 +199,7 @@ const params = new URLSearchParams(window.location.search);
 const affiliateRef = params.get('ref');
 
 if (!affiliateRef) {
-    window.location.replace('https://www.1654-speaktoheaven.ai');
+    window.location.replace('https://speaktoheaven.com');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -312,7 +312,7 @@ const response = await fetch("/api/create-promo-checkout-link", {      method: "
     }
 
     let nextUrl =
-      "https://www.1654-speaktoheaven.ai" +
+      "https://speaktoheaven.com" +
       data.url +
       "?ref=" + encodeURIComponent(affiliateRef) +
       "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
