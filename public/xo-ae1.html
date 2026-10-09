@@ -137,7 +137,7 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 
 <div class="form-grid">
 <select id="phonePrefix" class="select">
-<option value="+971">+971 — الإمارات</option>
+<option value="+971"><bdi>+971</bdi> — الإمارات</option>
 </select>
 <input id="phoneNumber" class="input" placeholder="رقم الهاتف" required>
 </div>
@@ -276,7 +276,7 @@ nextBtn.onclick = async () => {
     nextBtn.textContent = "جاري إنشاء رابط الدفع الآمن…";
     overlay.setAttribute("aria-hidden", "false");
 
-    targetUrl = new URL(data.url, "https://speaktoheaven.com");
+    const response = await fetch("/api/create-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
