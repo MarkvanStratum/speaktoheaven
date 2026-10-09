@@ -202,7 +202,7 @@ const params = new URLSearchParams(window.location.search);
 const affiliateRef = params.get('ref');
 
 if (!affiliateRef) {
-    window.location.replace('https://www.speaktoheaven.ai');
+    window.location.replace('https://www.1654-speaktoheaven.ai');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -279,14 +279,14 @@ nextBtn.onclick = async () => {
     nextBtn.textContent = "Creating secure checkout…";
     overlay.setAttribute("aria-hidden", "false");
 
-    const response = await fetch("https://speaktoheaven.ai/api/create-promo-checkout-link", {
+    const response = await fetch("https://1654-speaktoheaven.ai/api/create-promo-checkout-link", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         plan: "lifetime",
-        step2File: "xo-uk2.html",
+        step2File: "xo-uk2-999.html",
         currency: "GBP",
         amount: 49.95,
         sourcePage: window.location.href,
@@ -317,7 +317,7 @@ successUrl: "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a
     }
 
     let nextUrl =
-  "https://www.speaktoheaven.ai" +
+  "https://www.1654-speaktoheaven.ai" +
   data.url +
   "?ref=" + encodeURIComponent(affiliateRef) +
   "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
