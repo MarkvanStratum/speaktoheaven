@@ -276,7 +276,7 @@ nextBtn.onclick = async () => {
     nextBtn.textContent = "جاري إنشاء رابط الدفع الآمن…";
     overlay.setAttribute("aria-hidden", "false");
 
-    const response = await fetch("https://speaktoheaven.com/api/create-checkout-session", {
+    const response = await fetch("/api/create-promo-checkout-link", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
