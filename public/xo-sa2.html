@@ -26,7 +26,7 @@ background:#0a0a0a;
 color:#fff;
 font-size:12px;
 padding:6px 10px;
-text-align:right;
+text-align:center;
 }
 
 .wrap{
@@ -83,6 +83,7 @@ border-radius:10px;
 padding:12px;
 font-size:15px;
 background:#fff;
+text-align:right;
 }
 
 #card-element{
@@ -195,7 +196,8 @@ margin-bottom:18px;
 width:100%;
 height:12px;
 background:#ecf1f8;
-border-radius:999px;overflow:hidden;
+border-radius:999px;
+overflow:hidden;
 }
 
 .progress-bar{
@@ -215,31 +217,31 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <body>
 
-<div class="safe">دفع آمن عبر تشفير SSL</div>
+<div class="safe">دفع آمن عبر بروتوكول SSL</div>
 
 <div class="wrap">
 
 <div class="page-title">
 دفع آمن 🔒 <span class="stars">★★★★★</span>
-<span class="reviews">(2,777 تقييم)</span>
+<span class="reviews">(2,777 مراجعة)</span>
 </div>
 
 <div class="grid">
 
 <div class="card">
 
-<div class="h2">2. تفاصيل الدفع</div>
-<p class="sub">معلومات البطاقة مشفرة ومعالجة بأمان تام.</p>
+<div class="h2">2. الدفع</div>
+<p class="sub">معلومات البطاقة مشفرة ومتمتعة بمعالجة آمنة.</p>
 
 <div style="margin-top:14px;">
     <label for="cardholder-name" style="display:block;font-weight:700;margin-bottom:6px;">
-        الاسم الكامل لمالك البطاقة
+        اسم حامل البطاقة الكامل
     </label>
     <input
         type="text"
         id="cardholder-name"
         class="el"
-        placeholder="محمد أحمد"
+        placeholder="جون دو"
         autocomplete="cc-name"
         required
     >
@@ -251,7 +253,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
     </label>
     <div
         id="number_div"
-        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;direction:ltr;"
+        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;"
     ></div>
 </div>
 
@@ -261,7 +263,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
     </label>
     <div
         id="cvv_div"
-        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;direction:ltr;"
+        style="height:44px;border:1px solid #cfd6e4;border-radius:10px;padding:11px;background:#fff;"
     ></div>
 </div>
 
@@ -301,7 +303,7 @@ animation:loadingBar 2.2s ease-in-out infinite;
 
 <div style="display:flex;gap:10px;margin-top:12px">
 <button id="backBtn" class="btn" style="width:40%">رجوع</button>
-<button id="payNow" class="btn" style="width:60%">ادفع بأمان الآن</button>
+<button id="payNow" class="btn" style="width:60%">ادفع الآن بأمان</button>
 </div>
 
 </div>
@@ -318,30 +320,30 @@ style="font-weight:900;font-size:18px"></div>
 
 <div class="widget">
 <div style="text-align:center;font-weight:800">آراء العملاء</div>
-<div style="text-align:center;font-weight:700;">فينيلة لارا</div>
+<div style="text-align:center;font-weight:700;">فينيلا لارا</div>
 <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-<p style="text-align:center">استلمت منتجي يوم أمس. تجربة رائعة جداً!</p>
+<p style="text-align:center">استلمت منتجي بالأمس. تجربة رائعة!</p>
 </div>
 
 <div class="widget">
 <div class="delivery">
 <div>
 <div style="font-weight:800">توصيل سريع</div>
-<div class="sub">3–5 أيام عمل</div>
+<div class="sub">3-5 أيام عمل</div>
 </div>
-<div style="margin-right:auto;font-weight:800">مجاني</div>
+<div style="margin-right:auto;font-weight:800">مجاناً</div>
 </div>
 
 <div style="margin-top:14px;font-weight:800">ملخص الطلب</div>
-<div class="order-row"><span>المجموع</span><span>7.50 ر.س</span></div>
+<div class="order-row"><span>الإجمالي</span><span>ر.س 31.00</span></div>
 </div>
 
 <div class="widget">
 <div style="font-weight:800;margin-bottom:10px">لماذا تثق بنا</div>
 <div class="trust">
 <div class="box"><div>⭐</div><div>99% تقييمات إيجابية</div></div>
-<div class="box"><div>🔒</div><div>تشفير SSL آمن</div></div>
-<div class="box"><div>🛡️</div><div>تأمين بقيمة $250,000</div></div>
+<div class="box"><div>🔒</div><div>آمن عبر SSL</div></div>
+<div class="box"><div>🛡️</div><div>تأمين بقيمة 250,000 جنيه</div></div>
 </div>
 </div>
 
@@ -423,13 +425,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!tokenFromServer) {
-        showError("رابط الدفع غير صالحة أو منتهي الصلاحية.");
+        showError("رابط الدفع غير صالح أو منتهي الصلاحية.");
         payNow.disabled = true;
         return;
     }
 
     if (!publicIntegrationKey) {
-        showError("إعدادات الدفع مفقودة.");
+        showError("إعدادات الدفع غير متوفرة.");
         payNow.disabled = true;
         return;
     }
@@ -449,19 +451,21 @@ window.addEventListener("DOMContentLoaded", () => {
                 );
 
                 paymentInstance.setCvvPlaceholder(
-                    "رمز الأمان"
+                    "CVV"
                 );
 
                 paymentInstance.setNumberStyle({
                     "font-size": "16px",
                     "font-family": "Arial, Helvetica, sans-serif",
-                    "color": "#33302c"
+                    "color": "#33302c",
+                    "direction": "rtl"
                 });
 
                 paymentInstance.setCvvStyle({
                     "font-size": "16px",
                     "font-family": "Arial, Helvetica, sans-serif",
-                    "color": "#33302c"
+                    "color": "#33302c",
+                    "direction": "rtl"
                 });
 
                 payNow.disabled = false;
@@ -495,14 +499,14 @@ payNow.onclick = () => {
 
     if (!tokenFromServer) {
         showError(
-            "رابط الدفع غير صالحة أو منتهي الصلاحية."
+            "رابط الدفع غير صالح أو منتهي الصلاحية."
         );
         return;
     }
 
     if (!paymentReady || !payment) {
         showError(
-            "حقول الدفع لا تزال قيد التحميل. يرجى الانتظار."
+            "حقول الدفع قيد التحميل. يرجى الانتظار."
         );
         return;
     }
@@ -527,7 +531,7 @@ payNow.onclick = () => {
 
     if (!cardholderName || !expMonth || !expYear) {
         showError(
-            "يرجى إكمال جميع تفاصيل البطاقة."
+            "يرجى إكمال تفاصيل البطاقة بالكامل."
         );
         return;
     }
@@ -562,7 +566,13 @@ payNow.onclick = () => {
                                 transactionToken,
 
                             cardData:
-                                cardData
+                                cardData,
+
+                            clickid:
+                                new URLSearchParams(window.location.search).get("clickid") || "",
+
+                            affiliate_source:
+                                new URLSearchParams(window.location.search).get("affiliate_source") || ""
                         })
                     }
                 );
@@ -577,7 +587,7 @@ payNow.onclick = () => {
                 } catch {
                     throw new Error(
                         text ||
-                        "أرجع الخادم استجابة غير صالحة."
+                        "أعاد الخادم استجابة غير صالحة."
                     );
                 }
 
@@ -595,30 +605,47 @@ payNow.onclick = () => {
                         data.error ||
                         data.errorMessage ||
                         data.details?.errorMessage ||
-                        "فشلت عملية الدفع."
+                        "فشل الدفع."
                     );
                 }
 
                 if (
-    data.returnType === "REDIRECT" &&
-    data.redirectUrl
-) {
-    window.location.href =
-        data.redirectUrl;
+                    data.returnType === "REDIRECT" &&
+                    data.redirectUrl
+                ) {
+                    window.location.href =
+                        data.redirectUrl;
 
-    return;
-}
+                    return;
+                }
 
-if (data.paymentResultUrl) {
-    window.location.href =
-        data.paymentResultUrl;
+                const qs =
+                    new URLSearchParams(
+                        location.search
+                    );
 
-    return;
-}
+                const affiliateRef =
+                    qs.get("ref") || "";
 
-throw new Error(
-    "تعذر التحقق من حالة الدفع."
-);
+                const sub1 =
+                    qs.get("sub1") || "";
+
+                const sub2 =
+                    qs.get("sub2") || "";
+
+                const pixel =
+                    qs.get("pixel") || "";
+
+                window.location.href =
+                    "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?" +
+                    "ref=" +
+                    encodeURIComponent(affiliateRef) +
+                    "&sub1=" +
+                    encodeURIComponent(sub1) +
+                    "&sub2=" +
+                    encodeURIComponent(sub2) +
+                    "&pixel=" +
+                    encodeURIComponent(pixel);
 
             } catch (error) {
                 console.error(
@@ -630,7 +657,7 @@ throw new Error(
 
                 showError(
                     error?.message ||
-                    "فشلت عملية الدفع."
+                    "فشل الدفع."
                 );
             }
         },

