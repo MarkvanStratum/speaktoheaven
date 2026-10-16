@@ -199,11 +199,16 @@ Secure Checkout 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <script>
+const params = new URLSearchParams(window.location.search);
+const affiliateRef = params.get('ref');
+
+if (!affiliateRef) {
+    window.location.replace('https://speaktoheaven.com');
+}
+
 window.addEventListener('DOMContentLoaded', () => {
 
 const qs = new URLSearchParams(location.search);
-const affiliateRef = qs.get('ref');
-
 const d = v => {
   try { return decodeURIComponent(v || '') }
   catch { return v || '' }
@@ -283,7 +288,7 @@ const submitCheckout = async () => {
       },
       body: JSON.stringify({
         plan: "4995",
-        step2File: "xo-us2-999.html",
+        step2File: "xo-us2-ls.html",
         currency: "GBP",
         amount: 49.95,
         sourcePage: window.location.href,
@@ -304,7 +309,7 @@ const submitCheckout = async () => {
 
         ref: affiliateRef,
         originalQueryString: sessionStorage.getItem("orig_qs") || "",
-        successUrl: "https://speaktoheaven.com"
+        successUrl: "https://cudsr.bemobtrcks.com/go/887681ca-1541-435c-83e1-428caf800ea5"
       })
     });
 
@@ -314,19 +319,19 @@ const submitCheckout = async () => {
       throw new Error(data.error || "Unable to create secure payment link.");
     }
 
-    let targetUrl;
-    if (data.url.startsWith("http://") || data.url.startsWith("https://")) {
-      targetUrl = new URL(data.url);
-    } else {
-      targetUrl = new URL(data.url, window.location.origin);
+    let nextUrl =
+      "https://speaktoheaven.com" +
+      data.url +
+      "?ref=" + encodeURIComponent(affiliateRef) +
+      "&sub1=" + encodeURIComponent(qs.get("sub1") || "") +
+      "&sub2=" + encodeURIComponent(qs.get("sub2") || "");
+
+    const subId = qs.get("sub_id");
+    if (subId) {
+      nextUrl += "&sub_id=" + encodeURIComponent(subId);
     }
 
-    if (affiliateRef) targetUrl.searchParams.set("ref", affiliateRef);
-    if (qs.get("sub1")) targetUrl.searchParams.set("sub1", qs.get("sub1"));
-    if (qs.get("sub2")) targetUrl.searchParams.set("sub2", qs.get("sub2"));
-    if (qs.get("sub_id")) targetUrl.searchParams.set("sub_id", qs.get("sub_id"));
-
-    window.location.href = targetUrl.toString();
+    window.location.href = nextUrl;
     return true;
 
   } catch (error) {
