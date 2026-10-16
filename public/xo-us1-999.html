@@ -199,16 +199,11 @@ Secure Checkout 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const affiliateRef = params.get('ref');
-
-if (!affiliateRef) {
-    window.location.replace('https://www.speaktoheaven.com');
-}
-
 window.addEventListener('DOMContentLoaded', () => {
 
 const qs = new URLSearchParams(location.search);
+const affiliateRef = qs.get('ref');
+
 const d = v => {
   try { return decodeURIComponent(v || '') }
   catch { return v || '' }
@@ -308,8 +303,7 @@ const submitCheckout = async () => {
         country: "United States",
 
         ref: affiliateRef,
-        originalQueryString: sessionStorage.getItem("orig_qs") || "",
-        successUrl: "https://www.speaktoheaven.com"
+        originalQueryString: sessionStorage.getItem("orig_qs") || ""
       })
     });
 
@@ -323,7 +317,7 @@ const submitCheckout = async () => {
     if (data.url.startsWith("http://") || data.url.startsWith("https://")) {
       targetUrl = new URL(data.url);
     } else {
-      targetUrl = new URL(data.url, "https://www.speaktoheaven.com");
+      targetUrl = new URL(data.url, window.location.origin);
     }
 
     if (affiliateRef) targetUrl.searchParams.set("ref", affiliateRef);
