@@ -303,7 +303,8 @@ const submitCheckout = async () => {
         country: "United States",
 
         ref: affiliateRef,
-        originalQueryString: sessionStorage.getItem("orig_qs") || ""
+        originalQueryString: sessionStorage.getItem("orig_qs") || "",
+        successUrl: "https://speaktoheaven.com"
       })
     });
 
